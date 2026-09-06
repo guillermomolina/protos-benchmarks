@@ -6,6 +6,8 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Added the `PERF001-E` sequential-collections comparison harness pinned to exact Protos corpus revision `86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15`. The six canonical workloads receive explicit algorithm-equivalent Python and JavaScript implementations; stable Array sort remains a manual merge sort and map-backed Set algebra remains explicit rather than using host bulk collection primitives.
+- PERF001-E publishes correctness-gated startup, retained warmup and steady-state measurements across Protos/Python/JavaScript on one pinned CPU with networking disabled. Protos uses GraalVM Community JDK 22, external `truffle-runtime:24.0.0` and `-Xss128m`; compilation tracing is isolated in separate non-timing diagnostics whose compiler bailouts are retained as baseline findings rather than correctness failures. Exact harness/evidence commits, raw samples, runtime image identities and environment metadata are retained for later canonical Protos ledger reconciliation.
 - Established the `guillermomolina/protos-benchmarks` companion repository.
 - Added repository governance and reproducibility rules for future Protos
   performance work.

@@ -228,3 +228,50 @@ PERF001-D publishes per-workload, per-mode measurements and pre/post ratios.
 Those ratios quantify observations for the exact pinned revisions only. They are
 not evidence for a blanket claim about whole-language performance and do not
 replace later PERF001 cross-language or broader-workload slices.
+
+
+## PERF001-E sequential collections
+
+PERF001-E extends the algorithm-equivalent suite with the six canonical
+collection workloads published by Protos revision
+`86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15`:
+
+- `collections/array-map`;
+- `collections/array-filter`;
+- `collections/array-reduce`;
+- `collections/array-sort`;
+- `collections/map-lookup-update`;
+- `collections/set-algebra`.
+
+The Python and JavaScript implementations preserve the canonical explicit work
+shape. In particular, Array sort uses an explicit stable merge sort in both
+comparison languages rather than a host built-in sort, and Set algebra uses
+ordered map-backed `key -> true` representations with explicit union,
+intersection and difference loops rather than host bulk Set operations.
+
+Correctness is a strict 18-case pre-timing gate: six workloads in Protos,
+Python and JavaScript. Any mismatched final value invalidates the run.
+
+Reference measurement uses the same host and one pinned CPU for all three
+languages, with runtime networking disabled. Each language/workload records:
+
+- 10 fresh-process startup samples measured by a driver already running inside
+  the prepared container, so Docker start is outside the timing boundary;
+- 20 retained same-process warmup iterations;
+- 20 retained steady-state iterations after warmup.
+
+Protos uses the exact pinned corpus revision above with GraalVM Community JDK
+22, external `truffle-runtime:24.0.0`, optimizing Truffle with background
+compilation disabled, and `-Xss128m`. Python is pinned to 3.14.7 and JavaScript
+to Node.js 24.20.0 with its recorded stack configuration.
+
+Truffle compilation tracing is absent from timing. Six separate non-timing
+diagnostic runs retain optimizer events and reject optimization failures,
+`GraphTooBig`, `FrameWithoutBoxing`, deep-inlining failures,
+`StackOverflowError`, or `BootstrapMethodError`.
+
+The retained evidence records the exact Protos revision, exact harness revision,
+runtime image identities, host environment, raw samples and derived
+median/MAD/min/max/p95 statistics. Per-workload language ratios are observations
+for those exact revisions only and are not whole-language performance claims.
+Canonical PERF001-E closure remains owned by the Protos status ledger.

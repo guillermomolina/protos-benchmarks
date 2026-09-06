@@ -231,3 +231,112 @@ done
 printf 'RUNNER_UNIT_TESTS: PASS\n'
 printf 'STATIC_VALIDATION: PASS\n'
 printf 'LICENSE_CHECK: PASS\n'
+
+
+# PERF001-E collection equivalence/timing harness
+bash -n scripts/perf001e_measure.sh
+python3 -m py_compile scripts/perf001e_finalize.py docker/python-perf001e/timing_driver.py
+
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+cfg=json.loads(Path('config/perf001e.json').read_text(encoding='utf-8'))
+assert cfg['schema_version'] == 1
+assert cfg['perf_item'] == 'PERF001'
+assert cfg['slice'] == 'PERF001-E'
+assert cfg['classification'] == 'cross_language_sequential_collections'
+assert cfg['protos_revision'] == '86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15'
+assert cfg['protos_implementation_version'] == '0.2.167-SNAPSHOT'
+assert cfg['build_base'] == 'maven:3.9.9-eclipse-temurin-21'
+assert cfg['graal_base'] == 'ghcr.io/graalvm/jdk-community:22.0.0'
+assert cfg['truffle_runtime_version'] == '24.0.0'
+assert cfg['protos_stack'] == '128m'
+assert cfg['python_base'] == 'python:3.14.7-slim-bookworm'
+assert cfg['python_version'] == '3.14.7'
+assert cfg['node_base'] == 'node:24.20.0-bookworm-slim'
+assert cfg['node_version'] == '24.20.0'
+assert cfg['node_stack_kb'] == 32768
+assert cfg['startup_samples'] == 10
+assert cfg['warmup_iterations'] == 20
+assert cfg['steady_samples'] == 20
+assert cfg['diagnostic_iterations'] == 20
+assert cfg['languages'] == ['protos','python','javascript']
+assert len(cfg['workloads']) == 6
+assert [x['expected'] for x in cfg['workloads']] == ['408','136','528','321601','1250','240808']
+
+legacy=json.loads(Path('config/protos.json').read_text(encoding='utf-8'))
+suite=json.loads(Path('config/suite.json').read_text(encoding='utf-8'))
+perf002=json.loads(Path('config/perf002.json').read_text(encoding='utf-8'))
+perf001d=json.loads(Path('config/perf001d.json').read_text(encoding='utf-8'))
+assert legacy['pinned_revision'] == '42b8264a36254dafbd97d80f5181790e28b9de12'
+assert suite['protos_corpus_revision'] == '42b8264a36254dafbd97d80f5181790e28b9de12'
+assert perf002['protos_revision'] == '3c93912a5579326374782a43527fbb51046f8f91'
+assert perf001d['revisions'][1]['revision'] == '3c93912a5579326374782a43527fbb51046f8f91'
+
+protos=Path('docker/protos-perf001e/Dockerfile').read_text(encoding='utf-8')
+for required in (
+  'ARG BUILD_BASE=maven:3.9.9-eclipse-temurin-21',
+  'ARG GRAAL_BASE=ghcr.io/graalvm/jdk-community:22.0.0',
+  'ARG TRUFFLE_RUNTIME_VERSION=24.0.0',
+  'dependency:copy-dependencies',
+  'MeasurementDriver.java',
+  'StartupDriver.java',
+  'ENTRYPOINT ["java"]',
+):
+    assert required in protos
+
+python_docker=Path('docker/python-perf001e/Dockerfile').read_text(encoding='utf-8')
+node_docker=Path('docker/node-perf001e/Dockerfile').read_text(encoding='utf-8')
+assert 'ARG PYTHON_BASE=python:3.14.7-slim-bookworm' in python_docker
+assert 'ARG NODE_BASE=node:24.20.0-bookworm-slim' in node_docker
+assert 'COPY workloads/python /opt/benchmark/workloads' in python_docker
+assert 'COPY workloads/javascript /opt/benchmark/workloads' in node_docker
+
+measure=Path('scripts/perf001e_measure.sh').read_text(encoding='utf-8')
+assert '--network none' in measure
+assert '--cpuset-cpus "$CPUSET"' in measure
+assert '-Dpolyglot.engine.BackgroundCompilation=false' in measure
+assert '-Dpolyglot.engine.TraceCompilation=true' in measure
+assert 'CROSS_LANGUAGE_CORRECTNESS: PASS 18/18' in measure
+assert measure.count('runtime_path="/opt/benchmark/workloads/${source#workloads/python/}"') == 3
+assert measure.count('runtime_path="/opt/benchmark/workloads/${source#workloads/javascript/}"') == 3
+assert 'runtime_path="/opt/benchmark/${source#workloads/python/}"' not in measure
+assert 'runtime_path="/opt/benchmark/${source#workloads/javascript/}"' not in measure
+
+sort_py=Path('workloads/python/collections/array-sort.py').read_text(encoding='utf-8')
+sort_js=Path('workloads/javascript/collections/array-sort.mjs').read_text(encoding='utf-8')
+assert '.sort(' not in sort_py
+assert '.sort(' not in sort_js
+assert 'merge_sort' in sort_py and 'mergeSort' in sort_js
+
+set_py=Path('workloads/python/collections/set-algebra.py').read_text(encoding='utf-8')
+set_js=Path('workloads/javascript/collections/set-algebra.mjs').read_text(encoding='utf-8')
+assert 'union(' in set_py and 'intersection(' in set_py and 'difference(' in set_py
+assert 'new Set(' not in set_js
+print('PERF001E_CONFIG_VALIDATION: PASS')
+print('PERF001E_ALGORITHM_EQUIVALENCE_STATIC_GUARD: PASS')
+print('PERF001_HISTORICAL_PIN_GUARD: PASS')
+PY
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+  scripts/perf001e_measure.sh \
+  scripts/perf001e_finalize.py \
+  docker/protos-perf001e/Dockerfile \
+  docker/protos-perf001e/DiagnosticEval.java \
+  docker/protos-perf001e/RuntimeProbe.java \
+  docker/protos-perf001e/MeasurementDriver.java \
+  docker/protos-perf001e/StartupDriver.java \
+  docker/protos-perf001e/truffle-runtime-pom.xml \
+  docker/python-perf001e/Dockerfile \
+  docker/python-perf001e/timing_driver.py \
+  docker/node-perf001e/Dockerfile \
+  docker/node-perf001e/timing_driver.mjs
+do
+  grep -qF "$notice" "$path" || {
+    echo "missing APL notice: $path" >&2
+    exit 1
+  }
+done
+echo 'PERF001E_STATIC_VALIDATION: PASS'

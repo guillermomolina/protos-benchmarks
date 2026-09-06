@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF001",
+  "slice": "PERF001-E",
+  "classification": "cross_language_sequential_collections",
+  "protos_revision": "86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15",
+  "protos_implementation_version": "0.2.167-SNAPSHOT",
+  "build_base": "maven:3.9.9-eclipse-temurin-21",
+  "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+  "truffle_runtime_version": "24.0.0",
+  "protos_stack": "128m",
+  "python_base": "python:3.14.7-slim-bookworm",
+  "python_version": "3.14.7",
+  "node_base": "node:24.20.0-bookworm-slim",
+  "node_version": "24.20.0",
+  "node_stack_kb": 32768,
+  "startup_samples": 10,
+  "warmup_iterations": 20,
+  "steady_samples": 20,
+  "diagnostic_iterations": 20,
+  "languages": [
+    "protos",
+    "python",
+    "javascript"
+  ],
+  "workloads": [
+    {
+      "id": "collections/array-map",
+      "expected": "408",
+      "protos": "protos/benchmarks/collections/array-map.protos",
+      "py": "workloads/python/collections/array-map.py",
+      "js": "workloads/javascript/collections/array-map.mjs",
+      "shape": "500 explicit eager maps over 16 integers; transform value * 3"
+    },
+    {
+      "id": "collections/array-filter",
+      "expected": "136",
+      "protos": "protos/benchmarks/collections/array-filter.protos",
+      "py": "workloads/python/collections/array-filter.py",
+      "js": "workloads/javascript/collections/array-filter.mjs",
+      "shape": "250 explicit eager filters over 32 integers; retain values < 17"
+    },
+    {
+      "id": "collections/array-reduce",
+      "expected": "528",
+      "protos": "protos/benchmarks/collections/array-reduce.protos",
+      "py": "workloads/python/collections/array-reduce.py",
+      "js": "workloads/javascript/collections/array-reduce.mjs",
+      "shape": "1000 explicit left folds over 32 integers with initial 0"
+    },
+    {
+      "id": "collections/array-sort",
+      "expected": "321601",
+      "protos": "protos/benchmarks/collections/array-sort.protos",
+      "py": "workloads/python/collections/array-sort.py",
+      "js": "workloads/javascript/collections/array-sort.mjs",
+      "shape": "100 stable manual merge-sort runs over the same 32-integer permutation"
+    },
+    {
+      "id": "collections/map-lookup-update",
+      "expected": "1250",
+      "protos": "protos/benchmarks/collections/map-lookup-update.protos",
+      "py": "workloads/python/collections/map-lookup-update.py",
+      "js": "workloads/javascript/collections/map-lookup-update.mjs",
+      "shape": "1000 keyed update/lookup rounds over 16 integer keys"
+    },
+    {
+      "id": "collections/set-algebra",
+      "expected": "240808",
+      "protos": "protos/benchmarks/collections/set-algebra.protos",
+      "py": "workloads/python/collections/set-algebra.py",
+      "js": "workloads/javascript/collections/set-algebra.mjs",
+      "shape": "250 manual ordered union/intersection/difference rounds over overlapping 16-member map-backed sets"
+    }
+  ]
+}

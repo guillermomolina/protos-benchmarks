@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "protos_revision": "86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15",
+  "harness_revision": "280173d743b2ed838a89be0ad930b20828d89558",
+  "workload": "collections/array-sort",
+  "runtime": {
+    "name": "Python",
+    "version": "3.14.7",
+    "image_tag": "protos-benchmarks-perf001e-python:86b35d8bb2d7",
+    "image_id": "sha256:80066f1257a236118c50f765bb3d8627c845dcffe8357a58c8f2ead343ce1e72",
+    "image_repo_digests": []
+  },
+  "environment": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_count": 16,
+    "memory_bytes": 33563426816,
+    "kernel": "7.2.3-zen1-2-zen",
+    "cpuset": "0",
+    "docker_server_version": "29.7.2"
+  },
+  "measurement": {
+    "class": "steady_state",
+    "warmup_iterations": 20,
+    "samples_ns": [
+      3319080,
+      3359530,
+      3331881,
+      3327120,
+      3353260,
+      3306080,
+      3339181,
+      3359660,
+      3330950,
+      3367371,
+      3316290,
+      3325330,
+      3356051,
+      3332410,
+      3345760,
+      3346881,
+      3333140,
+      3414850,
+      3329760,
+      3316541
+    ],
+    "aggregation": "median primary; MAD, min, max and nearest-rank p95 secondary; raw samples retained"
+  },
+  "perf001e": {
+    "language": "python",
+    "expected_stdout": "321601",
+    "algorithm_equivalent": true,
+    "work_shape": "100 stable manual merge-sort runs over the same 32-integer permutation",
+    "network": "disabled",
+    "timing_instrumentation": "none"
+  }
+}

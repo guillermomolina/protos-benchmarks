@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF001",
+  "slice": "PERF001-E",
+  "status": "PUBLISHED_AWAITING_PROTOS_LEDGER",
+  "harness_revision": "280173d743b2ed838a89be0ad930b20828d89558",
+  "protos_revision": "86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15",
+  "correctness_gate": "PASS",
+  "correctness_case_count": 18,
+  "measurement_classes": [
+    "startup",
+    "warmup",
+    "steady_state"
+  ],
+  "languages": [
+    "protos",
+    "python",
+    "javascript"
+  ],
+  "workload_count": 6,
+  "raw_result_count": 54,
+  "diagnostics": [
+    {
+      "workload": "collections/array-map",
+      "rc": 0,
+      "opt_done": 100,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "workload": "collections/array-filter",
+      "rc": 0,
+      "opt_done": 291,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "workload": "collections/array-reduce",
+      "rc": 0,
+      "opt_done": 236,
+      "opt_failed": 40,
+      "graph_too_big": 40,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "workload": "collections/array-sort",
+      "rc": 0,
+      "opt_done": 650,
+      "opt_failed": 40,
+      "graph_too_big": 40,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "workload": "collections/map-lookup-update",
+      "rc": 0,
+      "opt_done": 12,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "workload": "collections/set-algebra",
+      "rc": 0,
+      "opt_done": 246,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    }
+  ],
+  "optimization_findings": [
+    {
+      "workload": "collections/array-reduce",
+      "opt_failed": 40,
+      "graph_too_big": 40
+    },
+    {
+      "workload": "collections/array-sort",
+      "opt_failed": 40,
+      "graph_too_big": 40
+    }
+  ],
+  "optimization_finding_count": 2,
+  "diagnostic_policy": "Compiler bailouts with rc=0 are retained PERF001 baseline findings; they do not invalidate correctness-gated timings.",
+  "comparisons": [
+    {
+      "workload": "collections/array-map",
+      "protos_steady_median_ns": 1715189524.0,
+      "python_steady_median_ns": 210635.0,
+      "javascript_steady_median_ns": 28065.0,
+      "protos_over_python_steady_ratio": 8142.946442898853,
+      "protos_over_javascript_steady_ratio": 61114.8948512382
+    },
+    {
+      "workload": "collections/array-filter",
+      "protos_steady_median_ns": 9142870650.0,
+      "python_steady_median_ns": 140435.0,
+      "javascript_steady_median_ns": 17445.0,
+      "protos_over_python_steady_ratio": 65103.93171218001,
+      "protos_over_javascript_steady_ratio": 524096.913155632
+    },
+    {
+      "workload": "collections/array-reduce",
+      "protos_steady_median_ns": 2546874664.0,
+      "python_steady_median_ns": 510195.0,
+      "javascript_steady_median_ns": 25310.0,
+      "protos_over_python_steady_ratio": 4991.963198384931,
+      "protos_over_javascript_steady_ratio": 100627.20916633742
+    },
+    {
+      "workload": "collections/array-sort",
+      "protos_steady_median_ns": 14939214996.5,
+      "python_steady_median_ns": 3332775.0,
+      "javascript_steady_median_ns": 314685.0,
+      "protos_over_python_steady_ratio": 4482.515320266145,
+      "protos_over_javascript_steady_ratio": 47473.55290687513
+    },
+    {
+      "workload": "collections/map-lookup-update",
+      "protos_steady_median_ns": 7338772.5,
+      "python_steady_median_ns": 132316.0,
+      "javascript_steady_median_ns": 41500.0,
+      "protos_over_python_steady_ratio": 55.46398394751957,
+      "protos_over_javascript_steady_ratio": 176.83789156626506
+    },
+    {
+      "workload": "collections/set-algebra",
+      "protos_steady_median_ns": 1699809287.0,
+      "python_steady_median_ns": 703761.5,
+      "javascript_steady_median_ns": 388031.0,
+      "protos_over_python_steady_ratio": 2415.320086421323,
+      "protos_over_javascript_steady_ratio": 4380.60177408506
+    }
+  ],
+  "environment": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "kernel": "7.2.3-zen1-2-zen",
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_count": 16,
+    "memory_bytes": 33563426816,
+    "cpus_allowed_list": "0-15",
+    "cpuset": "0",
+    "docker_server_version": "29.7.2"
+  },
+  "runtime": {
+    "protos": {
+      "version": "0.2.167-SNAPSHOT",
+      "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+      "truffle_runtime_version": "24.0.0",
+      "image": {
+        "tag": "protos-benchmarks-perf001e-protos:86b35d8bb2d7",
+        "id": "sha256:df198bb34d8ea8c0c3b32773fa9fd802213a76302bf763a653f2b5b4d0b9f49d",
+        "repo_digests": []
+      }
+    },
+    "python": {
+      "version": "3.14.7",
+      "base": "python:3.14.7-slim-bookworm",
+      "image": {
+        "tag": "protos-benchmarks-perf001e-python:86b35d8bb2d7",
+        "id": "sha256:80066f1257a236118c50f765bb3d8627c845dcffe8357a58c8f2ead343ce1e72",
+        "repo_digests": []
+      }
+    },
+    "javascript": {
+      "runtime": "Node.js",
+      "version": "24.20.0",
+      "base": "node:24.20.0-bookworm-slim",
+      "image": {
+        "tag": "protos-benchmarks-perf001e-node:86b35d8bb2d7",
+        "id": "sha256:80e17070e6aed43ee71a9fae1478b9702cd63d9b11a98dce3b95c92e5c147926",
+        "repo_digests": []
+      }
+    }
+  },
+  "interpretation": "Per-workload observations only; no whole-language performance claim."
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "protos_revision": "86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15",
+  "harness_revision": "280173d743b2ed838a89be0ad930b20828d89558",
+  "workload": "collections/array-filter",
+  "runtime": {
+    "name": "Node.js",
+    "version": "24.20.0",
+    "stack_kb": 32768,
+    "image_tag": "protos-benchmarks-perf001e-node:86b35d8bb2d7",
+    "image_id": "sha256:80e17070e6aed43ee71a9fae1478b9702cd63d9b11a98dce3b95c92e5c147926",
+    "image_repo_digests": []
+  },
+  "environment": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_count": 16,
+    "memory_bytes": 33563426816,
+    "kernel": "7.2.3-zen1-2-zen",
+    "cpuset": "0",
+    "docker_server_version": "29.7.2"
+  },
+  "measurement": {
+    "class": "warmup",
+    "warmup_iterations": 0,
+    "samples_ns": [
+      3793420,
+      2753189,
+      341500,
+      544070,
+      107260,
+      105610,
+      162640,
+      102040,
+      159620,
+      21780,
+      18050,
+      17920,
+      41020,
+      19220,
+      39010,
+      16940,
+      16620,
+      17500,
+      16500,
+      16550
+    ],
+    "aggregation": "median primary; MAD, min, max and nearest-rank p95 secondary; raw samples retained"
+  },
+  "perf001e": {
+    "language": "javascript",
+    "expected_stdout": "136",
+    "algorithm_equivalent": true,
+    "work_shape": "250 explicit eager filters over 32 integers; retain values < 17",
+    "network": "disabled",
+    "timing_instrumentation": "none"
+  }
+}

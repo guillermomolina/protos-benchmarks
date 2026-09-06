@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "protos_revision": "86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15",
+  "harness_revision": "280173d743b2ed838a89be0ad930b20828d89558",
+  "workload": "collections/array-map",
+  "runtime": {
+    "name": "Node.js",
+    "version": "24.20.0",
+    "stack_kb": 32768,
+    "image_tag": "protos-benchmarks-perf001e-node:86b35d8bb2d7",
+    "image_id": "sha256:80e17070e6aed43ee71a9fae1478b9702cd63d9b11a98dce3b95c92e5c147926",
+    "image_repo_digests": []
+  },
+  "environment": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_count": 16,
+    "memory_bytes": 33563426816,
+    "kernel": "7.2.3-zen1-2-zen",
+    "cpuset": "0",
+    "docker_server_version": "29.7.2"
+  },
+  "measurement": {
+    "class": "startup",
+    "warmup_iterations": 0,
+    "samples_ns": [
+      40781336,
+      35754168,
+      36094708,
+      41456736,
+      37703428,
+      33714488,
+      40331687,
+      36107098,
+      35368268,
+      37117438
+    ],
+    "aggregation": "median primary; MAD, min, max and nearest-rank p95 secondary; raw samples retained"
+  },
+  "perf001e": {
+    "language": "javascript",
+    "expected_stdout": "408",
+    "algorithm_equivalent": true,
+    "work_shape": "500 explicit eager maps over 16 integers; transform value * 3",
+    "network": "disabled",
+    "timing_instrumentation": "none"
+  }
+}

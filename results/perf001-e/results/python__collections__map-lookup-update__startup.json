@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "protos_revision": "86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15",
+  "harness_revision": "280173d743b2ed838a89be0ad930b20828d89558",
+  "workload": "collections/map-lookup-update",
+  "runtime": {
+    "name": "Python",
+    "version": "3.14.7",
+    "image_tag": "protos-benchmarks-perf001e-python:86b35d8bb2d7",
+    "image_id": "sha256:80066f1257a236118c50f765bb3d8627c845dcffe8357a58c8f2ead343ce1e72",
+    "image_repo_digests": []
+  },
+  "environment": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_count": 16,
+    "memory_bytes": 33563426816,
+    "kernel": "7.2.3-zen1-2-zen",
+    "cpuset": "0",
+    "docker_server_version": "29.7.2"
+  },
+  "measurement": {
+    "class": "startup",
+    "warmup_iterations": 0,
+    "samples_ns": [
+      10405472,
+      10060860,
+      9998861,
+      9955810,
+      13471510,
+      10116021,
+      9597909,
+      9923580,
+      9993660,
+      9751050
+    ],
+    "aggregation": "median primary; MAD, min, max and nearest-rank p95 secondary; raw samples retained"
+  },
+  "perf001e": {
+    "language": "python",
+    "expected_stdout": "1250",
+    "algorithm_equivalent": true,
+    "work_shape": "1000 keyed update/lookup rounds over 16 integer keys",
+    "network": "disabled",
+    "timing_instrumentation": "none"
+  }
+}

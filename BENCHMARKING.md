@@ -107,3 +107,41 @@ and measurement fields for retained timing results.
 correctness record. Local validation artifacts under `.work/` are not reference
 performance results. Reference timing publication is introduced only by later
 PERF001 slices.
+
+
+## PERF002-B external Truffle validation
+
+`PERF002-B` is the companion-repository validation slice for the Protos-side
+optimization published as `PERF002-A`. The canonical Protos ledger remains the
+only owner of PERF002 lifecycle state.
+
+This slice pins Protos revision
+`3c93912a5579326374782a43527fbb51046f8f91` (`0.2.162-SNAPSHOT`) and does not
+change the historical PERF001-C pin or comparison-language corpus.
+
+PERF002-B is deliberately **non-timing evidence**. It validates the published
+optimization under the optimizing Truffle runtime before later PERF001 timing
+work proceeds. It records:
+
+- the exact Protos revision;
+- the exact harness commit whose files were executed;
+- GraalVM Community JDK 22 image identity;
+- external `truffle-runtime:24.0.0` identity/configuration;
+- host CPU, architecture, kernel, memory and validation cpuset;
+- direct observable results for the two PERF002 semantic regression cases;
+- all 11 canonical PERF001 workloads in interpreter and optimizing-Truffle modes;
+- raw stdout/stderr and compilation traces;
+- ten consecutive optimizing-Truffle executions of the canonical polymorphic-dispatch workload at `-Xss128m`, all of which must pass;
+- counts/guards for Truffle compilation success/failure and the previously
+  observed `GraphTooBig`, `FrameWithoutBoxing`, deep-inlining,
+  `StackOverflowError`, and `BootstrapMethodError` failure classes.
+
+The Protos distributable remains unchanged by the companion harness:
+`truffle-runtime` is supplied only by the external validation image. The runtime
+uses `-Xss128m`, preserving the canonical 10,000-step recursive workload shape
+using the first headroom value that passed 20/20 consecutive polymorphic-dispatch Truffle runs after `-Xss96m` was shown to fail intermittently.
+
+A successful companion publication does not independently close PERF002. Its
+exact evidence commit is subsequently recorded in
+`guillermomolina/protos/docs/project/IMPLEMENTATION_STATUS.md`, where PERF002-B
+and the parent PERF002 can be closed.

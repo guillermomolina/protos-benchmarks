@@ -26,3 +26,5 @@ All notable changes to Protos Benchmarks are documented in this file.
 - Pinned PERF001-C to Protos `42b8264a36254dafbd97d80f5181790e28b9de12` and recorded the Protos `-Xss64m` JVM
   stack policy required to preserve the canonical 10,000-step recursive workload
   shape without rewriting benchmark control flow.
+- Added the `PERF002-B` external optimizing-Truffle validation harness pinned to Protos `3c93912a5579326374782a43527fbb51046f8f91`, with an external `truffle-runtime:24.0.0` on GraalVM Community JDK 22 and the validated `-Xss128m` recursive-workload stack policy.
+- Added retained non-timing PERF002 evidence for semantic call/extraction regressions and the canonical 11x2 interpreter/Truffle workload matrix, including raw compilation diagnostics and reproducibility metadata. Canonical PERF002 closure remains owned by the Protos ledger.

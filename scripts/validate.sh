@@ -92,6 +92,62 @@ test -f schemas/LICENSE_NOTICE.txt
 grep -q 'Protos Benchmarks' LICENSE.TXT
 grep -q 'guillermomolina/protos-benchmarks' LICENSE.TXT
 
+bash -n scripts/perf002b_validate.sh
+
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+cfg = json.loads(Path('config/perf002.json').read_text(encoding='utf-8'))
+assert cfg['schema_version'] == 1
+assert cfg['perf_item'] == 'PERF002'
+assert cfg['slice'] == 'PERF002-B'
+assert cfg['evidence_class'] == 'non_timing_truffle_correctness_and_compilability'
+assert cfg['protos_revision'] == '3c93912a5579326374782a43527fbb51046f8f91'
+assert cfg['protos_implementation_version'] == '0.2.162-SNAPSHOT'
+assert cfg['build_base'] == 'maven:3.9.9-eclipse-temurin-21'
+assert cfg['graal_base'] == 'ghcr.io/graalvm/jdk-community:22.0.0'
+assert cfg['truffle_runtime_version'] == '24.0.0'
+assert cfg['stack'] == '128m'
+assert cfg['stability_policy']['workload'] == 'runtime/polymorphic-dispatch'
+assert cfg['stability_policy']['mode'] == 'truffle'
+assert cfg['stability_policy']['consecutive_runs'] == 10
+assert len(cfg['semantic_smoke']) == 2
+assert len(cfg['workloads']) == 11
+assert set(cfg['modes']) == {'interpreter', 'truffle'}
+
+legacy = json.loads(Path('config/protos.json').read_text(encoding='utf-8'))
+suite = json.loads(Path('config/suite.json').read_text(encoding='utf-8'))
+assert legacy['pinned_revision'] == '42b8264a36254dafbd97d80f5181790e28b9de12'
+assert suite['protos_corpus_revision'] == '42b8264a36254dafbd97d80f5181790e28b9de12'
+
+dockerfile = Path('docker/protos-perf002/Dockerfile').read_text(encoding='utf-8')
+assert 'ARG BUILD_BASE=maven:3.9.9-eclipse-temurin-21' in dockerfile
+assert 'ARG GRAAL_BASE=ghcr.io/graalvm/jdk-community:22.0.0' in dockerfile
+assert 'ARG TRUFFLE_RUNTIME_VERSION=24.0.0' in dockerfile
+assert 'dependency:copy-dependencies' in dockerfile
+assert 'COPY --from=build /out/truffle-runtime /opt/truffle-runtime' in dockerfile
+assert 'COPY --from=build /out/protos.jar /opt/protos/protos.jar' in dockerfile
+assert 'ENTRYPOINT ["java"]' in dockerfile
+print('PERF002_CONFIG_VALIDATION: PASS')
+print('PERF002_DOCKERFILE_VALIDATION: PASS')
+print('PERF001_HISTORICAL_PIN_GUARD: PASS')
+PY
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    scripts/perf002b_validate.sh \
+    docker/protos-perf002/Dockerfile \
+    docker/protos-perf002/DiagnosticEval.java \
+    docker/protos-perf002/RuntimeProbe.java \
+    docker/protos-perf002/truffle-runtime-pom.xml
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+
 printf 'RUNNER_UNIT_TESTS: PASS\n'
 printf 'STATIC_VALIDATION: PASS\n'
 printf 'LICENSE_CHECK: PASS\n'

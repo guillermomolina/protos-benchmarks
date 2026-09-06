@@ -1,0 +1,159 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.00kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/graalvm/jdk-community:22.0.0
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/maven:3.9.9-eclipse-temurin-21
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [stage-1 1/6] FROM ghcr.io/graalvm/jdk-community:22.0.0
+#5 DONE 0.0s
+
+#6 [build  1/11] FROM docker.io/library/maven:3.9.9-eclipse-temurin-21
+#6 CACHED
+
+#7 [internal] load build context
+#7 transferring context: 13.56kB done
+#7 DONE 0.1s
+
+#8 [build  2/11] RUN test -n "8f363d0146164f99e72210eb44667f4efb7b88e7"
+#8 DONE 0.3s
+
+#9 [build  3/11] RUN apt-get update     && apt-get install -y --no-install-recommends git ca-certificates     && rm -rf /var/lib/apt/lists/*
+#9 0.371 Get:1 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+#9 0.527 Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+#9 0.594 Get:3 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,237 kB]
+#9 0.779 Get:4 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1,786 kB]
+#9 0.827 Get:5 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [50.0 kB]
+#9 0.827 Get:6 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1,530 kB]
+#9 1.163 Get:7 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+#9 1.319 Get:8 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+#9 1.476 Get:9 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+#9 1.515 Get:10 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1,808 kB]
+#9 1.852 Get:11 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+#9 1.875 Get:12 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+#9 2.247 Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,562 kB]
+#9 2.260 Get:14 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [55.8 kB]
+#9 2.260 Get:15 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1,903 kB]
+#9 2.277 Get:16 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2,151 kB]
+#9 2.405 Get:17 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [48.9 kB]
+#9 2.405 Get:18 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [671 B]
+#9 2.405 Get:19 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [35.9 kB]
+#9 2.969 Fetched 32.6 MB in 3s (12.1 MB/s)
+#9 2.969 Reading package lists...
+#9 3.686 Reading package lists...
+#9 4.361 Building dependency tree...
+#9 4.497 Reading state information...
+#9 4.646 The following additional packages will be installed:
+#9 4.647   git-man
+#9 4.648 Suggested packages:
+#9 4.648   gettext-base git-daemon-run | git-daemon-sysvinit git-doc git-email git-gui
+#9 4.648   gitk gitweb git-cvs git-mediawiki git-svn
+#9 4.648 Recommended packages:
+#9 4.648   patch less
+#9 4.672 The following packages will be upgraded:
+#9 4.673   ca-certificates git git-man
+#9 4.810 3 upgraded, 0 newly installed, 0 to remove and 83 not upgraded.
+#9 4.810 Need to get 4,919 kB of archives.
+#9 4.810 After this operation, 55.3 kB disk space will be freed.
+#9 4.810 Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 ca-certificates all 20260601~24.04.1 [139 kB]
+#9 5.077 Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 git-man all 1:2.43.0-1ubuntu7.3 [1,100 kB]
+#9 5.275 Get:3 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 git amd64 1:2.43.0-1ubuntu7.3 [3,680 kB]
+#9 5.504 debconf: delaying package configuration, since apt-utils is not installed
+#9 5.533 Fetched 4,919 kB in 1s (6,902 kB/s)
+#9 5.551 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 10039 files and directories currently installed.)
+#9 5.561 Preparing to unpack .../ca-certificates_20260601~24.04.1_all.deb ...
+#9 5.566 Unpacking ca-certificates (20260601~24.04.1) over (20240203) ...
+#9 5.612 Preparing to unpack .../git-man_1%3a2.43.0-1ubuntu7.3_all.deb ...
+#9 5.615 Unpacking git-man (1:2.43.0-1ubuntu7.3) over (1:2.43.0-1ubuntu7.2) ...
+#9 5.638 Preparing to unpack .../git_1%3a2.43.0-1ubuntu7.3_amd64.deb ...
+#9 5.652 Unpacking git (1:2.43.0-1ubuntu7.3) over (1:2.43.0-1ubuntu7.2) ...
+#9 5.911 Setting up ca-certificates (20260601~24.04.1) ...
+#9 5.976 debconf: unable to initialize frontend: Dialog
+#9 5.976 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#9 5.976 debconf: falling back to frontend: Readline
+#9 5.982 debconf: unable to initialize frontend: Readline
+#9 5.982 debconf: (This frontend requires a controlling tty.)
+#9 5.982 debconf: falling back to frontend: Teletype
+#9 7.044 Updating certificates in /etc/ssl/certs...
+#9 7.625 rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+#9 7.630 14 added, 39 removed; done.
+#9 7.643 Setting up git-man (1:2.43.0-1ubuntu7.3) ...
+#9 7.646 Setting up git (1:2.43.0-1ubuntu7.3) ...
+#9 7.655 Processing triggers for ca-certificates (20260601~24.04.1) ...
+#9 7.658 Updating certificates in /etc/ssl/certs...
+#9 8.016 0 added, 0 removed; done.
+#9 8.016 Running hooks in /etc/ca-certificates/update.d...
+#9 8.017 done.
+#9 DONE 8.1s
+
+#10 [build  4/11] COPY truffle-runtime-pom.xml /tmp/truffle-runtime-pom.xml
+#10 DONE 0.1s
+
+#11 [build  5/11] COPY DiagnosticEval.java /tmp/DiagnosticEval.java
+#11 DONE 0.1s
+
+#12 [build  6/11] COPY RuntimeProbe.java /tmp/RuntimeProbe.java
+#12 DONE 0.1s
+
+#13 [build  7/11] COPY MeasurementDriver.java /tmp/MeasurementDriver.java
+#13 DONE 0.1s
+
+#14 [build  8/11] COPY StartupDriver.java /tmp/StartupDriver.java
+#14 DONE 0.1s
+
+#15 [build  9/11] RUN git init /src     && cd /src     && git remote add origin "https://github.com/guillermomolina/protos.git"     && git fetch --depth 1 origin "8f363d0146164f99e72210eb44667f4efb7b88e7"     && git checkout --detach FETCH_HEAD     && test "$(git rev-parse HEAD)" = "8f363d0146164f99e72210eb44667f4efb7b88e7"     && mvn -q -DskipTests package     && mkdir -p /out     && JAR="$(find /src/target -maxdepth 1 -type f -name 'protos-*.jar' ! -name 'original-*' | LC_ALL=C sort | tail -n 1)"     && test -n "$JAR"     && cp "$JAR" /out/protos.jar
+#15 0.190 hint: Using 'master' as the name for the initial branch. This default branch name
+#15 0.190 hint: is subject to change. To configure the initial branch name to use in all
+#15 0.190 hint: of your new repositories, which will suppress this warning, call:
+#15 0.190 hint: 
+#15 0.190 hint: 	git config --global init.defaultBranch <name>
+#15 0.190 hint: 
+#15 0.190 hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+#15 0.190 hint: 'development'. The just-created branch can be renamed via this command:
+#15 0.190 hint: 
+#15 0.190 hint: 	git branch -m <name>
+#15 0.191 Initialized empty Git repository in /src/.git/
+#15 1.584 From https://github.com/guillermomolina/protos
+#15 1.584  * branch            8f363d0146164f99e72210eb44667f4efb7b88e7 -> FETCH_HEAD
+#15 1.651 HEAD is now at 8f363d0 Prefer Protos conformance for message sends
+#15 DONE 18.6s
+
+#16 [build 10/11] RUN mkdir -p /out/truffle-runtime     && mvn -q -f /tmp/truffle-runtime-pom.xml         -Dtruffle.version="24.0.0"         dependency:copy-dependencies         -DincludeScope=runtime         -DoutputDirectory=/out/truffle-runtime
+#16 DONE 8.7s
+
+#17 [build 11/11] RUN mkdir -p /out/diag     && javac -cp '/out/protos.jar:/out/truffle-runtime/*'         -d /out/diag         /tmp/DiagnosticEval.java         /tmp/RuntimeProbe.java         /tmp/MeasurementDriver.java         /tmp/StartupDriver.java
+#17 DONE 1.0s
+
+#5 [stage-1 1/6] FROM ghcr.io/graalvm/jdk-community:22.0.0
+#5 CACHED
+
+#18 [stage-1 2/6] COPY --from=build /src /opt/protos
+#18 DONE 0.2s
+
+#19 [stage-1 3/6] COPY --from=build /out/protos.jar /opt/protos/protos.jar
+#19 DONE 0.1s
+
+#20 [stage-1 4/6] COPY --from=build /out/truffle-runtime /opt/truffle-runtime
+#20 DONE 0.1s
+
+#21 [stage-1 5/6] COPY --from=build /out/diag /opt/diag
+#21 DONE 0.1s
+
+#22 [stage-1 6/6] WORKDIR /opt/protos
+#22 DONE 0.1s
+
+#23 exporting to image
+#23 exporting layers
+#23 exporting layers 0.5s done
+#23 writing image sha256:bd4eb5ea1ee0cf2758aabbe90798935ae3f81c18e3f51016657310facc68875b done
+#23 naming to docker.io/library/protos-benchmarks-perf001d:pre-perf002-8f363d014616 done
+#23 DONE 0.5s

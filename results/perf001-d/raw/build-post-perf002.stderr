@@ -1,0 +1,94 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.00kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/graalvm/jdk-community:22.0.0
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/maven:3.9.9-eclipse-temurin-21
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [stage-1 1/6] FROM ghcr.io/graalvm/jdk-community:22.0.0
+#5 DONE 0.0s
+
+#6 [build  1/11] FROM docker.io/library/maven:3.9.9-eclipse-temurin-21
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 201B done
+#7 DONE 0.0s
+
+#8 [build  2/11] RUN test -n "3c93912a5579326374782a43527fbb51046f8f91"
+#8 CACHED
+
+#9 [build  3/11] RUN apt-get update     && apt-get install -y --no-install-recommends git ca-certificates     && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [build  4/11] COPY truffle-runtime-pom.xml /tmp/truffle-runtime-pom.xml
+#10 DONE 0.1s
+
+#11 [build  5/11] COPY DiagnosticEval.java /tmp/DiagnosticEval.java
+#11 DONE 0.1s
+
+#12 [build  6/11] COPY RuntimeProbe.java /tmp/RuntimeProbe.java
+#12 DONE 0.1s
+
+#13 [build  7/11] COPY MeasurementDriver.java /tmp/MeasurementDriver.java
+#13 DONE 0.1s
+
+#14 [build  8/11] COPY StartupDriver.java /tmp/StartupDriver.java
+#14 DONE 0.1s
+
+#15 [build  9/11] RUN git init /src     && cd /src     && git remote add origin "https://github.com/guillermomolina/protos.git"     && git fetch --depth 1 origin "3c93912a5579326374782a43527fbb51046f8f91"     && git checkout --detach FETCH_HEAD     && test "$(git rev-parse HEAD)" = "3c93912a5579326374782a43527fbb51046f8f91"     && mvn -q -DskipTests package     && mkdir -p /out     && JAR="$(find /src/target -maxdepth 1 -type f -name 'protos-*.jar' ! -name 'original-*' | LC_ALL=C sort | tail -n 1)"     && test -n "$JAR"     && cp "$JAR" /out/protos.jar
+#15 0.186 hint: Using 'master' as the name for the initial branch. This default branch name
+#15 0.186 hint: is subject to change. To configure the initial branch name to use in all
+#15 0.186 hint: of your new repositories, which will suppress this warning, call:
+#15 0.186 hint: 
+#15 0.186 hint: 	git config --global init.defaultBranch <name>
+#15 0.186 hint: 
+#15 0.186 hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+#15 0.186 hint: 'development'. The just-created branch can be renamed via this command:
+#15 0.186 hint: 
+#15 0.186 hint: 	git branch -m <name>
+#15 0.187 Initialized empty Git repository in /src/.git/
+#15 1.474 From https://github.com/guillermomolina/protos
+#15 1.474  * branch            3c93912a5579326374782a43527fbb51046f8f91 -> FETCH_HEAD
+#15 1.542 HEAD is now at 3c93912 Publish PERF002-A Truffle compilability implementation
+#15 DONE 18.6s
+
+#16 [build 10/11] RUN mkdir -p /out/truffle-runtime     && mvn -q -f /tmp/truffle-runtime-pom.xml         -Dtruffle.version="24.0.0"         dependency:copy-dependencies         -DincludeScope=runtime         -DoutputDirectory=/out/truffle-runtime
+#16 DONE 9.0s
+
+#17 [build 11/11] RUN mkdir -p /out/diag     && javac -cp '/out/protos.jar:/out/truffle-runtime/*'         -d /out/diag         /tmp/DiagnosticEval.java         /tmp/RuntimeProbe.java         /tmp/MeasurementDriver.java         /tmp/StartupDriver.java
+#17 DONE 1.1s
+
+#5 [stage-1 1/6] FROM ghcr.io/graalvm/jdk-community:22.0.0
+#5 CACHED
+
+#18 [stage-1 2/6] COPY --from=build /src /opt/protos
+#18 DONE 0.2s
+
+#19 [stage-1 3/6] COPY --from=build /out/protos.jar /opt/protos/protos.jar
+#19 DONE 0.1s
+
+#20 [stage-1 4/6] COPY --from=build /out/truffle-runtime /opt/truffle-runtime
+#20 DONE 0.0s
+
+#21 [stage-1 5/6] COPY --from=build /out/diag /opt/diag
+#21 DONE 0.0s
+
+#22 [stage-1 6/6] WORKDIR /opt/protos
+#22 DONE 0.1s
+
+#23 exporting to image
+#23 exporting layers
+#23 exporting layers 0.8s done
+#23 writing image sha256:8e9ec022ff070672d6418f798fdf28be8c99cd460519639c085b777290e7ac77 done
+#23 naming to docker.io/library/protos-benchmarks-perf001d:post-perf002-3c93912a5579 done
+#23 DONE 0.8s

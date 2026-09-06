@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "protos_revision": "8f363d0146164f99e72210eb44667f4efb7b88e7",
+  "harness_revision": "0a406373c497df1173ff26a3ed4fcada015e0879",
+  "workload": "algorithms/factorial/recursive",
+  "runtime": {
+    "name": "Protos-interpreter",
+    "version": "0.2.161-SNAPSHOT",
+    "jdk_version": "GraalVM Community JDK 22.0.0",
+    "graal_truffle_line": "24.0.0",
+    "image_tag": "protos-benchmarks-perf001d:pre-perf002-8f363d014616",
+    "image_id": "sha256:bd4eb5ea1ee0cf2758aabbe90798935ae3f81c18e3f51016657310facc68875b",
+    "image_repo_digests": [],
+    "stack": "128m"
+  },
+  "environment": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_count": 16,
+    "memory_bytes": 33563426816,
+    "kernel": "Linux 7.2.3-zen1-2-zen x86_64 GNU/Linux",
+    "cpuset": "0",
+    "docker_server_version": "29.7.2"
+  },
+  "measurement": {
+    "class": "steady_state",
+    "warmup_iterations": 20,
+    "samples_ns": [
+      403319,
+      413789,
+      1733634,
+      342099,
+      365749,
+      3302420,
+      1287986,
+      345359,
+      337829,
+      3348810,
+      307309,
+      311519,
+      302699,
+      5020465,
+      412329,
+      312249,
+      290529,
+      3160011,
+      416619,
+      270189
+    ],
+    "aggregation": "median primary; MAD, min, max and nearest-rank p95 secondary; raw samples retained"
+  },
+  "perf001d": {
+    "revision_label": "pre-perf002",
+    "mode": "interpreter",
+    "expected_stdout": "2432902008176640000",
+    "timing_instrumentation": "TraceCompilation disabled"
+  }
+}

@@ -1,0 +1,574 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF001",
+  "slice": "PERF001-D",
+  "status": "PUBLISHED_AWAITING_PROTOS_LEDGER",
+  "harness_revision": "0a406373c497df1173ff26a3ed4fcada015e0879",
+  "measurement_identity": {
+    "schema_version": 1,
+    "perf_item": "PERF001",
+    "slice": "PERF001-D",
+    "generated_at": "2026-09-06T15:25:08Z",
+    "harness_revision": "0a406373c497df1173ff26a3ed4fcada015e0879",
+    "revisions": [
+      {
+        "label": "pre-perf002",
+        "revision": "8f363d0146164f99e72210eb44667f4efb7b88e7",
+        "relationship": "direct publication baseline of PERF002-A",
+        "implementation_version": "0.2.161-SNAPSHOT"
+      },
+      {
+        "label": "post-perf002",
+        "revision": "3c93912a5579326374782a43527fbb51046f8f91",
+        "relationship": "published PERF002-A implementation",
+        "implementation_version": "0.2.162-SNAPSHOT"
+      }
+    ],
+    "measurement_policy": {
+      "startup_samples": 10,
+      "warmup_iterations": 20,
+      "steady_samples": 20,
+      "diagnostic_iterations": 20,
+      "stack": "128m",
+      "cpu_policy": "first CPU in current process Cpus_allowed_list; same CPU for every measured run",
+      "network_policy": "disabled for all runtime measurement and diagnostic containers",
+      "startup_boundary": "fresh child JVM ProcessBuilder.start() through child exit, from a driver already running inside the container; Docker container creation/start is excluded",
+      "warmup_boundary": "same compiled Protos CallTarget, fresh module activation per equivalent iteration; bootstrap/source read/parse/lower are outside each timed interval",
+      "steady_boundary": "same JVM and CallTarget after the retained warmup curve; fresh module activation is constructed before each timed guest call",
+      "diagnostic_boundary": "separate non-timing run with TraceCompilation enabled; diagnostic data is never used as timing samples",
+      "aggregation": "median primary; MAD, min, max, p95 secondary; raw samples retained"
+    },
+    "runtime": {
+      "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+      "graal_base_id": "sha256:b6adbf458ad8f35287b792a35b249ccb8b6dd020cb1016fcdca33d4ffac9fa94",
+      "graal_base_repo_digests": [
+        "ghcr.io/graalvm/jdk-community@sha256:349d82fda9710bdd987bd934e678a4595a772def701a30e7e8eb50ba9c2ffe10"
+      ],
+      "build_base": "maven:3.9.9-eclipse-temurin-21",
+      "build_base_id": "sha256:4efe8769cc3208b00c72c06813da9e4f65da0007a474645e1e9ff3f8e59fbf5b",
+      "build_base_repo_digests": [
+        "maven@sha256:3a4ab3276a087bf276f79cae96b1af04f53731bec53fb2e651aca79e4b10211e"
+      ],
+      "truffle_runtime_version": "24.0.0",
+      "images": {
+        "pre-perf002": {
+          "tag": "protos-benchmarks-perf001d:pre-perf002-8f363d014616",
+          "id": "sha256:bd4eb5ea1ee0cf2758aabbe90798935ae3f81c18e3f51016657310facc68875b",
+          "repo_digests": []
+        },
+        "post-perf002": {
+          "tag": "protos-benchmarks-perf001d:post-perf002-3c93912a5579",
+          "id": "sha256:8e9ec022ff070672d6418f798fdf28be8c99cd460519639c085b777290e7ac77",
+          "repo_digests": []
+        }
+      }
+    },
+    "environment": {
+      "platform": "linux",
+      "architecture": "x86_64",
+      "kernel": "Linux 7.2.3-zen1-2-zen x86_64 GNU/Linux",
+      "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+      "cpu_count": 16,
+      "memory_bytes": 33563426816,
+      "cpus_allowed_list": "0-15",
+      "cpuset": "0",
+      "docker_server_version": "29.7.2"
+    }
+  },
+  "correctness_gate": "PASS",
+  "measurement_classes": [
+    "startup",
+    "warmup",
+    "steady_state"
+  ],
+  "raw_result_count": 132,
+  "diagnostics": [
+    {
+      "revision_label": "pre-perf002",
+      "workload": "micro/slot-read",
+      "rc": 0,
+      "opt_done": 6,
+      "opt_failed": 3,
+      "graph_too_big": 0,
+      "frame_escape": 3,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "micro/slot-read",
+      "rc": 0,
+      "opt_done": 12,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "micro/slot-write",
+      "rc": 0,
+      "opt_done": 6,
+      "opt_failed": 3,
+      "graph_too_big": 0,
+      "frame_escape": 3,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "micro/slot-write",
+      "rc": 0,
+      "opt_done": 12,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "micro/closure-call",
+      "rc": 0,
+      "opt_done": 8,
+      "opt_failed": 4,
+      "graph_too_big": 0,
+      "frame_escape": 4,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "micro/closure-call",
+      "rc": 0,
+      "opt_done": 16,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "micro/method-call",
+      "rc": 0,
+      "opt_done": 8,
+      "opt_failed": 4,
+      "graph_too_big": 0,
+      "frame_escape": 4,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "micro/method-call",
+      "rc": 0,
+      "opt_done": 16,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "micro/object-creation",
+      "rc": 0,
+      "opt_done": 6,
+      "opt_failed": 4,
+      "graph_too_big": 0,
+      "frame_escape": 4,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "micro/object-creation",
+      "rc": 0,
+      "opt_done": 14,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "micro/delegation-shallow",
+      "rc": 0,
+      "opt_done": 6,
+      "opt_failed": 3,
+      "graph_too_big": 0,
+      "frame_escape": 3,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "micro/delegation-shallow",
+      "rc": 0,
+      "opt_done": 12,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "micro/delegation-deep",
+      "rc": 0,
+      "opt_done": 6,
+      "opt_failed": 3,
+      "graph_too_big": 0,
+      "frame_escape": 3,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "micro/delegation-deep",
+      "rc": 0,
+      "opt_done": 12,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "runtime/monomorphic-dispatch",
+      "rc": 0,
+      "opt_done": 8,
+      "opt_failed": 4,
+      "graph_too_big": 0,
+      "frame_escape": 4,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "runtime/monomorphic-dispatch",
+      "rc": 0,
+      "opt_done": 16,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "runtime/polymorphic-dispatch",
+      "rc": 0,
+      "opt_done": 8,
+      "opt_failed": 4,
+      "graph_too_big": 0,
+      "frame_escape": 4,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "runtime/polymorphic-dispatch",
+      "rc": 0,
+      "opt_done": 16,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "algorithms/factorial/recursive",
+      "rc": 0,
+      "opt_done": 1,
+      "opt_failed": 1,
+      "graph_too_big": 0,
+      "frame_escape": 1,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "algorithms/factorial/recursive",
+      "rc": 0,
+      "opt_done": 2,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "pre-perf002",
+      "workload": "algorithms/fibonacci/recursive",
+      "rc": 0,
+      "opt_done": 4,
+      "opt_failed": 2,
+      "graph_too_big": 0,
+      "frame_escape": 2,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    },
+    {
+      "revision_label": "post-perf002",
+      "workload": "algorithms/fibonacci/recursive",
+      "rc": 0,
+      "opt_done": 8,
+      "opt_failed": 0,
+      "graph_too_big": 0,
+      "frame_escape": 0,
+      "deep_inlining": 0,
+      "stack_overflow": 0,
+      "bootstrap_error": 0
+    }
+  ],
+  "comparisons": [
+    {
+      "workload": "micro/slot-read",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 40373591.5,
+      "post_steady_median_ns": 35884723.5,
+      "pre_over_post_steady_ratio": 1.1250913358716559,
+      "pre_startup_median_ns": 1496951772.5,
+      "post_startup_median_ns": 1492579433.5,
+      "pre_over_post_startup_ratio": 1.0029293844614668
+    },
+    {
+      "workload": "micro/slot-read",
+      "mode": "truffle",
+      "pre_steady_median_ns": 32789252.0,
+      "post_steady_median_ns": 40128963.0,
+      "pre_over_post_steady_ratio": 0.8170969182532826,
+      "pre_startup_median_ns": 2404739120.5,
+      "post_startup_median_ns": 3835350945.5,
+      "pre_over_post_startup_ratio": 0.6269932412108127
+    },
+    {
+      "workload": "micro/slot-write",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 43901976.0,
+      "post_steady_median_ns": 37802422.0,
+      "pre_over_post_steady_ratio": 1.1613535238562227,
+      "pre_startup_median_ns": 1583040003.5,
+      "post_startup_median_ns": 1573387443.0,
+      "pre_over_post_startup_ratio": 1.0061348910231516
+    },
+    {
+      "workload": "micro/slot-write",
+      "mode": "truffle",
+      "pre_steady_median_ns": 45275378.0,
+      "post_steady_median_ns": 39804769.5,
+      "pre_over_post_steady_ratio": 1.1374360049993506,
+      "pre_startup_median_ns": 2470388977.0,
+      "post_startup_median_ns": 4341831277.0,
+      "pre_over_post_startup_ratio": 0.5689739695981282
+    },
+    {
+      "workload": "micro/closure-call",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 48174091.0,
+      "post_steady_median_ns": 80955281.5,
+      "pre_over_post_steady_ratio": 0.5950703908058179,
+      "pre_startup_median_ns": 1644024949.5,
+      "post_startup_median_ns": 1623152812.5,
+      "pre_over_post_startup_ratio": 1.012859009231455
+    },
+    {
+      "workload": "micro/closure-call",
+      "mode": "truffle",
+      "pre_steady_median_ns": 35412167.0,
+      "post_steady_median_ns": 39939345.5,
+      "pre_over_post_steady_ratio": 0.8866486557722885,
+      "pre_startup_median_ns": 2799629833.5,
+      "post_startup_median_ns": 4170534620.5,
+      "pre_over_post_startup_ratio": 0.6712879974041208
+    },
+    {
+      "workload": "micro/method-call",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 41683547.5,
+      "post_steady_median_ns": 38884890.0,
+      "pre_over_post_steady_ratio": 1.071972879439803,
+      "pre_startup_median_ns": 1587328160.0,
+      "post_startup_median_ns": 1550185011.5,
+      "pre_over_post_startup_ratio": 1.0239604616380977
+    },
+    {
+      "workload": "micro/method-call",
+      "mode": "truffle",
+      "pre_steady_median_ns": 33850516.5,
+      "post_steady_median_ns": 39594726.5,
+      "pre_over_post_steady_ratio": 0.8549248723816795,
+      "pre_startup_median_ns": 2598314473.0,
+      "post_startup_median_ns": 4113753787.5,
+      "pre_over_post_startup_ratio": 0.6316164280164762
+    },
+    {
+      "workload": "micro/object-creation",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 39512541.5,
+      "post_steady_median_ns": 36053504.0,
+      "pre_over_post_steady_ratio": 1.0959417841882997,
+      "pre_startup_median_ns": 1543598357.0,
+      "post_startup_median_ns": 1528522874.0,
+      "pre_over_post_startup_ratio": 1.0098627788019612
+    },
+    {
+      "workload": "micro/object-creation",
+      "mode": "truffle",
+      "pre_steady_median_ns": 36300274.5,
+      "post_steady_median_ns": 32488986.5,
+      "pre_over_post_steady_ratio": 1.117310153703933,
+      "pre_startup_median_ns": 2445054164.0,
+      "post_startup_median_ns": 3845422343.5,
+      "pre_over_post_startup_ratio": 0.635835012539761
+    },
+    {
+      "workload": "micro/delegation-shallow",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 35461949.0,
+      "post_steady_median_ns": 27316577.5,
+      "pre_over_post_steady_ratio": 1.2981841887037275,
+      "pre_startup_median_ns": 1484292111.5,
+      "post_startup_median_ns": 1495233609.5,
+      "pre_over_post_startup_ratio": 0.9926824156904427
+    },
+    {
+      "workload": "micro/delegation-shallow",
+      "mode": "truffle",
+      "pre_steady_median_ns": 54765230.5,
+      "post_steady_median_ns": 33048407.0,
+      "pre_over_post_steady_ratio": 1.6571216428071707,
+      "pre_startup_median_ns": 2247959533.0,
+      "post_startup_median_ns": 3901608855.0,
+      "pre_over_post_startup_ratio": 0.576162197837743
+    },
+    {
+      "workload": "micro/delegation-deep",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 39678448.5,
+      "post_steady_median_ns": 33873358.5,
+      "pre_over_post_steady_ratio": 1.1713762749566152,
+      "pre_startup_median_ns": 1470126985.5,
+      "post_startup_median_ns": 1491349232.0,
+      "pre_over_post_startup_ratio": 0.9857697673726364
+    },
+    {
+      "workload": "micro/delegation-deep",
+      "mode": "truffle",
+      "pre_steady_median_ns": 40639219.0,
+      "post_steady_median_ns": 41574901.5,
+      "pre_over_post_steady_ratio": 0.977494053714114,
+      "pre_startup_median_ns": 2382864727.5,
+      "post_startup_median_ns": 3881567960.0,
+      "pre_over_post_startup_ratio": 0.6138923115750368
+    },
+    {
+      "workload": "runtime/monomorphic-dispatch",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 36690834.0,
+      "post_steady_median_ns": 32058433.0,
+      "pre_over_post_steady_ratio": 1.144498672159054,
+      "pre_startup_median_ns": 1634667628.0,
+      "post_startup_median_ns": 1547488665.5,
+      "pre_over_post_startup_ratio": 1.0563357680373264
+    },
+    {
+      "workload": "runtime/monomorphic-dispatch",
+      "mode": "truffle",
+      "pre_steady_median_ns": 32900012.5,
+      "post_steady_median_ns": 40781320.5,
+      "pre_over_post_steady_ratio": 0.806742206888568,
+      "pre_startup_median_ns": 2459452827.5,
+      "post_startup_median_ns": 4126190266.0,
+      "pre_over_post_startup_ratio": 0.5960589960589083
+    },
+    {
+      "workload": "runtime/polymorphic-dispatch",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 34483786.0,
+      "post_steady_median_ns": 37288730.5,
+      "pre_over_post_steady_ratio": 0.9247776885297825,
+      "pre_startup_median_ns": 1517083861.5,
+      "post_startup_median_ns": 1484344136.0,
+      "pre_over_post_startup_ratio": 1.0220566947421148
+    },
+    {
+      "workload": "runtime/polymorphic-dispatch",
+      "mode": "truffle",
+      "pre_steady_median_ns": 37746242.5,
+      "post_steady_median_ns": 42163489.0,
+      "pre_over_post_steady_ratio": 0.8952352709710527,
+      "pre_startup_median_ns": 2586308937.5,
+      "post_startup_median_ns": 4953896518.5,
+      "pre_over_post_startup_ratio": 0.5220756888727085
+    },
+    {
+      "workload": "algorithms/factorial/recursive",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 384534.0,
+      "post_steady_median_ns": 509739.0,
+      "pre_over_post_steady_ratio": 0.7543742974345694,
+      "pre_startup_median_ns": 1059858182.5,
+      "post_startup_median_ns": 1060862771.0,
+      "pre_over_post_startup_ratio": 0.9990530457591107
+    },
+    {
+      "workload": "algorithms/factorial/recursive",
+      "mode": "truffle",
+      "pre_steady_median_ns": 325129.5,
+      "post_steady_median_ns": 199015.0,
+      "pre_over_post_steady_ratio": 1.6336934401929504,
+      "pre_startup_median_ns": 1104996204.0,
+      "post_startup_median_ns": 1068056565.0,
+      "pre_over_post_startup_ratio": 1.0345858451794638
+    },
+    {
+      "workload": "algorithms/fibonacci/recursive",
+      "mode": "interpreter",
+      "pre_steady_median_ns": 4536038342.0,
+      "post_steady_median_ns": 4217816610.5,
+      "pre_over_post_steady_ratio": 1.0754470288508529,
+      "pre_startup_median_ns": 6414599516.5,
+      "post_startup_median_ns": 6038064083.0,
+      "pre_over_post_startup_ratio": 1.0623602910343606
+    },
+    {
+      "workload": "algorithms/fibonacci/recursive",
+      "mode": "truffle",
+      "pre_steady_median_ns": 4447850321.0,
+      "post_steady_median_ns": 4711400384.5,
+      "pre_over_post_steady_ratio": 0.9440612043147402,
+      "pre_startup_median_ns": 7009056591.5,
+      "post_startup_median_ns": 9754724071.5,
+      "pre_over_post_startup_ratio": 0.7185294571250959
+    }
+  ],
+  "interpretation_guard": "Ratios are per-workload, per-mode observations for the two pinned revisions. They are not a claim about whole-language performance."
+}

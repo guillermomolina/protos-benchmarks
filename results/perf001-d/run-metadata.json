@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF001",
+  "slice": "PERF001-D",
+  "generated_at": "2026-09-06T15:25:08Z",
+  "harness_revision": "0a406373c497df1173ff26a3ed4fcada015e0879",
+  "revisions": [
+    {
+      "label": "pre-perf002",
+      "revision": "8f363d0146164f99e72210eb44667f4efb7b88e7",
+      "relationship": "direct publication baseline of PERF002-A",
+      "implementation_version": "0.2.161-SNAPSHOT"
+    },
+    {
+      "label": "post-perf002",
+      "revision": "3c93912a5579326374782a43527fbb51046f8f91",
+      "relationship": "published PERF002-A implementation",
+      "implementation_version": "0.2.162-SNAPSHOT"
+    }
+  ],
+  "measurement_policy": {
+    "startup_samples": 10,
+    "warmup_iterations": 20,
+    "steady_samples": 20,
+    "diagnostic_iterations": 20,
+    "stack": "128m",
+    "cpu_policy": "first CPU in current process Cpus_allowed_list; same CPU for every measured run",
+    "network_policy": "disabled for all runtime measurement and diagnostic containers",
+    "startup_boundary": "fresh child JVM ProcessBuilder.start() through child exit, from a driver already running inside the container; Docker container creation/start is excluded",
+    "warmup_boundary": "same compiled Protos CallTarget, fresh module activation per equivalent iteration; bootstrap/source read/parse/lower are outside each timed interval",
+    "steady_boundary": "same JVM and CallTarget after the retained warmup curve; fresh module activation is constructed before each timed guest call",
+    "diagnostic_boundary": "separate non-timing run with TraceCompilation enabled; diagnostic data is never used as timing samples",
+    "aggregation": "median primary; MAD, min, max, p95 secondary; raw samples retained"
+  },
+  "runtime": {
+    "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+    "graal_base_id": "sha256:b6adbf458ad8f35287b792a35b249ccb8b6dd020cb1016fcdca33d4ffac9fa94",
+    "graal_base_repo_digests": [
+      "ghcr.io/graalvm/jdk-community@sha256:349d82fda9710bdd987bd934e678a4595a772def701a30e7e8eb50ba9c2ffe10"
+    ],
+    "build_base": "maven:3.9.9-eclipse-temurin-21",
+    "build_base_id": "sha256:4efe8769cc3208b00c72c06813da9e4f65da0007a474645e1e9ff3f8e59fbf5b",
+    "build_base_repo_digests": [
+      "maven@sha256:3a4ab3276a087bf276f79cae96b1af04f53731bec53fb2e651aca79e4b10211e"
+    ],
+    "truffle_runtime_version": "24.0.0",
+    "images": {
+      "pre-perf002": {
+        "tag": "protos-benchmarks-perf001d:pre-perf002-8f363d014616",
+        "id": "sha256:bd4eb5ea1ee0cf2758aabbe90798935ae3f81c18e3f51016657310facc68875b",
+        "repo_digests": []
+      },
+      "post-perf002": {
+        "tag": "protos-benchmarks-perf001d:post-perf002-3c93912a5579",
+        "id": "sha256:8e9ec022ff070672d6418f798fdf28be8c99cd460519639c085b777290e7ac77",
+        "repo_digests": []
+      }
+    }
+  },
+  "environment": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "kernel": "Linux 7.2.3-zen1-2-zen x86_64 GNU/Linux",
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_count": 16,
+    "memory_bytes": 33563426816,
+    "cpus_allowed_list": "0-15",
+    "cpuset": "0",
+    "docker_server_version": "29.7.2"
+  }
+}

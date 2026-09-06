@@ -148,6 +148,86 @@ do
     }
 done
 
+bash -n scripts/perf001d_measure.sh
+python3 -m py_compile scripts/perf001d_finalize.py
+
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+cfg = json.loads(Path('config/perf001d.json').read_text(encoding='utf-8'))
+assert cfg['schema_version'] == 1
+assert cfg['perf_item'] == 'PERF001'
+assert cfg['slice'] == 'PERF001-D'
+assert cfg['classification'] == 'protos_measurement_pre_post_perf002'
+assert cfg['build_base'] == 'maven:3.9.9-eclipse-temurin-21'
+assert cfg['graal_base'] == 'ghcr.io/graalvm/jdk-community:22.0.0'
+assert cfg['truffle_runtime_version'] == '24.0.0'
+assert cfg['stack'] == '128m'
+assert cfg['startup_samples'] == 10
+assert cfg['warmup_iterations'] == 20
+assert cfg['steady_samples'] == 20
+assert cfg['diagnostic_iterations'] == 20
+assert len(cfg['workloads']) == 11
+assert set(cfg['timing_modes']) == {'interpreter', 'truffle'}
+revisions = {x['label']: x['revision'] for x in cfg['revisions']}
+assert revisions == {
+    'pre-perf002': '8f363d0146164f99e72210eb44667f4efb7b88e7',
+    'post-perf002': '3c93912a5579326374782a43527fbb51046f8f91',
+}
+
+legacy = json.loads(Path('config/protos.json').read_text(encoding='utf-8'))
+suite = json.loads(Path('config/suite.json').read_text(encoding='utf-8'))
+perf002 = json.loads(Path('config/perf002.json').read_text(encoding='utf-8'))
+assert legacy['pinned_revision'] == '42b8264a36254dafbd97d80f5181790e28b9de12'
+assert suite['protos_corpus_revision'] == '42b8264a36254dafbd97d80f5181790e28b9de12'
+assert perf002['protos_revision'] == '3c93912a5579326374782a43527fbb51046f8f91'
+assert perf002['stack'] == '128m'
+
+dockerfile = Path('docker/protos-perf001d/Dockerfile').read_text(encoding='utf-8')
+for required in (
+    'ARG BUILD_BASE=maven:3.9.9-eclipse-temurin-21',
+    'ARG GRAAL_BASE=ghcr.io/graalvm/jdk-community:22.0.0',
+    'ARG TRUFFLE_RUNTIME_VERSION=24.0.0',
+    'dependency:copy-dependencies',
+    'MeasurementDriver.java',
+    'StartupDriver.java',
+    'COPY --from=build /out/truffle-runtime /opt/truffle-runtime',
+    'ENTRYPOINT ["java"]',
+):
+    assert required in dockerfile
+
+measure = Path('scripts/perf001d_measure.sh').read_text(encoding='utf-8')
+assert '--network none' in measure
+assert '--cpuset-cpus "$CPUSET"' in measure
+assert '-Dpolyglot.engine.Compilation=false' in measure
+assert '-Dpolyglot.engine.BackgroundCompilation=false' in measure
+assert '-Dpolyglot.engine.TraceCompilation=true' in measure
+
+print('PERF001D_CONFIG_VALIDATION: PASS')
+print('PERF001D_DOCKERFILE_VALIDATION: PASS')
+print('PERF001D_TIMING_BOUNDARY_STATIC_CHECK: PASS')
+print('PERF001_HISTORICAL_PIN_GUARD: PASS')
+print('PERF002_EVIDENCE_PIN_GUARD: PASS')
+PY
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    scripts/perf001d_measure.sh \
+    scripts/perf001d_finalize.py \
+    docker/protos-perf001d/Dockerfile \
+    docker/protos-perf001d/DiagnosticEval.java \
+    docker/protos-perf001d/RuntimeProbe.java \
+    docker/protos-perf001d/MeasurementDriver.java \
+    docker/protos-perf001d/StartupDriver.java \
+    docker/protos-perf001d/truffle-runtime-pom.xml
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+
 printf 'RUNNER_UNIT_TESTS: PASS\n'
 printf 'STATIC_VALIDATION: PASS\n'
 printf 'LICENSE_CHECK: PASS\n'

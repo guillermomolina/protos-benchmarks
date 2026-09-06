@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF001",
+  "slice": "PERF001-D",
+  "classification": "protos_measurement_pre_post_perf002",
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "revisions": [
+    {
+      "label": "pre-perf002",
+      "revision": "8f363d0146164f99e72210eb44667f4efb7b88e7",
+      "relationship": "direct publication baseline of PERF002-A",
+      "implementation_version": "0.2.161-SNAPSHOT"
+    },
+    {
+      "label": "post-perf002",
+      "revision": "3c93912a5579326374782a43527fbb51046f8f91",
+      "relationship": "published PERF002-A implementation",
+      "implementation_version": "0.2.162-SNAPSHOT"
+    }
+  ],
+  "build_base": "maven:3.9.9-eclipse-temurin-21",
+  "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+  "truffle_runtime_version": "24.0.0",
+  "stack": "128m",
+  "startup_samples": 10,
+  "warmup_iterations": 20,
+  "steady_samples": 20,
+  "diagnostic_iterations": 20,
+  "cpu_policy": "first CPU in current process Cpus_allowed_list; same CPU for every measured run",
+  "network_policy": "disabled for all runtime measurement and diagnostic containers",
+  "timing_modes": {
+    "interpreter": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.Compilation=false"
+    ],
+    "truffle": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false"
+    ]
+  },
+  "diagnostic_mode": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.engine.TraceCompilation=true"
+  ],
+  "workloads": [
+    {
+      "id": "micro/slot-read",
+      "source": "protos/benchmarks/micro/slot-read.protos",
+      "expected_stdout": "42"
+    },
+    {
+      "id": "micro/slot-write",
+      "source": "protos/benchmarks/micro/slot-write.protos",
+      "expected_stdout": "10000"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "protos/benchmarks/micro/closure-call.protos",
+      "expected_stdout": "42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "protos/benchmarks/micro/method-call.protos",
+      "expected_stdout": "42"
+    },
+    {
+      "id": "micro/object-creation",
+      "source": "protos/benchmarks/micro/object-creation.protos",
+      "expected_stdout": "42"
+    },
+    {
+      "id": "micro/delegation-shallow",
+      "source": "protos/benchmarks/micro/delegation-shallow.protos",
+      "expected_stdout": "42"
+    },
+    {
+      "id": "micro/delegation-deep",
+      "source": "protos/benchmarks/micro/delegation-deep.protos",
+      "expected_stdout": "42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "protos/benchmarks/runtime/monomorphic-dispatch.protos",
+      "expected_stdout": "42"
+    },
+    {
+      "id": "runtime/polymorphic-dispatch",
+      "source": "protos/benchmarks/runtime/polymorphic-dispatch.protos",
+      "expected_stdout": "15000"
+    },
+    {
+      "id": "algorithms/factorial/recursive",
+      "source": "protos/benchmarks/algorithms/factorial/recursive.protos",
+      "expected_stdout": "2432902008176640000"
+    },
+    {
+      "id": "algorithms/fibonacci/recursive",
+      "source": "protos/benchmarks/algorithms/fibonacci/recursive.protos",
+      "expected_stdout": "832040"
+    }
+  ]
+}

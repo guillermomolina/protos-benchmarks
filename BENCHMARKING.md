@@ -145,3 +145,86 @@ A successful companion publication does not independently close PERF002. Its
 exact evidence commit is subsequently recorded in
 `guillermomolina/protos/docs/project/IMPLEMENTATION_STATUS.md`, where PERF002-B
 and the parent PERF002 can be closed.
+
+
+## PERF001-D measurement methodology
+
+PERF001-D establishes Protos-only startup, warmup-curve and steady-state
+measurements after the PERF001-C correctness gate. It also records separate
+non-timing Truffle compilation diagnostics.
+
+The measurement intentionally pins the two revisions immediately around the
+material PERF002 optimization:
+
+- pre-PERF002: `8f363d0146164f99e72210eb44667f4efb7b88e7`, the exact publication
+  baseline consumed by PERF002-A;
+- post-PERF002: `3c93912a5579326374782a43527fbb51046f8f91`, the exact published
+  PERF002-A implementation.
+
+Using these adjacent optimization revisions isolates the PERF002 implementation
+delta from later independent Standard Library/project changes. The historical
+PERF001-C pin remains unchanged and continues to identify its cross-language
+correctness evidence.
+
+Both revisions use the same GraalVM Community JDK 22 / external
+`truffle-runtime:24.0.0` environment, the same host, the same pinned CPU, and
+`-Xss128m`. Networking is disabled for runtime measurements.
+
+### Startup boundary
+
+Each startup sample is a fresh child JVM launched by a driver that is already
+running inside the prepared container. The sample begins immediately before
+`ProcessBuilder.start()` and ends after the child exits successfully. It includes
+process/JVM/runtime startup, Protos Core bootstrap, source loading,
+parse/lower/CallTarget creation, guest execution, final-result validation, and
+normal process termination.
+
+Docker image construction and container creation/start are outside this timing
+boundary. Ten raw startup samples are retained for every
+revision/mode/workload combination.
+
+### Warmup boundary
+
+Warmup uses one JVM and one compiled Protos CallTarget. Core bootstrap, source
+read and parse/lower occur before the iteration series. Each equivalent
+iteration receives a fresh module activation so program-local mutations do not
+leak between executions. Only `CallTarget.call(activation)` is timed; activation
+construction and result rendering/validation occur outside the timed interval.
+
+Twenty early iterations are retained in order as the warmup curve. They are not
+merged into steady-state data.
+
+### Steady-state boundary
+
+The same JVM and CallTarget continue after the 20 retained warmup iterations.
+Twenty further guest-call intervals are retained as steady-state samples. The
+primary summary statistic is the median. MAD, minimum, maximum and nearest-rank
+p95 remain secondary derived views; raw nanosecond samples are authoritative.
+
+### Interpreter and Truffle modes
+
+Both modes use the same external Truffle runtime. Interpreter mode explicitly
+sets `polyglot.engine.Compilation=false`. Truffle mode enables compilation with
+background compilation disabled for deterministic measurement sequencing.
+
+Compilation tracing is deliberately absent from every timing run.
+
+### Non-timing diagnostics
+
+Each revision/workload also receives a separate Truffle run with
+`TraceCompilation=true`. These diagnostic runs are never used as timing samples.
+They retain raw stdout/stderr and counts for optimization successes/failures plus
+the previously investigated `GraphTooBig`, `FrameWithoutBoxing`, deep-inlining,
+`StackOverflowError`, and `BootstrapMethodError` classes.
+
+The post-PERF002 diagnostic run must retain the compiler-health boundary already
+established by PERF002: zero optimization failures and zero known bailout/runtime
+failure guards. Pre-PERF002 diagnostics are evidence and may legitimately record
+the failures that motivated PERF002.
+
+### Interpretation
+
+PERF001-D publishes per-workload, per-mode measurements and pre/post ratios.
+Those ratios quantify observations for the exact pinned revisions only. They are
+not evidence for a blanket claim about whole-language performance and do not
+replace later PERF001 cross-language or broader-workload slices.

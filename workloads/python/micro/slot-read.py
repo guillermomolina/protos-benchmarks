@@ -13,9 +13,30 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-ARG PYTHON_BASE=python:3.14.7-slim-bookworm
-FROM ${PYTHON_BASE}
-WORKDIR /opt/benchmark
-COPY docker/python/smoke.py /opt/benchmark/smoke.py
-COPY workloads/python /opt/benchmark/workloads
-ENTRYPOINT ["python3"]
+import sys
+
+sys.setrecursionlimit(50000)
+
+
+def repeat(count, operation):
+    if count > 0:
+        operation()
+        repeat(count - 1, operation)
+
+
+class Holder:
+    def __init__(self):
+        self.value = 42
+
+
+holder = Holder()
+sink = 0
+
+
+def operation():
+    global sink
+    sink = holder.value
+
+
+repeat(10000, operation)
+print(sink)

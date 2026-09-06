@@ -16,3 +16,13 @@ All notable changes to Protos Benchmarks are documented in this file.
   schema.
 - Added correctness smoke validation for the Protos CLI, canonical corpus
   presence, and a Python control runtime without publishing timing results.
+- Added the PERF001-C algorithm-equivalent manifest for all 11 canonical
+  `micro`, `runtime`, and `algorithms` workloads.
+- Added Python and JavaScript comparison implementations and a 33-case
+  correctness gate that validates every Protos/Python/JavaScript observable
+  result before any later timing work is permitted.
+- Added a pinned Node.js comparison runtime and a correctness-evidence schema;
+  PERF001-C still publishes no performance timings.
+- Pinned PERF001-C to Protos `42b8264a36254dafbd97d80f5181790e28b9de12` and recorded the Protos `-Xss64m` JVM
+  stack policy required to preserve the canonical 10,000-step recursive workload
+  shape without rewriting benchmark control flow.

@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "classification": "algorithm-equivalent",
+  "protos_corpus_revision": "42b8264a36254dafbd97d80f5181790e28b9de12",
+  "comparison_languages": [
+    "python",
+    "javascript"
+  ],
+  "benchmarks": [
+    {
+      "id": "micro/slot-read",
+      "protos": "micro/slot-read.protos",
+      "expected_stdout": "42",
+      "implementations": {
+        "python": "micro/slot-read.py",
+        "javascript": "micro/slot-read.mjs"
+      },
+      "equivalence": "10,000 recursive repeat steps; each step performs one inherited-language-level read from a stable object and stores the result."
+    },
+    {
+      "id": "micro/slot-write",
+      "protos": "micro/slot-write.protos",
+      "expected_stdout": "10000",
+      "implementations": {
+        "python": "micro/slot-write.py",
+        "javascript": "micro/slot-write.mjs"
+      },
+      "equivalence": "10,000 recursive repeat steps; each step reads, increments, and writes one mutable object field/slot."
+    },
+    {
+      "id": "micro/closure-call",
+      "protos": "micro/closure-call.protos",
+      "expected_stdout": "42",
+      "implementations": {
+        "python": "micro/closure-call.py",
+        "javascript": "micro/closure-call.mjs"
+      },
+      "equivalence": "10,000 recursive repeat steps; each step invokes a one-argument identity closure/function and stores its result."
+    },
+    {
+      "id": "micro/method-call",
+      "protos": "micro/method-call.protos",
+      "expected_stdout": "42",
+      "implementations": {
+        "python": "micro/method-call.py",
+        "javascript": "micro/method-call.mjs"
+      },
+      "equivalence": "10,000 recursive repeat steps; each step performs one receiver-bound method call with one argument."
+    },
+    {
+      "id": "micro/object-creation",
+      "protos": "micro/object-creation.protos",
+      "expected_stdout": "42",
+      "implementations": {
+        "python": "micro/object-creation.py",
+        "javascript": "micro/object-creation.mjs"
+      },
+      "equivalence": "10,000 recursive repeat steps; each step allocates one fresh object containing value 42; the last object is observed."
+    },
+    {
+      "id": "micro/delegation-shallow",
+      "protos": "micro/delegation-shallow.protos",
+      "expected_stdout": "42",
+      "implementations": {
+        "python": "micro/delegation-shallow.py",
+        "javascript": "micro/delegation-shallow.mjs"
+      },
+      "equivalence": "10,000 recursive repeat steps; each step resolves value 42 through one parent/prototype/inheritance hop."
+    },
+    {
+      "id": "micro/delegation-deep",
+      "protos": "micro/delegation-deep.protos",
+      "expected_stdout": "42",
+      "implementations": {
+        "python": "micro/delegation-deep.py",
+        "javascript": "micro/delegation-deep.mjs"
+      },
+      "equivalence": "10,000 recursive repeat steps; each step resolves value 42 through an eight-hop parent/prototype/inheritance chain."
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "protos": "runtime/monomorphic-dispatch.protos",
+      "expected_stdout": "42",
+      "implementations": {
+        "python": "runtime/monomorphic-dispatch.py",
+        "javascript": "runtime/monomorphic-dispatch.mjs"
+      },
+      "equivalence": "10,000 recursive repeat steps dispatch the same zero-argument run method on one stable receiver shape."
+    },
+    {
+      "id": "runtime/polymorphic-dispatch",
+      "protos": "runtime/polymorphic-dispatch.protos",
+      "expected_stdout": "15000",
+      "implementations": {
+        "python": "runtime/polymorphic-dispatch.py",
+        "javascript": "runtime/polymorphic-dispatch.mjs"
+      },
+      "equivalence": "10,000 recursively alternating sends dispatch run across two stable receiver shapes returning 1 and 2."
+    },
+    {
+      "id": "algorithms/factorial/recursive",
+      "protos": "algorithms/factorial/recursive.protos",
+      "expected_stdout": "2432902008176640000",
+      "implementations": {
+        "python": "algorithms/factorial/recursive.py",
+        "javascript": "algorithms/factorial/recursive.mjs"
+      },
+      "equivalence": "Direct recursive factorial with input 20 and no library factorial primitive."
+    },
+    {
+      "id": "algorithms/fibonacci/recursive",
+      "protos": "algorithms/fibonacci/recursive.protos",
+      "expected_stdout": "832040",
+      "implementations": {
+        "python": "algorithms/fibonacci/recursive.py",
+        "javascript": "algorithms/fibonacci/recursive.mjs"
+      },
+      "equivalence": "Naive direct recursive Fibonacci with input 30 and no memoization or library primitive."
+    }
+  ]
+}

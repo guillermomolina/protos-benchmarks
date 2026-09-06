@@ -41,4 +41,4 @@ COPY --from=build /src /opt/protos
 COPY --from=build /out/protos.jar /opt/protos/protos.jar
 ENV PROTOS_HOME=/opt/protos
 WORKDIR /opt/protos
-ENTRYPOINT ["java", "--enable-native-access=ALL-UNNAMED", "-jar", "/opt/protos/protos.jar"]
+ENTRYPOINT ["java", "-Xss64m", "--enable-native-access=ALL-UNNAMED", "-jar", "/opt/protos/protos.jar"]

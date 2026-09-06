@@ -13,9 +13,30 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-ARG PYTHON_BASE=python:3.14.7-slim-bookworm
-FROM ${PYTHON_BASE}
-WORKDIR /opt/benchmark
-COPY docker/python/smoke.py /opt/benchmark/smoke.py
-COPY workloads/python /opt/benchmark/workloads
-ENTRYPOINT ["python3"]
+import sys
+
+sys.setrecursionlimit(50000)
+
+
+class A:
+    def run(self):
+        return 1
+
+
+class B:
+    def run(self):
+        return 2
+
+
+a = A()
+b = B()
+
+
+def run_alternating(count, receiver, other):
+    result = 0
+    if count > 0:
+        result = receiver.run() + run_alternating(count - 1, other, receiver)
+    return result
+
+
+print(run_alternating(10000, a, b))

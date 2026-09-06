@@ -13,9 +13,8 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-ARG PYTHON_BASE=python:3.14.7-slim-bookworm
-FROM ${PYTHON_BASE}
+ARG NODE_BASE=node:24.20.0-bookworm-slim
+FROM ${NODE_BASE}
 WORKDIR /opt/benchmark
-COPY docker/python/smoke.py /opt/benchmark/smoke.py
-COPY workloads/python /opt/benchmark/workloads
-ENTRYPOINT ["python3"]
+COPY workloads/javascript /opt/benchmark/workloads
+ENTRYPOINT ["node", "--stack-size=32768"]

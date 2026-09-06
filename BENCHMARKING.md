@@ -5,17 +5,49 @@ work. Canonical `PERFxxx` lifecycle state remains in `guillermomolina/protos`.
 
 ## PERF001-B scope
 
-PERF001-B establishes the reproducible harness only. It provides Docker runtime
-images, exact Protos revision pinning, host/runtime inventory capture, CPU
-affinity policy, a raw-result schema, and correctness smoke validation. It does
-not publish benchmark timing results.
+PERF001-B established the reproducible harness: Docker runtime images, exact
+Protos revision pinning, host/runtime inventory capture, CPU-affinity policy, a
+raw-result schema, and correctness smoke validation. It did not publish
+benchmark timing results.
+
+## PERF001-C scope
+
+PERF001-C integrates the complete existing sequential corpus selected by the
+canonical Protos `protos/benchmarks/` tree: seven `micro` workloads, two
+`runtime` dispatch workloads, and two recursive algorithms. The companion
+repository supplies Python and JavaScript implementations for each workload.
+
+`config/suite.json` is the auditable mapping from canonical Protos source to
+comparison-language source. Every entry records its exact expected stdout and a
+short work-shape description. The correctness runner executes all three
+languages and rejects the suite on the first mismatch. The resulting
+`.work/perf001c-correctness.json` file is validation evidence, not a performance
+measurement.
+
+Python uses language-native classes/inheritance for the delegation analogues;
+JavaScript uses direct prototype chains. That representation difference is
+explicit rather than hidden. Both retain the same chain depth, recursive repeat
+count, dispatch count, logical inputs, and observable result. Recursive repeat
+workloads preserve recursion in both comparison languages. Protos runs with a recorded `-Xss64m` JVM thread stack, Python raises its
+recursion limit to 50,000, and Node uses `--stack-size=32768`. These are runtime
+configuration choices, not workload rewrites: the canonical 10,000-step recursive
+work shape remains intact in all three implementations.
+
+PERF001-C does not introduce idiomatic/library-accelerated variants and does not
+publish timings. Measurement policy remains owned by later PERF001 slices.
 
 ## Source identity
 
 Every retained result must identify both an exact 40-character Protos Git SHA
-and an exact 40-character harness Git SHA. Floating branch names are not
-reference identities. The canonical Protos workload corpus is consumed from
+and an exact 40-character benchmark-harness Git SHA. Floating branch names are
+not reference identities. The canonical Protos workload corpus is consumed from
 `protos/benchmarks/` at the pinned Protos revision.
+
+The PERF001-C corpus mapping is audited against Protos revision
+`42b8264a36254dafbd97d80f5181790e28b9de12`. That revision exposes benchmark correctness through each program's
+final expression value rather than an unqualified `print` dependency, while
+preserving the original recursive workload shape. Future slices may deliberately
+advance the Protos pin, but must revalidate corpus equivalence when they do.
 
 ## Correctness gate
 
@@ -23,10 +55,23 @@ Correctness precedes timing. A runtime or comparison implementation must produce
 the documented observable result before samples can be accepted. Incorrect
 output invalidates the run; it is never reported as a performance result.
 
-PERF001-B uses a minimal CLI smoke (`-e "1 + 1"`, expected output `2`) plus a
-probe that confirms the canonical benchmark corpus is present in the pinned
-Protos checkout. Full corpus execution belongs to PERF001-C after workload
-equivalence is audited.
+The lightweight harness smoke (`-e "1 + 1"`, expected output `2`) remains a
+separate infrastructure gate. PERF001-C additionally executes every mapped
+canonical workload under Protos, Python, and JavaScript.
+
+## Cross-language equivalence
+
+The primary suite is algorithm-equivalent. It preserves explicit recursive
+control flow, call counts, lookup/dispatch depth, logical inputs, and observable
+results. It does not substitute built-in factorial/Fibonacci functions,
+memoization, vectorized operations, or library shortcuts for the canonical
+work.
+
+Language object models are not pretended to be identical. JavaScript prototype
+lookup is the nearest direct comparison for Protos delegation. Python
+inheritance is retained as a separately identifiable native lookup analogue.
+Results from a single workload or mechanism must not be generalized into a
+whole-language performance claim.
 
 ## Measurement classes
 
@@ -44,19 +89,21 @@ CPU set. Runtime containers execute with networking disabled unless a workload
 explicitly requires network access.
 
 Runtime configurations use exact release tags. Each retained run additionally
-records the actual Docker image ID and any repository digests resolved by Docker,
-so the concrete image used by the host is preserved in the evidence.
+records the actual Docker image ID and any repository digests resolved by
+Docker, so the concrete image used by the host is preserved in the evidence.
 
 ## Graal/Truffle compatibility
 
-The PERF001-B Protos runtime uses GraalVM Community for JDK 22 (`22.0.0`). That
-GraalVM generation carries the Graal/Truffle 24.0.0 line used by the pinned
-Protos Maven dependencies. Later PERF work must re-audit this compatibility when
-Protos changes its Truffle dependency.
+The Protos runtime uses GraalVM Community for JDK 22 (`22.0.0`). That GraalVM
+generation carries the Graal/Truffle 24.0.0 line used by the pinned Protos Maven
+dependencies. Later PERF work must re-audit this compatibility when Protos
+changes its Truffle dependency.
 
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,
-and measurement fields for retained timing results. Local validation artifacts
-are written under `.work/` and are not reference results. Reference result
-publication is introduced only by later PERF001 slices.
+and measurement fields for retained timing results.
+`schemas/correctness.schema.json` defines the shape of the local PERF001-C
+correctness record. Local validation artifacts under `.work/` are not reference
+performance results. Reference timing publication is introduced only by later
+PERF001 slices.

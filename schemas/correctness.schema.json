@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Protos cross-language correctness result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "purpose",
+    "protos_revision",
+    "harness_revision",
+    "environment",
+    "images",
+    "benchmarks"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "protos_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "harness_revision": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "object"
+    },
+    "images": {
+      "type": "object"
+    },
+    "benchmarks": {
+      "type": "array",
+      "minItems": 11
+    }
+  }
+}

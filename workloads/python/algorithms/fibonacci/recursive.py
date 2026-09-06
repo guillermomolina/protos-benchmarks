@@ -13,9 +13,11 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-ARG PYTHON_BASE=python:3.14.7-slim-bookworm
-FROM ${PYTHON_BASE}
-WORKDIR /opt/benchmark
-COPY docker/python/smoke.py /opt/benchmark/smoke.py
-COPY workloads/python /opt/benchmark/workloads
-ENTRYPOINT ["python3"]
+def fibonacci(n):
+    result = n
+    if n >= 2:
+        result = fibonacci(n - 1) + fibonacci(n - 2)
+    return result
+
+
+print(fibonacci(30))

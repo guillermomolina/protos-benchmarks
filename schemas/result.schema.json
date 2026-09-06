@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/guillermomolina/protos-benchmarks/schemas/result.schema.json",
+  "title": "Protos benchmark raw result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "protos_revision",
+    "harness_revision",
+    "workload",
+    "runtime",
+    "environment",
+    "measurement"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "protos_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "harness_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "workload": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "image_id"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "jdk_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_tag": {
+          "type": "string"
+        },
+        "image_id": {
+          "type": "string"
+        },
+        "image_repo_digests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "environment": {
+      "type": "object",
+      "required": [
+        "platform",
+        "architecture",
+        "cpu_count",
+        "cpuset",
+        "kernel",
+        "docker_server_version"
+      ],
+      "properties": {
+        "platform": {
+          "type": "string"
+        },
+        "architecture": {
+          "type": "string"
+        },
+        "cpu_model": {
+          "type": "string"
+        },
+        "cpu_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "memory_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "kernel": {
+          "type": "string"
+        },
+        "cpuset": {
+          "type": "string"
+        },
+        "docker_server_version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "measurement": {
+      "type": "object",
+      "required": [
+        "class",
+        "warmup_iterations",
+        "samples_ns",
+        "aggregation"
+      ],
+      "properties": {
+        "class": {
+          "enum": [
+            "startup",
+            "warmup",
+            "steady_state"
+          ]
+        },
+        "warmup_iterations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "samples_ns": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "aggregation": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

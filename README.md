@@ -29,8 +29,21 @@ forking those sources.
 - Raw measurements and the environment needed to interpret them are retained.
 - Performance work must never redefine, relax, or bypass Protos semantics.
 
-The benchmark harness itself is introduced by Protos `PERF001-B`; this initial
-repository commit intentionally contains no benchmark implementation.
+## PERF001-B harness
+
+PERF001-B adds the first executable harness: pinned Docker runtime definitions,
+exact Protos revision consumption, machine/runtime inventory capture, CPU-affinity
+policy, a raw-result schema, and correctness smoke validation. It deliberately
+does not publish performance timings; later PERF001 slices add comparable workload
+execution and measurement.
+
+Run the complete PERF001-B validation with:
+
+```sh
+python3 runner/bench.py all
+```
+
+See [BENCHMARKING.md](BENCHMARKING.md) for methodology and boundaries.
 
 ## License
 

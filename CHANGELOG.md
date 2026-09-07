@@ -6,6 +6,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Added a dedicated IGV `bgv2json` diagnostic container pinned to Graal `vm-24.0.0` (`78238a5ee6e4ae827059c70549e286ae730b7730`) and mx `6.27.1` (`d0d6d6cd2f70bb384dfba9f3f66f3dab21392ae4`). Its JDK 17 build environment is isolated from benchmark runtime images because that IGV revision uses NetBeans 14 components that still require `javac --release 7`; analysis runs with networking disabled.
 - Added the `PERF001-E` sequential-collections comparison harness pinned to exact Protos corpus revision `86b35d8bb2d7ab2ad54bc2947e1bf7fbff1fca15`. The six canonical workloads receive explicit algorithm-equivalent Python and JavaScript implementations; stable Array sort remains a manual merge sort and map-backed Set algebra remains explicit rather than using host bulk collection primitives.
 - PERF001-E publishes correctness-gated startup, retained warmup and steady-state measurements across Protos/Python/JavaScript on one pinned CPU with networking disabled. Protos uses GraalVM Community JDK 22, external `truffle-runtime:24.0.0` and `-Xss128m`; compilation tracing is isolated in separate non-timing diagnostics whose compiler bailouts are retained as baseline findings rather than correctness failures. Exact harness/evidence commits, raw samples, runtime image identities and environment metadata are retained for later canonical Protos ledger reconciliation.
 - Established the `guillermomolina/protos-benchmarks` companion repository.

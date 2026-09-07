@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-.PHONY: validate test build smoke correctness all inventory
+.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke
 
 validate:
 	./scripts/validate.sh
@@ -35,3 +35,9 @@ all:
 
 inventory:
 	python3 runner/bench.py inventory
+
+igv-analyzer-build:
+	./scripts/igv_analyzer.sh build
+
+igv-analyzer-smoke:
+	./scripts/igv_analyzer.sh smoke

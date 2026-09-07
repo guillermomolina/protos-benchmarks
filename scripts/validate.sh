@@ -340,3 +340,54 @@ do
   }
 done
 echo 'PERF001E_STATIC_VALIDATION: PASS'
+
+
+# Dedicated IGV diagnostic analyzer. This tool must remain isolated from
+# benchmark runtime images and pinned to the Graal/Truffle 24.0.0 line.
+bash -n scripts/igv_analyzer.sh
+python3 - <<'PYIGV'
+from pathlib import Path
+
+path = Path('docker/igv-analyzer/Dockerfile')
+text = path.read_text(encoding='utf-8')
+required = (
+    'FROM eclipse-temurin:17-jdk-jammy',
+    'ARG GRAAL_REV=78238a5ee6e4ae827059c70549e286ae730b7730',
+    'ARG MX_REV=d0d6d6cd2f70bb384dfba9f3f66f3dab21392ae4',
+    'javac --release 7 /tmp/Release7Probe.java',
+    'build --dependencies=IGV_JSONEXPORTER,IGV_DATA_SETTINGS',
+    'help bgv2json >/tmp/bgv2json-command-help.txt 2>&1',
+    "grep -q 'Export bgv graphs as json' /tmp/bgv2json-command-help.txt",
+    'ENTRYPOINT ["mx", "--primary-suite-path", "/opt/graal/visualizer", "bgv2json"]',
+)
+for item in required:
+    assert item in text, item
+
+wrapper = Path('scripts/igv_analyzer.sh').read_text(encoding='utf-8')
+assert '--network none' in wrapper
+assert '--entrypoint mx' in wrapper
+assert 'help bgv2json' in wrapper
+assert 'bgv2json --help' not in wrapper
+assert 'docker/igv-analyzer/Dockerfile' in wrapper
+assert 'protos-benchmarks/igv-analyzer:graal-24.0.0' in wrapper
+
+for runtime in (
+    Path('docker/protos/Dockerfile'),
+    Path('docker/protos-perf001d/Dockerfile'),
+    Path('docker/protos-perf001e/Dockerfile'),
+    Path('docker/protos-perf002/Dockerfile'),
+):
+    assert 'eclipse-temurin:17-jdk-jammy' not in runtime.read_text(encoding='utf-8')
+
+print('IGV_ANALYZER_STATIC_VALIDATION: PASS')
+print('IGV_ANALYZER_RUNTIME_ISOLATION_CHECK: PASS')
+PYIGV
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in docker/igv-analyzer/Dockerfile scripts/igv_analyzer.sh; do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+printf 'IGV_ANALYZER_LICENSE_CHECK: PASS\n'

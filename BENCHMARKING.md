@@ -99,6 +99,31 @@ generation carries the Graal/Truffle 24.0.0 line used by the pinned Protos Maven
 dependencies. Later PERF work must re-audit this compatibility when Protos
 changes its Truffle dependency.
 
+## IGV diagnostic analyzer
+
+IdealGraphVisualizer analysis is deliberately isolated from benchmark runtime
+images. `docker/igv-analyzer/Dockerfile` pins the Graal `vm-24.0.0` commit
+`78238a5ee6e4ae827059c70549e286ae730b7730` and the matching mx `6.27.1` commit
+`d0d6d6cd2f70bb384dfba9f3f66f3dab21392ae4`.
+
+That Graal revision uses NetBeans 14 for IGV and its build still contains Java 7
+release targets. JDK 22 rejects `javac --release 7`, so the analyzer image uses
+JDK 17 exclusively for building and running the diagnostic exporter. This is a
+tooling compatibility boundary, not a change to the JDK/GraalVM used by the
+measured Protos runtime.
+
+Build the tool with `make igv-analyzer-build` and verify it with
+`make igv-analyzer-smoke`. Convert a BGV file from the directory containing it,
+or from the repository root, with for example:
+
+```sh
+./scripts/igv_analyzer.sh analyze results/example.bgv > results/example.json
+```
+
+Runtime analysis uses `--network none`. The current working directory is mounted
+at `/work` so input paths and any explicitly requested output paths remain host
+artifacts rather than being trapped inside the diagnostic container.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

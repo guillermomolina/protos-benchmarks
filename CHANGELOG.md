@@ -4,6 +4,10 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ## Unreleased
 
+### Fixed
+
+- Recovered the pinned Graal 24 IGV `bgv2json` path used by PERF003-A: the analyzer now compiles the pinned `JSONExporter` against the complete built IGV distribution, bounds physical JSON filenames with a deterministic full-identity fingerprint, preserves graph metadata in JSON, and validates the path with a real BGV-to-JSON smoke test.
+
 ### Added
 
 - Added `PERF003-A` structural Truffle/Graal diagnostics for the residual `array-reduce` `GraphTooBig` investigation. The diagnostic captures `Truffle:2` BGV dumps plus method/node expansion evidence from the pinned JDK 22 runtime, converts BGV with the separately isolated JDK 17 IGV analyzer, and publishes bounded attribution summaries without changing Protos semantics or treating occurrence counts as causal proof.

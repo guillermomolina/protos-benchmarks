@@ -55,11 +55,28 @@ RUN printf 'class Release7Probe {}\n' >/tmp/Release7Probe.java \
 
 RUN mx --version \
     && mx --primary-suite-path /opt/graal/visualizer \
-       build --dependencies=IGV_JSONEXPORTER,IGV_DATA_SETTINGS \
-    && mx --primary-suite-path /opt/graal/visualizer \
-       help bgv2json >/tmp/bgv2json-command-help.txt 2>&1 \
-    && grep -q 'Export bgv graphs as json' /tmp/bgv2json-command-help.txt
+       build --dependencies=IGV_JSONEXPORTER,IGV_DATA_SETTINGS
+
+COPY docker/igv-analyzer/patch_json_exporter.py /tmp/patch_json_exporter.py
+RUN python3 /tmp/patch_json_exporter.py \
+    && rm -f /tmp/patch_json_exporter.py \
+    && set -eux; \
+       SRC=/opt/graal/visualizer/IdealGraphVisualizer/JSONExporter/src/org/graalvm/visualizer/JSONExporter.java; \
+       DIST=/opt/graal/visualizer/IdealGraphVisualizer/dist/idealgraphvisualizer; \
+       test -f "$SRC"; \
+       test -d "$DIST"; \
+       mkdir -p /opt/igv-jsonexporter/classes; \
+       find "$DIST" -type f -name '*.jar' -print | sort > /opt/igv-jsonexporter/jars.txt; \
+       test -s /opt/igv-jsonexporter/jars.txt; \
+       CP="$(paste -sd: /opt/igv-jsonexporter/jars.txt)"; \
+       javac -cp "$CP" -d /opt/igv-jsonexporter/classes "$SRC"; \
+       test -f /opt/igv-jsonexporter/classes/org/graalvm/visualizer/JSONExporter.class; \
+       printf '%s\n' "$CP" >/opt/igv-jsonexporter/classpath
+
+COPY docker/igv-analyzer/bgv2json /usr/local/bin/bgv2json
+RUN chmod 0755 /usr/local/bin/bgv2json \
+    && /usr/local/bin/bgv2json --help | grep -q 'mx igv-json'
 
 WORKDIR /work
 
-ENTRYPOINT ["mx", "--primary-suite-path", "/opt/graal/visualizer", "bgv2json"]
+ENTRYPOINT ["/usr/local/bin/bgv2json"]

@@ -24,17 +24,8 @@ usage() {
     cat <<'EOF'
 Usage:
   scripts/igv_analyzer.sh build
-  scripts/igv_analyzer.sh smoke
+  scripts/igv_analyzer.sh smoke [sample.bgv]
   scripts/igv_analyzer.sh analyze <bgv2json-args...>
-
-Examples:
-  scripts/igv_analyzer.sh build
-  scripts/igv_analyzer.sh analyze results/example.bgv > results/example.json
-
-The analyzer runs in a dedicated JDK 17 container. Runtime analysis is executed
-with networking disabled and the current working directory mounted at /work.
-Override the image with PROTOS_IGV_ANALYZER_IMAGE and the container CLI with
-DOCKER (for example DOCKER=podman).
 EOF
 }
 
@@ -47,34 +38,61 @@ case "$command" in
             "$ROOT"
         ;;
     smoke)
-        tmp=$(mktemp)
-        trap 'rm -f "$tmp"' EXIT
-        "$DOCKER" run --rm --network none \
-            --entrypoint mx \
-            "$IMAGE" \
-            --primary-suite-path /opt/graal/visualizer \
-            help bgv2json >"$tmp" 2>&1
-        grep -q 'Export bgv graphs as json' "$tmp"
-        printf 'IGV_ANALYZER_SMOKE: PASS\n'
+        shift
+        output=$(mktemp)
+        tmpdir=
+        trap 'rm -f "$output"; [ -z "$tmpdir" ] || rm -rf "$tmpdir"' EXIT
+        "$DOCKER" run --rm --network none "$IMAGE" --help >"$output" 2>&1
+        grep -q 'mx igv-json' "$output"
+        echo "IGV_ANALYZER_CLASS_SMOKE: PASS"
+        if [ "$#" -eq 1 ]; then
+            sample=$1
+            [ -f "$sample" ] || { echo "IGV_ANALYZER_REAL_SMOKE: FAIL missing BGV: $sample" >&2; exit 3; }
+            tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/protos-igv-smoke.XXXXXX")
+            cp -- "$sample" "$tmpdir/sample.bgv"
+            set +e
+            "$DOCKER" run --rm --network none \
+                --user "$(id -u):$(id -g)" \
+                --volume "$tmpdir:/work" \
+                --workdir /work \
+                "$IMAGE" sample.bgv \
+                >"$tmpdir/export.stdout" 2>"$tmpdir/export.stderr"
+            rc=$?
+            set -e
+            if [ "$rc" -ne 0 ]; then
+                echo "IGV_ANALYZER_REAL_SMOKE: FAIL rc=$rc" >&2
+                tail -80 "$tmpdir/export.stderr" >&2 || true
+                exit "$rc"
+            fi
+            mapfile -t jsons < <(find "$tmpdir" -maxdepth 1 -type f -name '*.json' -print | sort)
+            [ "${#jsons[@]}" -gt 0 ] || { echo "IGV_ANALYZER_REAL_SMOKE: FAIL no JSON generated" >&2; exit 4; }
+            python3 - "${jsons[@]}" <<'PYJSON'
+import json, os, sys
+for path in sys.argv[1:]:
+    name=os.path.basename(path)
+    if len(name.encode('utf-8')) > 240:
+        raise SystemExit(f'filename too long: {name}')
+    with open(path, encoding='utf-8') as fh:
+        obj=json.load(fh)
+    for key in ('name','graph_type','nodes'):
+        if key not in obj:
+            raise SystemExit(f'missing {key}: {path}')
+PYJSON
+            echo "IGV_ANALYZER_REAL_SMOKE: PASS json_count=${#jsons[@]}"
+        elif [ "$#" -ne 0 ]; then
+            usage >&2; exit 2
+        fi
+        echo "IGV_ANALYZER_SMOKE: PASS"
         ;;
     analyze)
         shift
-        if [ "$#" -eq 0 ]; then
-            usage >&2
-            exit 2
-        fi
+        [ "$#" -gt 0 ] || { usage >&2; exit 2; }
         exec "$DOCKER" run --rm --network none \
             --user "$(id -u):$(id -g)" \
             --volume "$PWD:/work" \
             --workdir /work \
             "$IMAGE" "$@"
         ;;
-    -h|--help|help|'')
-        usage
-        ;;
-    *)
-        printf 'Unknown command: %s\n' "$command" >&2
-        usage >&2
-        exit 2
-        ;;
+    -h|--help|help|'') usage ;;
+    *) echo "Unknown command: $command" >&2; usage >&2; exit 2 ;;
 esac

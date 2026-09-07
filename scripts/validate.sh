@@ -356,20 +356,30 @@ required = (
     'ARG MX_REV=d0d6d6cd2f70bb384dfba9f3f66f3dab21392ae4',
     'javac --release 7 /tmp/Release7Probe.java',
     'build --dependencies=IGV_JSONEXPORTER,IGV_DATA_SETTINGS',
-    'help bgv2json >/tmp/bgv2json-command-help.txt 2>&1',
-    "grep -q 'Export bgv graphs as json' /tmp/bgv2json-command-help.txt",
-    'ENTRYPOINT ["mx", "--primary-suite-path", "/opt/graal/visualizer", "bgv2json"]',
+    'COPY docker/igv-analyzer/patch_json_exporter.py /tmp/patch_json_exporter.py',
+    'COPY docker/igv-analyzer/bgv2json /usr/local/bin/bgv2json',
+    'javac -cp "$CP" -d /opt/igv-jsonexporter/classes "$SRC"',
+    'ENTRYPOINT ["/usr/local/bin/bgv2json"]',
 )
 for item in required:
     assert item in text, item
 
 wrapper = Path('scripts/igv_analyzer.sh').read_text(encoding='utf-8')
 assert '--network none' in wrapper
-assert '--entrypoint mx' in wrapper
-assert 'help bgv2json' in wrapper
-assert 'bgv2json --help' not in wrapper
+assert '--entrypoint mx' not in wrapper
+assert 'help bgv2json' not in wrapper
+assert 'IGV_ANALYZER_REAL_SMOKE' in wrapper
 assert 'docker/igv-analyzer/Dockerfile' in wrapper
 assert 'protos-benchmarks/igv-analyzer:graal-24.0.0' in wrapper
+
+exporter_wrapper = Path('docker/igv-analyzer/bgv2json').read_text(encoding='utf-8')
+assert 'org.graalvm.visualizer.JSONExporter' in exporter_wrapper
+assert '/opt/igv-jsonexporter/classpath' in exporter_wrapper
+exporter_patch = Path('docker/igv-analyzer/patch_json_exporter.py').read_text(encoding='utf-8')
+assert 'UUID.nameUUIDFromBytes' in exporter_patch
+assert 'gn.length() > 96' in exporter_patch
+assert 'gt.length() > 48' in exporter_patch
+print('IGV_ANALYZER_STATIC_VALIDATION: PASS')
 
 for runtime in (
     Path('docker/protos/Dockerfile'),

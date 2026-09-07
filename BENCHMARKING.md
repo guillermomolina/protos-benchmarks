@@ -251,6 +251,26 @@ optimization proposal. No timing claim is made.
 
 The retained A4b comparison is published under `results/perf003-a4b/`. It contains the raw control/boundary TraceCompilation streams, exact correctness outputs, runtime-class checks, Docker image metadata, the machine-readable comparison summary, and the harness-produced hypothesis conclusion.
 
+## PERF003-A4c immediate-method boundary experiment
+
+PERF003-A4a established a deterministic control failure at graph size 150026
+and showed that a diagnostic-only boundary at
+`ProtosClosureInvoker.invokePrepared` reduces that failing graph to 150001 while
+preserving exact result `528`. A4b then falsified the generic three-argument
+closure entry: its graph remained identical to control.
+
+Canonical method dispatch instead reaches
+`ProtosClosureInvoker.invokeImmediateMethod` through `ProtosInvocation`.
+A4c therefore tests that immediate-method path under the exact same pinned
+Protos revision, workload, runtime, stack, CPU-affinity and TraceCompilation
+policy.
+
+The prediction is narrow: if immediate-method activation/preparation is the
+causal prefix feeding the `invokePrepared` expansion seen in A4a, the diagnostic
+boundary should materially reduce the failing graph and may eliminate
+`GraphTooBig`. This remains controlled falsification instrumentation, not a
+proposed production boundary or a timing claim.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

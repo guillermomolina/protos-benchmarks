@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF003",
+  "slice": "PERF003-A4c",
+  "evidence_class": "controlled_immediate_method_boundary_falsification",
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "build_base": "maven:3.9.9-eclipse-temurin-21",
+  "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+  "truffle_runtime_version": "24.0.0",
+  "protos_stack": "128m",
+  "diagnostic_iterations": 20,
+  "workload": {
+    "id": "collections/array-reduce",
+    "protos": "protos/benchmarks/collections/array-reduce.protos",
+    "expected": "528"
+  },
+  "control_variant": "control",
+  "experimental_variant": "closure-immediate-method-boundary",
+  "experimental_boundary": "ProtosClosureInvoker.invokeImmediateMethod",
+  "prediction": "If the residual graph growth reaches invokePrepared through ordinary method dispatch, preventing partial evaluation through invokeImmediateMethod should materially reduce the failing graph and may take it below the 150000 limit while preserving the exact result 528.",
+  "interpretation": "A positive result attributes the additional causal prefix to immediate-method activation/preparation on the ProtosInvocation method-dispatch path. It does not by itself justify publishing a TruffleBoundary in Protos."
+}

@@ -721,3 +721,42 @@ do
     }
 done
 printf 'PERF003A_A4B_LICENSE_CHECK: PASS\n'
+
+
+# PERF003-A4c closure immediate-method boundary falsification harness
+bash -n scripts/perf003a_a4c_immediate_method_experiment.sh
+python3 -m py_compile docker/protos-perf003a-a4c/apply_boundary.py
+python3 - <<'PYA4C'
+import json, re
+from pathlib import Path
+cfg=json.loads(Path('config/perf003a-a4c.json').read_text(encoding='utf-8'))
+assert cfg['schema_version']==1
+assert cfg['perf_item']=='PERF003'
+assert cfg['slice']=='PERF003-A4c'
+assert cfg['protos_revision']=='d66841adb0b820047ed079f0bc7d643873f23194'
+assert cfg['protos_implementation_version']=='0.2.180-SNAPSHOT'
+assert cfg['diagnostic_iterations']==20
+assert cfg['workload']['id']=='collections/array-reduce'
+assert str(cfg['workload']['expected'])=='528'
+assert cfg['experimental_variant']=='closure-immediate-method-boundary'
+assert cfg['experimental_boundary']=='ProtosClosureInvoker.invokeImmediateMethod'
+d=Path('docker/protos-perf003a-a4c/Dockerfile').read_text(encoding='utf-8')
+for x in ('closure-immediate-method-boundary','python3 /tmp/apply_boundary.py /src','git ca-certificates python3'): assert x in d,x
+b=Path('docker/protos-perf003a-a4c/apply_boundary.py').read_text(encoding='utf-8')
+assert '@com.oracle.truffle.api.CompilerDirectives.TruffleBoundary' in b
+assert 'invokeImmediateMethod' in b and 'ProtosObjectValue methodHome' in b
+r=Path('scripts/perf003a_a4c_immediate_method_experiment.sh').read_text(encoding='utf-8')
+assert not re.search(r'local\s+[^\n]*prefix=\$[0-9][^\n]*\$\{prefix\}',r)
+assert 'os.sched_getaffinity(0)' in r
+assert 'Cpus_allowed_list' not in r
+for x in ('--smoke|--run','TraceCompilation=true','A4C_HYPOTHESIS','PROTOS_REPOSITORY_CHANGED: NO'): assert x in r,x
+m=Path('Makefile').read_text(encoding='utf-8')
+assert 'perf003a-a4c-smoke:' in m and 'perf003a-a4c:' in m
+print('PERF003A_A4C_STATIC_VALIDATION: PASS')
+PYA4C
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in docker/protos-perf003a-a4c/Dockerfile docker/protos-perf003a-a4c/apply_boundary.py scripts/perf003a_a4c_immediate_method_experiment.sh; do
+  grep -qF "$notice" "$path" || { echo "missing APL notice: $path" >&2; exit 1; }
+done
+printf 'PERF003A_A4C_LICENSE_CHECK: PASS
+'

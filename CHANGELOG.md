@@ -6,6 +6,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Fixed
 
+- Fixed PERF003-A4c TraceCompilation graph-shape parsing so `Node count`, `Graph Size`, and `Limit` are extracted with real whitespace/digit regex classes instead of doubly escaped literals; add a deterministic fixture for the known `50681:150026:150000` diagnostic shape.
 - Recovered the pinned Graal 24 IGV `bgv2json` path used by PERF003-A: the analyzer now compiles the pinned `JSONExporter` against the complete built IGV distribution, bounds physical JSON filenames with a deterministic full-identity fingerprint, preserves graph metadata in JSON, and validates the path with a real BGV-to-JSON smoke test.
 
 ### Added

@@ -760,3 +760,29 @@ for path in docker/protos-perf003a-a4c/Dockerfile docker/protos-perf003a-a4c/app
 done
 printf 'PERF003A_A4C_LICENSE_CHECK: PASS
 '
+
+
+# PERF003-A4c TraceCompilation graph-shape parser regression fixture.
+python3 - <<'PYA4CPARSER'
+import re
+from pathlib import Path
+
+runner = Path("scripts/perf003a_a4c_immediate_method_experiment.sh").read_text(
+    encoding="utf-8"
+)
+bad = r"r'Node count:\\s*(\\d+)\\.\\s*Graph Size:\\s*(\\d+)\\.\\s*Limit:\\s*(\\d+)'"
+good = r"r'Node count:\s*(\d+)\.\s*Graph Size:\s*(\d+)\.\s*Limit:\s*(\d+)'"
+assert bad not in runner
+assert runner.count(good) == 2
+
+sample = (
+    "GraphTooBigBailoutException: Graph too big to safely compile.\n"
+    "Node count: 50681. Graph Size: 150026. Limit: 150000.\n"
+)
+pattern = re.compile(
+    r"Node count:\s*(\d+)\.\s*Graph Size:\s*(\d+)\.\s*Limit:\s*(\d+)"
+)
+matches = pattern.findall(sample)
+assert matches == [("50681", "150026", "150000")], matches
+print("PERF003A_A4C_TRACE_PARSER_FIXTURE: PASS")
+PYA4CPARSER

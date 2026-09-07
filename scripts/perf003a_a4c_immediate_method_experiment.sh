@@ -133,7 +133,7 @@ summarize_trace() {
 import re,sys
 path,prefix=sys.argv[1:]; text=open(path,encoding='utf-8',errors='replace').read()
 done=len(re.findall(r'opt done',text,re.I)); failed=len(re.findall(r'opt failed',text,re.I)); graph=len(re.findall(r'GraphTooBig',text,re.I))
-pairs=re.findall(r'Node count:\\s*(\\d+)\\.\\s*Graph Size:\\s*(\\d+)\\.\\s*Limit:\\s*(\\d+)',text)
+pairs=re.findall(r'Node count:\s*(\d+)\.\s*Graph Size:\s*(\d+)\.\s*Limit:\s*(\d+)',text)
 unique=sorted({tuple(map(int,p)) for p in pairs})
 print(f'{prefix}_opt_done={done}'); print(f'{prefix}_opt_failed={failed}'); print(f'{prefix}_graph_too_big={graph}')
 print(f'{prefix}_graph_shapes=' + (','.join(f'{n}:{g}:{limit}' for n,g,limit in unique) if unique else 'NONE'))
@@ -177,7 +177,7 @@ import re,sys
 cp,bp,out=sys.argv[1:]
 def stats(path):
  text=open(path,encoding='utf-8',errors='replace').read(); graph=len(re.findall(r'GraphTooBig',text,re.I))
- shapes=sorted({tuple(map(int,p)) for p in re.findall(r'Node count:\\s*(\\d+)\\.\\s*Graph Size:\\s*(\\d+)\\.\\s*Limit:\\s*(\\d+)',text)})
+ shapes=sorted({tuple(map(int,p)) for p in re.findall(r'Node count:\s*(\d+)\.\s*Graph Size:\s*(\d+)\.\s*Limit:\s*(\d+)',text)})
  return graph,shapes
 cg,cs=stats(cp); bg,bs=stats(bp)
 if cg==0: c,r='INCONCLUSIVE','control did not reproduce GraphTooBig'

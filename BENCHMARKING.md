@@ -150,6 +150,37 @@ attribution (including the separately isolated IGV analyzer where useful) rather
 than continuing threshold-driven source micro-edits without a causal hypothesis.
 This diagnostic publishes no timing claim.
 
+## PERF003-A structural Graal/IGV diagnostic
+
+After the source-level `Array.reduce` refinements converged close to Graal's
+graph-size limit, PERF003-A stops treating further incidental source deletion as
+a justified optimization strategy. The structural diagnostic is a separate
+non-timing run pinned to Protos
+`d66841adb0b820047ed079f0bc7d643873f23194` (`0.2.180-SNAPSHOT`) and the same
+GraalVM Community JDK 22 / external Truffle 24.0.0 family used by the PERF003
+investigation.
+
+`scripts/perf003a_structural.sh` first requires exact `array-reduce` correctness
+(`528`), then enables Truffle/Graal compilation tracing, method/node expansion
+statistics at the `peTier`, node source positions, performance warnings, and
+`-Djdk.graal.Dump=Truffle:2`. The measured runtime writes BGV files; those files
+are analyzed only afterwards by the isolated JDK 17 IGV analyzer. JDK 17 is
+therefore diagnostic-tool implementation detail and never becomes the measured
+Protos runtime.
+
+The run retains compact attribution evidence: BGV/JSON hashes and sizes, IGV
+graph identities, the compressed raw structural trace, expansion rankings, and
+occurrence counts for the current architectural suspects
+(`ProtosParameterBindingNode`, `OptimizedCallTarget`, closure execution/invocation,
+activation, call-target and invocation machinery). Occurrence or expansion size
+is evidence for selecting a controlled experiment, not proof of causality.
+
+Full BGV and JSON outputs remain under the ignored `.work/` run directory for
+local reanalysis. Compressed BGV files are also included in published evidence
+when their aggregate compressed size is at most 80 MiB; otherwise the published
+manifest retains their exact hashes/sizes and reports the bounded-retention
+decision.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

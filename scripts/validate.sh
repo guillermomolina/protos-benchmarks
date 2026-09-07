@@ -430,3 +430,51 @@ grep -qF "$notice" scripts/perf003a_diagnostic.sh || {
   echo "missing APL notice: scripts/perf003a_diagnostic.sh" >&2
   exit 1
 }
+
+# PERF003-A structural Graal/IGV diagnostic
+bash -n scripts/perf003a_structural.sh
+python3 -m py_compile scripts/perf003a_structural_summary.py
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+cfg=json.loads(Path("config/perf003a-structural.json").read_text(encoding="utf-8"))
+assert cfg["schema_version"] == 1
+assert cfg["perf_item"] == "PERF003"
+assert cfg["slice"] == "PERF003-A"
+assert cfg["evidence_class"] == "structural_truffle_graal_diagnostic"
+assert cfg["protos_revision"] == "d66841adb0b820047ed079f0bc7d643873f23194"
+assert cfg["protos_implementation_version"] == "0.2.180-SNAPSHOT"
+assert cfg["graal_base"] == "ghcr.io/graalvm/jdk-community:22.0.0"
+assert cfg["truffle_runtime_version"] == "24.0.0"
+assert cfg["protos_stack"] == "128m"
+assert cfg["diagnostic_iterations"] == 20
+assert cfg["workload"]["id"] == "collections/array-reduce"
+assert cfg["workload"]["expected"] == "528"
+assert cfg["graal_dump"] == "Truffle:2"
+assert cfg["expansion_tier"] == "peTier"
+assert cfg["retained_bgv_compressed_limit_bytes"] == 80 * 1024 * 1024
+
+script=Path("scripts/perf003a_structural.sh").read_text(encoding="utf-8")
+for required in (
+    "-Dpolyglot.engine.MethodExpansionStatistics=$EXPANSION_TIER",
+    "-Dpolyglot.engine.NodeExpansionStatistics=$EXPANSION_TIER",
+    "-Dpolyglot.engine.TraceMethodExpansion=$EXPANSION_TIER",
+    "-Dpolyglot.engine.TraceNodeExpansion=$EXPANSION_TIER",
+    "-Dpolyglot.engine.NodeSourcePositions=true",
+    "-Djdk.graal.Dump=$DUMP",
+    "-Djdk.graal.DumpPath=/diag-out/graal_dumps",
+    'scripts/igv_analyzer.sh" analyze',
+    "--network none",
+):
+    assert required in script, required
+print("PERF003A_STRUCTURAL_STATIC_VALIDATION: PASS")
+PY
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in scripts/perf003a_structural.sh scripts/perf003a_structural_summary.py; do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done

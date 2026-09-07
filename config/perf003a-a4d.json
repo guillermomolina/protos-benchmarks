@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF003",
+  "slice": "PERF003-A4d",
+  "evidence_class": "controlled_immediate_activation_boundary_falsification",
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "build_base": "maven:3.9.9-eclipse-temurin-21",
+  "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+  "truffle_runtime_version": "24.0.0",
+  "protos_stack": "128m",
+  "diagnostic_iterations": 20,
+  "workload": {
+    "id": "collections/array-reduce",
+    "protos": "protos/benchmarks/collections/array-reduce.protos",
+    "expected": "528"
+  },
+  "control_variant": "control",
+  "experimental_variant": "immediate-activation-boundary",
+  "experimental_boundary": "ProtosActivation.forImmediateMethodInvocation",
+  "prediction": "If immediate-method activation construction materially supplies the residual graph growth exposed by A4c, preventing partial evaluation through ProtosActivation.forImmediateMethodInvocation should reduce the deterministic failing graph and may eliminate GraphTooBig while preserving result 528.",
+  "interpretation": "A positive result attributes material graph growth to immediate-method activation construction. It does not by itself justify publishing a TruffleBoundary or any semantic/runtime change in Protos."
+}

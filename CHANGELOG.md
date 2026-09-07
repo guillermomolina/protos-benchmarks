@@ -12,6 +12,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Added the PERF003-A4d controlled immediate-activation boundary falsification harness to isolate `ProtosActivation.forImmediateMethodInvocation` after A4c eliminated the failing graph at the wider immediate-method boundary, without changing Protos or making a timing claim.
 - Published PERF003-A4c controlled immediate-method boundary evidence under `results/perf003-a4c/`; the retained successful run shows the diagnostic boundary eliminates all 40 control `GraphTooBig` bailouts while preserving exact result `528`, with no Protos change or timing claim.
 - Added the PERF003-A4c controlled immediate-method boundary falsification harness to test the canonical ProtosInvocation method-dispatch prefix after A4b falsified the generic closure-entry path; the experiment changes no Protos source and makes no timing claim.
 - Published PERF003-A4b controlled invoke-entry boundary evidence under `results/perf003-a4b/`, comparing the exact control and diagnostic-only three-argument `ProtosClosureInvoker.invoke` boundary over the fixed 20-iteration TraceCompilation policy without changing Protos or making a timing claim.

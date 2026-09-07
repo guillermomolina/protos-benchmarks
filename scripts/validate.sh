@@ -800,3 +800,56 @@ s='conclusion=SUPPORTED\nreason=immediate-method boundary eliminated GraphTooBig
 assert s.splitlines() == ['conclusion=SUPPORTED','reason=immediate-method boundary eliminated GraphTooBig']
 print('PERF003A_A4C_CONCLUSION_SERIALIZER_FIXTURE: PASS')
 PYA4CCONCLUSION
+
+
+# PERF003-A4d immediate-activation boundary falsification harness
+bash -n scripts/perf003a_a4d_immediate_activation_experiment.sh
+python3 -m py_compile docker/protos-perf003a-a4d/apply_boundary.py
+python3 - <<'PYA4D'
+import json
+from pathlib import Path
+
+cfg=json.loads(Path("config/perf003a-a4d.json").read_text(encoding="utf-8"))
+assert cfg["slice"]=="PERF003-A4d"
+assert cfg["protos_revision"]=="d66841adb0b820047ed079f0bc7d643873f23194"
+assert cfg["diagnostic_iterations"]==20
+assert cfg["workload"]["id"]=="collections/array-reduce"
+assert str(cfg["workload"]["expected"])=="528"
+assert cfg["experimental_variant"]=="immediate-activation-boundary"
+assert cfg["experimental_boundary"]=="ProtosActivation.forImmediateMethodInvocation"
+
+dockerfile=Path("docker/protos-perf003a-a4d/Dockerfile").read_text(encoding="utf-8")
+assert "control|immediate-activation-boundary" in dockerfile
+assert 'if [ "$DIAGNOSTIC_VARIANT" = immediate-activation-boundary ]; then' in dockerfile
+
+patch=Path("docker/protos-perf003a-a4d/apply_boundary.py").read_text(encoding="utf-8")
+assert "ProtosActivation.java" in patch
+assert "forImmediateMethodInvocation" in patch
+assert "@com.oracle.truffle.api.CompilerDirectives.TruffleBoundary" in patch
+
+runner=Path("scripts/perf003a_a4d_immediate_activation_experiment.sh").read_text(encoding="utf-8")
+for required in (
+    "os.sched_getaffinity(0)",
+    "TraceCompilation=true",
+    "ProtosActivation.java",
+    "forImmediateMethodInvocation",
+    "A4D_HYPOTHESIS",
+    "PROTOS_REPOSITORY_CHANGED: NO",
+):
+    assert required in runner, required
+assert "Cpus_allowed_list" not in runner
+print("PERF003A_A4D_STATIC_VALIDATION: PASS")
+PYA4D
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    docker/protos-perf003a-a4d/Dockerfile \
+    docker/protos-perf003a-a4d/apply_boundary.py \
+    scripts/perf003a_a4d_immediate_activation_experiment.sh
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+printf 'PERF003A_A4D_LICENSE_CHECK: PASS\n'

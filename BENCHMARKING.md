@@ -273,6 +273,24 @@ proposed production boundary or a timing claim.
 
 The retained A4c comparison is published under `results/perf003-a4c/`. It contains raw control and boundary TraceCompilation streams, exact correctness outputs, runtime/Docker identity, and an independently recomputed comparison summary. Publication recovery reused the successful retained run and did not rerun the experiment.
 
+## PERF003-A4d immediate-activation boundary experiment
+
+PERF003-A4c established that a diagnostic-only boundary at
+`ProtosClosureInvoker.invokeImmediateMethod` eliminates all 40 deterministic
+`GraphTooBig` bailouts while preserving `collections/array-reduce => 528`.
+A4d narrows that supported result to activation construction alone.
+
+The experimental variant places a diagnostic-only `TruffleBoundary` on
+`ProtosActivation.forImmediateMethodInvocation`. Everything else remains pinned:
+the exact Protos revision, Graal/Truffle runtime, stack, CPU-affinity policy,
+workload, correctness result, and 20-iteration TraceCompilation policy.
+
+If this narrower boundary materially reduces or eliminates the bailout, activation
+construction is a causal graph-growth owner. If it does not, the remaining
+A4c-specific contribution lies elsewhere in immediate-method preparation. This
+is falsification instrumentation only; it is not a production boundary or timing
+claim.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

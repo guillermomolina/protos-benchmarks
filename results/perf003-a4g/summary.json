@@ -1,0 +1,66 @@
+{
+  "a4g2_revision": "de74bc4d16ec4f5b1d1c404c57bdff9a1b9408ff",
+  "boundary": {
+    "graph_shapes": [],
+    "graph_too_big": 0,
+    "opt_done": 336,
+    "opt_failed": 0
+  },
+  "control": {
+    "graph_shapes": [
+      {
+        "graph_size": 150026,
+        "limit": 150000,
+        "node_count": 50681
+      }
+    ],
+    "graph_too_big": 40,
+    "opt_done": 316,
+    "opt_failed": 40
+  },
+  "diagnostic_iterations": 20,
+  "diagnostic_transform": "extract-immediate-method-preparation-unit",
+  "evidence_class": "controlled_immediate_method_preparation_unit_boundary_falsification",
+  "execution_base": "7c701e767f7f676b3af7f78fa99ecc93dafc4410",
+  "expected_result": "528",
+  "experimental_boundaries": [
+    "ProtosClosureInvoker.prepareImmediateMethodActivation",
+    "ProtosClosureInvoker.invokePrepared"
+  ],
+  "experimental_variant": "immediate-preparation-unit-boundary",
+  "harness_revision": "7c701e767f7f676b3af7f78fa99ecc93dafc4410",
+  "host_evidence": {
+    "architecture": "host-arch.txt",
+    "boundary_image": "boundary-image.json",
+    "boundary_java_version": "boundary-java-version.txt",
+    "control_image": "control-image.json",
+    "control_java_version": "control-java-version.txt",
+    "cpu": "host-cpu.txt",
+    "docker_version": "docker-version.txt",
+    "environment": "environment.txt",
+    "uname": "host-uname.txt"
+  },
+  "hypothesis": "SUPPORTED",
+  "interpretation": "A positive result localizes material residual graph growth to the immediate-method preparation unit as a whole. The diagnostic helper and TruffleBoundary annotations are falsification instrumentation and are not automatically production changes.",
+  "perf_item": "PERF003",
+  "prediction": "With the supported invokePrepared boundary retained, if the extracted immediate-method preparation unit collectively owns the residual graph growth left by A4a, the preparation-unit diagnostic variant should reduce the A4a residual diagnostics and may eliminate GraphTooBig while preserving result 528.",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "protos_repository_changed": false,
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "reason": "immediate-preparation boundary eliminated the A4a residual GraphTooBig",
+  "reference_variant": {
+    "graph_shapes": [
+      {
+        "graph_size": 150001,
+        "limit": 150000,
+        "node_count": 48153
+      }
+    ],
+    "graph_too_big": 40,
+    "source": "PERF003-A4a"
+  },
+  "schema_version": 1,
+  "slice": "PERF003-A4g",
+  "timing_evidence": false,
+  "workload": "collections/array-reduce"
+}

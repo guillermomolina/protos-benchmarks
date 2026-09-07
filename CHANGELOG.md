@@ -13,6 +13,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Published PERF003-A4g immediate-method preparation-unit evidence under `results/perf003-a4g/`: control `50681:150026:150000` / `GraphTooBig=40`, boundary `NONE` / `GraphTooBig=0`, conclusion `SUPPORTED`; no timing claim and no canonical Protos change.
 - Added PERF003-A4g2 Docker/Truffle smoke harness for the published immediate-method preparation transform; it validates the two diagnostic boundaries, optimizing runtime, and exact result `528` without running TraceCompilation.
 - Added PERF003-A4g1 source-transform validation for extracting the exact immediate-method preparation prefix into a diagnostic helper while preserving the public-entry null checks and statement order; no real experiment is run.
 - Added PERF003-A4f one-shot residual replay-activation falsification, retaining the supported `invokePrepared` boundary and isolating `ProtosEvaluatorContinuation.invocationActivation` against the published A4a residual reference, with smoke, real TraceCompilation evidence, validation and publication in one launcher.

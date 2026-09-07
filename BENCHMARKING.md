@@ -327,6 +327,8 @@ It does not build the Docker experiment and does not execute TraceCompilation.
 
 A4g2 adds the Docker/Truffle smoke harness for this transform. It verifies both diagnostic boundaries inside the built image, requires an optimizing `HotSpotTruffleRuntime`, and checks `collections/array-reduce => 528`. TraceCompilation remains deferred to A4g3.
 
+The retained A4g comparison is published under `results/perf003-a4g/`. The exact A4a residual reference is `48153:150001:150000` with `GraphTooBig=40`; the control reproduced `50681:150026:150000` with `GraphTooBig=40`, and the preparation-unit variant produced `NONE` with `GraphTooBig=0`. The independently cross-checked conclusion is `SUPPORTED`: immediate-preparation boundary eliminated the A4a residual GraphTooBig. This remains non-timing causal evidence and does not by itself authorize a production boundary or semantic/runtime change.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

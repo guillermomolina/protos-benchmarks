@@ -6,7 +6,8 @@
   "protos_implementation_version": "0.2.180-SNAPSHOT",
   "workload": {
     "id": "collections/array-reduce",
-    "expected": "528"
+    "expected": "528",
+    "protos": "protos/benchmarks/collections/array-reduce.protos"
   },
   "diagnostic_transform": "extract-immediate-method-preparation-unit",
   "experimental_boundaries": [
@@ -17,7 +18,16 @@
     "source": "PERF003-A4a",
     "graph_too_big": 40,
     "graph_shapes": [
-      {"node_count": 48153, "graph_size": 150001, "limit": 150000}
+      {
+        "node_count": 48153,
+        "graph_size": 150001,
+        "limit": 150000
+      }
     ]
-  }
+  },
+  "build_base": "maven:3.9.9-eclipse-temurin-21",
+  "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+  "truffle_runtime_version": "24.0.0",
+  "protos_stack": "128m",
+  "experimental_variant": "immediate-preparation-unit-boundary"
 }

@@ -985,3 +985,20 @@ for required in (
     assert required in patch, required
 print('PERF003A_A4G1_STATIC_VALIDATION: PASS')
 PYA4G1
+
+# PERF003-A4g2 smoke harness.
+bash -n scripts/perf003a_a4g_preparation_smoke.sh
+python3 - <<'PYA4G2'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4g.json").read_text())
+assert cfg["experimental_variant"]=="immediate-preparation-unit-boundary"
+assert cfg["workload"]["protos"]=="protos/benchmarks/collections/array-reduce.protos"
+d=Path("docker/protos-perf003a-a4g/Dockerfile").read_text()
+assert "control|immediate-preparation-unit-boundary" in d
+assert "MeasurementDriver.java" not in d
+r=Path("scripts/perf003a_a4g_preparation_smoke.sh").read_text()
+for x in ("os.sched_getaffinity(0)","HotSpotTruffleRuntime","prepareImmediateMethodActivation(","private static Object invokePrepared(","REAL_20_ITERATION_EXPERIMENT_EXECUTED: NO"):
+    assert x in r,x
+print("PERF003A_A4G2_STATIC_VALIDATION: PASS")
+PYA4G2

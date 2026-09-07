@@ -324,6 +324,9 @@ at `invokeImmediateMethod`.
 
 A4g1 validates and publishes only this source transform plus its exact fixture.
 It does not build the Docker experiment and does not execute TraceCompilation.
+
+A4g2 adds the Docker/Truffle smoke harness for this transform. It verifies both diagnostic boundaries inside the built image, requires an optimizing `HotSpotTruffleRuntime`, and checks `collections/array-reduce => 528`. TraceCompilation remains deferred to A4g3.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

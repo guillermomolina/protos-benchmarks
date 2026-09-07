@@ -402,6 +402,71 @@ for path in docker/igv-analyzer/Dockerfile scripts/igv_analyzer.sh; do
 done
 printf 'IGV_ANALYZER_LICENSE_CHECK: PASS\n'
 
+bash -n docker/igv-analyzer/bgv-summary
+bash -n scripts/perf003a_structural_compact.sh
+python3 - <<'PYIGVCOMPACT'
+from pathlib import Path
+
+dockerfile=Path("docker/igv-analyzer/Dockerfile").read_text(encoding="utf-8")
+for required in (
+    "CompactBGVSummary.java",
+    "/opt/igv-compact/classes",
+    "/usr/local/bin/bgv-summary",
+):
+    assert required in dockerfile, required
+
+wrapper=Path("scripts/igv_analyzer.sh").read_text(encoding="utf-8")
+assert "summarize <input.bgv> <output.ndjson> [term...]" in wrapper
+assert "--entrypoint /usr/local/bin/bgv-summary" in wrapper
+
+compact=Path("scripts/perf003a_structural_compact.sh").read_text(encoding="utf-8")
+for required in (
+    "igv_compact",
+    "summary.ndjson",
+    "complete.marker",
+    "PERF003A_COMPACT_RESERVE_BYTES",
+    "FULL_JSON_MATERIALIZED: NO",
+    "BGV_RECAPTURED: NO",
+    "STRUCTURAL_EXECUTION_REPEATED: NO",
+    "--status",
+):
+    assert required in compact, required
+for forbidden in (
+    "MeasurementDriver",
+    "DiagnosticEval",
+    "-Djdk.graal.Dump=",
+    "perf003a_structural_summary.py",
+):
+    assert forbidden not in compact, forbidden
+
+java=Path("docker/igv-analyzer/CompactBGVSummary.java").read_text(encoding="utf-8")
+for required in (
+    "DigestInputStream",
+    "BinaryReader",
+    "LocationStackFrame",
+    "kind\\\":\\\"graph",
+    "kind\\\":\\\"term",
+):
+    assert required in java, required
+
+makefile=Path("Makefile").read_text(encoding="utf-8")
+assert "perf003a-structural-compact:" in makefile
+print("PERF003A_COMPACT_STATIC_VALIDATION: PASS")
+PYIGVCOMPACT
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    docker/igv-analyzer/CompactBGVSummary.java \
+    docker/igv-analyzer/bgv-summary \
+    scripts/perf003a_structural_compact.sh
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+printf 'PERF003A_COMPACT_LICENSE_CHECK: PASS\n'
+
 # PERF003-A external compilability diagnostic
 bash -n scripts/perf003a_diagnostic.sh
 python3 - <<'PY'

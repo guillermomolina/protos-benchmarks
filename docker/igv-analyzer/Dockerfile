@@ -73,8 +73,19 @@ RUN python3 /tmp/patch_json_exporter.py \
        test -f /opt/igv-jsonexporter/classes/org/graalvm/visualizer/JSONExporter.class; \
        printf '%s\n' "$CP" >/opt/igv-jsonexporter/classpath
 
+COPY docker/igv-analyzer/CompactBGVSummary.java /tmp/CompactBGVSummary.java
+RUN set -eux; \
+    CP="$(cat /opt/igv-jsonexporter/classpath)"; \
+    mkdir -p /opt/igv-compact/classes; \
+    javac -cp "/opt/igv-jsonexporter/classes:${CP}" \
+      -d /opt/igv-compact/classes \
+      /tmp/CompactBGVSummary.java; \
+    test -f /opt/igv-compact/classes/com/guillermomolina/protos/benchmarks/igv/CompactBGVSummary.class; \
+    rm -f /tmp/CompactBGVSummary.java
+
 COPY docker/igv-analyzer/bgv2json /usr/local/bin/bgv2json
-RUN chmod 0755 /usr/local/bin/bgv2json \
+COPY docker/igv-analyzer/bgv-summary /usr/local/bin/bgv-summary
+RUN chmod 0755 /usr/local/bin/bgv2json /usr/local/bin/bgv-summary \
     && /usr/local/bin/bgv2json --help | grep -q 'mx igv-json'
 
 WORKDIR /work

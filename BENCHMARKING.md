@@ -192,6 +192,18 @@ would exhaust the filesystem. `--status` reports completion and storage state
 without starting Docker. Compact attribution/final evidence remains a later
 summary/publication phase rather than part of the resume path.
 
+When full JSON materialization is not practical because the captured BGV set is
+larger than available storage, `make perf003a-structural-compact
+WORK=<existing-run-dir>` uses the same pinned IGV parser but retains only compact
+per-BGV NDJSON evidence. For each accepted graph it records dump identity,
+graph type/name and node/edge counts; it also records source BGV size/SHA-256 and
+case-sensitive occurrence counts for the configured suspect terms across graph
+identity, node properties/source stacks and edge metadata. This compact mode
+does not materialize the full IGV JSON representation. Its occurrence metric is
+therefore explicitly labelled IGV-object attribution rather than historical
+IGV-JSON textual occurrence. Completed BGV summaries are independently marked
+and resumable.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

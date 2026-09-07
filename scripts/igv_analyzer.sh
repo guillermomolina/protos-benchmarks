@@ -25,6 +25,7 @@ usage() {
 Usage:
   scripts/igv_analyzer.sh build
   scripts/igv_analyzer.sh smoke [sample.bgv]
+  scripts/igv_analyzer.sh summarize <input.bgv> <output.ndjson> [term...]
   scripts/igv_analyzer.sh analyze <bgv2json-args...>
 EOF
 }
@@ -83,6 +84,16 @@ PYJSON
             usage >&2; exit 2
         fi
         echo "IGV_ANALYZER_SMOKE: PASS"
+        ;;
+    summarize)
+        shift
+        [ "$#" -ge 2 ] || { usage >&2; exit 2; }
+        exec "$DOCKER" run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --volume "$PWD:/work" \
+            --workdir /work \
+            --entrypoint /usr/local/bin/bgv-summary \
+            "$IMAGE" "$@"
         ;;
     analyze)
         shift

@@ -601,3 +601,70 @@ for path in scripts/perf003a_structural_finalize_compact.py scripts/perf003a_ver
   grep -qF "$notice" "$path" || exit 1
 done
 printf 'PERF003A_COMPACT_FINALIZER_LICENSE_CHECK: PASS\n'
+
+
+# PERF003-A4a controlled closure-invocation boundary falsification harness
+bash -n scripts/perf003a_a4a_boundary_experiment.sh
+python3 -m py_compile docker/protos-perf003a-a4a/apply_boundary.py
+python3 - <<'PYA4A'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4a.json").read_text(encoding="utf-8"))
+assert cfg["schema_version"] == 1
+assert cfg["perf_item"] == "PERF003"
+assert cfg["slice"] == "PERF003-A4a"
+assert cfg["protos_revision"] == "d66841adb0b820047ed079f0bc7d643873f23194"
+assert cfg["protos_implementation_version"] == "0.2.180-SNAPSHOT"
+assert cfg["workload"]["id"] == "collections/array-reduce"
+assert str(cfg["workload"]["expected"]) == "528"
+assert cfg["diagnostic_iterations"] == 20
+assert cfg["experimental_variant"] == "closure-invoke-boundary"
+assert cfg["experimental_boundary"] == "ProtosClosureInvoker.invokePrepared"
+
+dockerfile=Path("docker/protos-perf003a-a4a/Dockerfile").read_text(encoding="utf-8")
+for required in (
+    "ARG DIAGNOSTIC_VARIANT=control",
+    "closure-invoke-boundary",
+    "python3 /tmp/apply_boundary.py /src",
+    "apt-get install -y --no-install-recommends git ca-certificates python3",
+    "git fetch --depth 1 origin",
+):
+    assert required in dockerfile, required
+
+patch=Path("docker/protos-perf003a-a4a/apply_boundary.py").read_text(encoding="utf-8")
+assert "@com.oracle.truffle.api.CompilerDirectives.TruffleBoundary" in patch
+assert "ProtosClosureInvoker.java" in patch
+assert "invokePrepared" in patch
+
+runner=Path("scripts/perf003a_a4a_boundary_experiment.sh").read_text(encoding="utf-8")
+import re
+assert not re.search(r'local\\s+[^\\n]*prefix=\\$[0-9][^\\n]*\\$\\{prefix\\}', runner)
+assert not re.search(r'local\\s+[^\\n]*image=\\$[0-9][^\\n]*\\$\\{image\\}', runner)
+for required in (
+    "--smoke|--run",
+    "TraceCompilation=true",
+    "EXPERIMENT_PRECONDITION",
+    "IMAGE_BUILD: FAIL",
+    "build stderr tail",
+    "A4A_HYPOTHESIS",
+    "PROTOS_REPOSITORY_CHANGED: NO",
+):
+    assert required in runner, required
+makefile=Path("Makefile").read_text(encoding="utf-8")
+assert "perf003a-a4a-smoke:" in makefile
+assert "perf003a-a4a:" in makefile
+print("PERF003A_A4A_STATIC_VALIDATION: PASS")
+PYA4A
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    docker/protos-perf003a-a4a/Dockerfile \
+    docker/protos-perf003a-a4a/apply_boundary.py \
+    scripts/perf003a_a4a_boundary_experiment.sh
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+printf 'PERF003A_A4A_LICENSE_CHECK: PASS\n'

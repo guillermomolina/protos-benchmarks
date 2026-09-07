@@ -206,6 +206,29 @@ and resumable.
 
 The completed PERF003-A compact structural evidence is published under `results/perf003-a/`. The published corpus is derived from all 316 preserved BGV captures through the compact summaries; raw BGV files remain local and are represented by their extractor-time SHA-256 manifest rather than being rehash-compressed during finalization. Full IGV JSON is not materialized.
 
+## PERF003-A4a controlled closure-invocation boundary experiment
+
+The published PERF003-A structural evidence leaves the residual
+`collections/array-reduce` bailout only 26 graph-size units above Graal's
+150000 limit and attributes substantial graph presence to closure/invocation
+runtime machinery. Presence is not causality, so the next step is a controlled
+falsification experiment rather than another Standard Library source micro-edit.
+
+The A4a harness builds two images from the exact same Protos
+`d66841adb0b820047ed079f0bc7d643873f23194` source revision. The control image is
+unchanged. The experimental image applies `@TruffleBoundary` only to the private
+host helper `ProtosClosureInvoker.invokePrepared` inside the diagnostic image
+before building Protos. Both variants must preserve exact `array-reduce` result
+`528` under the same GraalVM/Truffle 24.0.0 runtime, `-Xss128m`, CPU affinity and
+TraceCompilation policy.
+
+This boundary is diagnostic only. A result that removes or reduces
+`GraphTooBig` supports the hypothesis that expansion through this helper owns a
+material part of the graph, but does not establish that the boundary is an
+acceptable production optimization. A no-change result falsifies this broad
+ownership hypothesis and is retained as useful evidence. No timing claim is
+made.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

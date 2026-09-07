@@ -204,6 +204,8 @@ therefore explicitly labelled IGV-object attribution rather than historical
 IGV-JSON textual occurrence. Completed BGV summaries are independently marked
 and resumable.
 
+The completed PERF003-A compact structural evidence is published under `results/perf003-a/`. The published corpus is derived from all 316 preserved BGV captures through the compact summaries; raw BGV files remain local and are represented by their extractor-time SHA-256 manifest rather than being rehash-compressed during finalization. Full IGV JSON is not materialized.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

@@ -35,7 +35,11 @@ vals={
  'TRUFFLE_VERSION':cfg['truffle_runtime_version'], 'STACK':cfg['protos_stack'],
  'ITERATIONS':str(cfg['diagnostic_iterations']), 'WORKLOAD':cfg['workload']['id'],
  'SOURCE':cfg['workload']['protos'], 'EXPECTED':str(cfg['workload']['expected']),
- 'CONTROL_VARIANT':cfg['control_variant'], 'EXPERIMENTAL_VARIANT':cfg['experimental_variant']}
+ 'CONTROL_VARIANT':cfg['control_variant'], 'EXPERIMENTAL_VARIANT':cfg['experimental_variant'],
+ 'REFERENCE_GRAPH_TOO_BIG':str(cfg['reference_variant']['graph_too_big']),
+ 'REFERENCE_NODE_COUNT':str(cfg['reference_variant']['graph_shapes'][0]['node_count']),
+ 'REFERENCE_GRAPH_SIZE':str(cfg['reference_variant']['graph_shapes'][0]['graph_size']),
+ 'REFERENCE_LIMIT':str(cfg['reference_variant']['graph_shapes'][0]['limit'])}
 for k,v in vals.items(): print(f"{k}={shlex.quote(v)}")
 PYCFG
 )"
@@ -173,22 +177,39 @@ control_graph=$(printf '%s\n' "$control_summary" | sed -n 's/^control_graph_too_
 echo "phase=04 invokePrepared plus dynamic-control boundary TraceCompilation"
 run_trace "$BOUNDARY_IMAGE" boundary
 boundary_summary=$(summarize_trace boundary); printf '%s\n' "$boundary_summary"
-python3 - "$OUT/control-trace.stderr" "$OUT/boundary-trace.stderr" "$OUT/conclusion.txt" <<'PYCON'
+python3 - "$OUT/control-trace.stderr" "$OUT/boundary-trace.stderr" "$OUT/conclusion.txt" \
+  "$REFERENCE_GRAPH_TOO_BIG" "$REFERENCE_NODE_COUNT" "$REFERENCE_GRAPH_SIZE" "$REFERENCE_LIMIT" <<'PYCON'
 import re,sys
-cp,bp,out=sys.argv[1:]
+cp,bp,out,ref_graph,ref_nodes,ref_size,ref_limit=sys.argv[1:]
+ref_graph=int(ref_graph)
+ref_shape=(int(ref_nodes),int(ref_size),int(ref_limit))
+
 def stats(path):
- text=open(path,encoding='utf-8',errors='replace').read(); graph=len(re.findall(r'GraphTooBig',text,re.I))
- shapes=sorted({tuple(map(int,p)) for p in re.findall(r'Node count:\s*(\d+)\.\s*Graph Size:\s*(\d+)\.\s*Limit:\s*(\d+)',text)})
+ text=open(path,encoding='utf-8',errors='replace').read()
+ graph=len(re.findall(r'GraphTooBig',text,re.I))
+ shapes=sorted({tuple(map(int,p)) for p in re.findall(
+     r'Node count:\s*(\d+)\.\s*Graph Size:\s*(\d+)\.\s*Limit:\s*(\d+)',text)})
  return graph,shapes
-cg,cs=stats(cp); bg,bs=stats(bp)
-if cg==0: c,r='INCONCLUSIVE','control did not reproduce GraphTooBig'
-elif bg==0: c,r='SUPPORTED','prepared-plus-dynamic-control boundaries eliminated GraphTooBig'
-elif bg<cg: c,r='SUPPORTED','prepared-plus-dynamic-control boundaries reduced GraphTooBig occurrences'
-elif cs and bs and max(x[1] for x in bs)<max(x[1] for x in cs): c,r='SUPPORTED','prepared-plus-dynamic-control boundaries reduced failing graph size'
-elif cg==bg and cs==bs: c,r='NOT_SUPPORTED','prepared-plus-dynamic-control boundaries left GraphTooBig count and graph shape unchanged'
-else: c,r='INCONCLUSIVE','prepared-plus-dynamic-control boundaries changed diagnostics without a directional result'
+
+cg,cs=stats(cp)
+bg,bs=stats(bp)
+
+if cg==0:
+ c,r='INCONCLUSIVE','control did not reproduce GraphTooBig'
+elif bg==0:
+ c,r='SUPPORTED','dynamic-control boundary eliminated the A4a residual GraphTooBig'
+elif bg<ref_graph:
+ c,r='SUPPORTED','dynamic-control boundary reduced GraphTooBig occurrences relative to A4a'
+elif bs and max(x[1] for x in bs)<ref_shape[1]:
+ c,r='SUPPORTED','dynamic-control boundary reduced failing graph size relative to A4a'
+elif bg==ref_graph and bs==[ref_shape]:
+ c,r='NOT_SUPPORTED','dynamic-control boundary left the A4a residual graph unchanged'
+else:
+ c,r='INCONCLUSIVE','dynamic-control boundary changed the A4a residual diagnostics without a directional result'
+
 open(out,'w',encoding='utf-8').write(f'conclusion={c}\nreason={r}\n')
-print(f'A4E_HYPOTHESIS={c}'); print(f'A4E_REASON={r}')
+print(f'A4E_HYPOTHESIS={c}')
+print(f'A4E_REASON={r}')
 PYCON
 docker image inspect "$CONTROL_IMAGE" >"$OUT/control-image.json"
 docker image inspect "$BOUNDARY_IMAGE" >"$OUT/boundary-image.json"

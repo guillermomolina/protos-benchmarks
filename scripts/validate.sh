@@ -874,3 +874,55 @@ for path in docker/protos-perf003a-a4e/Dockerfile docker/protos-perf003a-a4e/app
   grep -qF "$notice" "$path" || { echo "missing APL notice: $path" >&2; exit 1; }
 done
 printf 'PERF003A_A4E_LICENSE_CHECK: PASS\n'
+
+
+# PERF003-A4e residual conclusion-policy regression fixture.
+python3 - <<'PYA4ERESIDUAL'
+import json
+from pathlib import Path
+
+cfg=json.loads(Path("config/perf003a-a4e.json").read_text(encoding="utf-8"))
+ref=cfg["reference_variant"]
+assert ref == {
+    "source":"PERF003-A4a",
+    "boundary":"ProtosClosureInvoker.invokePrepared",
+    "graph_too_big":40,
+    "graph_shapes":[{"node_count":48153,"graph_size":150001,"limit":150000}],
+}
+
+runner=Path("scripts/perf003a_a4e_prepared_dynamic_control_experiment.sh").read_text(
+    encoding="utf-8"
+)
+for required in (
+    "REFERENCE_GRAPH_TOO_BIG",
+    "REFERENCE_NODE_COUNT",
+    "REFERENCE_GRAPH_SIZE",
+    "REFERENCE_LIMIT",
+    "dynamic-control boundary eliminated the A4a residual GraphTooBig",
+    "dynamic-control boundary left the A4a residual graph unchanged",
+):
+    assert required in runner, required
+
+ref_graph=40
+ref_shape=(48153,150001,150000)
+
+def classify(control_graph,boundary_graph,boundary_shapes):
+    if control_graph == 0:
+        return "INCONCLUSIVE"
+    if boundary_graph == 0:
+        return "SUPPORTED"
+    if boundary_graph < ref_graph:
+        return "SUPPORTED"
+    if boundary_shapes and max(x[1] for x in boundary_shapes) < ref_shape[1]:
+        return "SUPPORTED"
+    if boundary_graph == ref_graph and boundary_shapes == [ref_shape]:
+        return "NOT_SUPPORTED"
+    return "INCONCLUSIVE"
+
+assert classify(40,0,[]) == "SUPPORTED"
+assert classify(40,40,[ref_shape]) == "NOT_SUPPORTED"
+assert classify(40,40,[(48000,150002,150000)]) == "INCONCLUSIVE"
+assert classify(40,20,[(48000,150001,150000)]) == "SUPPORTED"
+
+print("PERF003A_A4E_RESIDUAL_CONCLUSION_FIXTURE: PASS")
+PYA4ERESIDUAL

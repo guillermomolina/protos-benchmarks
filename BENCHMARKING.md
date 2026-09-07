@@ -301,6 +301,8 @@ A4e therefore preserves the A4a `invokePrepared` boundary and adds exactly one s
 
 The experiment keeps the exact Protos revision, workload, runtime, stack, CPU-affinity policy and correctness result fixed. These boundaries are falsification instrumentation only, not production proposals or timing claims.
 
+The A4e conclusion is evaluated against the retained A4a reference: `40` bailouts at `48153:150001:150000`, not merely against the original control. An unchanged A4a residual is `NOT_SUPPORTED`; elimination or a directional reduction relative to A4a is `SUPPORTED`.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

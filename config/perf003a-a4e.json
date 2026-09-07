@@ -22,5 +22,17 @@
     "ProtosActivation.inheritDynamicControlState"
   ],
   "prediction": "With the already-supported invokePrepared diagnostic boundary retained, if dynamic-control inheritance owns the single residual graph-size unit left by A4a, additionally preventing partial evaluation through ProtosActivation.inheritDynamicControlState should take the deterministic failing graph from 150001 to at most 150000 and eliminate GraphTooBig while preserving result 528.",
-  "interpretation": "A positive result attributes the A4a residual threshold contribution to dynamic-control inheritance on the immediate-method path. It does not by itself justify a production TruffleBoundary or semantic/runtime change."
+  "interpretation": "A positive result attributes the A4a residual threshold contribution to dynamic-control inheritance on the immediate-method path. It does not by itself justify a production TruffleBoundary or semantic/runtime change.",
+  "reference_variant": {
+    "source": "PERF003-A4a",
+    "boundary": "ProtosClosureInvoker.invokePrepared",
+    "graph_too_big": 40,
+    "graph_shapes": [
+      {
+        "node_count": 48153,
+        "graph_size": 150001,
+        "limit": 150000
+      }
+    ]
+  }
 }

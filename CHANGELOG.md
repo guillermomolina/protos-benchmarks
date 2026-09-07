@@ -10,6 +10,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Added the PERF003-A compact evidence finalizer/verifier core, with synthetic validation and explicit guards against raw-BGV rehashing/compression or full IGV JSON materialization.
 - Added a storage-bounded PERF003-A compact IGV extraction path for large BGV captures. It parses each BGV with the pinned IGV data model, records BGV SHA-256, graph identities, node/edge counts and configured suspect-term occurrences, and resumes per BGV without materializing the full JSON export.
 - Added resumable PERF003-A IGV export for already-captured structural BGV evidence. The resume path processes BGVs sequentially into isolated per-source directories, uses atomic completion markers, cleans only incomplete item output, guards free disk space before each export, and never rebuilds or re-executes the Protos structural capture.
 - Added `PERF003-A` structural Truffle/Graal diagnostics for the residual `array-reduce` `GraphTooBig` investigation. The diagnostic captures `Truffle:2` BGV dumps plus method/node expansion evidence from the pinned JDK 22 runtime, converts BGV with the separately isolated JDK 17 IGV analyzer, and publishes bounded attribution summaries without changing Protos semantics or treating occurrence counts as causal proof.

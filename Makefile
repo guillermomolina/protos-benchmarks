@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact
+.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize
 
 validate:
 	./scripts/validate.sh
@@ -55,3 +55,11 @@ perf003a-structural-resume:
 perf003a-structural-compact:
 	@test -n "$(WORK)" || { echo "usage: make perf003a-structural-compact WORK=<existing-run-dir>" >&2; exit 2; }
 	./scripts/perf003a_structural_compact.sh "$(WORK)"
+
+perf003a-structural-finalize:
+	@test -n "$(WORK)" || { echo "WORK is required" >&2; exit 2; }
+	@test -n "$(OUT)" || { echo "OUT is required" >&2; exit 2; }
+	@test -n "$(CAPTURE_HARNESS_REVISION)" || { echo "CAPTURE_HARNESS_REVISION is required" >&2; exit 2; }
+	@test -n "$(COMPACT_EXTRACTOR_REVISION)" || { echo "COMPACT_EXTRACTOR_REVISION is required" >&2; exit 2; }
+	@test -n "$(FINALIZATION_BASE)" || { echo "FINALIZATION_BASE is required" >&2; exit 2; }
+	python3 scripts/perf003a_structural_finalize_compact.py --config config/perf003a-structural.json --run-dir "$(WORK)" --output-dir "$(OUT)" --capture-harness-revision "$(CAPTURE_HARNESS_REVISION)" --compact-extractor-revision "$(COMPACT_EXTRACTOR_REVISION)" --finalization-base "$(FINALIZATION_BASE)"

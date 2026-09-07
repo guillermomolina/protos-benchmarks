@@ -582,3 +582,22 @@ for path in scripts/perf003a_structural.sh scripts/perf003a_structural_resume.sh
         exit 1
     }
 done
+
+# PERF003-A compact evidence finalizer
+python3 -m py_compile scripts/perf003a_structural_finalize_compact.py scripts/perf003a_verify_compact_evidence.py
+python3 - <<'PYFINAL'
+from pathlib import Path
+f=Path('scripts/perf003a_structural_finalize_compact.py').read_text(encoding='utf-8')
+for x in ('RAW_BGV_REHASHED = False','RAW_BGV_COMPRESSED = False','FULL_JSON_MATERIALIZED = False','structural_truffle_graal_compact_attribution'):
+    assert x in f, x
+v=Path('scripts/perf003a_verify_compact_evidence.py').read_text(encoding='utf-8')
+assert 'raw_bgv_rehashed_during_finalization' in v
+assert 'full_igv_json_materialized' in v
+assert 'perf003a-structural-finalize:' in Path('Makefile').read_text(encoding='utf-8')
+print('PERF003A_COMPACT_FINALIZER_STATIC_VALIDATION: PASS')
+PYFINAL
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in scripts/perf003a_structural_finalize_compact.py scripts/perf003a_verify_compact_evidence.py; do
+  grep -qF "$notice" "$path" || exit 1
+done
+printf 'PERF003A_COMPACT_FINALIZER_LICENSE_CHECK: PASS\n'

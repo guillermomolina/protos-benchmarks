@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural
+.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume
 
 validate:
 	./scripts/validate.sh
@@ -47,3 +47,7 @@ perf003a-diagnostic:
 
 perf003a-structural:
 	./scripts/perf003a_structural.sh .work/perf003-a-structural
+
+perf003a-structural-resume:
+	@test -n "$(WORK)" || { echo "usage: make perf003a-structural-resume WORK=<existing-run-dir>" >&2; exit 2; }
+	./scripts/perf003a_structural_resume.sh "$(WORK)"

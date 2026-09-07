@@ -443,6 +443,7 @@ grep -qF "$notice" scripts/perf003a_diagnostic.sh || {
 
 # PERF003-A structural Graal/IGV diagnostic
 bash -n scripts/perf003a_structural.sh
+bash -n scripts/perf003a_structural_resume.sh
 python3 -m py_compile scripts/perf003a_structural_summary.py
 python3 - <<'PY'
 import json
@@ -478,11 +479,39 @@ for required in (
     "--network none",
 ):
     assert required in script, required
+resume=Path("scripts/perf003a_structural_resume.sh").read_text(encoding="utf-8")
+for required in (
+    "igv_json",
+    "complete.marker",
+    "PERF003A_RESUME_RESERVE_BYTES",
+    "PERF003A_RESUME_ESTIMATE_MULTIPLIER",
+    "IGV_RESUME_DISK_GUARD: BLOCKED",
+    'scripts/igv_analyzer.sh" analyze',
+    "STRUCTURAL_EXECUTION_REPEATED: NO",
+    "BGV_RECAPTURED: NO",
+    "--status",
+):
+    assert required in resume, required
+for forbidden in (
+    "MeasurementDriver",
+    "DiagnosticEval",
+    "docker/protos-perf001e/Dockerfile",
+    "perf003a_structural_summary.py",
+    "-Djdk.graal.Dump=",
+):
+    assert forbidden not in resume, forbidden
+
+makefile=Path("Makefile").read_text(encoding="utf-8")
+assert "perf003a-structural-resume:" in makefile
+assert 'WORK=<existing-run-dir>' in makefile
+assert 'perf003a_structural_resume.sh "$(WORK)"' in makefile
+
 print("PERF003A_STRUCTURAL_STATIC_VALIDATION: PASS")
+print("PERF003A_RESUME_STATIC_VALIDATION: PASS")
 PY
 
 notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
-for path in scripts/perf003a_structural.sh scripts/perf003a_structural_summary.py; do
+for path in scripts/perf003a_structural.sh scripts/perf003a_structural_resume.sh scripts/perf003a_structural_summary.py; do
     grep -qF "$notice" "$path" || {
         echo "missing APL notice: $path" >&2
         exit 1

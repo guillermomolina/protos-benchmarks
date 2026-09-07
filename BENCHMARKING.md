@@ -181,6 +181,17 @@ when their aggregate compressed size is at most 80 MiB; otherwise the published
 manifest retains their exact hashes/sizes and reports the bounded-retention
 decision.
 
+If BGV capture has already completed but IGV export is interrupted,
+`make perf003a-structural-resume WORK=<existing-run-dir>` resumes from those
+existing BGV files without rebuilding or executing Protos and without capturing
+new BGVs. Each source BGV receives an isolated `igv_json/<key>/` export directory
+and an atomic completion marker, so an interrupted item can be retried without
+invalidating completed items. A conservative per-BGV free-space guard stops the
+resume before export when estimated JSON growth plus the configured reserve
+would exhaust the filesystem. `--status` reports completion and storage state
+without starting Docker. Compact attribution/final evidence remains a later
+summary/publication phase rather than part of the resume path.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

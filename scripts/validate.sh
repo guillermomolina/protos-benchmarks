@@ -996,9 +996,61 @@ assert cfg["experimental_variant"]=="immediate-preparation-unit-boundary"
 assert cfg["workload"]["protos"]=="protos/benchmarks/collections/array-reduce.protos"
 d=Path("docker/protos-perf003a-a4g/Dockerfile").read_text()
 assert "control|immediate-preparation-unit-boundary" in d
-assert "MeasurementDriver.java" not in d
+assert "COPY DiagnosticEval.java /tmp/DiagnosticEval.java" in d
+assert "COPY RuntimeProbe.java /tmp/RuntimeProbe.java" in d
 r=Path("scripts/perf003a_a4g_preparation_smoke.sh").read_text()
+assert "TraceCompilation=true" not in r
 for x in ("os.sched_getaffinity(0)","HotSpotTruffleRuntime","prepareImmediateMethodActivation(","private static Object invokePrepared(","REAL_20_ITERATION_EXPERIMENT_EXECUTED: NO"):
     assert x in r,x
 print("PERF003A_A4G2_STATIC_VALIDATION: PASS")
 PYA4G2
+
+
+# PERF003-A4g3 real diagnostic experiment harness.
+bash -n scripts/perf003a_a4g_experiment.sh
+python3 - <<'PYA4G3'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4g.json").read_text(encoding="utf-8"))
+assert cfg["slice"] == "PERF003-A4g"
+assert cfg["diagnostic_iterations"] == 20
+assert cfg["control_variant"] == "control"
+assert cfg["experimental_variant"] == "immediate-preparation-unit-boundary"
+assert cfg["workload"]["id"] == "collections/array-reduce"
+assert str(cfg["workload"]["expected"]) == "528"
+assert cfg["reference_variant"] == {
+    "source":"PERF003-A4a",
+    "graph_too_big":40,
+    "graph_shapes":[{"node_count":48153,"graph_size":150001,"limit":150000}],
+}
+
+dockerfile=Path("docker/protos-perf003a-a4g/Dockerfile").read_text(encoding="utf-8")
+assert "COPY MeasurementDriver.java /tmp/MeasurementDriver.java" in dockerfile
+assert "/tmp/DiagnosticEval.java /tmp/RuntimeProbe.java /tmp/MeasurementDriver.java" in dockerfile
+
+runner=Path("scripts/perf003a_a4g_experiment.sh").read_text(encoding="utf-8")
+for required in (
+    "HARNESS_REVISION=$(git -C \"$ROOT\" rev-parse HEAD)",
+    "os.sched_getaffinity(0)",
+    "TraceCompilation=true",
+    "MeasurementDriver",
+    "A4G_HYPOTHESIS",
+    "REFERENCE_GRAPH_SIZE",
+    "TIMING_EVIDENCE: NO",
+):
+    assert required in runner, required
+print("PERF003A_A4G3_HARNESS_VALIDATION: PASS")
+PYA4G3
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    docker/protos-perf003a-a4g/Dockerfile \
+    docker/protos-perf003a-a4g/MeasurementDriver.java \
+    scripts/perf003a_a4g_experiment.sh
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+printf 'PERF003A_A4G3_LICENSE_CHECK: PASS\n'

@@ -29,5 +29,10 @@
   "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
   "truffle_runtime_version": "24.0.0",
   "protos_stack": "128m",
-  "experimental_variant": "immediate-preparation-unit-boundary"
+  "experimental_variant": "immediate-preparation-unit-boundary",
+  "diagnostic_iterations": 20,
+  "control_variant": "control",
+  "evidence_class": "controlled_immediate_method_preparation_unit_boundary_falsification",
+  "prediction": "With the supported invokePrepared boundary retained, if the extracted immediate-method preparation unit collectively owns the residual graph growth left by A4a, the preparation-unit diagnostic variant should reduce the A4a residual diagnostics and may eliminate GraphTooBig while preserving result 528.",
+  "interpretation": "A positive result localizes material residual graph growth to the immediate-method preparation unit as a whole. The diagnostic helper and TruffleBoundary annotations are falsification instrumentation and are not automatically production changes."
 }

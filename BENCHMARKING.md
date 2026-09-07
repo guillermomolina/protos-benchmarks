@@ -231,6 +231,24 @@ made.
 
 The retained A4a comparison is published under `results/perf003-a4a/`. It contains both raw TraceCompilation stderr streams, correctness outputs, runtime-class checks, exact Docker image metadata, the machine-readable comparison summary, and the harness-produced hypothesis conclusion.
 
+## PERF003-A4b closure invoke-entry boundary experiment
+
+PERF003-A4a showed that a diagnostic-only boundary at
+`ProtosClosureInvoker.invokePrepared` reduces the deterministic failing
+`array-reduce` graph from 150026 to 150001 while preserving exact result `528`.
+That leaves one graph-size unit above the 150000 limit.
+
+A4b tests the immediately wider host boundary:
+`ProtosClosureInvoker.invoke(ProtosClosureValue,List,ProtosActivation)`. This is
+the ordinary Closure receiver path used by standard `Object.call`; it includes
+closure activation preparation before entering `invokePrepared`.
+
+The prediction is intentionally narrow: if the remaining graph-size unit is
+owned by this activation/preparation prefix, the wider diagnostic boundary
+should take the failing graph below 150000 and eliminate `GraphTooBig`. The
+boundary remains falsification instrumentation only and is not a production
+optimization proposal. No timing claim is made.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

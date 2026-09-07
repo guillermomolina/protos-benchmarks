@@ -668,3 +668,56 @@ do
     }
 done
 printf 'PERF003A_A4A_LICENSE_CHECK: PASS\n'
+
+
+# PERF003-A4b closure invoke-entry boundary falsification harness
+bash -n scripts/perf003a_a4b_invoke_entry_experiment.sh
+python3 -m py_compile docker/protos-perf003a-a4b/apply_boundary.py
+python3 - <<'PYA4B'
+import json, re
+from pathlib import Path
+cfg=json.loads(Path('config/perf003a-a4b.json').read_text(encoding='utf-8'))
+assert cfg['schema_version'] == 1
+assert cfg['perf_item'] == 'PERF003'
+assert cfg['slice'] == 'PERF003-A4b'
+assert cfg['protos_revision'] == 'd66841adb0b820047ed079f0bc7d643873f23194'
+assert cfg['protos_implementation_version'] == '0.2.180-SNAPSHOT'
+assert cfg['workload']['id'] == 'collections/array-reduce'
+assert str(cfg['workload']['expected']) == '528'
+assert cfg['diagnostic_iterations'] == 20
+assert cfg['experimental_variant'] == 'closure-invoke-entry-boundary'
+assert cfg['experimental_boundary'] == 'ProtosClosureInvoker.invoke(ProtosClosureValue,List,ProtosActivation)'
+
+dockerfile=Path('docker/protos-perf003a-a4b/Dockerfile').read_text(encoding='utf-8')
+for required in (
+    'closure-invoke-entry-boundary',
+    'python3 /tmp/apply_boundary.py /src',
+    'apt-get install -y --no-install-recommends git ca-certificates python3',
+    'git fetch --depth 1 origin',
+):
+    assert required in dockerfile, required
+patch=Path('docker/protos-perf003a-a4b/apply_boundary.py').read_text(encoding='utf-8')
+assert '@com.oracle.truffle.api.CompilerDirectives.TruffleBoundary' in patch
+assert 'ProtosActivation caller' in patch
+runner=Path('scripts/perf003a_a4b_invoke_entry_experiment.sh').read_text(encoding='utf-8')
+assert not re.search(r'local\s+[^\n]*prefix=\$[0-9][^\n]*\$\{prefix\}', runner)
+for required in ('--smoke|--run','TraceCompilation=true','EXPERIMENT_PRECONDITION','A4B_HYPOTHESIS','PROTOS_REPOSITORY_CHANGED: NO'):
+    assert required in runner, required
+makefile=Path('Makefile').read_text(encoding='utf-8')
+assert 'perf003a-a4b-smoke:' in makefile
+assert 'perf003a-a4b:' in makefile
+print('PERF003A_A4B_STATIC_VALIDATION: PASS')
+PYA4B
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    docker/protos-perf003a-a4b/Dockerfile \
+    docker/protos-perf003a-a4b/apply_boundary.py \
+    scripts/perf003a_a4b_invoke_entry_experiment.sh
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+printf 'PERF003A_A4B_LICENSE_CHECK: PASS\n'

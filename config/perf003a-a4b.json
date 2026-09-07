@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF003",
+  "slice": "PERF003-A4b",
+  "evidence_class": "controlled_closure_invoke_entry_boundary_falsification",
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "build_base": "maven:3.9.9-eclipse-temurin-21",
+  "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+  "truffle_runtime_version": "24.0.0",
+  "protos_stack": "128m",
+  "diagnostic_iterations": 20,
+  "workload": {
+    "id": "collections/array-reduce",
+    "protos": "protos/benchmarks/collections/array-reduce.protos",
+    "expected": "528"
+  },
+  "control_variant": "control",
+  "experimental_variant": "closure-invoke-entry-boundary",
+  "experimental_boundary": "ProtosClosureInvoker.invoke(ProtosClosureValue,List,ProtosActivation)",
+  "prediction": "If the remaining graph-size unit after the invokePrepared boundary is owned by closure activation/preparation before invokePrepared, preventing partial evaluation through the complete three-argument invoke entry should reduce the failing graph below 150000 and eliminate GraphTooBig while preserving result 528.",
+  "interpretation": "A positive result attributes additional graph growth to the closure invocation entry path including activation preparation. It does not by itself justify publishing a TruffleBoundary in Protos."
+}

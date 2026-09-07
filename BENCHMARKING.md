@@ -313,6 +313,17 @@ A4f retains the supported `invokePrepared` boundary and adds only a boundary at 
 
 The exact Protos revision, workload, result, runtime, stack, affinity and 20-iteration TraceCompilation policy remain fixed. A4f is controlled falsification instrumentation only; it is not a production boundary or timing claim.
 
+
+## PERF003-A4g immediate-method preparation-unit transform
+
+A4g stops isolating existing helper methods one by one. Its diagnostic transform
+extracts the existing `invokeImmediateMethod` activation-preparation prefix into
+`prepareImmediateMethodActivation(...)` without changing statement order or
+observable behavior. The five public-entry `Objects.requireNonNull` checks remain
+at `invokeImmediateMethod`.
+
+A4g1 validates and publishes only this source transform plus its exact fixture.
+It does not build the Docker experiment and does not execute TraceCompilation.
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

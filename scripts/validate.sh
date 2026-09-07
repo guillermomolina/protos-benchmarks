@@ -955,3 +955,33 @@ for path in docker/protos-perf003a-a4f/Dockerfile docker/protos-perf003a-a4f/app
   grep -qF "$notice" "$path" || { echo "missing APL notice: $path" >&2; exit 1; }
 done
 printf 'PERF003A_A4F_LICENSE_CHECK: PASS\n'
+
+
+# PERF003-A4g1 diagnostic source-transform validation.
+python3 -m py_compile docker/protos-perf003a-a4g/apply_boundary.py
+python3 -m json.tool config/perf003a-a4g.json >/dev/null
+python3 - <<'PYA4G1'
+import json
+from pathlib import Path
+cfg=json.loads(Path('config/perf003a-a4g.json').read_text(encoding='utf-8'))
+assert cfg['slice']=='PERF003-A4g'
+assert cfg['protos_revision']=='d66841adb0b820047ed079f0bc7d643873f23194'
+assert cfg['diagnostic_transform']=='extract-immediate-method-preparation-unit'
+assert cfg['experimental_boundaries']==[
+    'ProtosClosureInvoker.prepareImmediateMethodActivation',
+    'ProtosClosureInvoker.invokePrepared',
+]
+assert cfg['reference_variant']['graph_shapes']==[
+    {'node_count':48153,'graph_size':150001,'limit':150000}
+]
+patch=Path('docker/protos-perf003a-a4g/apply_boundary.py').read_text(encoding='utf-8')
+for required in (
+    'prepareImmediateMethodActivation',
+    'A4G1_PREPARATION_REFACTOR: PASS',
+    'Objects.requireNonNull(caller, "caller");',
+    'task.evaluatorContinuation().invocationActivation(activationFactory)',
+    'activation.attachTask(task);',
+):
+    assert required in patch, required
+print('PERF003A_A4G1_STATIC_VALIDATION: PASS')
+PYA4G1

@@ -786,3 +786,17 @@ matches = pattern.findall(sample)
 assert matches == [("50681", "150026", "150000")], matches
 print("PERF003A_A4C_TRACE_PARSER_FIXTURE: PASS")
 PYA4CPARSER
+
+
+# PERF003-A4c conclusion serialization regression fixture.
+python3 - <<'PYA4CCONCLUSION'
+from pathlib import Path
+runner=Path('scripts/perf003a_a4c_immediate_method_experiment.sh').read_text(encoding='utf-8')
+bad="open(out,'w',encoding='utf-8').write(f'conclusion={c}\\\\nreason={r}\\\\n')"
+good="open(out,'w',encoding='utf-8').write(f'conclusion={c}\\nreason={r}\\n')"
+assert bad not in runner
+assert runner.count(good) == 1
+s='conclusion=SUPPORTED\nreason=immediate-method boundary eliminated GraphTooBig\n'
+assert s.splitlines() == ['conclusion=SUPPORTED','reason=immediate-method boundary eliminated GraphTooBig']
+print('PERF003A_A4C_CONCLUSION_SERIALIZER_FIXTURE: PASS')
+PYA4CCONCLUSION

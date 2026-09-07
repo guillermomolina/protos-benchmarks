@@ -1,0 +1,43 @@
+{
+  "boundary": {
+    "graph_shapes": [],
+    "graph_too_big": 0,
+    "opt_done": 336,
+    "opt_failed": 0
+  },
+  "control": {
+    "graph_shapes": [
+      {
+        "graph_size": 150026,
+        "limit": 150000,
+        "node_count": 50681
+      }
+    ],
+    "graph_too_big": 40,
+    "opt_done": 316,
+    "opt_failed": 40
+  },
+  "diagnostic_iterations": 20,
+  "evidence_class": "controlled_immediate_method_boundary_falsification",
+  "execution_base": "970ce2d2e1aadc445e41598a61577d1001300f4f",
+  "expected_result": "528",
+  "experimental_boundary": "ProtosClosureInvoker.invokeImmediateMethod",
+  "hypothesis": "SUPPORTED",
+  "interpretation": "A positive result attributes the additional causal prefix to immediate-method activation/preparation on the ProtosInvocation method-dispatch path. It does not by itself justify publishing a TruffleBoundary in Protos.",
+  "perf_item": "PERF003",
+  "prediction": "If the residual graph growth reaches invokePrepared through ordinary method dispatch, preventing partial evaluation through invokeImmediateMethod should materially reduce the failing graph and may take it below the 150000 limit while preserving the exact result 528.",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "protos_repository_changed": false,
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "publication_recovery": {
+    "malformed_conclusion_file_reconstructed_from_raw_evidence": true,
+    "reran_experiment": false,
+    "reused_retained_stage": true
+  },
+  "reason": "immediate-method boundary eliminated GraphTooBig",
+  "schema_version": 1,
+  "slice": "PERF003-A4c",
+  "timing_evidence": false,
+  "validated_harness_revision": "970ce2d2e1aadc445e41598a61577d1001300f4f",
+  "workload": "collections/array-reduce"
+}

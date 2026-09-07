@@ -271,6 +271,8 @@ boundary should materially reduce the failing graph and may eliminate
 `GraphTooBig`. This remains controlled falsification instrumentation, not a
 proposed production boundary or a timing claim.
 
+The retained A4c comparison is published under `results/perf003-a4c/`. It contains raw control and boundary TraceCompilation streams, exact correctness outputs, runtime/Docker identity, and an independently recomputed comparison summary. Publication recovery reused the successful retained run and did not rerun the experiment.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

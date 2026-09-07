@@ -186,7 +186,7 @@ elif bg<cg: c,r='SUPPORTED','immediate-method boundary reduced GraphTooBig occur
 elif cs and bs and max(x[1] for x in bs)<max(x[1] for x in cs): c,r='SUPPORTED','immediate-method boundary reduced failing graph size'
 elif cg==bg and cs==bs: c,r='NOT_SUPPORTED','immediate-method boundary left GraphTooBig count and graph shape unchanged'
 else: c,r='INCONCLUSIVE','immediate-method boundary changed diagnostics without a directional result'
-open(out,'w',encoding='utf-8').write(f'conclusion={c}\\nreason={r}\\n')
+open(out,'w',encoding='utf-8').write(f'conclusion={c}\nreason={r}\n')
 print(f'A4C_HYPOTHESIS={c}'); print(f'A4C_REASON={r}')
 PYCON
 docker image inspect "$CONTROL_IMAGE" >"$OUT/control-image.json"

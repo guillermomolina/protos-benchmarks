@@ -6,11 +6,13 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Fixed
 
+- Fixed PERF003-A4c conclusion serialization so `conclusion.txt` contains real newline-delimited records instead of literal `\n` text; add a deterministic serialization fixture.
 - Fixed PERF003-A4c TraceCompilation graph-shape parsing so `Node count`, `Graph Size`, and `Limit` are extracted with real whitespace/digit regex classes instead of doubly escaped literals; add a deterministic fixture for the known `50681:150026:150000` diagnostic shape.
 - Recovered the pinned Graal 24 IGV `bgv2json` path used by PERF003-A: the analyzer now compiles the pinned `JSONExporter` against the complete built IGV distribution, bounds physical JSON filenames with a deterministic full-identity fingerprint, preserves graph metadata in JSON, and validates the path with a real BGV-to-JSON smoke test.
 
 ### Added
 
+- Published PERF003-A4c controlled immediate-method boundary evidence under `results/perf003-a4c/`; the retained successful run shows the diagnostic boundary eliminates all 40 control `GraphTooBig` bailouts while preserving exact result `528`, with no Protos change or timing claim.
 - Added the PERF003-A4c controlled immediate-method boundary falsification harness to test the canonical ProtosInvocation method-dispatch prefix after A4b falsified the generic closure-entry path; the experiment changes no Protos source and makes no timing claim.
 - Published PERF003-A4b controlled invoke-entry boundary evidence under `results/perf003-a4b/`, comparing the exact control and diagnostic-only three-argument `ProtosClosureInvoker.invoke` boundary over the fixed 20-iteration TraceCompilation policy without changing Protos or making a timing claim.
 - Added the PERF003-A4b controlled invoke-entry boundary falsification harness, testing whether activation/preparation before `invokePrepared` owns the final graph-size unit left by A4a without changing Protos or making a timing claim.

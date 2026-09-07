@@ -124,6 +124,32 @@ Runtime analysis uses `--network none`. The current working directory is mounted
 at `/work` so input paths and any explicitly requested output paths remain host
 artifacts rather than being trapped inside the diagnostic container.
 
+## PERF003-A external compilability diagnostic
+
+`PERF003-A` uses a non-timing external diagnostic gate against exact Protos
+revision `d66841adb0b820047ed079f0bc7d643873f23194`
+(`0.2.180-SNAPSHOT`). The diagnostic reuses the already-published Protos
+diagnostic runtime image construction from PERF001-E but changes no historical
+PERF001 evidence.
+
+The two targeted canonical workloads are `collections/array-reduce` and
+`collections/array-sort`. Each must first produce its exact observable result in
+both interpreter and optimizing-Truffle execution. A separate
+`TraceCompilation=true` run then retains raw compiler output and counts
+successful compilations, failed compilations, `GraphTooBig`,
+`FrameWithoutBoxing`, deep-inlining, `StackOverflowError`, and
+`BootstrapMethodError` findings.
+
+The PERF003-A external closure gate is zero optimizing failures and zero known
+bailout/runtime failure classes for both workloads. A remaining bailout does
+not invalidate the run when observable execution is correct: the negative result
+is retained as diagnostic evidence and PERF003-A remains open.
+
+If the gate remains blocked, subsequent investigation must use structural
+attribution (including the separately isolated IGV analyzer where useful) rather
+than continuing threshold-driven source micro-edits without a causal hypothesis.
+This diagnostic publishes no timing claim.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

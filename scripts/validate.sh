@@ -391,3 +391,42 @@ for path in docker/igv-analyzer/Dockerfile scripts/igv_analyzer.sh; do
     }
 done
 printf 'IGV_ANALYZER_LICENSE_CHECK: PASS\n'
+
+# PERF003-A external compilability diagnostic
+bash -n scripts/perf003a_diagnostic.sh
+python3 - <<'PY'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a.json").read_text(encoding="utf-8"))
+assert cfg["schema_version"] == 1
+assert cfg["perf_item"] == "PERF003"
+assert cfg["slice"] == "PERF003-A"
+assert cfg["classification"] == "collection_algorithm_truffle_compilability"
+assert cfg["protos_revision"] == "d66841adb0b820047ed079f0bc7d643873f23194"
+assert cfg["protos_implementation_version"] == "0.2.180-SNAPSHOT"
+assert cfg["build_base"] == "maven:3.9.9-eclipse-temurin-21"
+assert cfg["graal_base"] == "ghcr.io/graalvm/jdk-community:22.0.0"
+assert cfg["truffle_runtime_version"] == "24.0.0"
+assert cfg["protos_stack"] == "128m"
+assert cfg["diagnostic_iterations"] == 20
+assert [(w["id"], w["expected"]) for w in cfg["workloads"]] == [
+    ("collections/array-reduce", "528"),
+    ("collections/array-sort", "321601"),
+]
+script=Path("scripts/perf003a_diagnostic.sh").read_text(encoding="utf-8")
+for required in (
+    "--network none",
+    '--cpuset-cpus "$CPUSET"',
+    "-Dpolyglot.engine.Compilation=false",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "PERF003A_EXTERNAL_GATE:",
+    "docker/protos-perf001e/Dockerfile",
+):
+    assert required in script
+print("PERF003A_STATIC_VALIDATION: PASS")
+PY
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+grep -qF "$notice" scripts/perf003a_diagnostic.sh || {
+  echo "missing APL notice: scripts/perf003a_diagnostic.sh" >&2
+  exit 1
+}

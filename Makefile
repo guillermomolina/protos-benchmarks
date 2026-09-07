@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke
+.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic
 
 validate:
 	./scripts/validate.sh
@@ -41,3 +41,6 @@ igv-analyzer-build:
 
 igv-analyzer-smoke:
 	./scripts/igv_analyzer.sh smoke
+
+perf003a-diagnostic:
+	./scripts/perf003a_diagnostic.sh .work/perf003-a

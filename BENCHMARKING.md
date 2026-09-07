@@ -335,6 +335,8 @@ A4g eliminated all 40 deterministic GraphTooBig bailouts when the complete immed
 
 A4h2 adds the Docker/Truffle smoke harness for this production-shaped transform. The built image retains exactly one diagnostic boundary at `invokePrepared`, preserves a direct helper with no task/replay machinery, runs on `HotSpotTruffleRuntime`, and returns exact result `528`. TraceCompilation remains deferred to A4h3.
 
+A4h3 executes the retained 20-iteration controlled diagnostic from exact harness revision `041a6b821387494e6299c93334d72ecd8b3ce494`. Control reproduces `GraphTooBig=40` with shape `50681:150026:150000`. The production-shaped sync/task split variant records `GraphTooBig=40` with shape `48823:150002:150000` while preserving result `528`. Hypothesis: **INCONCLUSIVE** — sync/task split changed the A4a residual diagnostics without a directional result. This remains non-timing diagnostic evidence and does not itself publish a canonical Protos implementation change or a production Truffle boundary.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

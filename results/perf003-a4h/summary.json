@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF003",
+  "slice": "PERF003-A4h",
+  "evidence_class": "production_shaped_immediate_method_sync_task_split_falsification",
+  "harness_revision": "041a6b821387494e6299c93334d72ecd8b3ce494",
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "workload": "collections/array-reduce",
+  "expected_result": "528",
+  "diagnostic_iterations": 20,
+  "timing_evidence": false,
+  "protos_repository_changed": false,
+  "reference": {
+    "source": "PERF003-A4a",
+    "graph_too_big": 40,
+    "graph_shapes": [
+      {
+        "node_count": 48153,
+        "graph_size": 150001,
+        "limit": 150000
+      }
+    ]
+  },
+  "control": {
+    "opt_done": 316,
+    "opt_failed": 40,
+    "graph_too_big": 40,
+    "graph_shapes": [
+      {
+        "node_count": 50681,
+        "graph_size": 150026,
+        "limit": 150000
+      }
+    ]
+  },
+  "split": {
+    "opt_done": 316,
+    "opt_failed": 40,
+    "graph_too_big": 40,
+    "graph_shapes": [
+      {
+        "node_count": 48823,
+        "graph_size": 150002,
+        "limit": 150000
+      }
+    ]
+  },
+  "control_reproduction": true,
+  "hypothesis": "INCONCLUSIVE",
+  "reason": "sync/task split changed the A4a residual diagnostics without a directional result"
+}

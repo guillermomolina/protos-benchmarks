@@ -1,0 +1,61 @@
+{
+  "a4e1b_revision": "fe249e414ceb1766605b98f5943b612eac90e2ac",
+  "boundary": {
+    "graph_shapes": [
+      {
+        "graph_size": 150037,
+        "limit": 150000,
+        "node_count": 50290
+      }
+    ],
+    "graph_too_big": 40,
+    "opt_done": 316,
+    "opt_failed": 40
+  },
+  "control": {
+    "graph_shapes": [
+      {
+        "graph_size": 150026,
+        "limit": 150000,
+        "node_count": 50681
+      }
+    ],
+    "graph_too_big": 40,
+    "opt_done": 316,
+    "opt_failed": 40
+  },
+  "diagnostic_iterations": 20,
+  "evidence_class": "controlled_prepared_plus_dynamic_control_boundary_falsification",
+  "execution_base": "fe249e414ceb1766605b98f5943b612eac90e2ac",
+  "expected_result": "528",
+  "experimental_boundaries": [
+    "ProtosClosureInvoker.invokePrepared",
+    "ProtosActivation.inheritDynamicControlState"
+  ],
+  "experimental_variant": "prepared-dynamic-control-boundary",
+  "harness_revision": "fe249e414ceb1766605b98f5943b612eac90e2ac",
+  "hypothesis": "INCONCLUSIVE",
+  "interpretation": "A positive result attributes the A4a residual threshold contribution to dynamic-control inheritance on the immediate-method path. It does not by itself justify a production TruffleBoundary or semantic/runtime change.",
+  "perf_item": "PERF003",
+  "prediction": "With the already-supported invokePrepared diagnostic boundary retained, if dynamic-control inheritance owns the single residual graph-size unit left by A4a, additionally preventing partial evaluation through ProtosActivation.inheritDynamicControlState should take the deterministic failing graph from 150001 to at most 150000 and eliminate GraphTooBig while preserving result 528.",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "protos_repository_changed": false,
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "reason": "dynamic-control boundary changed the A4a residual diagnostics without a directional result",
+  "reference_variant": {
+    "boundary": "ProtosClosureInvoker.invokePrepared",
+    "graph_shapes": [
+      {
+        "graph_size": 150001,
+        "limit": 150000,
+        "node_count": 48153
+      }
+    ],
+    "graph_too_big": 40,
+    "source": "PERF003-A4a"
+  },
+  "schema_version": 1,
+  "slice": "PERF003-A4e",
+  "timing_evidence": false,
+  "workload": "collections/array-reduce"
+}

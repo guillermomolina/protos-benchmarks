@@ -303,6 +303,8 @@ The experiment keeps the exact Protos revision, workload, runtime, stack, CPU-af
 
 The A4e conclusion is evaluated against the retained A4a reference: `40` bailouts at `48153:150001:150000`, not merely against the original control. An unchanged A4a residual is `NOT_SUPPORTED`; elimination or a directional reduction relative to A4a is `SUPPORTED`.
 
+The retained A4e comparison is published under `results/perf003-a4e/`. It contains raw control and boundary TraceCompilation streams, exact correctness outputs, runtime-class checks, Docker image metadata, the retained A4a reference, and an independently recomputed residual conclusion.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

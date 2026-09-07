@@ -249,6 +249,8 @@ should take the failing graph below 150000 and eliminate `GraphTooBig`. The
 boundary remains falsification instrumentation only and is not a production
 optimization proposal. No timing claim is made.
 
+The retained A4b comparison is published under `results/perf003-a4b/`. It contains the raw control/boundary TraceCompilation streams, exact correctness outputs, runtime-class checks, Docker image metadata, the machine-readable comparison summary, and the harness-produced hypothesis conclusion.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

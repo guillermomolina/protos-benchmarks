@@ -333,6 +333,8 @@ The retained A4g comparison is published under `results/perf003-a4g/`. The exact
 
 A4g eliminated all 40 deterministic GraphTooBig bailouts when the complete immediate-method preparation unit and invokePrepared were bounded. A4h tests a production-shaped alternative before any canonical Protos change: direct synchronous activation preparation is physically separated from task/replay preparation. The direct helper has no Supplier, evaluator-continuation, task attachment, or task-state branch. Neither preparation helper is bounded; only the already-characterized invokePrepared diagnostic boundary is retained. A4h1 publishes only this exact transform and fixture.
 
+A4h2 adds the Docker/Truffle smoke harness for this production-shaped transform. The built image retains exactly one diagnostic boundary at `invokePrepared`, preserves a direct helper with no task/replay machinery, runs on `HotSpotTruffleRuntime`, and returns exact result `528`. TraceCompilation remains deferred to A4h3.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

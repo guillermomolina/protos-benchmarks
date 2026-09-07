@@ -1069,3 +1069,22 @@ for x in ("prepareImmediateMethodDirectActivation","prepareImmediateMethodTaskAc
     assert x in p,x
 print("PERF003A_A4H1_STATIC_VALIDATION: PASS")
 PYA4H1
+
+# PERF003-A4h2 Docker/Truffle smoke harness.
+bash -n scripts/perf003a_a4h_sync_task_split_smoke.sh
+python3 - <<'PYA4H2'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4h.json").read_text())
+assert cfg["experimental_variant"]=="sync-task-split"
+assert cfg["workload"]["protos"]=="protos/benchmarks/collections/array-reduce.protos"
+d=Path("docker/protos-perf003a-a4h/Dockerfile").read_text()
+assert "control|sync-task-split" in d
+assert "MeasurementDriver.java" not in d
+assert "apply_variant.py" in d
+r=Path("scripts/perf003a_a4h_sync_task_split_smoke.sh").read_text()
+for x in ("os.sched_getaffinity(0)","HotSpotTruffleRuntime","prepareImmediateMethodDirectActivation(","prepareImmediateMethodTaskActivation(","DIRECT_PATH_TASK_MACHINERY: NONE","REAL_20_ITERATION_EXPERIMENT_EXECUTED: NO"):
+    assert x in r,x
+assert "TraceCompilation=true" not in r
+print("PERF003A_A4H2_STATIC_VALIDATION: PASS")
+PYA4H2

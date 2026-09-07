@@ -305,6 +305,14 @@ The A4e conclusion is evaluated against the retained A4a reference: `40` bailout
 
 The retained A4e comparison is published under `results/perf003-a4e/`. It contains raw control and boundary TraceCompilation streams, exact correctness outputs, runtime-class checks, Docker image metadata, the retained A4a reference, and an independently recomputed residual conclusion.
 
+## PERF003-A4f residual replay-activation boundary experiment
+
+A4a left a deterministic residual at `48153:150001:150000` after isolating `ProtosClosureInvoker.invokePrepared`. A4d showed that activation construction alone does not explain that residual, and A4e showed that additionally bounding `ProtosActivation.inheritDynamicControlState` changes the graph non-directionally to `50290:150037:150000`.
+
+A4f retains the supported `invokePrepared` boundary and adds only a boundary at `ProtosEvaluatorContinuation.invocationActivation`. This isolates replay-stable task activation management, including the Supplier-consuming continuation path, from the residual A4a graph.
+
+The exact Protos revision, workload, result, runtime, stack, affinity and 20-iteration TraceCompilation policy remain fixed. A4f is controlled falsification instrumentation only; it is not a production boundary or timing claim.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

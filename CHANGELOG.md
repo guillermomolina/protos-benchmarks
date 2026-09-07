@@ -13,6 +13,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Added PERF003-A4f one-shot residual replay-activation falsification, retaining the supported `invokePrepared` boundary and isolating `ProtosEvaluatorContinuation.invocationActivation` against the published A4a residual reference, with smoke, real TraceCompilation evidence, validation and publication in one launcher.
 - Published PERF003-A4e residual dynamic-control falsification evidence under `results/perf003-a4e/`, comparing the dual `invokePrepared` + `inheritDynamicControlState` diagnostic variant against the retained A4a residual reference under the fixed 20-iteration policy, without changing Protos or making a timing claim.
 - Added the PERF003-A4e residual falsification harness, retaining the supported `invokePrepared` boundary and adding only `ProtosActivation.inheritDynamicControlState` to test the final graph-size unit left by A4a without changing Protos or making a timing claim.
 - Published PERF003-A4d controlled immediate-activation boundary evidence under `results/perf003-a4d/`, isolating `ProtosActivation.forImmediateMethodInvocation` with the fixed 20-iteration TraceCompilation policy, without changing Protos or making a timing claim.

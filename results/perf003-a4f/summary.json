@@ -1,0 +1,60 @@
+{
+  "boundary": {
+    "graph_shapes": [
+      {
+        "graph_size": 150071,
+        "limit": 150000,
+        "node_count": 47863
+      }
+    ],
+    "graph_too_big": 40,
+    "opt_done": 316,
+    "opt_failed": 40
+  },
+  "control": {
+    "graph_shapes": [
+      {
+        "graph_size": 150026,
+        "limit": 150000,
+        "node_count": 50681
+      }
+    ],
+    "graph_too_big": 40,
+    "opt_done": 316,
+    "opt_failed": 40
+  },
+  "diagnostic_iterations": 20,
+  "evidence_class": "controlled_prepared_plus_replay_activation_boundary_falsification",
+  "execution_base": "61ae21c8432471364637acbadd9f2554ca0f44ba",
+  "expected_result": "528",
+  "experimental_boundaries": [
+    "ProtosClosureInvoker.invokePrepared",
+    "ProtosEvaluatorContinuation.invocationActivation"
+  ],
+  "experimental_variant": "prepared-replay-activation-boundary",
+  "harness_revision": "61ae21c8432471364637acbadd9f2554ca0f44ba",
+  "hypothesis": "INCONCLUSIVE",
+  "interpretation": "A positive result attributes material residual graph growth to replay-stable task activation management in the immediate-method preparation path. It does not by itself justify a production TruffleBoundary or semantic/runtime change.",
+  "perf_item": "PERF003",
+  "prediction": "With the supported invokePrepared boundary retained, if task replay activation management contributes the residual graph-size unit left by A4a, additionally preventing partial evaluation through ProtosEvaluatorContinuation.invocationActivation should reduce the A4a residual diagnostics and may eliminate GraphTooBig while preserving result 528.",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "protos_repository_changed": false,
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "reason": "replay-activation boundary changed the A4a residual diagnostics without a directional result",
+  "reference_variant": {
+    "boundary": "ProtosClosureInvoker.invokePrepared",
+    "graph_shapes": [
+      {
+        "graph_size": 150001,
+        "limit": 150000,
+        "node_count": 48153
+      }
+    ],
+    "graph_too_big": 40,
+    "source": "PERF003-A4a"
+  },
+  "schema_version": 1,
+  "slice": "PERF003-A4f",
+  "timing_evidence": false,
+  "workload": "collections/array-reduce"
+}

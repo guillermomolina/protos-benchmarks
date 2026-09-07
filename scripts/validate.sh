@@ -926,3 +926,32 @@ assert classify(40,20,[(48000,150001,150000)]) == "SUPPORTED"
 
 print("PERF003A_A4E_RESIDUAL_CONCLUSION_FIXTURE: PASS")
 PYA4ERESIDUAL
+
+
+# PERF003-A4f residual replay-activation falsification.
+bash -n scripts/perf003a_a4f_prepared_replay_activation_experiment.sh
+python3 -m py_compile docker/protos-perf003a-a4f/apply_boundary.py
+python3 - <<'PYA4F'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4f.json").read_text(encoding="utf-8"))
+assert cfg["slice"] == "PERF003-A4f"
+assert cfg["protos_revision"] == "d66841adb0b820047ed079f0bc7d643873f23194"
+assert cfg["diagnostic_iterations"] == 20
+assert cfg["workload"]["id"] == "collections/array-reduce"
+assert str(cfg["workload"]["expected"]) == "528"
+assert cfg["experimental_variant"] == "prepared-replay-activation-boundary"
+assert cfg["experimental_boundaries"] == ["ProtosClosureInvoker.invokePrepared","ProtosEvaluatorContinuation.invocationActivation"]
+assert cfg["reference_variant"]["graph_too_big"] == 40
+assert cfg["reference_variant"]["graph_shapes"] == [{"node_count":48153,"graph_size":150001,"limit":150000}]
+runner=Path("scripts/perf003a_a4f_prepared_replay_activation_experiment.sh").read_text(encoding="utf-8")
+for required in ("os.sched_getaffinity(0)","TraceCompilation=true","ProtosEvaluatorContinuation.java","invocationActivation(Supplier<ProtosActivation> factory)","A4F_HYPOTHESIS","REFERENCE_GRAPH_SIZE","PROTOS_REPOSITORY_CHANGED: NO"):
+    assert required in runner, required
+assert "Cpus_allowed_list" not in runner
+print("PERF003A_A4F_STATIC_VALIDATION: PASS")
+PYA4F
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in docker/protos-perf003a-a4f/Dockerfile docker/protos-perf003a-a4f/apply_boundary.py scripts/perf003a_a4f_prepared_replay_activation_experiment.sh; do
+  grep -qF "$notice" "$path" || { echo "missing APL notice: $path" >&2; exit 1; }
+done
+printf 'PERF003A_A4F_LICENSE_CHECK: PASS\n'

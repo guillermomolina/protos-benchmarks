@@ -291,6 +291,8 @@ A4c-specific contribution lies elsewhere in immediate-method preparation. This
 is falsification instrumentation only; it is not a production boundary or timing
 claim.
 
+The retained A4d comparison is published under `results/perf003-a4d/`. It contains the raw control/boundary TraceCompilation streams, exact correctness outputs, runtime-class checks, Docker image metadata, the machine-readable comparison summary, and the harness-produced hypothesis conclusion.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

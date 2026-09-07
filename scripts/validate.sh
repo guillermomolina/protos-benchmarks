@@ -1080,11 +1080,67 @@ assert cfg["experimental_variant"]=="sync-task-split"
 assert cfg["workload"]["protos"]=="protos/benchmarks/collections/array-reduce.protos"
 d=Path("docker/protos-perf003a-a4h/Dockerfile").read_text()
 assert "control|sync-task-split" in d
-assert "MeasurementDriver.java" not in d
+assert "COPY DiagnosticEval.java /tmp/DiagnosticEval.java" in d
+assert "COPY RuntimeProbe.java /tmp/RuntimeProbe.java" in d
 assert "apply_variant.py" in d
 r=Path("scripts/perf003a_a4h_sync_task_split_smoke.sh").read_text()
+assert "TraceCompilation=true" not in r
 for x in ("os.sched_getaffinity(0)","HotSpotTruffleRuntime","prepareImmediateMethodDirectActivation(","prepareImmediateMethodTaskActivation(","DIRECT_PATH_TASK_MACHINERY: NONE","REAL_20_ITERATION_EXPERIMENT_EXECUTED: NO"):
     assert x in r,x
 assert "TraceCompilation=true" not in r
 print("PERF003A_A4H2_STATIC_VALIDATION: PASS")
 PYA4H2
+
+
+# PERF003-A4h3 experiment harness.
+bash -n scripts/perf003a_a4h_experiment.sh
+python3 - <<'PYA4H3'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4h.json").read_text())
+assert cfg["diagnostic_iterations"]==20
+assert cfg["control_variant"]=="control"
+assert cfg["experimental_variant"]=="sync-task-split"
+assert cfg["experimental_boundaries"]==["ProtosClosureInvoker.invokePrepared"]
+assert cfg["reference_variant"]["graph_too_big"]==40
+assert cfg["reference_variant"]["graph_shapes"]==[
+    {"node_count":48153,"graph_size":150001,"limit":150000}
+]
+
+docker=Path("docker/protos-perf003a-a4h/Dockerfile").read_text()
+assert "COPY MeasurementDriver.java /tmp/MeasurementDriver.java" in docker
+assert "/tmp/DiagnosticEval.java /tmp/RuntimeProbe.java /tmp/MeasurementDriver.java" in docker
+assert "control|sync-task-split" in docker
+
+driver=Path("docker/protos-perf003a-a4h/MeasurementDriver.java").read_text()
+assert "package com.guillermomolina.protos.cli;" in driver
+assert "WARMUP\\t" in driver
+assert "STEADY\\t" in driver
+
+runner=Path("scripts/perf003a_a4h_experiment.sh").read_text()
+for required in (
+    "com.guillermomolina.protos.cli.RuntimeProbe",
+    "com.guillermomolina.protos.cli.DiagnosticEval",
+    "com.guillermomolina.protos.cli.MeasurementDriver",
+    "TraceCompilation=true",
+    "os.sched_getaffinity(0)",
+    "DIRECT_PATH_TASK_MACHINERY: NONE",
+    "CONTROL_REPRODUCTION",
+    "A4H_HYPOTHESIS",
+    "sync/task split eliminated the A4a residual GraphTooBig",
+):
+    assert required in runner, required
+assert "com.guillermolina.protos" not in runner
+print("PERF003A_A4H3_HARNESS_VALIDATION: PASS")
+PYA4H3
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in   docker/protos-perf003a-a4h/MeasurementDriver.java   scripts/perf003a_a4h_experiment.sh
+do
+  grep -qF "$notice" "$path" || {
+    echo "missing APL notice: $path" >&2
+    exit 1
+  }
+done
+printf 'PERF003A_A4H3_LICENSE_CHECK: PASS
+'

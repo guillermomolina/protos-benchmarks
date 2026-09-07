@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git ca-certific
 COPY truffle-runtime-pom.xml /tmp/truffle-runtime-pom.xml
 COPY DiagnosticEval.java /tmp/DiagnosticEval.java
 COPY RuntimeProbe.java /tmp/RuntimeProbe.java
+COPY MeasurementDriver.java /tmp/MeasurementDriver.java
 COPY apply_variant.py /tmp/apply_variant.py
 
 RUN git init /src \
@@ -55,7 +56,7 @@ RUN mkdir -p /out/truffle-runtime \
 
 RUN mkdir -p /out/diag \
     && javac -cp '/out/protos.jar:/out/truffle-runtime/*' -d /out/diag \
-       /tmp/DiagnosticEval.java /tmp/RuntimeProbe.java
+       /tmp/DiagnosticEval.java /tmp/RuntimeProbe.java /tmp/MeasurementDriver.java
 
 FROM ${GRAAL_BASE}
 ARG DIAGNOSTIC_VARIANT=control

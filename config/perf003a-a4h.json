@@ -28,5 +28,9 @@
   "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
   "truffle_runtime_version": "24.0.0",
   "protos_stack": "128m",
-  "experimental_variant": "sync-task-split"
+  "experimental_variant": "sync-task-split",
+  "diagnostic_iterations": 20,
+  "control_variant": "control",
+  "prediction": "If mixing synchronous preparation with task/replay preparation owns the A4a residual, physically separating those paths while retaining only the known invokePrepared diagnostic boundary should reduce or eliminate GraphTooBig.",
+  "interpretation": "A supported result justifies architecture review of a canonical sync/task preparation split; it does not by itself justify publishing a TruffleBoundary."
 }

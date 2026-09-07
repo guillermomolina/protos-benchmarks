@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize perf003a-a4a-smoke perf003a-a4a perf003a-a4b-smoke perf003a-a4b perf003a-a4c-smoke perf003a-a4c perf003a-a4d-smoke perf003a-a4d perf003a-a4e-smoke perf003a-a4e perf003a-a4f-smoke perf003a-a4f perf003a-a4g-smoke perf003a-a4g perf003a-a4h-smoke
+.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize perf003a-a4a-smoke perf003a-a4a perf003a-a4b-smoke perf003a-a4b perf003a-a4c-smoke perf003a-a4c perf003a-a4d-smoke perf003a-a4d perf003a-a4e-smoke perf003a-a4e perf003a-a4f-smoke perf003a-a4f perf003a-a4g-smoke perf003a-a4g perf003a-a4h-smoke perf003a-a4h
 
 validate:
 	./scripts/validate.sh
@@ -123,3 +123,7 @@ perf003a-a4g:
 perf003a-a4h-smoke:
 	@test -n "$(OUT)" || { echo "usage: make perf003a-a4h-smoke OUT=<output-dir>" >&2; exit 2; }
 	./scripts/perf003a_a4h_sync_task_split_smoke.sh "$(OUT)"
+
+perf003a-a4h:
+	@test -n "$(OUT)" || { echo "usage: make perf003a-a4h OUT=<output-dir>" >&2; exit 2; }
+	./scripts/perf003a_a4h_experiment.sh "$(OUT)"

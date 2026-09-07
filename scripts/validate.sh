@@ -1054,3 +1054,18 @@ do
     }
 done
 printf 'PERF003A_A4G3_LICENSE_CHECK: PASS\n'
+
+python3 -m py_compile docker/protos-perf003a-a4h/apply_variant.py
+python3 -m json.tool config/perf003a-a4h.json >/dev/null
+python3 - <<'PYA4H1'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4h.json").read_text())
+assert cfg["slice"]=="PERF003-A4h"
+assert cfg["diagnostic_transform"]=="split-immediate-method-sync-task-preparation"
+assert cfg["experimental_boundaries"]==["ProtosClosureInvoker.invokePrepared"]
+p=Path("docker/protos-perf003a-a4h/apply_variant.py").read_text()
+for x in ("prepareImmediateMethodDirectActivation","prepareImmediateMethodTaskActivation","A4H1_SYNC_TASK_SPLIT: PASS","A4H1_DIRECT_PATH_TASK_MACHINERY: NONE"):
+    assert x in p,x
+print("PERF003A_A4H1_STATIC_VALIDATION: PASS")
+PYA4H1

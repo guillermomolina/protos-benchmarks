@@ -329,6 +329,10 @@ A4g2 adds the Docker/Truffle smoke harness for this transform. It verifies both 
 
 The retained A4g comparison is published under `results/perf003-a4g/`. The exact A4a residual reference is `48153:150001:150000` with `GraphTooBig=40`; the control reproduced `50681:150026:150000` with `GraphTooBig=40`, and the preparation-unit variant produced `NONE` with `GraphTooBig=0`. The independently cross-checked conclusion is `SUPPORTED`: immediate-preparation boundary eliminated the A4a residual GraphTooBig. This remains non-timing causal evidence and does not by itself authorize a production boundary or semantic/runtime change.
 
+## PERF003-A4h production-shaped sync/task split transform
+
+A4g eliminated all 40 deterministic GraphTooBig bailouts when the complete immediate-method preparation unit and invokePrepared were bounded. A4h tests a production-shaped alternative before any canonical Protos change: direct synchronous activation preparation is physically separated from task/replay preparation. The direct helper has no Supplier, evaluator-continuation, task attachment, or task-state branch. Neither preparation helper is bounded; only the already-characterized invokePrepared diagnostic boundary is retained. A4h1 publishes only this exact transform and fixture.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

@@ -1,0 +1,30 @@
+PERF003-A4a controlled closure invocation boundary experiment
+mode=--run
+HARNESS_REVISION=da44b819f29aa26ba7d88a7ba1d3751b1d80b592
+PROTOS_REVISION=d66841adb0b820047ed079f0bc7d643873f23194
+PROTOS_VERSION=0.2.180-SNAPSHOT
+WORKLOAD=collections/array-reduce
+EXPECTED=528
+CPUSET=0
+phase=01 build experimental boundary image
+BOUNDARY_IMAGE_BUILD: PASS
+BOUNDARY_SOURCE_CHECK: PASS
+CORRECTNESS: PASS variant=boundary result=528
+phase=02 build exact control image
+CONTROL_IMAGE_BUILD: PASS
+CORRECTNESS: PASS variant=control result=528
+phase=03 control TraceCompilation
+control_opt_done=316
+control_opt_failed=40
+control_graph_too_big=40
+control_graph_shapes=50681:150026:150000
+phase=04 boundary TraceCompilation
+boundary_opt_done=316
+boundary_opt_failed=40
+boundary_graph_too_big=40
+boundary_graph_shapes=48153:150001:150000
+A4A_HYPOTHESIS=SUPPORTED
+A4A_REASON=boundary reduced failing graph size
+PERF003A_A4A_EXPERIMENT: PASS
+TIMING_EVIDENCE: NO
+PROTOS_REPOSITORY_CHANGED: NO

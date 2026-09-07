@@ -229,6 +229,8 @@ acceptable production optimization. A no-change result falsifies this broad
 ownership hypothesis and is retained as useful evidence. No timing claim is
 made.
 
+The retained A4a comparison is published under `results/perf003-a4a/`. It contains both raw TraceCompilation stderr streams, correctness outputs, runtime-class checks, exact Docker image metadata, the machine-readable comparison summary, and the harness-produced hypothesis conclusion.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

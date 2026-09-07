@@ -10,6 +10,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Published PERF003-A4a controlled closure-invocation boundary falsification evidence under `results/perf003-a4a/`, comparing the exact control and diagnostic-only boundary variants over the fixed 20-iteration TraceCompilation policy without changing Protos or making a timing claim.
 - Added the PERF003-A4a controlled closure-invocation boundary falsification harness. It compares an exact Protos control build with a diagnostic-only `TruffleBoundary` at `ProtosClosureInvoker.invokePrepared`, preserving the same workload/runtime policy and making no production optimization or timing claim.
 - Published the PERF003-A compact structural attribution evidence generated from all 316 preserved BGV captures under `results/perf003-a/`; publication reuses extractor-time BGV SHA-256 values and retains no raw BGV or full IGV JSON.
 - Added the PERF003-A compact evidence finalizer/verifier core, with synthetic validation and explicit guards against raw-BGV rehashing/compression or full IGV JSON materialization.

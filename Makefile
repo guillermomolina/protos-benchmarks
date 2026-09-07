@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize perf003a-a4a-smoke perf003a-a4a perf003a-a4b-smoke perf003a-a4b perf003a-a4c-smoke perf003a-a4c perf003a-a4d-smoke perf003a-a4d
+.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize perf003a-a4a-smoke perf003a-a4a perf003a-a4b-smoke perf003a-a4b perf003a-a4c-smoke perf003a-a4c perf003a-a4d-smoke perf003a-a4d perf003a-a4e-smoke perf003a-a4e
 
 validate:
 	./scripts/validate.sh
@@ -95,3 +95,11 @@ perf003a-a4d-smoke:
 perf003a-a4d:
 	@test -n "$(OUT)" || { echo "usage: make perf003a-a4d OUT=<output-dir>" >&2; exit 2; }
 	./scripts/perf003a_a4d_immediate_activation_experiment.sh --run "$(OUT)"
+
+perf003a-a4e-smoke:
+	@test -n "$(OUT)" || { echo "usage: make perf003a-a4e-smoke OUT=<output-dir>" >&2; exit 2; }
+	./scripts/perf003a_a4e_prepared_dynamic_control_experiment.sh --smoke "$(OUT)"
+
+perf003a-a4e:
+	@test -n "$(OUT)" || { echo "usage: make perf003a-a4e OUT=<output-dir>" >&2; exit 2; }
+	./scripts/perf003a_a4e_prepared_dynamic_control_experiment.sh --run "$(OUT)"

@@ -853,3 +853,24 @@ do
     }
 done
 printf 'PERF003A_A4D_LICENSE_CHECK: PASS\n'
+
+# PERF003-A4e residual invokePrepared + dynamic-control falsification harness
+bash -n scripts/perf003a_a4e_prepared_dynamic_control_experiment.sh
+python3 -m py_compile docker/protos-perf003a-a4e/apply_boundary.py
+python3 - <<'PYA4E'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4e.json").read_text())
+assert cfg["slice"]=="PERF003-A4e"
+assert cfg["experimental_variant"]=="prepared-dynamic-control-boundary"
+assert cfg["experimental_boundaries"]==["ProtosClosureInvoker.invokePrepared","ProtosActivation.inheritDynamicControlState"]
+runner=Path("scripts/perf003a_a4e_prepared_dynamic_control_experiment.sh").read_text()
+for x in ("os.sched_getaffinity(0)","TraceCompilation=true","private static Object invokePrepared(","public void inheritDynamicControlState(","A4E_HYPOTHESIS","PROTOS_REPOSITORY_CHANGED: NO"): assert x in runner,x
+assert "Cpus_allowed_list" not in runner
+print("PERF003A_A4E_STATIC_VALIDATION: PASS")
+PYA4E
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in docker/protos-perf003a-a4e/Dockerfile docker/protos-perf003a-a4e/apply_boundary.py scripts/perf003a_a4e_prepared_dynamic_control_experiment.sh; do
+  grep -qF "$notice" "$path" || { echo "missing APL notice: $path" >&2; exit 1; }
+done
+printf 'PERF003A_A4E_LICENSE_CHECK: PASS\n'

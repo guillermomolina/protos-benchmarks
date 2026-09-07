@@ -293,6 +293,14 @@ claim.
 
 The retained A4d comparison is published under `results/perf003-a4d/`. It contains the raw control/boundary TraceCompilation streams, exact correctness outputs, runtime-class checks, Docker image metadata, the machine-readable comparison summary, and the harness-produced hypothesis conclusion.
 
+## PERF003-A4e residual dynamic-control boundary experiment
+
+A4a reduced the deterministic failing graph from `150026` to `150001` by placing a diagnostic-only boundary at `ProtosClosureInvoker.invokePrepared`. A4c showed that the wider `invokeImmediateMethod` boundary eliminates all 40 bailouts, while A4d showed that isolating activation construction alone does not explain the residual threshold contribution.
+
+A4e therefore preserves the A4a `invokePrepared` boundary and adds exactly one second diagnostic boundary at `ProtosActivation.inheritDynamicControlState`. This directly tests whether dynamic-control inheritance owns the single graph-size unit left after A4a.
+
+The experiment keeps the exact Protos revision, workload, runtime, stack, CPU-affinity policy and correctness result fixed. These boundaries are falsification instrumentation only, not production proposals or timing claims.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

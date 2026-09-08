@@ -13,6 +13,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Published PERF003-A4i decisive preparation-boundary-only evidence: control GraphTooBig=40 (50681:150026:150000); boundary GraphTooBig=40 (51502:150053:150000); decision NOT_SUFFICIENT; separate no-trace median ratio 0.5781. No canonical Protos change is made.
 - Published PERF003-A4h3 retained 20-iteration evidence for the production-shaped immediate-method sync/task preparation split: control GraphTooBig=40 (50681:150026:150000); split GraphTooBig=40 (48823:150002:150000); hypothesis INCONCLUSIVE. No timing claim or canonical Protos change is made.
 - Added PERF003-A4h2 Docker/Truffle smoke harness for the production-shaped sync/task preparation split; it checks exactly one diagnostic boundary, absence of task/replay machinery from the direct helper, optimizing runtime, and exact result `528` without TraceCompilation.
 - Added PERF003-A4h1 production-shaped immediate-method sync/task split diagnostic transform; the direct path excludes task/replay machinery and only the known invokePrepared diagnostic boundary remains. No Docker experiment runs in this slice.

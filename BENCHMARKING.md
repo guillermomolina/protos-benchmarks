@@ -337,6 +337,10 @@ A4h2 adds the Docker/Truffle smoke harness for this production-shaped transform.
 
 A4h3 executes the retained 20-iteration controlled diagnostic from exact harness revision `041a6b821387494e6299c93334d72ecd8b3ce494`. Control reproduces `GraphTooBig=40` with shape `50681:150026:150000`. The production-shaped sync/task split variant records `GraphTooBig=40` with shape `48823:150002:150000` while preserving result `528`. Hypothesis: **INCONCLUSIVE** — sync/task split changed the A4a residual diagnostics without a directional result. This remains non-timing diagnostic evidence and does not itself publish a canonical Protos implementation change or a production Truffle boundary.
 
+## PERF003-A4i preparation-boundary decision
+
+A4i is the final narrow partial-evaluation localization experiment after A4g and A4h. It bounds only immediate-method activation preparation and leaves `invokePrepared` fully optimizable. The exact control reproduced GraphTooBig=40 (50681:150026:150000); the preparation-boundary-only variant produced GraphTooBig=40 (51502:150053:150000). Separate no-trace steady-state medians were 9950715696 ns control and 5752923868 ns boundary (ratio 0.5781). Decision: **NOT_SUFFICIENT** — preparation boundary alone did not eliminate all deterministic GraphTooBig bailouts. Next: close this boundary-localization line; no further PE microexperiments. No canonical Protos repository change is made by this evidence slice.
+
 ## Raw evidence
 
 `schemas/result.schema.json` defines the minimum identity, environment, runtime,

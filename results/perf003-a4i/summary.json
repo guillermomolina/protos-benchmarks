@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF003",
+  "slice": "PERF003-A4i",
+  "harness_revision": "d4ee05c0d87c1680f30dd2c7cc7cae1154aa1276",
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "workload": "collections/array-reduce",
+  "expected_result": "528",
+  "trace_iterations": 20,
+  "timing_warmup": 10,
+  "timing_iterations": 30,
+  "control": {
+    "opt_done": 316,
+    "opt_failed": 40,
+    "graph_too_big": 40,
+    "graph_shapes": [
+      {
+        "node_count": 50681,
+        "graph_size": 150026,
+        "limit": 150000
+      }
+    ]
+  },
+  "boundary": {
+    "opt_done": 316,
+    "opt_failed": 40,
+    "graph_too_big": 40,
+    "graph_shapes": [
+      {
+        "node_count": 51502,
+        "graph_size": 150053,
+        "limit": 150000
+      }
+    ]
+  },
+  "control_timing": {
+    "samples": 30,
+    "median_ns": 9950715696,
+    "min_ns": 9507010694,
+    "max_ns": 10828981567
+  },
+  "boundary_timing": {
+    "samples": 30,
+    "median_ns": 5752923868,
+    "min_ns": 5185922708,
+    "max_ns": 7967193311
+  },
+  "median_ratio_boundary_over_control": 0.578141718018591,
+  "compilability_decision": "NOT_SUFFICIENT",
+  "reason": "preparation boundary alone did not eliminate all deterministic GraphTooBig bailouts",
+  "next_step": "close this boundary-localization line; no further PE microexperiments",
+  "protos_repository_changed": false
+}

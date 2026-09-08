@@ -1144,3 +1144,35 @@ do
 done
 printf 'PERF003A_A4H3_LICENSE_CHECK: PASS
 '
+
+
+# PERF003-A4i decisive preparation-boundary-only harness.
+bash -n scripts/perf003a_a4i_experiment.sh
+python3 -m py_compile docker/protos-perf003a-a4i/apply_boundary.py
+python3 -m json.tool config/perf003a-a4i.json >/dev/null
+python3 - <<'PYA4I'
+import json
+from pathlib import Path
+cfg=json.loads(Path("config/perf003a-a4i.json").read_text())
+assert cfg["diagnostic_iterations"]==20
+assert cfg["timing_warmup"]==10
+assert cfg["timing_iterations"]==30
+assert cfg["experimental_variant"]=="preparation-boundary-only"
+assert cfg["experimental_boundaries"]==["ProtosClosureInvoker.prepareImmediateMethodActivation"]
+d=Path("docker/protos-perf003a-a4i/Dockerfile").read_text()
+assert "control|preparation-boundary-only" in d
+assert "COPY MeasurementDriver.java /tmp/MeasurementDriver.java" in d
+assert "COPY apply_boundary.py /tmp/apply_boundary.py" in d
+p=Path("docker/protos-perf003a-a4i/apply_boundary.py").read_text()
+assert "A4I_PREPARATION_BOUNDARY_ONLY: PASS" in p
+r=Path("scripts/perf003a_a4i_experiment.sh").read_text()
+for x in ("com.guillermomolina.protos.cli.RuntimeProbe","com.guillermomolina.protos.cli.DiagnosticEval","com.guillermomolina.protos.cli.MeasurementDriver","TraceCompilation=true","TIMING_WARMUP","A4I_DECISION"):
+    assert x in r,x
+assert "com.guillermolina.protos" not in r
+print("PERF003A_A4I_HARNESS_VALIDATION: PASS")
+PYA4I
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in docker/protos-perf003a-a4i/Dockerfile docker/protos-perf003a-a4i/MeasurementDriver.java docker/protos-perf003a-a4i/apply_boundary.py scripts/perf003a_a4i_experiment.sh; do
+  grep -qF "$notice" "$path" || { echo "missing APL notice: $path" >&2; exit 1; }
+done
+printf 'PERF003A_A4I_LICENSE_CHECK: PASS\n'

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF003",
+  "slice": "PERF003-A4i",
+  "protos_revision": "d66841adb0b820047ed079f0bc7d643873f23194",
+  "protos_implementation_version": "0.2.180-SNAPSHOT",
+  "workload": {
+    "id": "collections/array-reduce",
+    "expected": "528",
+    "protos": "protos/benchmarks/collections/array-reduce.protos"
+  },
+  "diagnostic_transform": "preparation-boundary-only",
+  "experimental_boundaries": [
+    "ProtosClosureInvoker.prepareImmediateMethodActivation"
+  ],
+  "build_base": "maven:3.9.9-eclipse-temurin-21",
+  "graal_base": "ghcr.io/graalvm/jdk-community:22.0.0",
+  "truffle_runtime_version": "24.0.0",
+  "protos_stack": "128m",
+  "diagnostic_iterations": 20,
+  "timing_warmup": 10,
+  "timing_iterations": 30,
+  "control_variant": "control",
+  "experimental_variant": "preparation-boundary-only",
+  "control_reference": {
+    "graph_too_big": 40,
+    "graph_shapes": [
+      {
+        "node_count": 50681,
+        "graph_size": 150026,
+        "limit": 150000
+      }
+    ]
+  },
+  "a4g_reference": {
+    "graph_too_big": 0,
+    "boundaries": [
+      "ProtosClosureInvoker.prepareImmediateMethodActivation",
+      "ProtosClosureInvoker.invokePrepared"
+    ]
+  },
+  "decision_rule": "SUPPORTED only if preparation-boundary-only reaches zero GraphTooBig; otherwise NOT_SUFFICIENT and stop this localization line."
+}

@@ -517,3 +517,61 @@ runtime image identities, host environment, raw samples and derived
 median/MAD/min/max/p95 statistics. Per-workload language ratios are observations
 for those exact revisions only and are not whole-language performance claims.
 Canonical PERF001-E closure remains owned by the Protos status ledger.
+
+
+## PERF001-F companion harness foundation
+
+The first companion-harness phase for `PERF001-F` consumes the exact canonical
+concurrency corpus published by Protos revision
+`faa1714523d68650447047a05d184ab17a747c06`. It does not copy or translate that
+corpus: runtime correctness executes the six files directly from the pinned
+Protos checkout.
+
+`config/perf001f.json` records the six approved workload identifiers, exact
+observable results, fixed-cost versus strong-scaling classification, the
+`1/2/4/8` candidate physical-core widths and the established `10/20/20`
+startup/warmup/steady sample policy. This phase does not publish timing evidence.
+
+Unlike historical PERF001-C/D/E runtime definitions, the PERF001-F runner does
+not carry a forward-copied GraalVM/Truffle pin. It fetches the exact measured
+Protos revision, reads that revision's repository-owned `toolchain.json`, rejects
+a floating primary runtime, runs Maven at the declared version inside the exact declared GraalVM container
+image, and uses that same primary-runtime image as the final runtime stage. Historical JDK 22 / Truffle 24 evidence remains
+unchanged and authoritative only for its own pinned revisions.
+
+The PERF001-F image is built through the measured revision's own
+`dist/build_portable.py` contract and validates that portable archive with the
+repository-owned optimizing-runtime smoke before copying the distribution into
+the benchmark image. The final `/opt/protos/bin/protos` therefore runs in the
+supported distribution mode with `lib/protos.jar`, `RUNTIME.txt`, and the exact
+`lib/runtime/*` closure, including `HotSpotTruffleRuntime`. It does not preserve
+the historical direct `ProtosSourceCompiler` measurement entry. The concurrency
+corpus uses iterative `while` work rather than the deep recursive PERF001-C
+workload family, so this harness also does not inherit the historical `-Xss128m`
+recursion accommodation as an unrelated concurrency-runtime setting.
+
+CPU topology is audited on the Linux host through the current process affinity
+and `/sys/devices/system/cpu/*/topology`. The primary series chooses at most one
+logical CPU representative for each distinct `(physical package, core)` pair and
+materializes only available widths from `1, 2, 4, 8`. SMT siblings are retained
+in the topology record but are not silently substituted for additional physical
+cores.
+
+Before any later timing is accepted, `perf001f-prepare` builds the toolchain-
+aligned portable Protos image, probes the final image for the exact
+`HotSpotTruffleRuntime`, and runs every fixed-cost workload at one physical core
+and every strong-scaling workload at each available approved physical-core
+width, with Docker networking disabled. Standalone file execution intentionally
+does not render its final expression, so the correctness gate creates an
+ephemeral observation copy of each exact canonical source in which only the
+terminal `run()` becomes `print(run())`. Canonical and observation SHA-256 values
+are retained. These wrappers are correctness-only and are never the later timing
+source. Every configuration must produce its exact canonical result. The
+resulting `.work/perf001f/correctness.json` is local correctness/topology
+evidence, not reference timing evidence.
+
+A later PERF001-F harness phase owns persistent production-hosted warmup and
+steady-state timing, raw-sample retention and statistical finalization. The final
+retained reference run remains gated by the Protos-side
+`I026-A4B3_RELEVANT_PRODUCTION_ENTRY_RETIREMENT` condition recorded by the
+canonical PERF001-F methodology.

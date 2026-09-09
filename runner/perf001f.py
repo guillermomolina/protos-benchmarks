@@ -37,6 +37,8 @@ EXPECTED_IDS = (
     "concurrency/actor-fanout-requests",
 )
 EXPECTED_OPTIMIZING_RUNTIME = "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
+EXPECTED_CORPUS_PUBLICATION_REVISION = "faa1714523d68650447047a05d184ab17a747c06"
+EXPECTED_REFERENCE_REVISION = "a08844c7ba59f4a213e4d318bcf3bee32393c2a9"
 EXPECTED_RESULTS = (
     "1948000",
     "6233600",
@@ -95,7 +97,13 @@ def validate_config(*, announce: bool = True) -> dict[str, Any]:
         raise RuntimeError("unsupported PERF001-F harness configuration schema")
     if cfg.get("perf_item") != "PERF001" or cfg.get("slice") != "PERF001-F":
         raise RuntimeError("PERF001-F ownership metadata drift")
-    validate_revision(str(cfg.get("protos_revision", "")))
+    revision = validate_revision(str(cfg.get("protos_revision", "")))
+    if revision != EXPECTED_REFERENCE_REVISION:
+        raise RuntimeError("PERF001-F reference revision drift")
+    if cfg.get("corpus_publication_revision") != EXPECTED_CORPUS_PUBLICATION_REVISION:
+        raise RuntimeError("PERF001-F corpus publication revision drift")
+    if cfg.get("reference_gate_satisfied_by") != EXPECTED_REFERENCE_REVISION:
+        raise RuntimeError("PERF001-F reference gate evidence drift")
     if cfg.get("canonical_corpus") != "protos/benchmarks/concurrency":
         raise RuntimeError("PERF001-F canonical corpus path drift")
     workloads = cfg.get("workloads")
@@ -498,6 +506,159 @@ def correctness(
     return payload
 
 
+
+# PERF001F-H2-PERSISTENT-DRIVER
+
+def persistent_driver_command(
+    image: str,
+    cpuset: str,
+    source: str,
+    expected: str,
+    warmup: int,
+    steady: int,
+) -> list[str]:
+    return [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--cpuset-cpus",
+        cpuset,
+        "--entrypoint",
+        "java",
+        image,
+        "--enable-native-access=ALL-UNNAMED",
+        "-cp",
+        "/opt/perf001f/driver:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/*",
+        "Perf001fPersistentDriver",
+        f"/opt/perf001f/corpus/{source}",
+        expected,
+        str(warmup),
+        str(steady),
+    ]
+
+
+def run_persistent_driver_case(
+    image: str,
+    cpuset: str,
+    workload: dict[str, Any],
+    *,
+    warmup: int,
+    steady: int,
+) -> dict[str, Any]:
+    command = persistent_driver_command(
+        image,
+        cpuset,
+        str(workload["source"]),
+        str(workload["expected"]),
+        warmup,
+        steady,
+    )
+    completed = run(command, capture=True, check=False)
+    stdout = completed.stdout or ""
+    stderr = (completed.stderr or "").strip()
+    if completed.returncode != 0:
+        raise RuntimeError(
+            f"persistent driver failed for {workload['id']}: "
+            f"exit={completed.returncode} stderr={stderr!r} stdout={stdout!r}"
+        )
+    line = last_nonempty_line(stdout)
+    try:
+        payload = json.loads(line)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"persistent driver emitted invalid JSON for {workload['id']}: {line!r}"
+        ) from exc
+    expected = str(workload["expected"])
+    if payload.get("schema_version") != 1:
+        raise RuntimeError("unsupported persistent-driver payload schema")
+    if payload.get("expected") != expected:
+        raise RuntimeError(f"persistent-driver expected-result identity mismatch for {workload['id']}")
+    if payload.get("setup_run_binding_ready") is not True:
+        raise RuntimeError(f"persistent-driver setup binding was not ready for {workload['id']}")
+    if payload.get("setup_projection") != "terminal run() -> run":
+        raise RuntimeError(f"persistent-driver setup projection drift for {workload['id']}")
+    for flag in ("process_reused", "context_reused", "run_binding_reused"):
+        if payload.get(flag) is not True:
+            raise RuntimeError(f"persistent-driver reuse contract failed: {flag}")
+    warmup_ns = payload.get("warmup_ns")
+    steady_ns = payload.get("steady_ns")
+    if not isinstance(warmup_ns, list) or len(warmup_ns) != warmup:
+        raise RuntimeError(f"persistent-driver warmup count mismatch for {workload['id']}")
+    if not isinstance(steady_ns, list) or len(steady_ns) != steady:
+        raise RuntimeError(f"persistent-driver steady count mismatch for {workload['id']}")
+    if any(not isinstance(value, int) or value <= 0 for value in warmup_ns + steady_ns):
+        raise RuntimeError(f"persistent-driver non-positive sample for {workload['id']}")
+    return payload
+
+
+def persistent_smoke(
+    revision: str,
+    source_checkout: Path,
+    image: str,
+    toolchain: dict[str, Any],
+) -> dict[str, Any]:
+    cfg = config()
+    topology = host_topology()
+    series_by_width = {int(entry["width"]): entry for entry in topology["reference_series"]}
+    width_one = series_by_width.get(1)
+    if width_one is None:
+        raise RuntimeError("no width=1 CPU set available for persistent-driver smoke")
+    optimizing_runtime = runtime_probe(image, str(width_one["cpuset"]))
+    cases: list[dict[str, Any]] = []
+    for workload in cfg["workloads"]:
+        widths = [width for width in workload["cpu_widths"] if width in series_by_width]
+        if not widths:
+            raise RuntimeError(f"no eligible CPU width for {workload['id']}")
+        for width in widths:
+            cpuset = str(series_by_width[width]["cpuset"])
+            driver = run_persistent_driver_case(
+                image,
+                cpuset,
+                workload,
+                warmup=2,
+                steady=2,
+            )
+            cases.append(
+                {
+                    "id": workload["id"],
+                    "width": width,
+                    "cpuset": cpuset,
+                    "expected": str(workload["expected"]),
+                    "driver": driver,
+                }
+            )
+            print(
+                f"PERSISTENT SMOKE PASS {workload['id']} width={width} cpuset={cpuset}"
+            )
+    payload = {
+        "schema_version": 1,
+        "purpose": "PERF001-F persistent production-hosted driver smoke; not reference timing evidence",
+        "protos_revision": revision,
+        "harness_revision": harness_revision(),
+        "reference_gate": cfg["reference_gate"],
+        "reference_gate_satisfied_by": cfg["reference_gate_satisfied_by"],
+        "toolchain": toolchain,
+        "optimizing_runtime": optimizing_runtime,
+        "topology": topology,
+        "image": image_identity(image),
+        "driver_source_sha256": sha256_text(
+            (ROOT / "docker/protos-perf001f/Perf001fPersistentDriver.java").read_text(encoding="utf-8")
+        ),
+        "cases": cases,
+    }
+    WORK.mkdir(parents=True, exist_ok=True)
+    path = WORK / "persistent-smoke.json"
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    print(f"PERF001F_PERSISTENT_DRIVER_SMOKE: PASS {len(cases)}/{len(cases)}")
+    print("PERF001F_PERSISTENT_PROCESS_REUSE: PASS")
+    print("PERF001F_PERSISTENT_CONTEXT_REUSE: PASS")
+    print("PERF001F_PERSISTENT_RUN_BINDING_REUSE: PASS")
+    print(f"PERF001F_PERSISTENT_SMOKE_EVIDENCE={path.relative_to(ROOT)}")
+    print("PERF001F_REFERENCE_TIMING: NOT_RUN")
+    return payload
+
 def selected_revision(value: str | None) -> str:
     return validate_revision(value or str(config()["protos_revision"]))
 
@@ -513,7 +674,7 @@ def emit(payload: dict[str, Any], output: str | None) -> None:
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description="PERF001-F companion harness foundation")
     result.add_argument(
-        "command", choices=["validate", "toolchain", "topology", "build", "correctness", "prepare"]
+        "command", choices=["validate", "toolchain", "topology", "build", "correctness", "prepare", "persistent-smoke", "h2-prepare"]
     )
     result.add_argument("--protos-revision")
     result.add_argument("--output")
@@ -547,6 +708,18 @@ def main() -> int:
             correctness(revision, source, image, toolchain)
             print("PERF001F_HARNESS_FOUNDATION: READY")
             print(f"PERF001F_REFERENCE_GATE: {cfg['reference_gate']}")
+            print(f"PERF001F_REFERENCE_GATE_SATISFIED_BY: {cfg['reference_gate_satisfied_by']}")
+            print("PERF001F_REFERENCE_TIMING: NOT_RUN")
+            return 0
+        if args.command == "persistent-smoke":
+            persistent_smoke(revision, source, image, toolchain)
+            return 0
+        if args.command == "h2-prepare":
+            image = build_image(revision, source, toolchain)
+            correctness(revision, source, image, toolchain)
+            persistent_smoke(revision, source, image, toolchain)
+            print("PERF001F_H2_PERSISTENT_DRIVER: READY")
+            print(f"PERF001F_REFERENCE_GATE_SATISFIED_BY: {cfg['reference_gate_satisfied_by']}")
             print("PERF001F_REFERENCE_TIMING: NOT_RUN")
             return 0
     except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:

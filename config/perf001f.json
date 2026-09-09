@@ -2,63 +2,94 @@
   "schema_version": 1,
   "perf_item": "PERF001",
   "slice": "PERF001-F",
-  "phase": "companion-harness-foundation",
-  "protos_revision": "faa1714523d68650447047a05d184ab17a747c06",
+  "phase": "persistent-production-hosted-measurement-driver",
+  "protos_revision": "a08844c7ba59f4a213e4d318bcf3bee32393c2a9",
+  "corpus_publication_revision": "faa1714523d68650447047a05d184ab17a747c06",
   "protos_repository": "https://github.com/guillermomolina/protos.git",
   "canonical_corpus": "protos/benchmarks/concurrency",
   "measurement_policy": {
     "startup_samples": 10,
     "warmup_iterations": 20,
     "steady_samples": 20,
-    "summary": ["median", "mad", "p95", "min", "max"]
+    "summary": [
+      "median",
+      "mad",
+      "p95",
+      "min",
+      "max"
+    ]
   },
   "topology_policy": {
-    "candidate_physical_core_widths": [1, 2, 4, 8],
+    "candidate_physical_core_widths": [
+      1,
+      2,
+      4,
+      8
+    ],
     "prefer_distinct_physical_cores_before_smt_siblings": true
   },
   "reference_gate": "I026-A4B3_RELEVANT_PRODUCTION_ENTRY_RETIREMENT",
+  "reference_gate_satisfied_by": "a08844c7ba59f4a213e4d318bcf3bee32393c2a9",
   "workloads": [
     {
       "id": "concurrency/future-roundtrip",
       "source": "future-roundtrip.protos",
       "expected": "1948000",
       "kind": "fixed-cost",
-      "cpu_widths": [1]
+      "cpu_widths": [
+        1
+      ]
     },
     {
       "id": "concurrency/future-fanout-all",
       "source": "future-fanout-all.protos",
       "expected": "6233600",
       "kind": "fixed-cost",
-      "cpu_widths": [1]
+      "cpu_widths": [
+        1
+      ]
     },
     {
       "id": "concurrency/parallel-roundtrip",
       "source": "parallel-roundtrip.protos",
       "expected": "38608200",
       "kind": "fixed-cost",
-      "cpu_widths": [1]
+      "cpu_widths": [
+        1
+      ]
     },
     {
       "id": "concurrency/parallel-array-map",
       "source": "parallel-array-map.protos",
       "expected": "2128520",
       "kind": "strong-scaling",
-      "cpu_widths": [1, 2, 4, 8]
+      "cpu_widths": [
+        1,
+        2,
+        4,
+        8
+      ]
     },
     {
       "id": "concurrency/actor-request-roundtrip",
       "source": "actor-request-roundtrip.protos",
       "expected": "2000",
       "kind": "fixed-cost",
-      "cpu_widths": [1]
+      "cpu_widths": [
+        1
+      ]
     },
     {
       "id": "concurrency/actor-fanout-requests",
       "source": "actor-fanout-requests.protos",
       "expected": "4096",
       "kind": "strong-scaling",
-      "cpu_widths": [1, 2, 4, 8]
+      "cpu_widths": [
+        1,
+        2,
+        4,
+        8
+      ]
     }
   ]
 }

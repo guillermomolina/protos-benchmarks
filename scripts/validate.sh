@@ -1176,3 +1176,38 @@ for path in docker/protos-perf003a-a4i/Dockerfile docker/protos-perf003a-a4i/Mea
   grep -qF "$notice" "$path" || { echo "missing APL notice: $path" >&2; exit 1; }
 done
 printf 'PERF003A_A4I_LICENSE_CHECK: PASS\n'
+
+
+# PERF001F-H2-PERSISTENT-DRIVER
+python3 -m py_compile runner/perf001f.py tests/test_perf001f.py
+python3 - <<'PYH2'
+import json
+from pathlib import Path
+cfg=json.loads(Path('config/perf001f.json').read_text(encoding='utf-8'))
+assert cfg['phase'] == 'persistent-production-hosted-measurement-driver'
+assert cfg['corpus_publication_revision'] == 'faa1714523d68650447047a05d184ab17a747c06'
+assert cfg['protos_revision'] == 'a08844c7ba59f4a213e4d318bcf3bee32393c2a9'
+assert cfg['reference_gate_satisfied_by'] == cfg['protos_revision']
+driver=Path('docker/protos-perf001f/Perf001fPersistentDriver.java').read_text(encoding='utf-8')
+for required in (
+    'ProtosPolyglotRuntimeHost.open()',
+    'runtimeHost.hostProcess(',
+    'processContext.execute(source, bootstrap.activation())',
+    'readLocalSlot("run")',
+    'String terminal = "run()"',
+    'setup projection did not return the exact top-level run Closure',
+    'ProtosClosureInvoker.invokeInTask(',
+    'dispatchUntilTerminal(task, () -> false)',
+):
+    assert required in driver
+assert 'ProtosSourceCompiler' not in driver
+assert 'Thread.sleep' not in driver
+docker=Path('docker/protos-perf001f/Dockerfile').read_text(encoding='utf-8')
+assert 'Perf001fPersistentDriver.java' in docker
+assert '/out/driver' in docker
+assert '/opt/perf001f/driver' in docker
+print('PERF001F_H2_STATIC_VALIDATION: PASS')
+PYH2
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+grep -qF "$notice" docker/protos-perf001f/Perf001fPersistentDriver.java || { echo 'missing APL notice: persistent driver' >&2; exit 1; }
+echo 'PERF001F_H2_LICENSE_CHECK: PASS'

@@ -30,7 +30,7 @@ class Perf001fHarnessTest(unittest.TestCase):
     def test_config_preserves_six_approved_workloads(self) -> None:
         cfg = perf001f.validate_config()
         self.assertEqual(
-            "faa1714523d68650447047a05d184ab17a747c06",
+            "a08844c7ba59f4a213e4d318bcf3bee32393c2a9",
             cfg["protos_revision"],
         )
         self.assertEqual(list(perf001f.EXPECTED_IDS), [entry["id"] for entry in cfg["workloads"]])
@@ -177,6 +177,52 @@ class Perf001fHarnessTest(unittest.TestCase):
             "docker/protos-perf001f/Dockerfile",
         ):
             self.assertIn(notice, (ROOT / relative).read_text(encoding="utf-8"), relative)
+
+
+# PERF001F-H2-PERSISTENT-DRIVER
+class Perf001fPersistentDriverH2Test(unittest.TestCase):
+    def test_h2_config_retains_corpus_origin_and_gate_closure(self) -> None:
+        cfg = perf001f.validate_config(announce=False)
+        self.assertEqual("persistent-production-hosted-measurement-driver", cfg["phase"])
+        self.assertEqual("faa1714523d68650447047a05d184ab17a747c06", cfg["corpus_publication_revision"])
+        self.assertEqual("a08844c7ba59f4a213e4d318bcf3bee32393c2a9", cfg["protos_revision"])
+        self.assertEqual(cfg["protos_revision"], cfg["reference_gate_satisfied_by"])
+
+    def test_persistent_driver_command_uses_portable_runtime_classpath(self) -> None:
+        cfg = perf001f.config()
+        workload = cfg["workloads"][0]
+        command = perf001f.persistent_driver_command(
+            "image:test", "2", workload["source"], workload["expected"], 20, 20
+        )
+        self.assertIn("--network", command)
+        self.assertIn("none", command)
+        self.assertIn("--cpuset-cpus", command)
+        self.assertIn("/opt/perf001f/driver:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/*", command)
+        self.assertIn("Perf001fPersistentDriver", command)
+        self.assertEqual("20", command[-2])
+        self.assertEqual("20", command[-1])
+
+    def test_persistent_driver_is_production_hosted_and_parse_free_in_timed_loop(self) -> None:
+        text = (ROOT / "docker/protos-perf001f/Perf001fPersistentDriver.java").read_text(encoding="utf-8")
+        self.assertIn("ProtosPolyglotRuntimeHost.open()", text)
+        self.assertIn("runtimeHost.hostProcess(", text)
+        self.assertIn("processContext.execute(source, bootstrap.activation())", text)
+        self.assertIn('readLocalSlot("run")', text)
+        self.assertIn('String terminal = "run()"', text)
+        self.assertIn(' + "run\\n"', text)
+        self.assertIn("ProtosClosureInvoker.invokeInTask(", text)
+        self.assertIn("dispatchUntilTerminal(task, () -> false)", text)
+        self.assertNotIn("ProtosSourceCompiler", text)
+        self.assertNotIn("Thread.sleep", text)
+        measure_body = text.split("private static List<Long> measureSeries", 1)[1]
+        self.assertNotIn("Source.newBuilder", measure_body.split("private static void requireCompletedInteger", 1)[0])
+
+    def test_h2_driver_has_apl_notice(self) -> None:
+        notice = "THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE"
+        self.assertIn(
+            notice,
+            (ROOT / "docker/protos-perf001f/Perf001fPersistentDriver.java").read_text(encoding="utf-8"),
+        )
 
 
 if __name__ == "__main__":

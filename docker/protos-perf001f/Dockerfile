@@ -22,6 +22,7 @@ USER root
 ARG MAVEN_VERSION=3.9.9
 ARG PROTOS_REPOSITORY=https://github.com/guillermomolina/protos.git
 ARG PROTOS_REVISION
+COPY docker/protos-perf001f/Perf001fPersistentDriver.java /tmp/Perf001fPersistentDriver.java
 RUN test -n "$MAVEN_VERSION" && test -n "$PROTOS_REVISION"
 RUN microdnf install -y git gzip tar findutils ca-certificates python39 unzip \
     && microdnf clean all
@@ -51,13 +52,19 @@ RUN git init /src \
     && javac \
         -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
         -d /out/probe \
-        dist/Dist001RuntimeProbe.java
+        dist/Dist001RuntimeProbe.java \
+    && mkdir -p /out/driver \
+    && javac \
+        -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
+        -d /out/driver \
+        /tmp/Perf001fPersistentDriver.java
 
 FROM ${GRAAL_BASE}
 USER root
 COPY --from=build /out/protos /opt/protos
 COPY --from=build /out/corpus /opt/perf001f/corpus
 COPY --from=build /out/probe /opt/perf001f/probe
+COPY --from=build /out/driver /opt/perf001f/driver
 ENV PROTOS_HOME=/opt/protos
 WORKDIR /opt/protos
 ENTRYPOINT ["/opt/protos/bin/protos"]

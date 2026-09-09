@@ -575,3 +575,36 @@ steady-state timing, raw-sample retention and statistical finalization. The fina
 retained reference run remains gated by the Protos-side
 `I026-A4B3_RELEVANT_PRODUCTION_ENTRY_RETIREMENT` condition recorded by the
 canonical PERF001-F methodology.
+
+
+## PERF001-F persistent production-hosted driver
+
+PERF001-F H2 advances the measured Protos pin from the corpus-publication revision
+`faa1714523d68650447047a05d184ab17a747c06` to
+`a08844c7ba59f4a213e4d318bcf3bee32393c2a9`, the first exact revision that also
+closes the approved `I026-A4B3_RELEVANT_PRODUCTION_ENTRY_RETIREMENT` gate. This
+minimizes unrelated post-gate drift while retaining the exact canonical six-workload
+concurrency corpus.
+
+Warmup and steady-state measurement no longer launch a fresh CLI process or parse
+the benchmark for every iteration. The external `Perf001fPersistentDriver` builds
+Core, one semantic Process and one Process-scoped Polyglot Context, then derives an
+untimed setup projection by changing only the canonical source's terminal `run()` to
+`run`. Executing that projection as a real RootActor task creates the ordinary
+`run` Closure and performs benchmark bootstrap, including Actor spawn/readiness,
+without consuming an unretained benchmark invocation before warmup[0].
+
+The driver then reads that exact `run` Closure once. Every retained iteration creates
+a fresh RootActor-local task and invokes the retained Closure through
+`ProtosClosureInvoker.invokeInTask` while dispatching inside the same production
+Process Context. The timed interval begins before task creation and ends after
+semantic task completion. It therefore includes task creation/scheduling/dispatch,
+the guest workload and completion, but excludes Core/Process/Context bootstrap,
+source parsing, initial Actor setup and result serialization.
+
+H2 publication runs only a two-warmup/two-steady smoke for every eligible
+workload/physical-core configuration. Those local samples validate the driver and
+are explicitly not reference timing evidence. The later reference-evidence slice
+must execute the approved 20 warmup + 20 steady policy from the exact published H2
+harness revision and retain raw samples plus exact Protos/harness/runtime/host
+identity.

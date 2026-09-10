@@ -15,6 +15,7 @@
 
 .PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize perf003a-a4a-smoke perf003a-a4a perf003a-a4b-smoke perf003a-a4b perf003a-a4c-smoke perf003a-a4c perf003a-a4d-smoke perf003a-a4d perf003a-a4e-smoke perf003a-a4e perf003a-a4f-smoke perf003a-a4f perf003a-a4g-smoke perf003a-a4g perf003a-a4h-smoke perf003a-a4h perf003a-a4i perf001f-validate perf001f-topology perf001f-build perf001f-correctness perf001f-prepare perf001f-persistent-smoke perf001f-h2-prepare
 .PHONY: perf001f-reference-smoke perf001f-reference
+.PHONY: perf001g-validate perf001g-run
 
 validate:
 	./scripts/validate.sh
@@ -160,3 +161,11 @@ perf001f-reference-smoke:
 perf001f-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf001f-reference HARNESS_REVISION=<published-H3-SHA>" >&2; exit 2; }
 	python3 runner/perf001f_reference.py --run --harness-revision "$(HARNESS_REVISION)" --output-dir results/perf001-f
+
+perf001g-validate:
+	python3 runner/perf001g.py validate
+
+perf001g-run:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf001g-run HARNESS_REVISION=<published-G1-SHA> OUT=<output-dir>" >&2; exit 2; }
+	@test -n "$(OUT)" || { echo "usage: make perf001g-run HARNESS_REVISION=<published-G1-SHA> OUT=<output-dir>" >&2; exit 2; }
+	python3 runner/perf001g.py run --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"

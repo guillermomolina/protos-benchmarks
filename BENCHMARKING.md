@@ -646,3 +646,13 @@ published H3 harness SHA, use the configured `10/20/20` policy, and retain
 nearest-rank p95, min and max are derived for startup, warmup and steady classes;
 steady-state speedup and efficiency are derived only for
 `parallel-array-map` and `actor-fanout-requests`.
+
+## PERF001-G final reproducibility and baseline reporting
+
+PERF001-G uses the project-owner-approved **bounded exact-pin reproducibility replay**. The retained PERF001-D, PERF001-E and PERF001-F timing corpora remain the sole timing authority; G does not rerun them as replacement baselines and does not define a timing-drift pass/fail threshold.
+
+The final replay reconstructs the exact historical PERF001-D harness `0a406373c497df1173ff26a3ed4fcada015e0879` and executes its complete 44-case correctness matrix across both pre/post PERF002 revisions and interpreter/Truffle modes. It separately reconstructs exact PERF001-E harness `280173d743b2ed838a89be0ad930b20828d89558` and executes its complete 18-case Protos/Python/JavaScript correctness matrix. PERF001-F is replayed through exact H3 harness `b8a9eeca85c241f544512a02a6fa29d935f240ef` using its already-published non-retained `2 startup / 2 warmup / 2 steady` smoke path across the 12 approved configurations.
+
+Before replay, G verifies that the retained `results/perf001-d`, `results/perf001-e` and `results/perf001-f` subtrees are byte-identical to their state at companion evidence commit `f34e37da11f209aa9f9ea84465822c3362fc4da0`. The replay records current host/runtime/container identities and PASS counts but retains no replacement timing samples.
+
+The final baseline report presents the existing D/E/F summaries as separate benchmark generations. It does not normalize, rank, or infer a whole-language comparison across incompatible historical revisions or environments. G1 publishes only this harness and its static/integrity validation. The real replay and retained `results/perf001-g/` publication occur only from the exact published G1 harness revision in G2.

@@ -1314,3 +1314,17 @@ do
     }
 done
 printf 'PERF001F_H3_LICENSE_CHECK: PASS\n'
+
+# PERF001-G bounded exact-pin reproducibility harness
+python3 -m py_compile runner/perf001g.py tests/test_perf001g.py
+python3 -m unittest tests.test_perf001g -v
+python3 runner/perf001g.py validate
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in runner/perf001g.py tests/test_perf001g.py; do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+printf 'PERF001G_STATIC_VALIDATION: PASS\n'
+printf 'PERF001G_LICENSE_CHECK: PASS\n'

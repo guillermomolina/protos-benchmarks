@@ -608,3 +608,41 @@ are explicitly not reference timing evidence. The later reference-evidence slice
 must execute the approved 20 warmup + 20 steady policy from the exact published H2
 harness revision and retain raw samples plus exact Protos/harness/runtime/host
 identity.
+
+## PERF001-F H3 reference-evidence runner
+
+H3 keeps the six-workload corpus publication at `faa1714523d68650447047a05d184ab17a747c06` and repins the
+measured runtime from the original post-I026 revision `a08844c7ba59f4a213e4d318bcf3bee32393c2a9` to
+`0372a58addc63f305c911811659edd9b2b508420`. The latter is the published PLAT010/PLAT011 carrier cutover
+that closed PERF001-F blocker #239. The original
+`reference_gate_satisfied_by=a08844c7ba59f4a213e4d318bcf3bee32393c2a9` value remains the provenance of the
+I026 production-entry gate rather than being rewritten to a later revision.
+
+Fresh startup and persistent warmup/steady measurements share the same
+production-hosted `Perf001fPersistentDriver`. The fresh-startup controller runs
+inside an already-started Docker container and launches one fresh JVM per startup
+sample with `warmup=0` and `steady=1`. The outer startup interval includes fresh
+JVM launch, Core/Process/Polyglot-Context bootstrap, canonical-source setup, one
+real RootActor-local invocation, semantic completion and child serialization.
+Docker container creation/start and parent-side result parsing remain outside
+that interval.
+
+Each fresh child is bounded to 120 seconds. Child stdout/stderr are redirected
+to temporary regular files rather than pipes; timeout destroys the child,
+escalating to `destroyForcibly()` when necessary. The Python reference
+controller also bounds each Docker startup or persistent case to 600 seconds and
+removes the named container on timeout or interruption. Progress is emitted per
+reference case and per startup sample.
+
+H3 publication validates the complete runner with a `2 startup / 2 warmup /
+2 steady` non-retained smoke. The smoke deliberately executes Actor fan-out
+width 8 first because that configuration exposed #239. These samples validate
+the harness only and MUST NOT be published as PERF001-F reference timings.
+
+H4 is the retained evidence execution. It must run from the exact clean,
+published H3 harness SHA, use the configured `10/20/20` policy, and retain
+`evidence.json`, `run-metadata.json`, `summary.tsv`, `summary.md` and
+`MANIFEST.sha256`. Raw ordered samples are authoritative. Median, MAD,
+nearest-rank p95, min and max are derived for startup, warmup and steady classes;
+steady-state speedup and efficiency are derived only for
+`parallel-array-map` and `actor-fanout-requests`.

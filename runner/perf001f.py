@@ -38,7 +38,9 @@ EXPECTED_IDS = (
 )
 EXPECTED_OPTIMIZING_RUNTIME = "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
 EXPECTED_CORPUS_PUBLICATION_REVISION = "faa1714523d68650447047a05d184ab17a747c06"
-EXPECTED_REFERENCE_REVISION = "a08844c7ba59f4a213e4d318bcf3bee32393c2a9"
+EXPECTED_REFERENCE_REVISION = "0372a58addc63f305c911811659edd9b2b508420"
+EXPECTED_REFERENCE_GATE_REVISION = "a08844c7ba59f4a213e4d318bcf3bee32393c2a9"
+EXPECTED_RUNTIME_BLOCKER_239_FIX = "0372a58addc63f305c911811659edd9b2b508420"
 EXPECTED_RESULTS = (
     "1948000",
     "6233600",
@@ -95,6 +97,8 @@ def validate_config(*, announce: bool = True) -> dict[str, Any]:
     cfg = config()
     if cfg.get("schema_version") != 1:
         raise RuntimeError("unsupported PERF001-F harness configuration schema")
+    if cfg.get("phase") != "reference-evidence-runner-ready":
+        raise RuntimeError("PERF001-F harness phase drift")
     if cfg.get("perf_item") != "PERF001" or cfg.get("slice") != "PERF001-F":
         raise RuntimeError("PERF001-F ownership metadata drift")
     revision = validate_revision(str(cfg.get("protos_revision", "")))
@@ -102,8 +106,10 @@ def validate_config(*, announce: bool = True) -> dict[str, Any]:
         raise RuntimeError("PERF001-F reference revision drift")
     if cfg.get("corpus_publication_revision") != EXPECTED_CORPUS_PUBLICATION_REVISION:
         raise RuntimeError("PERF001-F corpus publication revision drift")
-    if cfg.get("reference_gate_satisfied_by") != EXPECTED_REFERENCE_REVISION:
+    if cfg.get("reference_gate_satisfied_by") != EXPECTED_REFERENCE_GATE_REVISION:
         raise RuntimeError("PERF001-F reference gate evidence drift")
+    if cfg.get("runtime_blocker_239_fixed_by") != EXPECTED_RUNTIME_BLOCKER_239_FIX:
+        raise RuntimeError("PERF001-F runtime blocker fix identity drift")
     if cfg.get("canonical_corpus") != "protos/benchmarks/concurrency":
         raise RuntimeError("PERF001-F canonical corpus path drift")
     workloads = cfg.get("workloads")

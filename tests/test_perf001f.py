@@ -30,7 +30,7 @@ class Perf001fHarnessTest(unittest.TestCase):
     def test_config_preserves_six_approved_workloads(self) -> None:
         cfg = perf001f.validate_config()
         self.assertEqual(
-            "a08844c7ba59f4a213e4d318bcf3bee32393c2a9",
+            "0372a58addc63f305c911811659edd9b2b508420",
             cfg["protos_revision"],
         )
         self.assertEqual(list(perf001f.EXPECTED_IDS), [entry["id"] for entry in cfg["workloads"]])
@@ -183,10 +183,11 @@ class Perf001fHarnessTest(unittest.TestCase):
 class Perf001fPersistentDriverH2Test(unittest.TestCase):
     def test_h2_config_retains_corpus_origin_and_gate_closure(self) -> None:
         cfg = perf001f.validate_config(announce=False)
-        self.assertEqual("persistent-production-hosted-measurement-driver", cfg["phase"])
+        self.assertEqual("reference-evidence-runner-ready", cfg["phase"])
         self.assertEqual("faa1714523d68650447047a05d184ab17a747c06", cfg["corpus_publication_revision"])
-        self.assertEqual("a08844c7ba59f4a213e4d318bcf3bee32393c2a9", cfg["protos_revision"])
-        self.assertEqual(cfg["protos_revision"], cfg["reference_gate_satisfied_by"])
+        self.assertEqual("0372a58addc63f305c911811659edd9b2b508420", cfg["protos_revision"])
+        self.assertEqual("a08844c7ba59f4a213e4d318bcf3bee32393c2a9", cfg["reference_gate_satisfied_by"])
+        self.assertEqual("0372a58addc63f305c911811659edd9b2b508420", cfg["runtime_blocker_239_fixed_by"])
 
     def test_persistent_driver_command_uses_portable_runtime_classpath(self) -> None:
         cfg = perf001f.config()
@@ -224,6 +225,49 @@ class Perf001fPersistentDriverH2Test(unittest.TestCase):
             (ROOT / "docker/protos-perf001f/Perf001fPersistentDriver.java").read_text(encoding="utf-8"),
         )
 
+
+# PERF001F-H3-REFERENCE-RUNNER
+class Perf001fReferenceRunnerH3Test(unittest.TestCase):
+    def test_h3_config_repins_runtime_without_rewriting_i026_gate_provenance(self) -> None:
+        cfg = perf001f.validate_config(announce=False)
+        self.assertEqual("reference-evidence-runner-ready", cfg["phase"])
+        self.assertEqual("0372a58addc63f305c911811659edd9b2b508420", cfg["protos_revision"])
+        self.assertEqual("faa1714523d68650447047a05d184ab17a747c06", cfg["corpus_publication_revision"])
+        self.assertEqual("a08844c7ba59f4a213e4d318bcf3bee32393c2a9", cfg["reference_gate_satisfied_by"])
+        self.assertEqual("0372a58addc63f305c911811659edd9b2b508420", cfg["runtime_blocker_239_fixed_by"])
+
+    def test_h3_startup_controller_is_bounded_and_non_pipe(self) -> None:
+        text = (ROOT / "docker/protos-perf001f/Perf001fStartupDriver.java").read_text(encoding="utf-8")
+        for required in (
+            "builder.redirectOutput(stdout.toFile())",
+            "builder.redirectError(stderr.toFile())",
+            "child.waitFor(timeoutSeconds, TimeUnit.SECONDS)",
+            "child.destroyForcibly()",
+            "STARTUP_SAMPLE_BEGIN",
+            "STARTUP_SAMPLE_PASS",
+            "Perf001fPersistentDriver",
+        ):
+            self.assertIn(required, text)
+        self.assertNotIn(".readAllBytes(", text)
+        self.assertNotIn("Thread.sleep", text)
+        self.assertNotIn("-Xss", text)
+
+    def test_h3_dockerfile_compiles_both_measurement_drivers(self) -> None:
+        text = (ROOT / "docker/protos-perf001f/Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("Perf001fPersistentDriver.java", text)
+        self.assertIn("Perf001fStartupDriver.java", text)
+        self.assertIn("/out/driver", text)
+        self.assertIn("/out/startup", text)
+        self.assertIn("/opt/perf001f/driver", text)
+        self.assertIn("/opt/perf001f/startup", text)
+
+    def test_h3_new_executables_have_apl_notice(self) -> None:
+        notice = "THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE"
+        for relative in (
+            "docker/protos-perf001f/Perf001fStartupDriver.java",
+            "runner/perf001f_reference.py",
+        ):
+            self.assertIn(notice, (ROOT / relative).read_text(encoding="utf-8"), relative)
 
 if __name__ == "__main__":
     unittest.main()

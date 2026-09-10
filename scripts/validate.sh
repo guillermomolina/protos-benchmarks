@@ -1184,10 +1184,11 @@ python3 - <<'PYH2'
 import json
 from pathlib import Path
 cfg=json.loads(Path('config/perf001f.json').read_text(encoding='utf-8'))
-assert cfg['phase'] == 'persistent-production-hosted-measurement-driver'
+assert cfg['phase'] == 'reference-evidence-runner-ready'
 assert cfg['corpus_publication_revision'] == 'faa1714523d68650447047a05d184ab17a747c06'
-assert cfg['protos_revision'] == 'a08844c7ba59f4a213e4d318bcf3bee32393c2a9'
-assert cfg['reference_gate_satisfied_by'] == cfg['protos_revision']
+assert cfg['protos_revision'] == '0372a58addc63f305c911811659edd9b2b508420'
+assert cfg['reference_gate_satisfied_by'] == 'a08844c7ba59f4a213e4d318bcf3bee32393c2a9'
+assert cfg['runtime_blocker_239_fixed_by'] == '0372a58addc63f305c911811659edd9b2b508420'
 driver=Path('docker/protos-perf001f/Perf001fPersistentDriver.java').read_text(encoding='utf-8')
 for required in (
     'ProtosPolyglotRuntimeHost.open()',
@@ -1211,3 +1212,105 @@ PYH2
 notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
 grep -qF "$notice" docker/protos-perf001f/Perf001fPersistentDriver.java || { echo 'missing APL notice: persistent driver' >&2; exit 1; }
 echo 'PERF001F_H2_LICENSE_CHECK: PASS'
+
+# PERF001-F H3 reference-evidence runner
+python3 -m py_compile runner/perf001f.py runner/perf001f_reference.py tests/test_perf001f.py
+python3 runner/perf001f_reference.py --help >/dev/null
+
+python3 - <<'PYH3'
+import json
+from pathlib import Path
+
+cfg = json.loads(Path("config/perf001f.json").read_text(encoding="utf-8"))
+assert cfg["phase"] == "reference-evidence-runner-ready"
+
+validate_text = Path("scripts/validate.sh").read_text(encoding="utf-8")
+h3_marker = "# PERF001-F H3 " + "reference-evidence runner"
+assert validate_text.count(h3_marker) == 1
+pre_h3_validate = validate_text.split(h3_marker, 1)[0]
+assert "assert cfg['phase'] == 'persistent-production-hosted-measurement-driver'" not in pre_h3_validate
+assert "assert cfg['reference_gate_satisfied_by'] == cfg['protos_revision']" not in pre_h3_validate
+assert "assert cfg['runtime_blocker_239_fixed_by'] == '0372a58addc63f305c911811659edd9b2b508420'" in pre_h3_validate
+assert cfg["protos_revision"] == "0372a58addc63f305c911811659edd9b2b508420"
+assert cfg["corpus_publication_revision"] == "faa1714523d68650447047a05d184ab17a747c06"
+assert cfg["reference_gate_satisfied_by"] == "a08844c7ba59f4a213e4d318bcf3bee32393c2a9"
+assert cfg["runtime_blocker_239_fixed_by"] == "0372a58addc63f305c911811659edd9b2b508420"
+assert cfg["measurement_policy"]["startup_samples"] == 10
+assert cfg["measurement_policy"]["warmup_iterations"] == 20
+assert cfg["measurement_policy"]["steady_samples"] == 20
+
+dockerfile = Path("docker/protos-perf001f/Dockerfile").read_text(encoding="utf-8")
+for required in (
+    "Perf001fStartupDriver.java",
+    "/out/startup",
+    "/opt/perf001f/startup",
+    "Perf001fPersistentDriver.java",
+    "python3 dist/build_portable.py",
+    "dist/smoke_optimizing_runtime.sh",
+):
+    assert required in dockerfile, required
+
+startup = Path("docker/protos-perf001f/Perf001fStartupDriver.java").read_text(encoding="utf-8")
+for required in (
+    "builder.redirectOutput(stdout.toFile())",
+    "builder.redirectError(stderr.toFile())",
+    "child.waitFor(timeoutSeconds, TimeUnit.SECONDS)",
+    "child.destroyForcibly()",
+    "STARTUP_SAMPLE_BEGIN",
+    "STARTUP_SAMPLE_PASS",
+    "Perf001fPersistentDriver",
+):
+    assert required in startup, required
+for forbidden in (".readAllBytes(", "Thread.sleep", "-Xss"):
+    assert forbidden not in startup, forbidden
+
+runner = Path("runner/perf001f_reference.py").read_text(encoding="utf-8")
+for required in (
+    "STARTUP_CHILD_TIMEOUT_SECONDS = 120",
+    "CASE_TIMEOUT_SECONDS = 600",
+    "SMOKE_STARTUP_SAMPLES = 2",
+    "SMOKE_WARMUP_ITERATIONS = 2",
+    "SMOKE_STEADY_SAMPLES = 2",
+    "ACTOR_FANOUT_ID",
+    "docker_cleanup(container_name)",
+    'print("PERF001F_REFERENCE_TIMING: NOT_RUN")',
+    "MANIFEST.sha256",
+    "summary.tsv",
+    "summary.md",
+    "evidence.json",
+    "run-metadata.json",
+):
+    assert required in runner, required
+
+tests = Path("tests/test_perf001f.py").read_text(encoding="utf-8")
+stale_general = (
+    '        self.assertEqual(\n'
+    '            "a08844c7ba59f4a213e4d318bcf3bee32393c2a9",\n'
+    '            cfg["protos_revision"],\n'
+    '        )\n'
+)
+assert stale_general not in tests
+assert (
+    '        self.assertEqual(\n'
+    '            "0372a58addc63f305c911811659edd9b2b508420",\n'
+    '            cfg["protos_revision"],\n'
+    '        )\n'
+) in tests
+
+makefile = Path("Makefile").read_text(encoding="utf-8")
+assert "perf001f-reference-smoke:" in makefile
+assert "perf001f-reference:" in makefile
+print("PERF001F_REFERENCE_RUNNER_STATIC_VALIDATION: PASS")
+PYH3
+
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    docker/protos-perf001f/Perf001fStartupDriver.java \
+    runner/perf001f_reference.py
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+printf 'PERF001F_H3_LICENSE_CHECK: PASS\n'

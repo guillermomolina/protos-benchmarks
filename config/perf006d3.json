@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF006",
+  "slice": "PERF006-D3A",
+  "phase": "structural-diagnostics-harness-ready",
+  "diagnostic_claim": false,
+  "d2_evidence_revision": "7e3c2a9554d7ac48d30e74572460e14aaecb8fec",
+  "d2_harness_revision": "1a752e92569b4ed42d3f9f55f67d1a7447eae308",
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+  "protos_implementation_version": "0.2.492-SNAPSHOT",
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_feature": 25,
+    "jdk_version": "25.0.4.1",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9"
+  },
+  "historical_pre_c_prime": {
+    "classification": "historical_pre_C_prime_not_absolute_performance_comparator",
+    "test_tool_command": "bin/protos test --jobs 2",
+    "wall_seconds_approx": 471.985,
+    "execution_samples": 44568,
+    "hashmap_keyiterator_next_samples": 41092,
+    "hashmap_keyiterator_next_percent": 92.201,
+    "main_thread_samples": 43913,
+    "main_thread_percent": 98.53,
+    "jdk_deoptimization_events": 1824883,
+    "truffle_deoptimization_events": 1824544,
+    "hotspot": "ProtosEvaluatorContinuation.compactCompletedChildExecution",
+    "hotspot_operation": "invocationActivations.keySet().removeIf(...)",
+    "interpretation": "serial replay cleanup dominated main-thread CPU; do not attribute historical wall-time changes solely to optimizer"
+  },
+  "current_diagnostic_contract": {
+    "real_workload": "bin/protos test --jobs 2",
+    "real_workload_cpu_policy": "two distinct physical cores from current allowed cpuset",
+    "jfr_settings_base": "profile",
+    "execution_sample_period": "10 ms",
+    "standard_deoptimization_event": "jdk.Deoptimization",
+    "truffle_deoptimization_event": "jdk.graal.compiler.truffle.Deoptimization",
+    "bounded_trace_workload": "micro/method-call.protos",
+    "bounded_trace_expected": "42",
+    "bounded_trace_warmup": 20,
+    "bounded_trace_steady": 20,
+    "trace_compilation": true,
+    "trace_compilation_details": false,
+        "compilation_failure_action": "Print",
+    "reference_timing_changed": false,
+    "production_optimization_allowed": false,
+    "igv24_analyzer_used": false
+  },
+  "d3a_smoke": {
+    "jfr_workload": "micro/method-call.protos",
+    "jfr_expected": "42",
+    "jfr_warmup": 20,
+    "jfr_steady": 20,
+    "retained": false,
+    "diagnostic_claim": false
+  },
+  "d3b_output": "results/perf006-d3"
+}

@@ -1376,3 +1376,24 @@ assert cfg["d2_harness_smoke"]["retained"] is False
 assert cfg["d2_reference_output"] == "results/perf006-d2"
 print("PERF006D2A_STATIC_VALIDATION: PASS")
 PY
+
+# PERF006-D3A structural diagnostics harness
+python3 -m py_compile runner/perf006d3.py tests/test_perf006d3.py
+python3 runner/perf006d3.py validate
+python3 -m unittest tests.test_perf006d3 -v
+bash -n docker/protos-perf006d3/jfr-java
+python3 - <<'PY'
+import json
+from pathlib import Path
+cfg = json.loads(Path("config/perf006d3.json").read_text(encoding="utf-8"))
+assert cfg["slice"] == "PERF006-D3A"
+assert cfg["diagnostic_claim"] is False
+assert cfg["d2_evidence_revision"] == "7e3c2a9554d7ac48d30e74572460e14aaecb8fec"
+assert cfg["protos_revision"] == "4a03efc15620b37b2e418b3df30b4a26486446ec"
+assert cfg["current_diagnostic_contract"]["reference_timing_changed"] is False
+assert cfg["current_diagnostic_contract"]["production_optimization_allowed"] is False
+assert cfg["current_diagnostic_contract"]["igv24_analyzer_used"] is False
+assert cfg["current_diagnostic_contract"]["trace_compilation_details"] is False
+assert cfg["current_diagnostic_contract"]["compilation_failure_action"] == "Print"
+print("PERF006D3A_STATIC_VALIDATION: PASS")
+PY

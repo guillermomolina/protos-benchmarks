@@ -739,3 +739,38 @@ published under `results/perf006-d2/`.
 Heavy compiler/JFR/IGV diagnostics are intentionally excluded from these timing
 runs and belong to PERF006-D3. Historical pre-C′ replay evidence is
 interpretation-only and is not used as an absolute performance comparison.
+
+## PERF006-D3 current structural diagnostics
+
+D3 is diagnostic-only and is deliberately separate from retained D2 timing.
+
+D3A publishes the exact JFR/TraceCompilation harness. Its smoke output is not
+retained as a performance or diagnostic conclusion. D3B must run from the exact
+published D3A SHA.
+
+The current real-workload profile is `bin/protos test --jobs 2` on exact Protos
+`4a03efc15620b37b2e418b3df30b4a26486446ec` with the optimizing runtime. JFR uses the JDK 25 `profile` settings,
+10 ms `jdk.ExecutionSample`, explicit `jdk.Deoptimization`, and requests the
+Graal/Truffle deoptimization event by its historical name when available.
+
+The recovered pre-C′ evidence is structural historical context only:
+
+```text
+wall                         ~471.985 s
+ExecutionSample              44,568
+HashMap$KeyIterator.next     41,092 / 92.201%
+thread main                  43,913 / 98.530%
+jdk.Deoptimization           1,824,883
+Truffle Deoptimization       1,824,544
+```
+
+Its known source hotspot was
+`ProtosEvaluatorContinuation.compactCompletedChildExecution()` repeatedly
+scanning `invocationActivations.keySet().removeIf(...)`. D3 must not reintroduce
+or optimize that retired replay path. It records whether the exact historical
+symbol remains hot, current thread concentration, current deoptimization
+behavior, a static audit for the old path, and any new dominant hotspot.
+
+Current-toolchain TraceCompilation is run separately on
+`micro/method-call.protos`. The historical Graal-24/JDK-17 IGV analyzer is not
+used by D3A/D3B unless separately re-ratified for current 25.3.4.1 output.

@@ -13,6 +13,8 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Added PERF006-D3A current structural-diagnostics harness: JDK 25 JFR ExecutionSample/deoptimization analysis, exact pre-C′ replay-hotspot tracking, two-physical-core Test Tool profiling support, and current 25.3.4.1 TraceCompilation evidence on a bounded canonical workload. D3 remains separate from D2 reference timing and applies no production optimization.
+
 - Published PERF006-D2 retained controlled optimizer/fallback timing evidence from exact D2A harness `1a752e92569b4ed42d3f9f55f67d1a7447eae308`: 10 fresh-JVM startup samples and five persistent forks with 20 warmup + 20 steady samples for each of five workloads under both runtime variants, retaining raw samples, runtime/host/image identity, median/MAD/min/max/p95 summaries and per-workload speedup ratios. Heavy diagnostics and historical pre-C′ replay evidence remain outside the reference timing path.
 
 - Added PERF006-D2A timing-harness capability over the published D1 control: canonical-source persistent execution with fresh module Activation per sample, fresh-JVM startup control outside Docker-start timing, exact runtime identity per variant, deterministic median/MAD/min/max/p95 aggregation, and an exact-harness-SHA guard for retained D2B publication. D2A smoke timings are non-retained and make no performance claim.

@@ -187,3 +187,16 @@ perf006d-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf006d-reference HARNESS_REVISION=<published-D2A-SHA> OUT=results/perf006-d2" >&2; exit 2; }
 	@test -n "$(OUT)" || { echo "usage: make perf006d-reference HARNESS_REVISION=<published-D2A-SHA> OUT=results/perf006-d2" >&2; exit 2; }
 	python3 runner/perf006d.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
+
+.PHONY: perf006d3-validate perf006d3-smoke perf006d3-reference
+
+perf006d3-validate:
+	python3 runner/perf006d3.py validate
+
+perf006d3-smoke:
+	python3 runner/perf006d3.py smoke
+
+perf006d3-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf006d3-reference HARNESS_REVISION=<published-D3A-SHA> OUT=results/perf006-d3" >&2; exit 2; }
+	@test -n "$(OUT)" || { echo "usage: make perf006d3-reference HARNESS_REVISION=<published-D3A-SHA> OUT=results/perf006-d3" >&2; exit 2; }
+	python3 runner/perf006d3.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"

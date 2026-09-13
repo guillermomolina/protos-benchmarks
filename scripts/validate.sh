@@ -1328,3 +1328,33 @@ for path in runner/perf001g.py tests/test_perf001g.py; do
 done
 printf 'PERF001G_STATIC_VALIDATION: PASS\n'
 printf 'PERF001G_LICENSE_CHECK: PASS\n'
+
+# PERF006-D1 current-runtime benchmark contract
+python3 -m py_compile runner/perf006d.py tests/test_perf006d.py
+python3 runner/perf006d.py validate
+python3 -m unittest tests.test_perf006d -v
+notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
+for path in \
+    runner/perf006d.py \
+    tests/test_perf006d.py \
+    docker/protos-perf006d/Dockerfile \
+    docker/protos-perf006d/run.sh \
+    docker/protos-perf006d/Perf006dRuntimeProbe.java \
+    docker/protos-perf006d/Perf006dCorrectnessDriver.java
+do
+    grep -qF "$notice" "$path" || {
+        echo "missing APL notice: $path" >&2
+        exit 1
+    }
+done
+python3 - <<'PY'
+import json
+from pathlib import Path
+cfg = json.loads(Path("config/perf006d.json").read_text(encoding="utf-8"))
+assert cfg["slice"] == "PERF006-D1"
+assert cfg["timing_claim"] is False
+assert cfg["protos_revision"] == "4a03efc15620b37b2e418b3df30b4a26486446ec"
+assert cfg["protos_implementation_version"] == "0.2.492-SNAPSHOT"
+assert len(cfg["workloads"]) == 5
+print("PERF006D1_JSON_VALIDATION: PASS")
+PY

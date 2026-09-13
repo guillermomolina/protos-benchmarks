@@ -656,3 +656,48 @@ The final replay reconstructs the exact historical PERF001-D harness `0a406373c4
 Before replay, G verifies that the retained `results/perf001-d`, `results/perf001-e` and `results/perf001-f` subtrees are byte-identical to their state at companion evidence commit `f34e37da11f209aa9f9ea84465822c3362fc4da0`. The replay records current host/runtime/container identities and PASS counts but retains no replacement timing samples.
 
 The final baseline report presents the existing D/E/F summaries as separate benchmark generations. It does not normalize, rank, or infer a whole-language comparison across incompatible historical revisions or environments. G1 publishes only this harness and its static/integrity validation. The real replay and retained `results/perf001-g/` publication occur only from the exact published G1 harness revision in G2.
+
+## PERF006-D current-runtime optimizer/fallback evidence
+
+`PERF006-D` is a current-generation runtime-integrity measurement track owned by
+`guillermomolina/protos#487`. It does not replace or rewrite PERF001/PERF003
+evidence.
+
+### D1 — current runtime contract
+
+D1 pins Protos `4a03efc15620b37b2e418b3df30b4a26486446ec`
+(`0.2.492-SNAPSHOT`) and its exact canonical toolchain:
+
+```text
+GraalVM Community 25.3.4.1
+JDK 25.0.4.1
+Graal/Truffle 25.3.4.1
+Maven 3.9.9
+container ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825
+```
+
+The executable content had already passed PERF006-C3 full validation at
+`428e46523e8fa0b3f0260b5a6e76c198725c041b`; the pinned D1 source additionally
+contains the documentation-only C4 closure evidence.
+
+D1 defines two diagnostic variants from the **same** portable bundle:
+
+- optimizer: the complete canonical `lib/runtime` projection;
+- fallback: a byte-identical projection for every retained jar except the
+  `truffle-runtime` and `truffle-compiler` jars, which are deliberately omitted.
+
+The fallback control changes no Protos source and does not suppress
+`WarnInterpreterOnly`. Its expected runtime is
+`com.oracle.truffle.api.impl.DefaultTruffleRuntime`; the optimizer must be
+`com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime`.
+
+D1 correctness-gates five canonical guest-heavy workloads under both variants:
+closure call, method call, monomorphic dispatch, polymorphic dispatch and
+recursive Fibonacci. This is 10 correctness cases plus exact runtime identity.
+D1 publishes **no timing claim**.
+
+D2 owns reference timing. Startup, warmup and steady-state remain separate
+measurement classes; heavy compiler/IGV diagnostics remain outside reference
+timing. The informal historical observation that a later full Maven suite took
+roughly 8 minutes rather than roughly 20 minutes is not a controlled
+optimizer-vs-fallback result and must not be promoted into one.

@@ -13,6 +13,8 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Added PERF006-D1 current-runtime benchmark contract for Protos `4a03efc15620b37b2e418b3df30b4a26486446ec` / `0.2.492-SNAPSHOT`: exact GraalVM 25.3.4.1 + JDK 25.0.4.1 profile, same-source optimizer/fallback runtime controls, five canonical guest-heavy correctness workloads, CPU/network/runtime-identity gates, and a timing-free 10-case smoke path that leaves historical PERF001/PERF003 evidence untouched.
+
 - Published PERF001-G G2 final reproducibility evidence from exact G1 harness `2fad6741b429c3e8d69683806e3aadc64f0812cf`: exact historical PERF001-D correctness replay passed 44/44, PERF001-E cross-language correctness replay passed 18/18, and exact PERF001-F H3 replay passed all 12 configurations under the non-retained 2/2/2 smoke policy. `results/perf001-g/` records replay/runtime/host/image provenance and the final baseline report while preserving retained PERF001-D/E/F timing evidence at `f34e37da11f209aa9f9ea84465822c3362fc4da0` as the sole timing authority; no replacement timing corpus or timing-drift pass/fail threshold is introduced.
 - Added the PERF001-G G1 bounded exact-pin reproducibility harness after explicit project-owner approval: preserve PERF001-D/E/F retained timing evidence as the sole baseline authority, verify retained result-subtree identity against companion evidence commit `f34e37da11f209aa9f9ea84465822c3362fc4da0`, reconstruct exact historical D/E harnesses for their full correctness matrices, and delegate F to exact H3 non-retained `2/2/2` smoke. G1 publishes harness capability only; the real replay and `results/perf001-g/` baseline report remain deferred to G2 from the exact published G1 SHA.
 

@@ -169,3 +169,11 @@ perf001g-run:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf001g-run HARNESS_REVISION=<published-G1-SHA> OUT=<output-dir>" >&2; exit 2; }
 	@test -n "$(OUT)" || { echo "usage: make perf001g-run HARNESS_REVISION=<published-G1-SHA> OUT=<output-dir>" >&2; exit 2; }
 	python3 runner/perf001g.py run --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
+
+.PHONY: perf006d-validate perf006d-smoke
+
+perf006d-validate:
+	python3 runner/perf006d.py validate
+
+perf006d-smoke:
+	python3 runner/perf006d.py smoke

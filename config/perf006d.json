@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF006",
+  "slice": "PERF006-D1",
+  "phase": "current-runtime-benchmark-contract",
+  "timing_claim": false,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+  "protos_executable_baseline": "428e46523e8fa0b3f0260b5a6e76c198725c041b",
+  "protos_implementation_version": "0.2.492-SNAPSHOT",
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_feature": 25,
+    "jdk_version": "25.0.4.1",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "java_stack": "128m"
+  },
+  "runtime_variants": {
+    "optimizer": {
+      "expected_runtime": "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime",
+      "runtime_plane": "complete canonical portable lib/runtime projection"
+    },
+    "fallback": {
+      "expected_runtime": "com.oracle.truffle.api.impl.DefaultTruffleRuntime",
+      "runtime_plane": "same canonical projection excluding only truffle-runtime and truffle-compiler jars",
+      "diagnostic_only": true,
+      "warning_suppression": false
+    }
+  },
+  "workloads": [
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42"
+    },
+    {
+      "id": "runtime/polymorphic-dispatch",
+      "source": "runtime/polymorphic-dispatch.protos",
+      "expected": "15000"
+    },
+    {
+      "id": "algorithms/fibonacci/recursive",
+      "source": "algorithms/fibonacci/recursive.protos",
+      "expected": "832040"
+    }
+  ],
+  "execution_policy": {
+    "network": "none",
+    "cpu_affinity": "first CPU from current allowed cpuset",
+    "correctness_before_timing": true,
+    "runtime_identity_per_variant": true
+  },
+  "d2_measurement_contract": {
+    "startup_process_samples_per_variant_workload": 10,
+    "persistent_forks_per_variant_workload": 5,
+    "warmup_iterations_per_fork": 20,
+    "steady_samples_per_fork": 20,
+    "primary_statistic": "median",
+    "dispersion": [
+      "mad",
+      "min",
+      "max",
+      "p95"
+    ],
+    "reference_timing_diagnostics": false,
+    "heavy_compiler_diagnostics_separate": true
+  },
+  "historical_policy": {
+    "rewrite_existing_perf001_perf003_evidence": false,
+    "cross_generation_speedup_claim_from_20_to_8_minute_full_suite": false
+  }
+}

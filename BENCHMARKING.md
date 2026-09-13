@@ -774,3 +774,35 @@ behavior, a static audit for the old path, and any new dominant hotspot.
 Current-toolchain TraceCompilation is run separately on
 `micro/method-call.protos`. The historical Graal-24/JDK-17 IGV analyzer is not
 used by D3A/D3B unless separately re-ratified for current 25.3.4.1 output.
+
+## PERF006-D3 retained current structural diagnostics
+
+The retained D3 structural profile was produced from exact published D3A
+harness `297ccb4fc94a0f0b0c9e0a65422aba2e223c4a83`. No production optimization or reference-timing change was
+made.
+
+Current diagnostic headline:
+
+```text
+main_thread_percent=39.411481
+top_frame=com.guillermomolina.protos.execution.ProtosBytecodeRootNodeGen$CachedBytecodeNode.continueAt
+top_frame_percent=32.995658
+HashMap$KeyIterator.next_percent=0.000000
+jdk_deoptimizations=191
+truffle_deoptimizations=6
+compactCompletedChildExecution_present=FALSE
+invocationActivations.keySet().removeIf_present=FALSE
+trace_successful_compilations=12
+trace_failed_markers=6
+trace_bailout_markers=15
+```
+
+These values are compared structurally with the recovered historical pre-C′
+profile, not as an absolute wall-time speedup claim. D4 owns final causal
+interpretation and any decision to create a separate PERF item for a new
+dominant hotspot.
+
+The D3B publication launcher normalized trailing horizontal whitespace in
+`jfr-summary.txt` and `test-tool-output-tail.txt` after the completed diagnostic
+run. `result.json`, `current-profile.json`, and `trace-compilation.log` retain
+their exact measured SHA-256 identities; no diagnostic was rerun.

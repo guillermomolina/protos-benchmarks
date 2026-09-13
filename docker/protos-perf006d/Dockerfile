@@ -23,6 +23,8 @@ ARG PROTOS_REVISION=4a03efc15620b37b2e418b3df30b4a26486446ec
 
 COPY docker/protos-perf006d/Perf006dRuntimeProbe.java /tmp/Perf006dRuntimeProbe.java
 COPY docker/protos-perf006d/Perf006dCorrectnessDriver.java /tmp/Perf006dCorrectnessDriver.java
+COPY docker/protos-perf006d/Perf006dPersistentDriver.java /tmp/Perf006dPersistentDriver.java
+COPY docker/protos-perf006d/Perf006dStartupController.java /tmp/Perf006dStartupController.java
 COPY docker/protos-perf006d/run.sh /tmp/perf006d-run.sh
 
 RUN microdnf install -y git gzip tar findutils ca-certificates python39 unzip \
@@ -60,7 +62,7 @@ RUN cd /src \
     && test -n "$BUNDLE" \
     && test -f "$BUNDLE/lib/protos.jar" \
     && test -d "$BUNDLE/lib/runtime" \
-    && mkdir -p /out/protos /out/corpus /out/probe /out/driver /out/runtime-fallback \
+    && mkdir -p /out/protos /out/corpus /out/probe /out/driver /out/timing /out/runtime-fallback \
     && cp -a "$BUNDLE"/. /out/protos/ \
     && cp -a protos/benchmarks/. /out/corpus/ \
     && for jar in "$BUNDLE"/lib/runtime/*.jar; do \
@@ -77,6 +79,8 @@ RUN cd /src \
          -d /out/probe /tmp/Perf006dRuntimeProbe.java \
     && javac -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
          -d /out/driver /tmp/Perf006dCorrectnessDriver.java \
+    && javac -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
+         -d /out/timing /tmp/Perf006dPersistentDriver.java /tmp/Perf006dStartupController.java \
     && install -m 0755 /tmp/perf006d-run.sh /out/run
 
 FROM ${GRAAL_BASE}
@@ -85,6 +89,7 @@ COPY --from=build /out/protos /opt/protos
 COPY --from=build /out/corpus /opt/perf006d/corpus
 COPY --from=build /out/probe /opt/perf006d/probe
 COPY --from=build /out/driver /opt/perf006d/driver
+COPY --from=build /out/timing /opt/perf006d/timing
 COPY --from=build /out/runtime-fallback /opt/perf006d/runtime-fallback
 COPY --from=build /out/run /opt/perf006d/run
 ENV PROTOS_HOME=/opt/protos

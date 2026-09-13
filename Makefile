@@ -177,3 +177,13 @@ perf006d-validate:
 
 perf006d-smoke:
 	python3 runner/perf006d.py smoke
+
+.PHONY: perf006d-timing-smoke perf006d-reference
+
+perf006d-timing-smoke:
+	python3 runner/perf006d.py timing-smoke
+
+perf006d-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf006d-reference HARNESS_REVISION=<published-D2A-SHA> OUT=results/perf006-d2" >&2; exit 2; }
+	@test -n "$(OUT)" || { echo "usage: make perf006d-reference HARNESS_REVISION=<published-D2A-SHA> OUT=results/perf006-d2" >&2; exit 2; }
+	python3 runner/perf006d.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"

@@ -1358,3 +1358,21 @@ assert cfg["protos_implementation_version"] == "0.2.492-SNAPSHOT"
 assert len(cfg["workloads"]) == 5
 print("PERF006D1_JSON_VALIDATION: PASS")
 PY
+
+# PERF006-D2A controlled timing harness
+python3 -m py_compile runner/perf006d.py tests/test_perf006d.py
+python3 runner/perf006d.py validate
+python3 -m unittest tests.test_perf006d -v
+bash -n docker/protos-perf006d/run.sh
+python3 - <<'PY'
+import json
+from pathlib import Path
+cfg = json.loads(Path("config/perf006d.json").read_text(encoding="utf-8"))
+assert cfg["slice"] == "PERF006-D2A"
+assert cfg["phase"] == "controlled-timing-harness-ready"
+assert cfg["d1_harness_revision"] == "1dc27dda3033f1d447b5525c9e40b6a93d03232d"
+assert cfg["timing_claim"] is False
+assert cfg["d2_harness_smoke"]["retained"] is False
+assert cfg["d2_reference_output"] == "results/perf006-d2"
+print("PERF006D2A_STATIC_VALIDATION: PASS")
+PY

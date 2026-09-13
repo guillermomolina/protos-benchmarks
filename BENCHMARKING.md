@@ -701,3 +701,25 @@ measurement classes; heavy compiler/IGV diagnostics remain outside reference
 timing. The informal historical observation that a later full Maven suite took
 roughly 8 minutes rather than roughly 20 minutes is not a controlled
 optimizer-vs-fallback result and must not be promoted into one.
+
+## PERF006-D2 timing harness publication
+
+D2 uses a two-publication retained-evidence pattern.
+
+`PERF006-D2A` publishes the timing runner and proves it with a non-retained
+1-startup / 1-fork / 2-warmup / 2-steady smoke over `micro/closure-call` in both
+runtime variants. D2A publishes no performance claim.
+
+`PERF006-D2B` must execute the retained reference run from the exact published
+D2A harness SHA. It uses the D1 contract unchanged: 10 fresh-JVM startup samples
+per variant/workload, five independent persistent JVM forks, 20 warmup
+iterations per fork and 20 steady-state samples per fork.
+
+The persistent driver reads the canonical source once, retains one
+RuntimeHost/Process/Polyglot Context per fork, and creates a fresh module
+Activation for each execution. Source text is not projected or rewritten.
+Startup samples are timed by a controller inside an already-running Docker
+container, so Docker creation/start is outside the timing interval.
+
+Reference timing contains no TraceCompilation, IGV dump or other heavyweight
+compiler diagnostics. Those belong to D3.

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "perf_item": "PERF006",
-  "slice": "PERF006-D1",
-  "phase": "current-runtime-benchmark-contract",
+  "slice": "PERF006-D2A",
+  "phase": "controlled-timing-harness-ready",
   "timing_claim": false,
   "protos_repository": "https://github.com/guillermomolina/protos.git",
   "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
@@ -33,27 +33,32 @@
     {
       "id": "micro/closure-call",
       "source": "micro/closure-call.protos",
-      "expected": "42"
+      "expected": "42",
+      "source_blob_sha": "5ed62d6e67e2ec02195383987ca3f367c18ac947"
     },
     {
       "id": "micro/method-call",
       "source": "micro/method-call.protos",
-      "expected": "42"
+      "expected": "42",
+      "source_blob_sha": "630ed821cc9b62c71f843859fb16b963414a0f52"
     },
     {
       "id": "runtime/monomorphic-dispatch",
       "source": "runtime/monomorphic-dispatch.protos",
-      "expected": "42"
+      "expected": "42",
+      "source_blob_sha": "9ba70de276572f11771de4d98ebbed165e8892b2"
     },
     {
       "id": "runtime/polymorphic-dispatch",
       "source": "runtime/polymorphic-dispatch.protos",
-      "expected": "15000"
+      "expected": "15000",
+      "source_blob_sha": "ac0814f4dc6f5e2f3ac69e07b5738d0301aa7f38"
     },
     {
       "id": "algorithms/fibonacci/recursive",
       "source": "algorithms/fibonacci/recursive.protos",
-      "expected": "832040"
+      "expected": "832040",
+      "source_blob_sha": "4e8967a904425b189775640232bd4861009ab7dd"
     }
   ],
   "execution_policy": {
@@ -80,5 +85,15 @@
   "historical_policy": {
     "rewrite_existing_perf001_perf003_evidence": false,
     "cross_generation_speedup_claim_from_20_to_8_minute_full_suite": false
-  }
+  },
+  "d1_harness_revision": "1dc27dda3033f1d447b5525c9e40b6a93d03232d",
+  "d2_harness_smoke": {
+    "workload": "micro/closure-call",
+    "startup_samples_per_variant": 1,
+    "persistent_forks_per_variant": 1,
+    "warmup_iterations_per_fork": 2,
+    "steady_samples_per_fork": 2,
+    "retained": false
+  },
+  "d2_reference_output": "results/perf006-d2"
 }

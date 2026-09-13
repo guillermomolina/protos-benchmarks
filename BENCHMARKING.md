@@ -723,3 +723,19 @@ container, so Docker creation/start is outside the timing interval.
 
 Reference timing contains no TraceCompilation, IGV dump or other heavyweight
 compiler diagnostics. Those belong to D3.
+
+## PERF006-D2 retained controlled timing evidence
+
+The retained D2 optimizer/fallback corpus was measured from exact published
+harness `1a752e92569b4ed42d3f9f55f67d1a7447eae308`. The harness and measurement contract were not changed by
+the evidence publication.
+
+The retained policy is 10 fresh-JVM startup samples per runtime/workload plus
+five persistent JVM forks per runtime/workload, with 20 warmup and 20
+steady-state iterations per fork. Raw ordered samples, runtime/host/image
+identity, deterministic summaries and the five fallback/optimizer ratios are
+published under `results/perf006-d2/`.
+
+Heavy compiler/JFR/IGV diagnostics are intentionally excluded from these timing
+runs and belong to PERF006-D3. Historical pre-C′ replay evidence is
+interpretation-only and is not used as an absolute performance comparison.

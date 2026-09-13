@@ -13,6 +13,8 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
+- Published PERF006-D2 retained controlled optimizer/fallback timing evidence from exact D2A harness `1a752e92569b4ed42d3f9f55f67d1a7447eae308`: 10 fresh-JVM startup samples and five persistent forks with 20 warmup + 20 steady samples for each of five workloads under both runtime variants, retaining raw samples, runtime/host/image identity, median/MAD/min/max/p95 summaries and per-workload speedup ratios. Heavy diagnostics and historical pre-C′ replay evidence remain outside the reference timing path.
+
 - Added PERF006-D2A timing-harness capability over the published D1 control: canonical-source persistent execution with fresh module Activation per sample, fresh-JVM startup control outside Docker-start timing, exact runtime identity per variant, deterministic median/MAD/min/max/p95 aggregation, and an exact-harness-SHA guard for retained D2B publication. D2A smoke timings are non-retained and make no performance claim.
 
 - Added PERF006-D1 current-runtime benchmark contract for Protos `4a03efc15620b37b2e418b3df30b4a26486446ec` / `0.2.492-SNAPSHOT`: exact GraalVM 25.3.4.1 + JDK 25.0.4.1 profile, same-source optimizer/fallback runtime controls, five canonical guest-heavy correctness workloads, CPU/network/runtime-identity gates, and a timing-free 10-case smoke path that leaves historical PERF001/PERF003 evidence untouched.

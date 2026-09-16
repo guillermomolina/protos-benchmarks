@@ -20,7 +20,14 @@ import subprocess
 import tempfile
 import unittest
 
-from runner.perf009a import materialize_source, materialized_source_identity
+from runner.perf009a import (
+    load_config,
+    materialize_source,
+    materialized_source_identity,
+    measurement_plan,
+    parse_makefile_contract_text,
+    parse_test_tool_phase_names_text,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,7 +51,7 @@ class Perf009aConfigTest(unittest.TestCase):
     def test_config_pins_reproducible_protos_source(self) -> None:
         cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
 
-        self.assertEqual(1, cfg["schema_version"])
+        self.assertEqual(2, cfg["schema_version"])
         self.assertEqual("PERF009", cfg["perf_item"])
         self.assertEqual("PERF009-A", cfg["slice"])
         self.assertEqual(
@@ -78,6 +85,67 @@ class Perf009aConfigTest(unittest.TestCase):
         self.assertNotIn("../protos", raw)
         self.assertNotIn("/home/", raw)
         self.assertNotIn("toolchain", cfg)
+
+
+    def test_a1_contract_pins_current_measurement_surface(self) -> None:
+        cfg = load_config()
+        contract = cfg["a1_inventory_contract"]
+        self.assertEqual(4, contract["ci_java_jobs"])
+        self.assertEqual(4, contract["ci_protos_jobs"])
+        self.assertEqual(3, contract["minimum_repetitions"])
+        self.assertEqual([1, 2, 4, 8], contract["diagnostic_protos_jobs"])
+        self.assertEqual("ProtosI026FDapBehaviorTest", contract["expected_java_serial_test"])
+        self.assertEqual(8, len(contract["expected_java_slow_test_classes"]))
+        self.assertEqual(18, len(contract["expected_test_tool_phases"]))
+        self.assertEqual("package-toml", contract["expected_test_tool_phases"][4])
+        self.assertEqual("package-tool-project-projection", contract["expected_test_tool_phases"][-1])
+
+    def test_makefile_contract_parser_keeps_quarantine_distinct(self) -> None:
+        makefile = "\n".join([
+            "JAVA_TEST_JOBS ?= 8",
+            "PROTOS_TEST_JOBS ?= 8",
+            "JAVA_SLOW_TEST_EXCLUDES := **/SlowOne.java,**/SlowTwo.java",
+            "JAVA_SERIAL_TEST := SerialOnly",
+            "test: test-java test-protos",
+            "test-protos:",
+            "\\tbin/protos test --jobs $(PROTOS_TEST_JOBS)",
+        ]) + "\n"
+        parsed = parse_makefile_contract_text(makefile)
+        self.assertEqual(8, parsed["java_test_jobs_default"])
+        self.assertEqual(8, parsed["protos_test_jobs_default"])
+        self.assertEqual(["SlowOne", "SlowTwo"], parsed["slow_test_classes"])
+        self.assertEqual("SerialOnly", parsed["serial_test_class"])
+        self.assertEqual(["test-java", "test-protos"], parsed["test_target_order"])
+
+    def test_test_tool_phase_parser_preserves_order(self) -> None:
+        main = (
+            'phaseNames: Array(\n'
+            '    "main",\n'
+            '    "actor",\n'
+            '    "package-toml"\n'
+            ')\n'
+            'phaseNames.freeze()\n'
+        )
+
+        self.assertEqual(
+            ["main", "actor", "package-toml"],
+            parse_test_tool_phase_names_text(main),
+        )
+
+    def test_measurement_plan_separates_operational_and_complete_reference(self) -> None:
+        plan = measurement_plan(load_config())
+        lanes = {lane["id"]: lane for lane in plan["lanes"]}
+        self.assertEqual(
+            ["make", "test", "JAVA_TEST_JOBS=4", "PROTOS_TEST_JOBS=4"],
+            lanes["current-ci"]["command"],
+        )
+        self.assertEqual("CURRENT_OPERATIONAL_PATH_WITH_QUARANTINE", lanes["current-ci"]["role"])
+        self.assertEqual(["mvn", "test"], lanes["java-complete-reference"]["command"])
+        self.assertEqual(
+            "COMPLETE_JAVA_COVERAGE_REFERENCE_NOT_CURRENT_CI_TOPOLOGY",
+            lanes["java-complete-reference"]["role"],
+        )
+        self.assertEqual([1, 2, 4, 8], plan["diagnostic_protos_jobs"])
 
 
 class Perf009aMaterializationTest(unittest.TestCase):

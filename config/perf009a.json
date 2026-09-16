@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "perf_item": "PERF009",
   "slice": "PERF009-A",
   "phase": "baseline-and-critical-path-attribution",
@@ -9,5 +9,47 @@
   "source_materialization": {
     "mode": "isolated-git-fetch",
     "require_exact_revision": true
+  },
+  "a1_inventory_contract": {
+    "ci_java_jobs": 4,
+    "ci_protos_jobs": 4,
+    "minimum_repetitions": 3,
+    "diagnostic_protos_jobs": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "expected_java_slow_test_classes": [
+      "ProtosTomlParserStressTest",
+      "ProtosTomlEncoderModuleTest",
+      "ProtosPackageToolProtosTest",
+      "ProtosExternalPackagePlanningPreflightTest",
+      "ProtosWorkspaceRunCliTest",
+      "ProtosJsonParserModuleTest",
+      "ProtosPackageExecutionPlanAdapterTest",
+      "ProtosTestToolManifestPlanTest"
+    ],
+    "expected_java_serial_test": "ProtosI026FDapBehaviorTest",
+    "expected_test_tool_phases": [
+      "main",
+      "process-snapshot",
+      "actor",
+      "group",
+      "package-toml",
+      "uri",
+      "csv",
+      "cli",
+      "math-integer",
+      "crypto-sha256",
+      "network-ip-addresses",
+      "network-ip-endpoints",
+      "package-tool-version",
+      "package-tool-lock",
+      "package-tool-resolution-input",
+      "package-tool-resolution-root",
+      "package-tool-execution-plan",
+      "package-tool-project-projection"
+    ]
   }
 }

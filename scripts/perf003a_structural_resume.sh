@@ -42,7 +42,7 @@ RUN=$(CDPATH= cd -- "$RUN" && pwd)
 CONFIG="$ROOT/config/perf003a-structural.json"
 DUMPS="$RUN/graal_dumps"
 EXPORT_ROOT="$RUN/igv_json"
-ANALYZER_IMAGE=${PROTOS_IGV_ANALYZER_IMAGE:-protos-benchmarks/igv-analyzer:graal-24.0.0}
+ANALYZER_IMAGE=${PROTOS_IGV_ANALYZER24_IMAGE:-protos-benchmarks/igv-analyzer24:graal-24.0.0}
 RESERVE_BYTES=${PERF003A_RESUME_RESERVE_BYTES:-5368709120}
 ESTIMATE_MULTIPLIER=${PERF003A_RESUME_ESTIMATE_MULTIPLIER:-16}
 MARKER_VERSION=1
@@ -223,9 +223,9 @@ command -v docker >/dev/null 2>&1 || {
 
 if ! docker image inspect "$ANALYZER_IMAGE" >/dev/null 2>&1; then
     echo "IGV_ANALYZER_IMAGE: MISSING; building isolated analyzer"
-    "$ROOT/scripts/igv_analyzer.sh" build
+    "$ROOT/scripts/igv_analyzer24.sh" build
 fi
-"$ROOT/scripts/igv_analyzer.sh" smoke
+"$ROOT/scripts/igv_analyzer24.sh" smoke
 echo "IGV_ANALYZER_READY: PASS"
 
 converted=0
@@ -281,7 +281,7 @@ for bgv in "${bgv_files[@]}"; do
     set +e
     (
         cd "$RUN"
-        "$ROOT/scripts/igv_analyzer.sh" analyze "igv_json/$key/input.bgv"
+        "$ROOT/scripts/igv_analyzer24.sh" analyze "igv_json/$key/input.bgv"
     ) >"$log" 2>&1
     rc=$?
     set -e

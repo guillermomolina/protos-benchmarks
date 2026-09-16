@@ -195,7 +195,7 @@ command -v docker >/dev/null 2>&1 || {
     echo "ENVIRONMENT_LIMITATION: docker is required" >&2
     exit 9
 }
-"$ROOT/scripts/igv_analyzer.sh" smoke
+"$ROOT/scripts/igv_analyzer24.sh" smoke
 echo "IGV_ANALYZER_READY: PASS"
 
 converted=0
@@ -233,7 +233,7 @@ for bgv in "${BGV_FILES[@]}"; do
     set +e
     (
         cd "$RUN"
-        "$ROOT/scripts/igv_analyzer.sh" summarize \
+        "$ROOT/scripts/igv_analyzer24.sh" summarize \
             "$rel" \
             "igv_compact/$key/summary.ndjson.tmp" \
             "${TERMS[@]}"

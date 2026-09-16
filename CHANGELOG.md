@@ -13,7 +13,7 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Added
 
-- Added a current-generation IGV analyzer pinned to Graal 25.3.4.1 and mx 7.83.0. It builds upstream `GRAAL_IGVUTIL`, runs the extracted tooling on a neutral JRE 21, exposes `list`/`filter`/`flatten`, and leaves the historical Graal 24 PERF003 analyzer unchanged.
+- Promoted the Graal 25.3.4.1 / mx 7.83.0 `GRAAL_IGVUTIL` analyzer to the unsuffixed default `igv-analyzer` path for new PERF diagnostics. Retained Graal 24.0.0 PERF003 tooling now uses explicit `igv-analyzer24` names and is not a dependency of the generic/current analyzer targets.
 
 - Published PERF006-D3 retained current structural diagnostics from exact D3A harness `297ccb4fc94a0f0b0c9e0a65422aba2e223c4a83`: full `bin/protos test --jobs 2` JDK-25 JFR profile, current main-thread/top-frame CPU concentration, exact historical `HashMap$KeyIterator.next` share, standard/Truffle deoptimization evidence, static retired-replay audit, and bounded current-toolchain TraceCompilation. No production optimization or historical absolute wall-time attribution is included. Publication-only recovery normalized trailing whitespace in two derived text artifacts without changing the measured JSON/TraceCompilation evidence.
 

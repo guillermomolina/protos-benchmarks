@@ -17,20 +17,25 @@
 set -euo pipefail
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-IMAGE=${PROTOS_IGV_ANALYZER_IMAGE:-protos-benchmarks/igv-analyzer:graal-24.0.0}
+IMAGE=${PROTOS_IGV_ANALYZER_IMAGE:-protos-benchmarks/igv-analyzer:graal-25.3.4.1}
 DOCKER=${DOCKER:-docker}
 
 usage() {
-    cat <<'EOF'
+    cat <<'USAGE'
 Usage:
   scripts/igv_analyzer.sh build
   scripts/igv_analyzer.sh smoke [sample.bgv]
-  scripts/igv_analyzer.sh summarize <input.bgv> <output.ndjson> [term...]
-  scripts/igv_analyzer.sh analyze <bgv2json-args...>
-EOF
+  scripts/igv_analyzer.sh list <igvutil-list-args...>
+  scripts/igv_analyzer.sh filter <igvutil-filter-args...>
+  scripts/igv_analyzer.sh flatten <igvutil-flatten-args...>
+
+Direct list/filter/flatten arguments are evaluated inside the current working
+directory, which is mounted read/write as /work in the analyzer container.
+USAGE
 }
 
 command=${1:-}
+
 case "$command" in
     build)
         exec "$DOCKER" build \
@@ -40,70 +45,84 @@ case "$command" in
         ;;
     smoke)
         shift
+        [ "$#" -le 1 ] || { usage >&2; exit 2; }
+
         output=$(mktemp)
         tmpdir=
         trap 'rm -f "$output"; [ -z "$tmpdir" ] || rm -rf "$tmpdir"' EXIT
-        "$DOCKER" run --rm --network none "$IMAGE" --help >"$output" 2>&1
-        grep -q 'mx igv-json' "$output"
+
+        "$DOCKER" run --rm --network none "$IMAGE" --help >"$output"
+        grep -q 'list' "$output"
+        grep -q 'filter' "$output"
+        grep -q 'flatten' "$output"
+
         echo "IGV_ANALYZER_CLASS_SMOKE: PASS"
+
         if [ "$#" -eq 1 ]; then
             sample=$1
-            [ -f "$sample" ] || { echo "IGV_ANALYZER_REAL_SMOKE: FAIL missing BGV: $sample" >&2; exit 3; }
+            [ -f "$sample" ] || {
+                echo "IGV_ANALYZER_REAL_SMOKE: FAIL missing BGV: $sample" >&2
+                exit 3
+            }
+
             tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/protos-igv-smoke.XXXXXX")
             cp -- "$sample" "$tmpdir/sample.bgv"
-            set +e
-            "$DOCKER" run --rm --network none \
+
+            "$DOCKER" run \
+                --rm \
+                --network none \
                 --user "$(id -u):$(id -g)" \
                 --volume "$tmpdir:/work" \
                 --workdir /work \
-                "$IMAGE" sample.bgv \
-                >"$tmpdir/export.stdout" 2>"$tmpdir/export.stderr"
-            rc=$?
-            set -e
-            if [ "$rc" -ne 0 ]; then
-                echo "IGV_ANALYZER_REAL_SMOKE: FAIL rc=$rc" >&2
-                tail -80 "$tmpdir/export.stderr" >&2 || true
-                exit "$rc"
-            fi
-            mapfile -t jsons < <(find "$tmpdir" -maxdepth 1 -type f -name '*.json' -print | sort)
-            [ "${#jsons[@]}" -gt 0 ] || { echo "IGV_ANALYZER_REAL_SMOKE: FAIL no JSON generated" >&2; exit 4; }
-            python3 - "${jsons[@]}" <<'PYJSON'
-import json, os, sys
-for path in sys.argv[1:]:
-    name=os.path.basename(path)
-    if len(name.encode('utf-8')) > 240:
-        raise SystemExit(f'filename too long: {name}')
-    with open(path, encoding='utf-8') as fh:
-        obj=json.load(fh)
-    for key in ('name','graph_type','nodes'):
-        if key not in obj:
-            raise SystemExit(f'missing {key}: {path}')
-PYJSON
-            echo "IGV_ANALYZER_REAL_SMOKE: PASS json_count=${#jsons[@]}"
-        elif [ "$#" -ne 0 ]; then
-            usage >&2; exit 2
+                "$IMAGE" \
+                list sample.bgv \
+                >/dev/null
+
+            "$DOCKER" run \
+                --rm \
+                --network none \
+                --user "$(id -u):$(id -g)" \
+                --volume "$tmpdir:/work" \
+                --workdir /work \
+                "$IMAGE" \
+                filter sample.bgv \
+                >"$tmpdir/sample.json"
+
+            python3 - "$tmpdir/sample.json" <<'PY'
+import json
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+if path.stat().st_size == 0:
+    raise SystemExit("IGV analyzer produced empty JSON")
+with path.open(encoding="utf-8") as fh:
+    json.load(fh)
+PY
+            echo "IGV_ANALYZER_REAL_SMOKE: PASS"
         fi
+
         echo "IGV_ANALYZER_SMOKE: PASS"
         ;;
-    summarize)
-        shift
-        [ "$#" -ge 2 ] || { usage >&2; exit 2; }
-        exec "$DOCKER" run --rm --network none \
-            --user "$(id -u):$(id -g)" \
-            --volume "$PWD:/work" \
-            --workdir /work \
-            --entrypoint /usr/local/bin/bgv-summary \
-            "$IMAGE" "$@"
-        ;;
-    analyze)
+    list|filter|flatten)
         shift
         [ "$#" -gt 0 ] || { usage >&2; exit 2; }
-        exec "$DOCKER" run --rm --network none \
+
+        exec "$DOCKER" run \
+            --rm \
+            --network none \
             --user "$(id -u):$(id -g)" \
             --volume "$PWD:/work" \
             --workdir /work \
-            "$IMAGE" "$@"
+            "$IMAGE" \
+            "$command" "$@"
         ;;
-    -h|--help|help|'') usage ;;
-    *) echo "Unknown command: $command" >&2; usage >&2; exit 2 ;;
+    -h|--help|help|'')
+        usage
+        ;;
+    *)
+        echo "Unknown command: $command" >&2
+        usage >&2
+        exit 2
+        ;;
 esac

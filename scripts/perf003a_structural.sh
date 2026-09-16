@@ -83,7 +83,7 @@ echo "WORKLOAD=$WORKLOAD"
 echo "CPUSET=$CPUSET"
 
 PROTOS_IMAGE="protos-benchmarks-perf003a-structural:${PROTOS_REVISION:0:12}"
-ANALYZER_IMAGE=${PROTOS_IGV_ANALYZER_IMAGE:-protos-benchmarks/igv-analyzer:graal-24.0.0}
+ANALYZER_IMAGE=${PROTOS_IGV_ANALYZER24_IMAGE:-protos-benchmarks/igv-analyzer24:graal-24.0.0}
 
 echo "phase=01 ensure exact runtime + analyzer"
 docker pull "$BUILD_BASE" >/dev/null
@@ -100,9 +100,9 @@ docker build \
 
 if ! docker image inspect "$ANALYZER_IMAGE" >/dev/null 2>&1; then
     echo "IGV analyzer image missing; building isolated analyzer"
-    "$ROOT/scripts/igv_analyzer.sh" build
+    "$ROOT/scripts/igv_analyzer24.sh" build
 fi
-"$ROOT/scripts/igv_analyzer.sh" smoke
+"$ROOT/scripts/igv_analyzer24.sh" smoke
 echo "IGV_ANALYZER_READY: PASS"
 
 runtime_class=$(
@@ -191,7 +191,7 @@ for bgv in "${bgv_files[@]}"; do
     rel=${bgv#"$OUT/"}
     (
         cd "$OUT"
-        "$ROOT/scripts/igv_analyzer.sh" analyze "$rel"
+        "$ROOT/scripts/igv_analyzer24.sh" analyze "$rel"
     ) >>"$export_log" 2>&1
 done
 

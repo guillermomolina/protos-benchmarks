@@ -14,16 +14,17 @@
 # the specific language governing rights and limitations under the License.
 
 import pathlib
+import re
 import subprocess
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
-class IgvAnalyzer25Test(unittest.TestCase):
+class IgvAnalyzerTest(unittest.TestCase):
     def test_help_exposes_commands(self):
         result = subprocess.run(
-            [str(ROOT / "scripts" / "igv_analyzer25.sh"), "--help"],
+            [str(ROOT / "scripts" / "igv_analyzer.sh"), "--help"],
             cwd=ROOT,
             check=True,
             text=True,
@@ -35,7 +36,7 @@ class IgvAnalyzer25Test(unittest.TestCase):
 
     def test_dockerfile_pins_current_toolchain(self):
         dockerfile = (
-            ROOT / "docker" / "igv-analyzer25" / "Dockerfile"
+            ROOT / "docker" / "igv-analyzer" / "Dockerfile"
         ).read_text(encoding="utf-8")
 
         self.assertIn(
@@ -49,9 +50,42 @@ class IgvAnalyzer25Test(unittest.TestCase):
         self.assertIn("GRAAL_IGVUTIL", dockerfile)
         self.assertIn("eclipse-temurin:21.0.12_8-jre-jammy", dockerfile)
 
-    def test_historical_analyzer_is_retained(self):
-        self.assertTrue((ROOT / "docker" / "igv-analyzer").is_dir())
-        self.assertTrue((ROOT / "scripts" / "igv_analyzer.sh").is_file())
+    def test_default_and_historical_analyzers_are_explicit(self):
+        current_docker = ROOT / "docker" / "igv-analyzer"
+        current_script = ROOT / "scripts" / "igv_analyzer.sh"
+        historical_docker = ROOT / "docker" / "igv-analyzer24"
+        historical_script = ROOT / "scripts" / "igv_analyzer24.sh"
+
+        self.assertTrue(current_docker.is_dir())
+        self.assertTrue(current_script.is_file())
+        self.assertTrue(historical_docker.is_dir())
+        self.assertTrue(historical_script.is_file())
+
+        current_text = current_script.read_text(encoding="utf-8")
+        historical_text = historical_script.read_text(encoding="utf-8")
+
+        self.assertIn("graal-25.3.4.1", current_text)
+        self.assertNotIn("graal-24.0.0", current_text)
+        self.assertIn("graal-24.0.0", historical_text)
+
+    def test_analyzer_contract_has_no_machine_local_checkout_path(self):
+        paths = (
+            ROOT / "docker" / "igv-analyzer" / "Dockerfile",
+            ROOT / "docker" / "igv-analyzer24" / "Dockerfile",
+            ROOT / "scripts" / "igv_analyzer.sh",
+            ROOT / "scripts" / "igv_analyzer24.sh",
+            ROOT / "BENCHMARKING.md",
+        )
+        forbidden_patterns = (
+            re.compile(r"/home/[^/\\s]+/"),
+            re.compile(r"/Users/[^/\\s]+/"),
+            re.compile(r"~/(?:[^/\\s]+/)+"),
+            re.compile(r"protos-benchmarks-igv[0-9]+"),
+        )
+        for path in paths:
+            content = path.read_text(encoding="utf-8")
+            for pattern in forbidden_patterns:
+                self.assertIsNone(pattern.search(content), str(path))
 
 
 if __name__ == "__main__":

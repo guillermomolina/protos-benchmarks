@@ -809,28 +809,35 @@ their exact measured SHA-256 identities; no diagnostic was rerun.
 
 ## IGV analyzer generations
 
-The repository retains version-bounded IGV tooling rather than silently
-upgrading one analyzer across incompatible Graal generations.
+The unsuffixed analyzer path always denotes the current supported diagnostic
+generation. New PERF work MUST use `docker/igv-analyzer/`,
+`scripts/igv_analyzer.sh`, and the generic `igv-analyzer-*` Makefile targets
+unless a retained historical harness explicitly pins another generation.
 
-The historical `docker/igv-analyzer/` and `scripts/igv_analyzer.sh` path remains
-pinned to Graal `24.0.0` for reproduction of PERF003 evidence.
-
-Current Graal `25.3.4.1` diagnostics use `docker/igv-analyzer25/` and
-`scripts/igv_analyzer25.sh`. The builder pins Graal commit
+The current default is Graal `25.3.4.1`. Its builder pins Graal commit
 `7b025988a922a73286d1326e1eddc1ca39d3f569` and mx commit
 `22381992c7322f661498cd6101144f0f49c72ae1`, builds upstream
 `GRAAL_IGVUTIL`, and copies only its runtime classpath into a neutral JRE 21
-image.
-
-The neutral runtime avoids the module/classpath collision with the
+image. The neutral runtime avoids the module/classpath collision with the
 `jdk.graal.compiler` module embedded in GraalVM 25 while preserving the exact
 Graal 25.3.4.1 BGV parser and graph model.
 
-The current analyzer exposes upstream `igvutil` operations `list`, `filter`,
+The default analyzer exposes upstream `igvutil` operations `list`, `filter`,
 and `flatten`.
 
 ```text
-make igv-analyzer25-build
-make igv-analyzer25-smoke
-make igv-analyzer25-smoke BGV=/path/to/sample.bgv
+make igv-analyzer-build
+make igv-analyzer-smoke
+make igv-analyzer-smoke BGV=/path/to/sample.bgv
 ```
+
+Graal `24.0.0` tooling is historical-only and lives under the explicit
+`docker/igv-analyzer24/` and `scripts/igv_analyzer24.sh` names. It exists only
+for retained PERF003 replay paths that require the old `analyze`/`summarize`
+contract. Generic analyzer targets and new PERF harnesses do not build or
+depend on it. The exact benchmark-harness revision recorded with historical
+evidence remains the authoritative reproduction identity.
+
+Repository tooling and retained evidence MUST remain independent of developer
+checkout locations. Local clone/worktree paths are execution details and are
+not part of analyzer contracts or evidence identity.

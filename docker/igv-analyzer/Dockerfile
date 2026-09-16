@@ -13,81 +13,75 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-# IGV is diagnostic tooling, not a benchmark runtime image. Graal vm-24.0.0
-# embeds a NetBeans 14 IGV build that still compiles Java 7 release targets;
-# JDK 17 is intentionally isolated here because JDK 22 no longer supports
-# javac --release 7.
-FROM eclipse-temurin:17-jdk-jammy
+# Current/default BGV tooling aligned with Graal 25.3.4.1.
+# Historical Graal 24 tooling is isolated under docker/igv-analyzer24/.
 
-ARG GRAAL_REV=78238a5ee6e4ae827059c70549e286ae730b7730
-ARG MX_REV=d0d6d6cd2f70bb384dfba9f3f66f3dab21392ae4
+FROM ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825 AS builder
 
-LABEL org.opencontainers.image.title="Protos IGV analyzer" \
-      org.opencontainers.image.description="Pinned Graal 24.0.0 IdealGraphVisualizer bgv2json diagnostic tool" \
-      org.opencontainers.image.source="https://github.com/guillermomolina/protos-benchmarks"
+USER root
 
-ENV DEBIAN_FRONTEND=noninteractive
+ARG GRAAL_REV=7b025988a922a73286d1326e1eddc1ca39d3f569
+ARG MX_REV=22381992c7322f661498cd6101144f0f49c72ae1
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       ant \
-       ca-certificates \
-       git \
-       python3 \
-       unzip \
-       zip \
-    && rm -rf /var/lib/apt/lists/*
+RUN microdnf install -y \
+        findutils \
+        git \
+        python3 \
+        unzip \
+        zip \
+    && microdnf clean all
 
-RUN git clone https://github.com/graalvm/mx.git /opt/mx \
+RUN git clone --filter=blob:none https://github.com/graalvm/mx.git /opt/mx \
     && git -C /opt/mx checkout --detach "${MX_REV}" \
     && test "$(git -C /opt/mx rev-parse HEAD)" = "${MX_REV}"
 
 ENV PATH="/opt/mx:${PATH}"
 
-RUN git clone https://github.com/oracle/graal.git /opt/graal \
+RUN git clone --filter=blob:none https://github.com/oracle/graal.git /opt/graal \
     && git -C /opt/graal checkout --detach "${GRAAL_REV}" \
     && test "$(git -C /opt/graal rev-parse HEAD)" = "${GRAAL_REV}"
 
-# Prove the compatibility assumption before doing the expensive IGV build.
-RUN printf 'class Release7Probe {}\n' >/tmp/Release7Probe.java \
-    && javac --release 7 /tmp/Release7Probe.java \
-    && rm -f /tmp/Release7Probe.java /tmp/Release7Probe.class
+RUN java -version && mx --version
 
-RUN mx --version \
-    && mx --primary-suite-path /opt/graal/visualizer \
-       build --dependencies=IGV_JSONEXPORTER,IGV_DATA_SETTINGS
+RUN mx \
+    --primary-suite-path /opt/graal/compiler \
+    build \
+    --dependencies=GRAAL_IGVUTIL
 
-COPY docker/igv-analyzer/patch_json_exporter.py /tmp/patch_json_exporter.py
-RUN python3 /tmp/patch_json_exporter.py \
-    && rm -f /tmp/patch_json_exporter.py \
-    && set -eux; \
-       SRC=/opt/graal/visualizer/IdealGraphVisualizer/JSONExporter/src/org/graalvm/visualizer/JSONExporter.java; \
-       DIST=/opt/graal/visualizer/IdealGraphVisualizer/dist/idealgraphvisualizer; \
-       test -f "$SRC"; \
-       test -d "$DIST"; \
-       mkdir -p /opt/igv-jsonexporter/classes; \
-       find "$DIST" -type f -name '*.jar' -print | sort > /opt/igv-jsonexporter/jars.txt; \
-       test -s /opt/igv-jsonexporter/jars.txt; \
-       CP="$(paste -sd: /opt/igv-jsonexporter/jars.txt)"; \
-       javac -cp "$CP" -d /opt/igv-jsonexporter/classes "$SRC"; \
-       test -f /opt/igv-jsonexporter/classes/org/graalvm/visualizer/JSONExporter.class; \
-       printf '%s\n' "$CP" >/opt/igv-jsonexporter/classpath
-
-COPY docker/igv-analyzer/CompactBGVSummary.java /tmp/CompactBGVSummary.java
 RUN set -eux; \
-    CP="$(cat /opt/igv-jsonexporter/classpath)"; \
-    mkdir -p /opt/igv-compact/classes; \
-    javac -cp "/opt/igv-jsonexporter/classes:${CP}" \
-      -d /opt/igv-compact/classes \
-      /tmp/CompactBGVSummary.java; \
-    test -f /opt/igv-compact/classes/com/guillermomolina/protos/benchmarks/igv/CompactBGVSummary.class; \
-    rm -f /tmp/CompactBGVSummary.java
+    CP="$(mx --primary-suite-path /opt/graal/compiler classpath GRAAL_IGVUTIL)"; \
+    mkdir -p /opt/igvutil/lib; \
+    printf '%s\n' "$CP" >/opt/igvutil/classpath.source; \
+    OLDIFS="$IFS"; \
+    IFS=':'; \
+    for jar in $CP; do \
+        test -f "$jar"; \
+        cp "$jar" /opt/igvutil/lib/; \
+    done; \
+    IFS="$OLDIFS"; \
+    test -f /opt/igvutil/lib/graal-igvutil.jar; \
+    test -f /opt/igvutil/lib/graal.jar; \
+    find /opt/igvutil/lib -maxdepth 1 -type f -name '*.jar' -printf '%f\n' | sort
 
-COPY docker/igv-analyzer/bgv2json /usr/local/bin/bgv2json
-COPY docker/igv-analyzer/bgv-summary /usr/local/bin/bgv-summary
-RUN chmod 0755 /usr/local/bin/bgv2json /usr/local/bin/bgv-summary \
-    && /usr/local/bin/bgv2json --help | grep -q 'mx igv-json'
+FROM eclipse-temurin:21.0.12_8-jre-jammy AS runtime
+
+COPY --from=builder /opt/igvutil /opt/igvutil
+
+RUN java -version \
+    && if java --list-modules | grep -q '^jdk\.graal\.compiler@'; then \
+         echo 'ERROR: neutral runtime unexpectedly contains jdk.graal.compiler'; \
+         exit 1; \
+       fi \
+    && java -cp '/opt/igvutil/lib/*' org.graalvm.igvutil.IgvUtility --help >/tmp/igvutil-help.txt \
+    && grep -q 'list' /tmp/igvutil-help.txt \
+    && grep -q 'filter' /tmp/igvutil-help.txt \
+    && grep -q 'flatten' /tmp/igvutil-help.txt \
+    && rm -f /tmp/igvutil-help.txt
+
+LABEL org.opencontainers.image.title="Protos IGV analyzer" \
+      org.opencontainers.image.description="Pinned Graal 25.3.4.1 official igvutil BGV diagnostic tool" \
+      org.opencontainers.image.source="https://github.com/guillermomolina/protos-benchmarks"
 
 WORKDIR /work
 
-ENTRYPOINT ["/usr/local/bin/bgv2json"]
+ENTRYPOINT ["java","-cp","/opt/igvutil/lib/*","org.graalvm.igvutil.IgvUtility"]

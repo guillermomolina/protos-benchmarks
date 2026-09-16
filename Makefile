@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize perf003a-a4a-smoke perf003a-a4a perf003a-a4b-smoke perf003a-a4b perf003a-a4c-smoke perf003a-a4c perf003a-a4d-smoke perf003a-a4d perf003a-a4e-smoke perf003a-a4e perf003a-a4f-smoke perf003a-a4f perf003a-a4g-smoke perf003a-a4g perf003a-a4h-smoke perf003a-a4h perf003a-a4i perf001f-validate perf001f-topology perf001f-build perf001f-correctness perf001f-prepare perf001f-persistent-smoke perf001f-h2-prepare
+.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke igv-analyzer25-build igv-analyzer25-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize perf003a-a4a-smoke perf003a-a4a perf003a-a4b-smoke perf003a-a4b perf003a-a4c-smoke perf003a-a4c perf003a-a4d-smoke perf003a-a4d perf003a-a4e-smoke perf003a-a4e perf003a-a4f-smoke perf003a-a4f perf003a-a4g-smoke perf003a-a4g perf003a-a4h-smoke perf003a-a4h perf003a-a4i perf001f-validate perf001f-topology perf001f-build perf001f-correctness perf001f-prepare perf001f-persistent-smoke perf001f-h2-prepare
 .PHONY: perf001f-reference-smoke perf001f-reference
 .PHONY: perf001g-validate perf001g-run
 
@@ -43,6 +43,16 @@ igv-analyzer-build:
 
 igv-analyzer-smoke:
 	./scripts/igv_analyzer.sh smoke
+
+igv-analyzer25-build:
+	./scripts/igv_analyzer25.sh build
+
+igv-analyzer25-smoke:
+	@if [ -n "$(BGV)" ]; then \
+		./scripts/igv_analyzer25.sh smoke "$(BGV)"; \
+	else \
+		./scripts/igv_analyzer25.sh smoke; \
+	fi
 
 perf003a-diagnostic:
 	./scripts/perf003a_diagnostic.sh .work/perf003-a

@@ -806,3 +806,31 @@ The D3B publication launcher normalized trailing horizontal whitespace in
 `jfr-summary.txt` and `test-tool-output-tail.txt` after the completed diagnostic
 run. `result.json`, `current-profile.json`, and `trace-compilation.log` retain
 their exact measured SHA-256 identities; no diagnostic was rerun.
+
+## IGV analyzer generations
+
+The repository retains version-bounded IGV tooling rather than silently
+upgrading one analyzer across incompatible Graal generations.
+
+The historical `docker/igv-analyzer/` and `scripts/igv_analyzer.sh` path remains
+pinned to Graal `24.0.0` for reproduction of PERF003 evidence.
+
+Current Graal `25.3.4.1` diagnostics use `docker/igv-analyzer25/` and
+`scripts/igv_analyzer25.sh`. The builder pins Graal commit
+`7b025988a922a73286d1326e1eddc1ca39d3f569` and mx commit
+`22381992c7322f661498cd6101144f0f49c72ae1`, builds upstream
+`GRAAL_IGVUTIL`, and copies only its runtime classpath into a neutral JRE 21
+image.
+
+The neutral runtime avoids the module/classpath collision with the
+`jdk.graal.compiler` module embedded in GraalVM 25 while preserving the exact
+Graal 25.3.4.1 BGV parser and graph model.
+
+The current analyzer exposes upstream `igvutil` operations `list`, `filter`,
+and `flatten`.
+
+```text
+make igv-analyzer25-build
+make igv-analyzer25-smoke
+make igv-analyzer25-smoke BGV=/path/to/sample.bgv
+```

@@ -6,12 +6,24 @@ repository.
 ## Role of this repository
 
 This repository is the companion benchmark harness and evidence store for the
-Protos project. The canonical Protos implementation, specification, and
-`PERFxxx` work-item lifecycle remain owned by `guillermomolina/protos`.
+Protos project. The canonical Protos implementation, normative specification,
+and formal `PERFxxx` live work-item lifecycle remain owned by
+`guillermomolina/protos`.
 
-Do not create an independent lifecycle here that can contradict the canonical
-Protos project ledger. When work is performed for a Protos `PERFxxx` item, use
-the identifier and state published by the current Protos repository.
+Canonical durable, non-normative Protos project records live in
+`guillermomolina/protos-project-docs:docs/project/**`.
+
+Benchmark source, raw measurements, generated reports/artifacts, harness-local
+reproducibility evidence, and benchmark implementation remain owned by this
+repository.
+
+Do not create an independent formal Protos lifecycle here that can contradict
+the canonical Protos project Issue. When work is performed for a formal Protos
+`PERFxxx` item, use the identifier and live state published by
+`guillermomolina/protos`. When durable Protos project evidence is required,
+publish the project record in `guillermomolina/protos-project-docs` and reference
+the exact benchmark-repository revision or immutable artifact identity rather
+than copying product-local evidence merely for convenience.
 
 ## Semantic firewall
 

@@ -344,11 +344,11 @@ echo 'PERF001E_STATIC_VALIDATION: PASS'
 
 # Dedicated IGV diagnostic analyzer. This tool must remain isolated from
 # benchmark runtime images and pinned to the Graal/Truffle 24.0.0 line.
-bash -n scripts/igv_analyzer.sh
+bash -n scripts/igv_analyzer24.sh
 python3 - <<'PYIGV'
 from pathlib import Path
 
-path = Path('docker/igv-analyzer/Dockerfile')
+path = Path('docker/igv-analyzer24/Dockerfile')
 text = path.read_text(encoding='utf-8')
 required = (
     'FROM eclipse-temurin:17-jdk-jammy',
@@ -356,26 +356,26 @@ required = (
     'ARG MX_REV=d0d6d6cd2f70bb384dfba9f3f66f3dab21392ae4',
     'javac --release 7 /tmp/Release7Probe.java',
     'build --dependencies=IGV_JSONEXPORTER,IGV_DATA_SETTINGS',
-    'COPY docker/igv-analyzer/patch_json_exporter.py /tmp/patch_json_exporter.py',
-    'COPY docker/igv-analyzer/bgv2json /usr/local/bin/bgv2json',
+    'COPY docker/igv-analyzer24/patch_json_exporter.py /tmp/patch_json_exporter.py',
+    'COPY docker/igv-analyzer24/bgv2json /usr/local/bin/bgv2json',
     'javac -cp "$CP" -d /opt/igv-jsonexporter/classes "$SRC"',
     'ENTRYPOINT ["/usr/local/bin/bgv2json"]',
 )
 for item in required:
     assert item in text, item
 
-wrapper = Path('scripts/igv_analyzer.sh').read_text(encoding='utf-8')
+wrapper = Path('scripts/igv_analyzer24.sh').read_text(encoding='utf-8')
 assert '--network none' in wrapper
 assert '--entrypoint mx' not in wrapper
 assert 'help bgv2json' not in wrapper
-assert 'IGV_ANALYZER_REAL_SMOKE' in wrapper
-assert 'docker/igv-analyzer/Dockerfile' in wrapper
-assert 'protos-benchmarks/igv-analyzer:graal-24.0.0' in wrapper
+assert 'IGV_ANALYZER24_REAL_SMOKE' in wrapper
+assert 'docker/igv-analyzer24/Dockerfile' in wrapper
+assert 'protos-benchmarks/igv-analyzer24:graal-24.0.0' in wrapper
 
-exporter_wrapper = Path('docker/igv-analyzer/bgv2json').read_text(encoding='utf-8')
+exporter_wrapper = Path('docker/igv-analyzer24/bgv2json').read_text(encoding='utf-8')
 assert 'org.graalvm.visualizer.JSONExporter' in exporter_wrapper
 assert '/opt/igv-jsonexporter/classpath' in exporter_wrapper
-exporter_patch = Path('docker/igv-analyzer/patch_json_exporter.py').read_text(encoding='utf-8')
+exporter_patch = Path('docker/igv-analyzer24/patch_json_exporter.py').read_text(encoding='utf-8')
 assert 'UUID.nameUUIDFromBytes' in exporter_patch
 assert 'gn.length() > 96' in exporter_patch
 assert 'gt.length() > 48' in exporter_patch
@@ -394,7 +394,7 @@ print('IGV_ANALYZER_RUNTIME_ISOLATION_CHECK: PASS')
 PYIGV
 
 notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
-for path in docker/igv-analyzer/Dockerfile scripts/igv_analyzer.sh; do
+for path in docker/igv-analyzer24/Dockerfile scripts/igv_analyzer24.sh; do
     grep -qF "$notice" "$path" || {
         echo "missing APL notice: $path" >&2
         exit 1
@@ -402,12 +402,12 @@ for path in docker/igv-analyzer/Dockerfile scripts/igv_analyzer.sh; do
 done
 printf 'IGV_ANALYZER_LICENSE_CHECK: PASS\n'
 
-bash -n docker/igv-analyzer/bgv-summary
+bash -n docker/igv-analyzer24/bgv-summary
 bash -n scripts/perf003a_structural_compact.sh
 python3 - <<'PYIGVCOMPACT'
 from pathlib import Path
 
-dockerfile=Path("docker/igv-analyzer/Dockerfile").read_text(encoding="utf-8")
+dockerfile=Path("docker/igv-analyzer24/Dockerfile").read_text(encoding="utf-8")
 for required in (
     "CompactBGVSummary.java",
     "/opt/igv-compact/classes",
@@ -415,7 +415,7 @@ for required in (
 ):
     assert required in dockerfile, required
 
-wrapper=Path("scripts/igv_analyzer.sh").read_text(encoding="utf-8")
+wrapper=Path("scripts/igv_analyzer24.sh").read_text(encoding="utf-8")
 assert "summarize <input.bgv> <output.ndjson> [term...]" in wrapper
 assert "--entrypoint /usr/local/bin/bgv-summary" in wrapper
 
@@ -439,7 +439,7 @@ for forbidden in (
 ):
     assert forbidden not in compact, forbidden
 
-java=Path("docker/igv-analyzer/CompactBGVSummary.java").read_text(encoding="utf-8")
+java=Path("docker/igv-analyzer24/CompactBGVSummary.java").read_text(encoding="utf-8")
 for required in (
     "DigestInputStream",
     "BinaryReader",
@@ -456,8 +456,8 @@ PYIGVCOMPACT
 
 notice='THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE'
 for path in \
-    docker/igv-analyzer/CompactBGVSummary.java \
-    docker/igv-analyzer/bgv-summary \
+    docker/igv-analyzer24/CompactBGVSummary.java \
+    docker/igv-analyzer24/bgv-summary \
     scripts/perf003a_structural_compact.sh
 do
     grep -qF "$notice" "$path" || {
@@ -540,7 +540,7 @@ for required in (
     "-Dpolyglot.engine.NodeSourcePositions=true",
     "-Djdk.graal.Dump=$DUMP",
     "-Djdk.graal.DumpPath=/diag-out/graal_dumps",
-    'scripts/igv_analyzer.sh" analyze',
+    'scripts/igv_analyzer24.sh" analyze',
     "--network none",
 ):
     assert required in script, required
@@ -551,7 +551,7 @@ for required in (
     "PERF003A_RESUME_RESERVE_BYTES",
     "PERF003A_RESUME_ESTIMATE_MULTIPLIER",
     "IGV_RESUME_DISK_GUARD: BLOCKED",
-    'scripts/igv_analyzer.sh" analyze',
+    'scripts/igv_analyzer24.sh" analyze',
     "STRUCTURAL_EXECUTION_REPEATED: NO",
     "BGV_RECAPTURED: NO",
     "--status",
@@ -1351,12 +1351,13 @@ python3 - <<'PY'
 import json
 from pathlib import Path
 cfg = json.loads(Path("config/perf006d.json").read_text(encoding="utf-8"))
-assert cfg["slice"] == "PERF006-D1"
+assert cfg["slice"] == "PERF006-D2A"
+assert cfg["d1_harness_revision"] == "1dc27dda3033f1d447b5525c9e40b6a93d03232d"
 assert cfg["timing_claim"] is False
 assert cfg["protos_revision"] == "4a03efc15620b37b2e418b3df30b4a26486446ec"
 assert cfg["protos_implementation_version"] == "0.2.492-SNAPSHOT"
 assert len(cfg["workloads"]) == 5
-print("PERF006D1_JSON_VALIDATION: PASS")
+print("PERF006D1_LINEAGE_VALIDATION: PASS")
 PY
 
 # PERF006-D2A controlled timing harness

@@ -268,6 +268,19 @@ def run_case(
         "none",
         "--cpuset-cpus",
         cpu,
+    ]
+
+    if mode == "control":
+        host_source = (
+            ROOT / "results/.perf004-b2c-work" /
+            (slug + "-control.protos")
+        )
+        docker_command.extend([
+            "--volume",
+            f"{host_source.resolve()}:/work/{host_source.name}",
+        ])
+
+    docker_command.extend([
         "--entrypoint",
         "java",
         tag,
@@ -280,21 +293,7 @@ def run_case(
         item["expected"],
         str(warmup),
         str(steady),
-    ]
-
-    if mode == "control":
-        host_source = (
-            ROOT / "results/.perf004-b2c-work" /
-            (slug + "-control.protos")
-        )
-        docker_command.insert(
-            10,
-            "--volume",
-        )
-        docker_command.insert(
-            11,
-            f"{host_source.resolve()}:/work/{host_source.name}",
-        )
+    ])
 
     completed = run(
         docker_command,

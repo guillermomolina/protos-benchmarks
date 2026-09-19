@@ -1,0 +1,82 @@
+{
+  "comparison_runtimes": {
+    "javascript": {
+      "base": "node:24.20.0-bookworm-slim",
+      "runtime": "Node.js",
+      "stack_kb": 32768,
+      "version": "24.20.0"
+    },
+    "python": {
+      "base": "python:3.14.7-slim-bookworm",
+      "recursion_limit": 50000,
+      "version": "3.14.7"
+    }
+  },
+  "correctness_cases": 33,
+  "equivalence_source_revision": "42b8264a36254dafbd97d80f5181790e28b9de12",
+  "generated_at_utc": "2026-09-19T12:02:59.531334+00:00",
+  "harness_revision": "60dbce7faf5510bd1bd6867a866aa7ca69c48637",
+  "host": {
+    "architecture": "x86_64",
+    "cpu_count": 16,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpuset": "0",
+    "docker_server_version": "29.8.1",
+    "kernel": "7.2.6-zen2-1-zen",
+    "memory_bytes": 33563394048,
+    "platform": "linux"
+  },
+  "images": {
+    "javascript": {
+      "id": "sha256:6f5c8ccb93e99fe0f2a0746979194ea7bfa46d8056b26b78c2381e1bbd4aef27",
+      "repo_digests": [],
+      "tag": "protos-benchmarks-perf004a-node:4a03efc15620"
+    },
+    "protos": {
+      "id": "sha256:adfa7a9f284e3900d80ae0b99fcb995ad44dbf605894710e1ed200924b20c25d",
+      "repo_digests": [],
+      "tag": "protos-benchmarks-perf004a-protos:4a03efc15620"
+    },
+    "python": {
+      "id": "sha256:4f0466c08acf6c78495a7bcb1d7b75435ec427861bef0919faebc78fe47259ff",
+      "repo_digests": [],
+      "tag": "protos-benchmarks-perf004a-python:4a03efc15620"
+    }
+  },
+  "measurement_policy": {
+    "correctness_before_timing": true,
+    "cpu_affinity": "first CPU from current allowed cpuset",
+    "dispersion": [
+      "mad",
+      "min",
+      "max",
+      "p95"
+    ],
+    "heavy_diagnostics_separate": true,
+    "network": "none",
+    "persistent_boundary": "source/module load and runtime bootstrap outside timed iterations; one process per fork",
+    "persistent_forks_per_language_workload": 5,
+    "primary_statistic": "median",
+    "startup_boundary": "fresh language process inside an already-running Docker container; Docker creation/start excluded",
+    "startup_process_samples_per_language_workload": 10,
+    "steady_samples_per_fork": 20,
+    "warmup_iterations_per_fork": 20
+  },
+  "perf_item": "PERF004",
+  "phase": "retained-cross-language-baseline",
+  "protos_implementation_version": "0.2.492-SNAPSHOT",
+  "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+  "protos_runtime": "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime",
+  "schema_version": 1,
+  "slice": "PERF004-A",
+  "timing_diagnostics": false,
+  "toolchain": {
+    "graal_container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825",
+    "graal_truffle_version": "25.3.4.1",
+    "graalvm_release": "25.3.4.1",
+    "java_stack": "128m",
+    "jdk_feature": 25,
+    "jdk_version": "25.0.4.1",
+    "maven_version": "3.9.9"
+  }
+}

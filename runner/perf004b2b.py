@@ -114,7 +114,7 @@ def reference(output_dir, harness_revision):
     tag = perf004b.build_image(base_cfg)
     cpu = perf004b.first_cpu()
 
-    runtime = perf004b.protos_runtime_probe(base_cfg, tag, cpu)
+    runtime = perf004b.runtime_probe(base_cfg, tag, cpu)
     if runtime != EXPECTED_RUNTIME:
         raise RuntimeError(f"runtime mismatch: {runtime}")
 

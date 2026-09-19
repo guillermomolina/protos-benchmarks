@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF004",
+  "slice": "PERF004-B2-B",
+  "phase": "steady-state-mechanism-profile-harness-ready",
+  "diagnostic_claim": false,
+  "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+  "baseline_evidence_revision": "5e8ff21f966c6c506652eef79c684d8b286bb546",
+  "b1_evidence_revision": "d73a982be26a6661d934727035afad0f459c3c26",
+  "b2a_evidence_revision": "8d8e1c6cce843d0d64c9e0b740ba13df04b3effb",
+  "workload_operation_count": 10000,
+  "warmup_iterations": 20,
+  "steady_iterations": 100,
+  "execution_sample_period": "10 ms",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "workloads": [
+    ["micro/slot-read", "micro/slot-read.protos", "42"],
+    ["micro/closure-call", "micro/closure-call.protos", "42"],
+    ["micro/method-call", "micro/method-call.protos", "42"],
+    ["runtime/monomorphic-dispatch", "runtime/monomorphic-dispatch.protos", "42"]
+  ],
+  "output": "results/perf004-b2b"
+}

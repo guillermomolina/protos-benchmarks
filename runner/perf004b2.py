@@ -138,7 +138,7 @@ def runtime_probe(tag: str, cpu: str) -> str:
             tag,
             "--enable-native-access=ALL-UNNAMED",
             "-cp",
-            "/opt/perf006d/diagnostic:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/*",
+            "/opt/perf006d3/diagnostic:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/*",
             "Perf006dRuntimeProbe",
         ],
         capture=True,

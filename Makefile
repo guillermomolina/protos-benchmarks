@@ -265,3 +265,13 @@ perf004b2c-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b2c-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2c" >&2; exit 2; }
 	@test -n "$(OUT)" || { echo "usage: make perf004b2c-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2c" >&2; exit 2; }
 	python3 runner/perf004b2c.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
+
+.PHONY: perf004b2d-validate perf004b2d-reference
+
+perf004b2d-validate:
+	python3 runner/perf004b2d.py validate
+
+perf004b2d-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b2d-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2d" >&2; exit 2; }
+	@test -n "$(OUT)" || { echo "usage: make perf004b2d-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2d" >&2; exit 2; }
+	python3 runner/perf004b2d.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"

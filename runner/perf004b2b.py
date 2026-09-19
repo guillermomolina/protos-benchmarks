@@ -136,11 +136,10 @@ def reference(output_dir, harness_revision):
             )
 
             payload = perf004b.profile_one(
-                base_cfg,
                 tag,
                 cpu,
-                "protos",
                 item,
+                work,
             )
 
             # profile_one() already uses the canonical D3 profiler contract.

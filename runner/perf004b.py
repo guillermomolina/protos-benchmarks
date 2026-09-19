@@ -197,7 +197,11 @@ def reference(output_dir: Path, harness_revision: str):
     if output(["git","status","--porcelain","--untracked-files=all"]):
         raise RuntimeError("B1 reference requires a clean exact harness worktree")
     if output_dir.exists():
-        raise RuntimeError("output already exists: "+str(output_dir))
+        if not output_dir.is_dir():
+            raise RuntimeError("output path exists and is not a directory: "+str(output_dir))
+        if any(output_dir.iterdir()):
+            raise RuntimeError("output directory already contains evidence: "+str(output_dir))
+        output_dir.rmdir()
     cpu=first_cpu()
     tag=build_image(cfg)
     runtime=runtime_probe(tag,cpu)

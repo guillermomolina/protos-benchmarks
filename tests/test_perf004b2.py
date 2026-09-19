@@ -25,3 +25,10 @@ def test_only_repeat_count_is_declared_variant():
     assert cfg["comparison"]["variant_transform"] == (
         "replace exactly one repeat(10000, occurrence with repeat(N,)"
     )
+
+def test_identity_scale_uses_canonical_source():
+    text = __import__("pathlib").Path(
+        "runner/perf004b2.py"
+    ).read_text(encoding="utf-8")
+    assert 'if [ "{count}" -eq 10000 ]; then' in text
+    assert 'cp "$src" "$dst"' in text

@@ -185,9 +185,15 @@ src='{source}'
 dst='{variant}'
 count=$(grep -o 'repeat(10000,' "$src" | wc -l)
 test "$count" -eq 1
-sed 's/repeat(10000,/repeat({count},/' "$src" > "$dst"
-test "$(grep -o 'repeat({count},' "$dst" | wc -l)" -eq 1
-test "$(grep -o 'repeat(10000,' "$dst" | wc -l)" -eq 0
+
+if [ "{count}" -eq 10000 ]; then
+  cp "$src" "$dst"
+else
+  sed 's/repeat(10000,/repeat({count},/' "$src" > "$dst"
+  test "$(grep -o 'repeat({count},' "$dst" | wc -l)" -eq 1
+  test "$(grep -o 'repeat(10000,' "$dst" | wc -l)" -eq 0
+fi
+
 exec java -Xss128m \
   --enable-native-access=ALL-UNNAMED \
   -cp /opt/perf006d/timing:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/* \

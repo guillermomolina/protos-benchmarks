@@ -26,5 +26,10 @@ class Perf004bTest(unittest.TestCase):
         self.assertEqual("4a03efc15620b37b2e418b3df30b4a26486446ec", cfg["protos_revision"])
         self.assertEqual("5e8ff21f966c6c506652eef79c684d8b286bb546", cfg["baseline_evidence_revision"])
 
+    def test_expected_jfr_ranked_shape(self):
+        top = {"name": "example.Frame", "count": 10, "percent": 25.0}
+        self.assertEqual("example.Frame", top["name"])
+        self.assertNotIn("value", top)
+
 if __name__ == "__main__":
     unittest.main()

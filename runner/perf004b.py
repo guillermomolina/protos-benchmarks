@@ -234,8 +234,8 @@ def reference(output_dir: Path, harness_revision: str):
     rows=[]
     for p in profiles:
         frames=p["execution_samples"]["top_frames"]
-        top=frames[0] if frames else {"value":"<none>","count":0,"percent":0}
-        rows.append((p["workload"],p["execution_samples"]["total"],top["value"],top["percent"],p["deoptimizations"]["jdk_total"],p["deoptimizations"]["truffle_total"]))
+        top=frames[0] if frames else {"name":"<none>","count":0,"percent":0}
+        rows.append((p["workload"],p["execution_samples"]["total"],top["name"],top["percent"],p["deoptimizations"]["jdk_total"],p["deoptimizations"]["truffle_total"]))
     (output_dir/"run-metadata.json").write_text(json.dumps(metadata,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     (output_dir/"raw.json").write_text(json.dumps(raw,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     lines=[

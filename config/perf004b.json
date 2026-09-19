@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF004",
+  "slice": "PERF004-B1",
+  "phase": "mechanism-profile-diagnostic-harness-ready",
+  "diagnostic_claim": false,
+  "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+  "protos_implementation_version": "0.2.492-SNAPSHOT",
+  "baseline_evidence_revision": "5e8ff21f966c6c506652eef79c684d8b286bb546",
+  "baseline_harness_revision": "60dbce7faf5510bd1bd6867a866aa7ca69c48637",
+  "source_harness_origin": "PERF006-D3",
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825"
+  },
+  "measurement_contract": {
+    "warmup_iterations": 20,
+    "steady_iterations": 100,
+    "execution_sample_period": "10 ms",
+    "cpu_affinity": "one physical-core representative from current allowed cpuset",
+    "network": "none",
+    "jfr_diagnostics_outside_reference_timing": true,
+    "startup_timing_not_measured": true
+  },
+  "workloads": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42"
+    },
+    {
+      "id": "micro/slot-write",
+      "source": "micro/slot-write.protos",
+      "expected": "10000"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42"
+    },
+    {
+      "id": "micro/object-creation",
+      "source": "micro/object-creation.protos",
+      "expected": "42"
+    },
+    {
+      "id": "micro/delegation-shallow",
+      "source": "micro/delegation-shallow.protos",
+      "expected": "42"
+    },
+    {
+      "id": "micro/delegation-deep",
+      "source": "micro/delegation-deep.protos",
+      "expected": "42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42"
+    },
+    {
+      "id": "runtime/polymorphic-dispatch",
+      "source": "runtime/polymorphic-dispatch.protos",
+      "expected": "15000"
+    }
+  ],
+  "output": "results/perf004-b1"
+}

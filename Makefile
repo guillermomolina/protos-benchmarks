@@ -215,3 +215,13 @@ perf004a-smoke:
 perf004a-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004a-reference HARNESS_REVISION=<published-A2-SHA>" >&2; exit 2; }
 	python3 runner/perf004a.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir results/perf004-a
+
+.PHONY: perf004b1-validate perf004b1-reference
+
+perf004b1-validate:
+	python3 runner/perf004b.py validate
+
+perf004b1-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b1-reference HARNESS_REVISION=<published-B1-SHA> OUT=results/perf004-b1" >&2; exit 2; }
+	@test -n "$(OUT)" || { echo "usage: make perf004b1-reference HARNESS_REVISION=<published-B1-SHA> OUT=results/perf004-b1" >&2; exit 2; }
+	python3 runner/perf004b.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"

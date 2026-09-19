@@ -216,9 +216,11 @@ exec java -Xss128m \
     )
     if p.returncode != 0:
         raise RuntimeError(
-            f"variant failed {item['id']} N={count}\n"
+            f"variant failed {item['id']} N={count} "
+            f"returncode={p.returncode}\n"
             f"stdout:\n{(p.stdout or '')[-6000:]}\n"
-            f"stderr:\n{(p.stderr or '')[-6000:]}"
+            f"stderr:\n{(p.stderr or '')[-6000:]}\n"
+            f"command={p.args!r}"
         )
 
     payload = parse_payload(p.stdout or "")

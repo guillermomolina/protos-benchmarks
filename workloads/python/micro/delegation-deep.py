@@ -60,14 +60,17 @@ class P8(P7):
     pass
 
 
-receiver = P8()
-sink = 0
+def run():
+    receiver = P8()
+    sink = 0
+
+    def operation():
+        nonlocal sink
+        sink = receiver.value
+
+    repeat(10000, operation)
+    return sink
 
 
-def operation():
-    global sink
-    sink = receiver.value
-
-
-repeat(10000, operation)
-print(sink)
+if __name__ == "__main__":
+    print(run())

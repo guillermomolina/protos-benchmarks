@@ -15,17 +15,6 @@
  * the specific language governing rights and limitations under the License.
  */
 
-const a = {
-  run() {
-    return 1;
-  },
-};
-const b = {
-  run() {
-    return 2;
-  },
-};
-
 function runAlternating(count, receiver, other) {
   let result = 0;
   if (count > 0) {
@@ -34,4 +23,18 @@ function runAlternating(count, receiver, other) {
   return result;
 }
 
-console.log(runAlternating(10000, a, b));
+export function run() {
+  const a = {
+    run() {
+      return 1;
+    },
+  };
+  const b = {
+    run() {
+      return 2;
+    },
+  };
+  return runAlternating(10000, a, b);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

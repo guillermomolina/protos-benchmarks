@@ -29,13 +29,16 @@ class Holder:
         self.value = 42
 
 
-sink = None
+def run():
+    sink = None
+
+    def operation():
+        nonlocal sink
+        sink = Holder()
+
+    repeat(10000, operation)
+    return sink.value
 
 
-def operation():
-    global sink
-    sink = Holder()
-
-
-repeat(10000, operation)
-print(sink.value)
+if __name__ == "__main__":
+    print(run())

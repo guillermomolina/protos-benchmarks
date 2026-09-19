@@ -22,7 +22,11 @@ function repeat(count, operation) {
   }
 }
 
-const holder = { value: 42 };
-let sink = 0;
-repeat(10000, () => { sink = holder.value; });
-console.log(sink);
+export function run() {
+  const holder = { value: 42 };
+  let sink = 0;
+  repeat(10000, () => { sink = holder.value; });
+  return sink;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

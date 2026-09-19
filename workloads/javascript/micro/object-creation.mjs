@@ -22,6 +22,10 @@ function repeat(count, operation) {
   }
 }
 
-let sink = null;
-repeat(10000, () => { sink = { value: 42 }; });
-console.log(sink.value);
+export function run() {
+  let sink = null;
+  repeat(10000, () => { sink = { value: 42 }; });
+  return sink.value;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

@@ -23,6 +23,11 @@ function repeat(count, operation) {
 }
 
 const identity = (value) => value;
-let sink = 0;
-repeat(10000, () => { sink = identity(42); });
-console.log(sink);
+
+export function run() {
+  let sink = 0;
+  repeat(10000, () => { sink = identity(42); });
+  return sink;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

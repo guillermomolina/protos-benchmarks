@@ -22,8 +22,12 @@ function repeat(count, operation) {
   }
 }
 
-const parent = { value: 42 };
-const child = Object.create(parent);
-let sink = 0;
-repeat(10000, () => { sink = child.value; });
-console.log(sink);
+export function run() {
+  const parent = { value: 42 };
+  const child = Object.create(parent);
+  let sink = 0;
+  repeat(10000, () => { sink = child.value; });
+  return sink;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

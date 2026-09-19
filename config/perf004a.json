@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF004",
+  "slice": "PERF004-A1",
+  "phase": "callable-cross-language-corpus-preparation",
+  "timing_claim": false,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+  "protos_implementation_version": "0.2.492-SNAPSHOT",
+  "equivalence_source_revision": "42b8264a36254dafbd97d80f5181790e28b9de12",
+  "comparison_languages": [
+    "protos",
+    "python",
+    "javascript"
+  ],
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_feature": 25,
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "java_stack": "128m"
+  },
+  "measurement_contract": {
+    "startup_process_samples_per_language_workload": 10,
+    "persistent_forks_per_language_workload": 5,
+    "warmup_iterations_per_fork": 20,
+    "steady_samples_per_fork": 20,
+    "primary_statistic": "median",
+    "dispersion": [
+      "mad",
+      "min",
+      "max",
+      "p95"
+    ],
+    "correctness_before_timing": true,
+    "heavy_diagnostics_separate": true
+  },
+  "workloads": [
+    {
+      "id": "micro/slot-read",
+      "source_blob_sha": "c90f22ddc4bce857a62772e88cf44b38d0a5147a"
+    },
+    {
+      "id": "micro/slot-write",
+      "source_blob_sha": "54a356d82108fca23af9de8f10386511855e709a"
+    },
+    {
+      "id": "micro/closure-call",
+      "source_blob_sha": "5ed62d6e67e2ec02195383987ca3f367c18ac947"
+    },
+    {
+      "id": "micro/method-call",
+      "source_blob_sha": "630ed821cc9b62c71f843859fb16b963414a0f52"
+    },
+    {
+      "id": "micro/object-creation",
+      "source_blob_sha": "74d231f7f88cd0719a2222a0ee8f47a8bdbe486c"
+    },
+    {
+      "id": "micro/delegation-shallow",
+      "source_blob_sha": "ebbefd06802b69e300a9960c5be8e51d9c4e50f6"
+    },
+    {
+      "id": "micro/delegation-deep",
+      "source_blob_sha": "b0653d2dcf2ccc69e0f524dc400c7889a9e4f09c"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source_blob_sha": "9ba70de276572f11771de4d98ebbed165e8892b2"
+    },
+    {
+      "id": "runtime/polymorphic-dispatch",
+      "source_blob_sha": "ac0814f4dc6f5e2f3ac69e07b5738d0301aa7f38"
+    },
+    {
+      "id": "algorithms/factorial/recursive",
+      "source_blob_sha": "0e6b2ef5f1e3d293e4cb934632b6d15d35ba33b5"
+    },
+    {
+      "id": "algorithms/fibonacci/recursive",
+      "source_blob_sha": "4e8967a904425b189775640232bd4861009ab7dd"
+    }
+  ]
+}

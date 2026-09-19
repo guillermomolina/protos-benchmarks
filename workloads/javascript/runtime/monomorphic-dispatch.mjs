@@ -22,11 +22,15 @@ function repeat(count, operation) {
   }
 }
 
-const receiver = {
-  run() {
-    return 42;
-  },
-};
-let sink = 0;
-repeat(10000, () => { sink = receiver.run(); });
-console.log(sink);
+export function run() {
+  const receiver = {
+    run() {
+      return 42;
+    },
+  };
+  let sink = 0;
+  repeat(10000, () => { sink = receiver.run(); });
+  return sink;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

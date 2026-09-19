@@ -28,10 +28,6 @@ class B:
         return 2
 
 
-a = A()
-b = B()
-
-
 def run_alternating(count, receiver, other):
     result = 0
     if count > 0:
@@ -39,4 +35,9 @@ def run_alternating(count, receiver, other):
     return result
 
 
-print(run_alternating(10000, a, b))
+def run():
+    return run_alternating(10000, A(), B())
+
+
+if __name__ == "__main__":
+    print(run())

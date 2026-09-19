@@ -20,4 +20,9 @@ def fibonacci(n):
     return result
 
 
-print(fibonacci(30))
+def run():
+    return fibonacci(30)
+
+
+if __name__ == "__main__":
+    print(run())

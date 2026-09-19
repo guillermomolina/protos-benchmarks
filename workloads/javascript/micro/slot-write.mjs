@@ -22,6 +22,10 @@ function repeat(count, operation) {
   }
 }
 
-const holder = { value: 0 };
-repeat(10000, () => { holder.value = holder.value + 1; });
-console.log(holder.value);
+export function run() {
+  const holder = { value: 0 };
+  repeat(10000, () => { holder.value = holder.value + 1; });
+  return holder.value;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

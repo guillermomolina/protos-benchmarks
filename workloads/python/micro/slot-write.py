@@ -29,12 +29,15 @@ class Holder:
         self.value = 0
 
 
-holder = Holder()
+def run():
+    holder = Holder()
+
+    def operation():
+        holder.value = holder.value + 1
+
+    repeat(10000, operation)
+    return holder.value
 
 
-def operation():
-    holder.value = holder.value + 1
-
-
-repeat(10000, operation)
-print(holder.value)
+if __name__ == "__main__":
+    print(run())

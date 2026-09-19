@@ -20,4 +20,9 @@ def factorial(n):
     return result
 
 
-print(factorial(20))
+def run():
+    return factorial(20)
+
+
+if __name__ == "__main__":
+    print(run())

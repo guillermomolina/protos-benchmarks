@@ -23,4 +23,8 @@ function factorial(n) {
   return result;
 }
 
-console.log(factorial(20));
+export function run() {
+  return factorial(20);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

@@ -13,31 +13,19 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-import sys
+import unittest
 
-sys.setrecursionlimit(50000)
-
-
-def repeat(count, operation):
-    if count > 0:
-        operation()
-        repeat(count - 1, operation)
+from runner import perf004a
 
 
-def identity(value):
-    return value
-
-
-def run():
-    sink = 0
-
-    def operation():
-        nonlocal sink
-        sink = identity(42)
-
-    repeat(10000, operation)
-    return sink
+class Perf004aCallableCorpusTest(unittest.TestCase):
+    def test_perf004a_configuration_and_callable_corpus(self):
+        cfg = perf004a.validate()
+        self.assertEqual(cfg["perf_item"], "PERF004")
+        self.assertEqual(cfg["slice"], "PERF004-A1")
+        self.assertFalse(cfg["timing_claim"])
+        self.assertEqual(len(cfg["workloads"]), 11)
 
 
 if __name__ == "__main__":
-    print(run())
+    unittest.main()

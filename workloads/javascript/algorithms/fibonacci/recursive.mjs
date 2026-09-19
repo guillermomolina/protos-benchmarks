@@ -23,4 +23,8 @@ function fibonacci(n) {
   return result;
 }
 
-console.log(fibonacci(30));
+export function run() {
+  return fibonacci(30);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

@@ -22,11 +22,15 @@ function repeat(count, operation) {
   }
 }
 
-const receiver = {
-  identity(value) {
-    return value;
-  },
-};
-let sink = 0;
-repeat(10000, () => { sink = receiver.identity(42); });
-console.log(sink);
+export function run() {
+  const receiver = {
+    identity(value) {
+      return value;
+    },
+  };
+  let sink = 0;
+  repeat(10000, () => { sink = receiver.identity(42); });
+  return sink;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

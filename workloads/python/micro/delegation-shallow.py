@@ -32,14 +32,17 @@ class Child(Parent):
     pass
 
 
-child = Child()
-sink = 0
+def run():
+    child = Child()
+    sink = 0
+
+    def operation():
+        nonlocal sink
+        sink = child.value
+
+    repeat(10000, operation)
+    return sink
 
 
-def operation():
-    global sink
-    sink = child.value
-
-
-repeat(10000, operation)
-print(sink)
+if __name__ == "__main__":
+    print(run())

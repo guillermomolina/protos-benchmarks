@@ -22,15 +22,19 @@ function repeat(count, operation) {
   }
 }
 
-const p0 = { value: 42 };
-const p1 = Object.create(p0);
-const p2 = Object.create(p1);
-const p3 = Object.create(p2);
-const p4 = Object.create(p3);
-const p5 = Object.create(p4);
-const p6 = Object.create(p5);
-const p7 = Object.create(p6);
-const p8 = Object.create(p7);
-let sink = 0;
-repeat(10000, () => { sink = p8.value; });
-console.log(sink);
+export function run() {
+  const p0 = { value: 42 };
+  const p1 = Object.create(p0);
+  const p2 = Object.create(p1);
+  const p3 = Object.create(p2);
+  const p4 = Object.create(p3);
+  const p5 = Object.create(p4);
+  const p6 = Object.create(p5);
+  const p7 = Object.create(p6);
+  const p8 = Object.create(p7);
+  let sink = 0;
+  repeat(10000, () => { sink = p8.value; });
+  return sink;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) console.log(run());

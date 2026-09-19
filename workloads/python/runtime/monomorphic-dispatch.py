@@ -29,14 +29,17 @@ class Receiver:
         return 42
 
 
-receiver = Receiver()
-sink = 0
+def run():
+    receiver = Receiver()
+    sink = 0
+
+    def operation():
+        nonlocal sink
+        sink = receiver.run()
+
+    repeat(10000, operation)
+    return sink
 
 
-def operation():
-    global sink
-    sink = receiver.run()
-
-
-repeat(10000, operation)
-print(sink)
+if __name__ == "__main__":
+    print(run())

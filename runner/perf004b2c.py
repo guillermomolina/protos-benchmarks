@@ -236,8 +236,9 @@ def run_case(
                 "docker",
                 "run",
                 "--rm",
-                tag,
+                "--entrypoint",
                 "/bin/cat",
+                tag,
                 source,
             ]
         )

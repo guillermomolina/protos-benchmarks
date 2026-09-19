@@ -1,9 +1,10 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "perf_item": "PERF004",
-  "slice": "PERF004-A1",
-  "phase": "callable-cross-language-corpus-preparation",
+  "slice": "PERF004-A2",
+  "phase": "cross-language-timing-harness-ready",
   "timing_claim": false,
+  "a1_revision": "d8df6daf11015b0a074ed47456e946d985d111db",
   "protos_repository": "https://github.com/guillermomolina/protos.git",
   "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
   "protos_implementation_version": "0.2.492-SNAPSHOT",
@@ -19,7 +20,33 @@
     "jdk_version": "25.0.4.1",
     "graal_truffle_version": "25.3.4.1",
     "maven_version": "3.9.9",
-    "java_stack": "128m"
+    "java_stack": "128m",
+    "graal_container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825"
+  },
+  "comparison_runtimes": {
+    "python": {
+      "version": "3.14.7",
+      "base": "python:3.14.7-slim-bookworm",
+      "recursion_limit": 50000
+    },
+    "javascript": {
+      "runtime": "Node.js",
+      "version": "24.20.0",
+      "base": "node:24.20.0-bookworm-slim",
+      "stack_kb": 32768
+    }
+  },
+  "protos_driver_reuse": {
+    "origin_slice": "PERF006-D2A",
+    "dockerfile": "docker/protos-perf006d/Dockerfile",
+    "persistent_driver": "Perf006dPersistentDriver",
+    "startup_controller": "Perf006dStartupController",
+    "runtime_probe": "Perf006dRuntimeProbe",
+    "expected_runtime": "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime",
+    "runtime_dir": "/opt/protos/lib/runtime",
+    "timing_dir": "/opt/perf006d/timing",
+    "probe_dir": "/opt/perf006d/probe",
+    "corpus_dir": "/opt/perf006d/corpus"
   },
   "measurement_contract": {
     "startup_process_samples_per_language_workload": 10,
@@ -34,8 +61,21 @@
       "p95"
     ],
     "correctness_before_timing": true,
-    "heavy_diagnostics_separate": true
+    "heavy_diagnostics_separate": true,
+    "network": "none",
+    "cpu_affinity": "first CPU from current allowed cpuset",
+    "startup_boundary": "fresh language process inside an already-running Docker container; Docker creation/start excluded",
+    "persistent_boundary": "source/module load and runtime bootstrap outside timed iterations; one process per fork"
   },
+  "a2_smoke": {
+    "workload": "micro/closure-call",
+    "startup_samples_per_language": 1,
+    "persistent_forks_per_language": 1,
+    "warmup_iterations_per_fork": 2,
+    "steady_samples_per_fork": 2,
+    "retained": false
+  },
+  "reference_output": "results/perf004-a",
   "workloads": [
     {
       "id": "micro/slot-read",

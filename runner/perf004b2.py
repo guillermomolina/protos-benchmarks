@@ -138,7 +138,7 @@ def runtime_probe(tag: str, cpu: str) -> str:
             tag,
             "--enable-native-access=ALL-UNNAMED",
             "-cp",
-            "/opt/perf006d/diagnostic:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/*",
+            "/opt/perf006d/probe:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/*",
             "Perf006dRuntimeProbe",
         ],
         capture=True,
@@ -190,7 +190,7 @@ test "$(grep -o 'repeat({count_value},' "$dst" | wc -l)" -eq 1
 test "$(grep -o 'repeat(10000,' "$dst" | wc -l)" -eq 0
 exec java -Xss128m \\
   --enable-native-access=ALL-UNNAMED \\
-  -cp /opt/perf006d/diagnostic:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/* \\
+  -cp /opt/perf006d/timing:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/* \\
   Perf006dPersistentDriver "$dst" '{expected}' '{warmup}' '{steady}'
 """.format(
         count_value=count,

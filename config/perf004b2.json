@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF004",
+  "slice": "PERF004-B2-A",
+  "phase": "work-scaling-contrast-harness-ready",
+  "diagnostic_claim": false,
+  "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+  "baseline_evidence_revision": "5e8ff21f966c6c506652eef79c684d8b286bb546",
+  "b1_evidence_revision": "d73a982be26a6661d934727035afad0f459c3c26",
+  "comparison": {
+    "operation_counts": [100, 1000, 10000],
+    "warmup_iterations": 20,
+    "steady_iterations": 50,
+    "cpu_affinity": "one physical-core representative from current allowed cpuset",
+    "network": "none",
+    "variant_transform": "replace exactly one repeat(10000, occurrence with repeat(N,)"
+  },
+  "workloads": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42"
+    }
+  ],
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825"
+  }
+}

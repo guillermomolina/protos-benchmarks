@@ -22,6 +22,9 @@ requires Docker and is human-executed per this repository's human-executor mode.
 import importlib.util
 import json
 from pathlib import Path
+import re
+import subprocess
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,6 +80,18 @@ class Perf008ContractTest(unittest.TestCase):
         self.assertIn("import jdk.jfr.Recording;", new_driver)
         self.assertIn("import jdk.jfr.Configuration;", new_driver)
 
+    def test_driver_catches_the_real_configuration_parse_exception(self):
+        # `jdk.jfr.Configuration.create(Reader)` declares `throws IOException,
+        # java.text.ParseException` (confirmed via `javap` against the exact pinned
+        # toolchain, ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-*); there is no
+        # `jdk.jfr.ParseException` class, so a catch clause naming it fails to compile.
+        new_driver = (
+            ROOT / "docker/protos-perf006d3/Perf008SteadyStateDriver.java"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("jdk.jfr.ParseException", new_driver)
+        self.assertIn("import java.text.ParseException;", new_driver)
+        self.assertIn("catch (ParseException malformed)", new_driver)
+
     def test_analyzer_output_schema_is_additive(self):
         # Every PERF006-D3 field name must still be present verbatim so
         # runner/perf006d3.py and runner/perf004b2d.py keep working unmodified.
@@ -119,6 +134,42 @@ class Perf008ContractTest(unittest.TestCase):
 
         cfg = json.loads((ROOT / "config/perf008.json").read_text(encoding="utf-8"))
         self.assertEqual("python3", cfg["toolchain"]["python_package"])
+
+    def test_worktree_harness_revision_declares_exact_sha_or_precommit_sentinel(self):
+        # Docker-free: only reads git state, never mutates it. Retained `reference` runs
+        # never call this helper; only the non-retained `smoke` command does (see AGENTS.md's
+        # "no commit during iteration" rule and AGENTS.work/REPRODUCIBILITY.md).
+        revision = perf008.worktree_harness_revision()
+        self.assertTrue(
+            revision == "WORKTREE_PRECOMMIT" or re.fullmatch(r"[0-9a-f]{40}", revision),
+            f"unexpected declared harness revision: {revision!r}",
+        )
+
+    def test_smoke_is_a_top_level_command_like_the_sibling_harnesses(self):
+        # PERF006-D3 and PERF004-A both expose `smoke` as a positional command choice
+        # (see runner/perf006d3.py, runner/perf004a.py); PERF008 follows the same shape
+        # rather than inventing a `--smoke` flag of its own.
+        completed = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--help"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(0, completed.returncode)
+        self.assertIn("{validate,smoke,reference}", completed.stdout)
+
+    def test_reference_still_requires_harness_revision_and_output_dir(self):
+        # Unchanged strict-gate behavior: a plain `reference` run must keep requiring the
+        # exact clean --harness-revision (retained evidence is never produced from a dirty
+        # or undeclared working tree; that is what `smoke` is for).
+        completed = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "reference", "--output-dir", "/tmp/perf008-not-used"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn("--harness-revision", completed.stderr)
 
 
 if __name__ == "__main__":

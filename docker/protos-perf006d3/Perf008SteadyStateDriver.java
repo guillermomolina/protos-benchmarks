@@ -38,6 +38,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -215,7 +216,7 @@ public final class Perf008SteadyStateDriver {
         Configuration configuration;
         try (var reader = Files.newBufferedReader(jfrSettings, StandardCharsets.UTF_8)) {
             configuration = Configuration.create(reader);
-        } catch (jdk.jfr.ParseException malformed) {
+        } catch (ParseException malformed) {
             throw new IllegalStateException("malformed JFR settings: " + jfrSettings, malformed);
         }
 

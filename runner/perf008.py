@@ -77,6 +77,23 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def worktree_harness_revision() -> str:
+    """Declared harness source identity for the non-retained `smoke` command only.
+
+    Mirrors `runner/perf001f.harness_revision()`: returns the exact HEAD SHA when the
+    working tree is clean, otherwise the explicit `WORKTREE_PRECOMMIT` sentinel. Retained
+    reference evidence never uses this helper - `reference()` still requires an exact clean
+    SHA matching `--harness-revision`, per `AGENTS.work/REPRODUCIBILITY.md` ("Floating
+    branch names ... are not sufficient identities for retained reference results"; an
+    uncommitted tree is weaker still). `smoke` exists so an uncommitted harness fix can be
+    exercised end-to-end before publication, without producing evidence that claims a
+    pinned identity it does not have.
+    """
+    head = output(["git", "rev-parse", "HEAD"])
+    dirty = output(["git", "status", "--porcelain", "--untracked-files=all"])
+    return head if not dirty else "WORKTREE_PRECOMMIT"
+
+
 def validate() -> dict[str, Any]:
     cfg = load()
     b2d_cfg = json.loads(B2D_CONFIG.read_text(encoding="utf-8"))
@@ -326,28 +343,124 @@ def profile(
     }
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("command", choices=("validate", "reference"))
-    ap.add_argument("--harness-revision")
-    ap.add_argument("--output-dir")
-    args = ap.parse_args()
+def run_matrix(cfg: dict[str, Any], tag: str, cpu: str, work: Path) -> list[dict[str, Any]]:
+    """Runs the full canonical/control profile matrix (4 workloads) and returns paired results.
 
+    Shared by `smoke()` (ephemeral, non-retained) and `reference()` (persisted, retained
+    evidence); the matrix itself - workloads, N, warmup/steady counts - is identical either
+    way, matching the PERF004-B2-D experiment exactly (see `validate()`).
+    """
+    paired = []
+
+    for item in cfg["controls"]:
+        workload = item["id"]
+        slug = workload.replace("/", "__")
+        canonical_source = "/opt/perf006d3/corpus/" + item["source"]
+
+        source_text = output([
+            "docker", "run", "--rm",
+            "--entrypoint", "/bin/cat", tag,
+            canonical_source,
+        ])
+
+        if source_text.count(item["replace"]) != 1:
+            raise RuntimeError(
+                f"expected exactly one control target in {workload}"
+            )
+
+        control_text = source_text.replace(
+            item["replace"], item["with"], 1
+        )
+
+        control_host = work / f"{slug}-control.protos"
+        control_host.write_text(control_text, encoding="utf-8")
+
+        print(
+            f"PROFILE BEGIN workload={workload} mode=canonical operations=10000",
+            flush=True,
+        )
+        canonical = profile(
+            tag, cpu, work, None, canonical_source,
+            item["expected"], slug + "-canonical",
+            cfg["warmup_iterations"], cfg["steady_iterations"],
+        )
+        print(
+            f"PROFILE PASS workload={workload} mode=canonical "
+            f"samples={canonical['profile']['execution_samples']['total']}",
+            flush=True,
+        )
+
+        print(
+            f"PROFILE BEGIN workload={workload} mode=control operations=10000",
+            flush=True,
+        )
+        control = profile(
+            tag, cpu, work, control_host, "/work/source.protos",
+            item["expected"], slug + "-control",
+            cfg["warmup_iterations"], cfg["steady_iterations"],
+        )
+        print(
+            f"PROFILE PASS workload={workload} mode=control "
+            f"samples={control['profile']['execution_samples']['total']}",
+            flush=True,
+        )
+
+        paired.append({
+            "workload": workload,
+            "canonical": canonical,
+            "control": control,
+        })
+
+    return paired
+
+
+def smoke() -> None:
+    """Non-retained, dirty-working-tree-tolerant run of the exact PERF008 matrix.
+
+    Exists so an uncommitted harness fix (for example, a driver compile error) can be
+    exercised end-to-end - full image build, all 4 canonical/control profile pairs,
+    full-stack and steady-state-only JFR capture, correctness checks - before the harness
+    is committed. Mirrors the `smoke` command already used by the sibling PERF006-D3/PERF004-A
+    harnesses (see `runner/perf006d3.py:smoke()`): nothing is written under `results/` or any
+    other persisted location, and the declared harness identity is HEAD when the tree is
+    clean, or the `WORKTREE_PRECOMMIT` sentinel when dirty (matching
+    `runner/perf001f.harness_revision()`). Retained reference evidence is produced only by
+    `reference()`, which still requires an exact clean `--harness-revision` per
+    `AGENTS.work/REPRODUCIBILITY.md`.
+    """
+    cfg = validate()
+    harness_revision = worktree_harness_revision()
+    cpu = first_cpu()
+    tag = build_image(cfg)
+    runtime = runtime_probe(tag, cpu)
+    java_version_probe(tag, cpu)
+
+    with tempfile.TemporaryDirectory(prefix="perf008-smoke-") as tmp:
+        work = Path(tmp)
+        paired = run_matrix(cfg, tag, cpu, work)
+
+    print("PERF008_SMOKE_HARNESS_REVISION=" + harness_revision)
+    print("PERF008_SMOKE_RUNTIME=" + runtime)
+    print("PERF008_SMOKE_PAIRS=" + str(len(paired)))
+    print("PERF008_SMOKE_EVIDENCE_UNITS=" + str(len(paired) * 2))
+    print("PERF008_FULL_STACK_SUPPORT=PASS")
+    print("PERF008_STEADY_STATE_CAPTURE=PASS")
+    print("PERF008_CURRENT_MAIN_MATRIX=PASS")
+    print("PERF008_CORRECTNESS=PASS")
+    print("PERF008_SMOKE=PASS")
+    print("PERF008_SMOKE_RETAINED=NO")
+    print("PERF008_DIAGNOSTIC_CLAIM=NO")
+
+
+def reference(harness_revision: str, output_dir: Path) -> None:
     cfg = validate()
 
-    if args.command == "validate":
-        return
-
-    if not args.harness_revision or not args.output_dir:
-        ap.error("reference requires --harness-revision and --output-dir")
-
-    if output(["git", "rev-parse", "HEAD"]) != args.harness_revision:
+    if output(["git", "rev-parse", "HEAD"]) != harness_revision:
         raise RuntimeError("exact harness revision mismatch")
 
     if output(["git", "status", "--porcelain", "--untracked-files=all"]):
         raise RuntimeError("reference requires clean exact harness")
 
-    output_dir = Path(args.output_dir)
     if output_dir.exists():
         if not output_dir.is_dir() or any(output_dir.iterdir()):
             raise RuntimeError("output directory already contains evidence")
@@ -358,69 +471,9 @@ def main():
     runtime = runtime_probe(tag, cpu)
     java_version = java_version_probe(tag, cpu)
 
-    paired = []
-
     with tempfile.TemporaryDirectory(prefix="perf008-") as tmp:
         work = Path(tmp)
-
-        for item in cfg["controls"]:
-            workload = item["id"]
-            slug = workload.replace("/", "__")
-            canonical_source = "/opt/perf006d3/corpus/" + item["source"]
-
-            source_text = output([
-                "docker", "run", "--rm",
-                "--entrypoint", "/bin/cat", tag,
-                canonical_source,
-            ])
-
-            if source_text.count(item["replace"]) != 1:
-                raise RuntimeError(
-                    f"expected exactly one control target in {workload}"
-                )
-
-            control_text = source_text.replace(
-                item["replace"], item["with"], 1
-            )
-
-            control_host = work / f"{slug}-control.protos"
-            control_host.write_text(control_text, encoding="utf-8")
-
-            print(
-                f"PROFILE BEGIN workload={workload} mode=canonical operations=10000",
-                flush=True,
-            )
-            canonical = profile(
-                tag, cpu, work, None, canonical_source,
-                item["expected"], slug + "-canonical",
-                cfg["warmup_iterations"], cfg["steady_iterations"],
-            )
-            print(
-                f"PROFILE PASS workload={workload} mode=canonical "
-                f"samples={canonical['profile']['execution_samples']['total']}",
-                flush=True,
-            )
-
-            print(
-                f"PROFILE BEGIN workload={workload} mode=control operations=10000",
-                flush=True,
-            )
-            control = profile(
-                tag, cpu, work, control_host, "/work/source.protos",
-                item["expected"], slug + "-control",
-                cfg["warmup_iterations"], cfg["steady_iterations"],
-            )
-            print(
-                f"PROFILE PASS workload={workload} mode=control "
-                f"samples={control['profile']['execution_samples']['total']}",
-                flush=True,
-            )
-
-            paired.append({
-                "workload": workload,
-                "canonical": canonical,
-                "control": control,
-            })
+        paired = run_matrix(cfg, tag, cpu, work)
 
     output_dir.mkdir(parents=True)
 
@@ -428,7 +481,7 @@ def main():
         "schema_version": 1,
         "perf_item": "PERF008",
         "slice": "PERF008",
-        "harness_revision": args.harness_revision,
+        "harness_revision": harness_revision,
         "protos_revision": cfg["protos_revision"],
         "historical_protos_revision": cfg["historical_protos_revision"],
         "historical_evidence_references": cfg["historical_evidence"],
@@ -493,7 +546,7 @@ def main():
     readme = [
         "# PERF008 steady-state full-stack JFR evidence",
         "",
-        f"- Harness revision: `{args.harness_revision}`",
+        f"- Harness revision: `{harness_revision}`",
         f"- Protos revision (current): `{cfg['protos_revision']}`",
         "- Historical Protos revision (PERF004-B2-D / PERF006-D3; not mixed with "
         f"current-revision measurements): `{cfg['historical_protos_revision']}`",
@@ -551,6 +604,27 @@ def main():
     print("PERF008_DIAGNOSTIC_CLAIM=NO")
     print("PERF008_PROTOS_REPOSITORY_TOUCHED=NO")
     print("PERF008_NEXT_EVIDENCE_READY=YES")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("command", choices=("validate", "smoke", "reference"))
+    ap.add_argument("--harness-revision")
+    ap.add_argument("--output-dir")
+    args = ap.parse_args()
+
+    if args.command == "validate":
+        validate()
+        return
+
+    if args.command == "smoke":
+        smoke()
+        return
+
+    if not args.harness_revision or not args.output_dir:
+        ap.error("reference requires --harness-revision and --output-dir")
+
+    reference(args.harness_revision, Path(args.output_dir))
 
 
 if __name__ == "__main__":

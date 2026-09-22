@@ -99,6 +99,19 @@ remote branches unless the user explicitly requests them. Before publishing,
 validate the exact intended changed file set and stage only those paths; do
 not use `git add .` or `git add -A` in automated publication scripts.
 
+Do not commit an implementation slice while it is still being iterated. Keep
+the working tree uncommitted while builds, tests, benchmarks, and validation
+are being used to discover or repair implementation defects; under
+Human-executor mode above, the human already runs each of those and reports
+the result back, so nothing about this rule changes who runs `add`/`commit`.
+Commit only once the requested slice is complete, the required validation
+passes, the intended changed-file set has been reviewed, and the final diff
+is coherent. A single implementation slice SHOULD normally result in one
+coherent commit; intermediate repair commits are not required and MUST NOT
+be used merely to checkpoint failed or incomplete iterations — defects
+discovered while validating a slice are repaired within that same slice, not
+published as separate commits.
+
 Repository bootstrap is a special one-time case: the initial commit may be
 created only while both the local repository and the remote repository have no
 commits. If another initial commit appears remotely, abort instead of reconciling

@@ -1,29 +1,56 @@
+diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java
+index 6e0720e4..78965bf1 100644
+--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java
++++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java
+@@ -467,13 +467,18 @@ public final class ProtosActivation {
+     public Optional<Object> lookup(String name) {
+         Objects.requireNonNull(name, "name");
+ 
+-        Optional<Object> current = context.readLocalSlot(name);
++        // PERF010A_ABLATION_3 diagnostic-only call site (see
++        // ProtosObjectValue.readLocalSlotSingleProbe); never publish to guillermomolina/protos.
++        Optional<Object> current = context.readLocalSlotSingleProbe(name);
+         if (current.isPresent()) {
+             return current;
+         }
+ 
+         for (ProtosObjectValue lexicalContext : capturedLexicalContexts) {
+-            Optional<Object> captured = lexicalContext.readLocalSlot(name);
++            // PERF010A_ABLATION_3 diagnostic-only call site (see
++            // ProtosObjectValue.readLocalSlotSingleProbe); never publish to
++            // guillermomolina/protos.
++            Optional<Object> captured = lexicalContext.readLocalSlotSingleProbe(name);
+             if (captured.isPresent()) {
+                 return captured;
+             }
 diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java
-index 12f9f00b..a7cbdc5a 100644
+index 12f9f00b..7b0169ca 100644
 --- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java
 +++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java
-@@ -98,9 +98,21 @@ public class ProtosObjectValue implements TruffleObject {
-
-     public Optional<Object> readLocalSlot(String name) {
-         Objects.requireNonNull(name, "name");
--        return localSlots.containsKey(name)
--                ? Optional.of(localSlots.get(name))
--                : Optional.empty();
-+        // PERF010A_ABLATION_3 diagnostic transformation (protos-benchmarks
-+        // docker/protos-perf010a/ablation-3.patch): replace the redundant
-+        // containsKey(name) + get(name) probe-then-read with a single get(name), relying on
-+        // localSlots' own invariant that no local slot value is ever null (createLocalSlot and
-+        // assignLocalSlot both require a non-null value via Objects.requireNonNull, and
-+        // composeLocalSlotsFrom only copies values already subject to that invariant from
-+        // another ProtosObjectValue) to distinguish ABSENT from any semantically valid stored
-+        // value without a second map probe. This is a diagnostic-only evidence intervention for
-+        // PERF010-A's third causal ablation
-+        // (THIRD_ABLATION_TARGET=ProtosObjectValue.readLocalSlot); it does not alter captured-
-+        // lexical-context traversal, lexical precedence, shadowing, or missing-name behavior,
-+        // all of which live in ProtosActivation.lookup and are untouched by this patch. Never
-+        // publish this change to guillermomolina/protos.
+@@ -103,6 +103,26 @@ public class ProtosObjectValue implements TruffleObject {
+                 : Optional.empty();
+     }
+ 
++    // PERF010A_ABLATION_3 diagnostic-only helper (protos-benchmarks
++    // docker/protos-perf010a/ablation-3.patch): used exclusively by the two lexical-slot-read
++    // call sites inside ProtosActivation.lookup (current context, then
++    // capturedLexicalContexts). Replaces the redundant containsKey(name) + get(name)
++    // probe-then-read with a single get(name), relying on localSlots' own invariant that no
++    // local slot value is ever null (createLocalSlot/assignLocalSlot both require
++    // Objects.requireNonNull(value, ...); composeLocalSlotsFrom only copies values already
++    // subject to that invariant from another ProtosObjectValue) to discriminate ABSENT from any
++    // semantically valid stored value without a second map probe. readLocalSlot above is
++    // untouched and remains the path used by every other caller (ProtosValueLookup,
++    // hasLocalSlot-adjacent callers, interop member reads, and any other production call site).
++    // This is a diagnostic-only evidence intervention for PERF010-A's third causal ablation
++    // (THIRD_ABLATION_TARGET=ProtosObjectValue.readLocalSlot as read from the two
++    // ProtosActivation.lookup call sites); never publish this method to guillermomolina/protos.
++    Optional<Object> readLocalSlotSingleProbe(String name) {
++        Objects.requireNonNull(name, "name");
 +        Object value = localSlots.get(name);
 +        return value != null ? Optional.of(value) : Optional.empty();
-     }
-
++    }
++
      public Map<String, Object> localSlotsSnapshot() {
+         return java.util.Collections.unmodifiableMap(new LinkedHashMap<>(localSlots));
+     }

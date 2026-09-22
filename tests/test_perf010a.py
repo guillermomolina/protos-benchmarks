@@ -436,33 +436,71 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertEqual(cfg1["variants"], cfg3["variants"])
         self.assertEqual(cfg1["toolchain"], cfg3["toolchain"])
 
-    def test_ablation3_patch_touches_exactly_read_local_slot(self):
+    def test_ablation3_patch_touches_exactly_the_two_declared_targets(self):
+        # The established causal-ablation contract touches two files: the diagnostic helper
+        # (ProtosObjectValue.java, purely additive) and its two call sites
+        # (ProtosActivation.java). A single-file patch is the shape of the earlier, invalid
+        # execution of this slice (see test_ablation3_invalid_global_patch_fails_validation).
         cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
         patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
         targets = cfg["ablation_patch_targets"]
-        self.assertEqual(1, len(targets))
-        self.assertEqual(
-            "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java",
-            targets[0],
+        self.assertEqual(2, len(targets))
+        self.assertIn(
+            "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java", targets
         )
-        self.assertEqual(1, patch_text.count("--- a/"))
+        self.assertIn(
+            "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java", targets
+        )
+        self.assertEqual(2, patch_text.count("--- a/"))
 
-    def test_ablation3_patch_removes_redundant_contains_key_and_get(self):
+    def test_ablation3_patch_adds_diagnostic_helper_without_touching_baseline_body(self):
         cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
         patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
-        self.assertIn("-        return localSlots.containsKey(name)", patch_text)
-        self.assertIn("-                ? Optional.of(localSlots.get(name))", patch_text)
-        self.assertIn("+        Object value = localSlots.get(name);", patch_text)
-        self.assertIn("+        return value != null ? Optional.of(value) : Optional.empty();", patch_text)
+        files = perf010a._parse_unified_diff(patch_text)
+        object_value = files[
+            "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java"
+        ]
+        # Purely additive: the existing readLocalSlot method body (containsKey(name) +
+        # get(name)) is not removed or otherwise touched.
+        self.assertEqual([], object_value["removed"])
+        added_text = "\n".join(object_value["added"])
+        self.assertIn(perf010a.DIAGNOSTIC_HELPER_SIGNATURE, added_text)
+        self.assertIn(perf010a.ABLATION_3_MARKER_COMMENT, added_text)
+        self.assertEqual(1, added_text.count("localSlots.get(name)"))
+        self.assertNotIn("localSlots.containsKey", added_text)
 
-    def test_ablation3_patch_does_not_touch_lexical_traversal_or_other_mechanisms(self):
+    def test_ablation3_patch_redirects_exactly_the_two_lexical_call_sites(self):
+        cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        files = perf010a._parse_unified_diff(patch_text)
+        activation = files[
+            "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java"
+        ]
+        removed_calls = [
+            l for l in activation["removed"] if perf010a.BASELINE_CALL_SITE_PATTERN in l
+        ]
+        non_call_removed = [
+            l for l in activation["removed"] if perf010a.BASELINE_CALL_SITE_PATTERN not in l
+        ]
+        self.assertEqual(2, len(removed_calls))
+        # Nothing else in ProtosActivation.java is removed: not the captured-lexical-traversal
+        # loop header, not the ProtosValueLookup fallback, not lookup ordering.
+        self.assertEqual([], non_call_removed)
+        added_text = "\n".join(activation["added"])
+        self.assertEqual(2, added_text.count(perf010a.DIAGNOSTIC_CALL_SITE_PATTERN))
+        self.assertNotIn(perf010a.CAPTURED_LEXICAL_TRAVERSAL_MARKER, added_text)
+        self.assertNotIn(perf010a.LOOKUP_FALLBACK_MARKER, added_text)
+
+    def test_ablation3_patch_does_not_touch_other_production_mechanisms(self):
         cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
         patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
         for forbidden in (
-            "ProtosActivation.java",
             "ProtosBytecodeRootNode.java",
             "CanonicalToBytecodeLowerer.java",
-            "capturedLexicalContexts",
+            "ProtosSourceCompiler.java",
+            "ProtosBytecodeClosureExecutionPlan.java",
+            "ProtosRootTaskExecution.java",
+            "ProtosValueLookup.java",
             "continueAt",
             "RootTag",
             "ContinuationResult",
@@ -474,6 +512,189 @@ class Perf010aContractTest(unittest.TestCase):
         cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
         patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
         self.assertIn("PERF010A_ABLATION_3", patch_text)
+
+    # --- exact-scope validation (AGENTS.work/PERFORMANCE.md's causal-ablation rule) ---
+
+    def test_ablation3_patch_passes_exact_scope_validation(self):
+        cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        perf010a.validate_patch_shape_3(patch_text)  # must not raise
+
+    def test_ablation3_invalid_global_patch_fails_validation(self):
+        # Shape of the earlier, invalid execution of this slice: readLocalSlot's own body is
+        # transformed globally (single file, only ProtosObjectValue.java), which changes every
+        # caller instead of only the two established ProtosActivation.lookup call sites. This
+        # must fail exact-scope validation even though it is semantically equivalent by
+        # construction and even though it targets the correct file.
+        invalid_patch = (
+            "diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "@@ -100,9 +100,15 @@\n"
+            "     public Optional<Object> readLocalSlot(String name) {\n"
+            "         Objects.requireNonNull(name, \"name\");\n"
+            "-        return localSlots.containsKey(name)\n"
+            "-                ? Optional.of(localSlots.get(name))\n"
+            "-                : Optional.empty();\n"
+            "+        // PERF010A_ABLATION_3 diagnostic transformation\n"
+            "+        Object value = localSlots.get(name);\n"
+            "+        return value != null ? Optional.of(value) : Optional.empty();\n"
+            "     }\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_3(invalid_patch)
+
+    def test_ablation3_patch_with_only_one_diagnostic_call_site_fails_validation(self):
+        # Only the current-context call site redirected; the captured-lexical-context loop's
+        # call site left on the baseline reader. Must fail (requirement: both call sites must
+        # move together).
+        patch = (
+            "diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "@@ -103,6 +103,12 @@\n"
+            "     }\n"
+            "\n"
+            "+    // PERF010A_ABLATION_3 diagnostic-only helper\n"
+            "+    Optional<Object> readLocalSlotSingleProbe(String name) {\n"
+            "+        Object value = localSlots.get(name);\n"
+            "+        return value != null ? Optional.of(value) : Optional.empty();\n"
+            "+    }\n"
+            "+\n"
+            "     public Map<String, Object> localSlotsSnapshot() {\n"
+            "diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "@@ -467,7 +467,7 @@\n"
+            "     public Optional<Object> lookup(String name) {\n"
+            "         Objects.requireNonNull(name, \"name\");\n"
+            "\n"
+            "-        Optional<Object> current = context.readLocalSlot(name);\n"
+            "+        Optional<Object> current = context.readLocalSlotSingleProbe(name);\n"
+            "         if (current.isPresent()) {\n"
+            "             return current;\n"
+            "         }\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_3(patch)
+
+    def test_ablation3_patch_touching_value_lookup_fails_validation(self):
+        # If ProtosValueLookup were redirected to the diagnostic helper too, the receiver/
+        # delegation member-lookup path (not part of the established target) would also be
+        # measured. Must fail even though ProtosObjectValue.java/ProtosActivation.java are
+        # otherwise correct, because a third file is touched.
+        base_patch = (ROOT / "docker/protos-perf010a/ablation-3.patch").read_text(
+            encoding="utf-8"
+        )
+        extra = (
+            "\ndiff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosValueLookup.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosValueLookup.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosValueLookup.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosValueLookup.java\n"
+            "@@ -36,7 +36,7 @@\n"
+            "             if (current instanceof ProtosObjectValue ordinary) {\n"
+            "-                Optional<Object> local = ordinary.readLocalSlot(name);\n"
+            "+                Optional<Object> local = ordinary.readLocalSlotSingleProbe(name);\n"
+            "                 if (local.isPresent()) {\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_3(base_patch + extra)
+
+    def test_ablation3_patch_removing_baseline_read_local_slot_body_fails_validation(self):
+        # If ordinary readLocalSlot's own body is also modified (even alongside a correct
+        # helper addition and correct call-site redirection), it is no longer the untouched
+        # baseline every other caller relies on. Must fail.
+        patch = (
+            "diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "@@ -98,9 +98,21 @@\n"
+            "     public Optional<Object> readLocalSlot(String name) {\n"
+            "         Objects.requireNonNull(name, \"name\");\n"
+            "-        return localSlots.containsKey(name)\n"
+            "-                ? Optional.of(localSlots.get(name))\n"
+            "-                : Optional.empty();\n"
+            "+        return localSlots.containsKey(name) ? Optional.of(localSlots.get(name)) : Optional.empty();\n"
+            "     }\n"
+            "\n"
+            "+    // PERF010A_ABLATION_3 diagnostic-only helper\n"
+            "+    Optional<Object> readLocalSlotSingleProbe(String name) {\n"
+            "+        Object value = localSlots.get(name);\n"
+            "+        return value != null ? Optional.of(value) : Optional.empty();\n"
+            "+    }\n"
+            "+\n"
+            "     public Map<String, Object> localSlotsSnapshot() {\n"
+            "diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "@@ -467,13 +467,13 @@\n"
+            "     public Optional<Object> lookup(String name) {\n"
+            "         Objects.requireNonNull(name, \"name\");\n"
+            "\n"
+            "-        Optional<Object> current = context.readLocalSlot(name);\n"
+            "+        Optional<Object> current = context.readLocalSlotSingleProbe(name);\n"
+            "         if (current.isPresent()) {\n"
+            "             return current;\n"
+            "         }\n"
+            "\n"
+            "         for (ProtosObjectValue lexicalContext : capturedLexicalContexts) {\n"
+            "-            Optional<Object> captured = lexicalContext.readLocalSlot(name);\n"
+            "+            Optional<Object> captured = lexicalContext.readLocalSlotSingleProbe(name);\n"
+            "             if (captured.isPresent()) {\n"
+            "                 return captured;\n"
+            "             }\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_3(patch)
+
+    def test_ablation3_patch_removing_captured_lexical_traversal_fails_validation(self):
+        # If the captured-lexical-context loop header itself is removed/altered alongside the
+        # call-site redirection, this is no longer "the traversal preserved, only the reader
+        # method changed" contract. Must fail.
+        patch = (
+            "diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java\n"
+            "@@ -103,6 +103,12 @@\n"
+            "     }\n"
+            "\n"
+            "+    // PERF010A_ABLATION_3 diagnostic-only helper\n"
+            "+    Optional<Object> readLocalSlotSingleProbe(String name) {\n"
+            "+        Object value = localSlots.get(name);\n"
+            "+        return value != null ? Optional.of(value) : Optional.empty();\n"
+            "+    }\n"
+            "+\n"
+            "     public Map<String, Object> localSlotsSnapshot() {\n"
+            "diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "@@ -467,13 +467,13 @@\n"
+            "     public Optional<Object> lookup(String name) {\n"
+            "         Objects.requireNonNull(name, \"name\");\n"
+            "\n"
+            "-        Optional<Object> current = context.readLocalSlot(name);\n"
+            "+        Optional<Object> current = context.readLocalSlotSingleProbe(name);\n"
+            "         if (current.isPresent()) {\n"
+            "             return current;\n"
+            "         }\n"
+            "\n"
+            "-        for (ProtosObjectValue lexicalContext : capturedLexicalContexts) {\n"
+            "-            Optional<Object> captured = lexicalContext.readLocalSlot(name);\n"
+            "+        for (ProtosObjectValue lexicalContext : capturedLexicalContexts) { // touched\n"
+            "+            Optional<Object> captured = lexicalContext.readLocalSlotSingleProbe(name);\n"
+            "             if (captured.isPresent()) {\n"
+            "                 return captured;\n"
+            "             }\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_3(patch)
 
     def test_ablation3_dockerfile_supports_selectable_patch(self):
         dockerfile = (ROOT / "docker/protos-perf010a/Dockerfile").read_text(encoding="utf-8")
@@ -539,7 +760,7 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertNotIn(perf010a.ABLATION_3_MARKER_COMMENT, body)
         self.assertIn("containsKey", body)
 
-    def test_classify_workload_ablation3_uses_source_markers_not_jfr(self):
+    def test_classify_workload_ablation3_uses_structural_contract_not_jfr(self):
         def cell(median_ns):
             return {
                 "timing": {"steady_summary": {"median_ns": median_ns}},
@@ -560,27 +781,23 @@ class Perf010aContractTest(unittest.TestCase):
                 },
             },
         }
-        source_markers = {
-            "baseline": {
-                "marker_present": False,
-                "contains_key_absent": False,
-                "single_get_present": False,
-                "captured_lexical_traversal_present": True,
-            },
-            "ablation": {
-                "marker_present": True,
-                "contains_key_absent": True,
-                "single_get_present": True,
-                "captured_lexical_traversal_present": True,
-            },
+        structural_contract_3 = {
+            "ABLATION_3_TARGET_HELPER_PRESENT": True,
+            "ABLATION_3_CURRENT_CONTEXT_CALLSITE": True,
+            "ABLATION_3_CAPTURED_CONTEXT_CALLSITE": True,
+            "ABLATION_3_BASELINE_READ_LOCAL_SLOT_UNCHANGED": True,
+            "ABLATION_3_PROTOS_VALUE_LOOKUP_PATH_UNCHANGED": True,
+            "ABLATION_3_CAPTURED_LEXICAL_TRAVERSAL_PRESERVED": True,
+            "ABLATION_3_LOOKUP_ORDER_PRESERVED": True,
+            "ABLATION_3_PATCH_SCOPE_MATCH": True,
         }
-        classification = perf010a.classify_workload(entry, "3", source_markers)
+        classification = perf010a.classify_workload(entry, "3", structural_contract_3)
         self.assertTrue(classification["correctness_confirmed"])
         self.assertTrue(classification["structural_ablation_confirmed"])
         self.assertEqual("VALID", classification["perf010a_ablation_3"])
         self.assertEqual(300, classification["removed_ns"])
 
-    def test_classify_workload_ablation3_without_source_markers_is_invalid(self):
+    def test_classify_workload_ablation3_without_structural_contract_is_invalid(self):
         def cell(median_ns):
             return {
                 "timing": {"steady_summary": {"median_ns": median_ns}},
@@ -599,10 +816,10 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertFalse(classification["structural_ablation_confirmed"])
         self.assertEqual("INVALID", classification["perf010a_ablation_3"])
 
-    def test_classify_workload_ablation3_baseline_still_showing_ablation_marker_is_invalid(self):
-        # If the "baseline" image's source somehow already carries the ablation marker/
-        # single-get pattern, the source-marker check cannot distinguish baseline from
-        # ablation, so it must not be confirmed VALID.
+    def test_classify_workload_ablation3_failed_scope_match_is_invalid(self):
+        # A structural contract where the overall ABLATION_3_PATCH_SCOPE_MATCH is False (e.g.
+        # because the baseline readLocalSlot body diverged between images) must not be
+        # confirmed VALID even if some individual sub-checks passed.
         def cell(median_ns):
             return {
                 "timing": {"steady_summary": {"median_ns": median_ns}},
@@ -617,23 +834,110 @@ class Perf010aContractTest(unittest.TestCase):
                 "ablation": {"canonical": cell(700), "control": cell(100)},
             },
         }
-        source_markers = {
-            "baseline": {
-                "marker_present": True,
-                "contains_key_absent": True,
-                "single_get_present": True,
-                "captured_lexical_traversal_present": True,
-            },
-            "ablation": {
-                "marker_present": True,
-                "contains_key_absent": True,
-                "single_get_present": True,
-                "captured_lexical_traversal_present": True,
-            },
+        structural_contract_3 = {
+            "ABLATION_3_TARGET_HELPER_PRESENT": True,
+            "ABLATION_3_CURRENT_CONTEXT_CALLSITE": True,
+            "ABLATION_3_CAPTURED_CONTEXT_CALLSITE": True,
+            "ABLATION_3_BASELINE_READ_LOCAL_SLOT_UNCHANGED": False,
+            "ABLATION_3_PROTOS_VALUE_LOOKUP_PATH_UNCHANGED": True,
+            "ABLATION_3_CAPTURED_LEXICAL_TRAVERSAL_PRESERVED": True,
+            "ABLATION_3_LOOKUP_ORDER_PRESERVED": True,
+            "ABLATION_3_PATCH_SCOPE_MATCH": False,
         }
-        classification = perf010a.classify_workload(entry, "3", source_markers)
+        classification = perf010a.classify_workload(entry, "3", structural_contract_3)
         self.assertFalse(classification["structural_ablation_confirmed"])
         self.assertEqual("INVALID", classification["perf010a_ablation_3"])
+
+    # --- structural_contract_confirmed_ablation_3 (per-image exact-scope proof) ---
+
+    def _valid_probe_pair(self):
+        baseline_probe = {
+            "baseline_read_local_slot_body": "{ containsKey/get body }",
+            "diagnostic_helper_present": False,
+            "diagnostic_marker_present": False,
+            "diagnostic_helper_contains_key_absent": True,
+            "diagnostic_helper_single_get_count": 0,
+            "current_context_diagnostic": False,
+            "current_context_baseline": True,
+            "captured_context_diagnostic": False,
+            "captured_context_baseline": True,
+            "captured_lexical_traversal_present": True,
+            "lookup_fallback_present": True,
+            "value_lookup_call_site_present": True,
+        }
+        ablation_probe = {
+            "baseline_read_local_slot_body": "{ containsKey/get body }",
+            "diagnostic_helper_present": True,
+            "diagnostic_marker_present": True,
+            "diagnostic_helper_contains_key_absent": True,
+            "diagnostic_helper_single_get_count": 1,
+            "current_context_diagnostic": True,
+            "current_context_baseline": False,
+            "captured_context_diagnostic": True,
+            "captured_context_baseline": False,
+            "captured_lexical_traversal_present": True,
+            "lookup_fallback_present": True,
+            "value_lookup_call_site_present": True,
+        }
+        return baseline_probe, ablation_probe
+
+    def test_structural_contract_confirmed_for_correct_probe_pair(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair()
+        checks = perf010a.structural_contract_confirmed_ablation_3(baseline_probe, ablation_probe)
+        self.assertTrue(checks["ABLATION_3_PATCH_SCOPE_MATCH"])
+        self.assertTrue(all(checks.values()))
+
+    def test_structural_contract_fails_when_baseline_body_diverges(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair()
+        ablation_probe["baseline_read_local_slot_body"] = "{ different body }"
+        checks = perf010a.structural_contract_confirmed_ablation_3(baseline_probe, ablation_probe)
+        self.assertFalse(checks["ABLATION_3_BASELINE_READ_LOCAL_SLOT_UNCHANGED"])
+        self.assertFalse(checks["ABLATION_3_PATCH_SCOPE_MATCH"])
+
+    def test_structural_contract_fails_when_only_current_context_is_diagnostic(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair()
+        ablation_probe["captured_context_diagnostic"] = False
+        ablation_probe["captured_context_baseline"] = True
+        checks = perf010a.structural_contract_confirmed_ablation_3(baseline_probe, ablation_probe)
+        self.assertFalse(checks["ABLATION_3_CAPTURED_CONTEXT_CALLSITE"])
+        self.assertFalse(checks["ABLATION_3_LOOKUP_ORDER_PRESERVED"])
+        self.assertFalse(checks["ABLATION_3_PATCH_SCOPE_MATCH"])
+
+    def test_structural_contract_fails_when_value_lookup_path_changed(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair()
+        ablation_probe["value_lookup_call_site_present"] = False
+        checks = perf010a.structural_contract_confirmed_ablation_3(baseline_probe, ablation_probe)
+        self.assertFalse(checks["ABLATION_3_PROTOS_VALUE_LOOKUP_PATH_UNCHANGED"])
+        self.assertFalse(checks["ABLATION_3_PATCH_SCOPE_MATCH"])
+
+    def test_structural_contract_fails_when_captured_lexical_traversal_missing(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair()
+        ablation_probe["captured_lexical_traversal_present"] = False
+        checks = perf010a.structural_contract_confirmed_ablation_3(baseline_probe, ablation_probe)
+        self.assertFalse(checks["ABLATION_3_CAPTURED_LEXICAL_TRAVERSAL_PRESERVED"])
+        self.assertFalse(checks["ABLATION_3_PATCH_SCOPE_MATCH"])
+
+    # --- reference() fails closed on the static structural gate before the expensive matrix ---
+
+    def test_reference_checks_ablation3_structural_contract_before_run_matrix(self):
+        import inspect
+
+        source = inspect.getsource(perf010a.reference)
+        gate_idx = source.index("structural_contract_confirmed_ablation_3(")
+        matrix_idx = source.index("run_matrix(")
+        self.assertLess(
+            gate_idx, matrix_idx,
+            "ablation 3's structural exact-scope gate must be checked before the expensive "
+            "reference matrix runs, not after",
+        )
+
+    def test_smoke_checks_ablation3_structural_contract_before_run_matrix(self):
+        import inspect
+
+        source = inspect.getsource(perf010a.smoke)
+        gate_idx = source.index("structural_contract_confirmed_ablation_3(")
+        matrix_idx = source.index("run_matrix(")
+        self.assertLess(gate_idx, matrix_idx)
 
 
 if __name__ == "__main__":

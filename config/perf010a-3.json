@@ -10,10 +10,11 @@
   "protos_revision_note": "current origin/main at this third-ablation investigation's start (2026-09-22); the single file touched by ablation-3.patch (ProtosObjectValue.java), plus ProtosActivation.java and toolchain.json, are byte-identical between this revision and PERF010A_ABLATION_1/2's pin bc0471184bf6dbbf03d0c6b09ef7b9e28aede014, confirmed by `git diff` across both revisions for those exact paths; the commits between the two pins are unrelated Group/Actor conformance-corpus and tooling migration work (TOOL009-B/TOOL009-C), not execution-engine changes",
   "ablation_patch": "docker/protos-perf010a/ablation-3.patch",
   "ablation_patch_targets": [
-    "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java"
+    "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java",
+    "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java"
   ],
-  "third_ablation_target": "ProtosObjectValue.readLocalSlot",
-  "diagnostic_transformation": "containsKey(name) + get(name) -> single get(name), discriminating ABSENT from any stored value via localSlots' own invariant that no local slot value is ever null (createLocalSlot/assignLocalSlot both require Objects.requireNonNull(value, ...); composeLocalSlotsFrom only copies values already subject to that invariant)",
+  "third_ablation_target": "the two lexical local-slot-read call sites inside ProtosActivation.lookup (current activation context, then each captured lexical context), redirected to a new diagnostic-only ProtosObjectValue.readLocalSlotSingleProbe helper; ordinary ProtosObjectValue.readLocalSlot is untouched and remains the path used by every other caller (ProtosValueLookup's receiver/delegation member lookup, interop member reads, and all other production call sites)",
+  "diagnostic_transformation": "ProtosObjectValue gains a new package-private readLocalSlotSingleProbe(name) helper (containsKey(name) + get(name) -> single get(name), discriminating ABSENT from any stored value via localSlots' own invariant that no local slot value is ever null: createLocalSlot/assignLocalSlot both require Objects.requireNonNull(value, ...); composeLocalSlotsFrom only copies values already subject to that invariant); ProtosActivation.lookup's two context.readLocalSlot(name)/lexicalContext.readLocalSlot(name) call sites are redirected to this helper. The original readLocalSlot(name) method body is byte-for-byte unchanged and remains in use everywhere else, including ProtosValueLookup's receiver/delegation member lookup.",
   "historical_evidence": {
     "perf004_a_cross_language_baseline": "results/perf004-a",
     "perf004_b2c_causal_control": "results/perf004-b2c",
@@ -82,15 +83,24 @@
     "yield"
   ],
   "structural_confirmation_mode": "source",
-  "structural_confirmation_note": "Unlike ablation 1/2, this ablation does not bypass a call site (readLocalSlot is still invoked from the same call sites, with the same fully-qualified frame name); java.util.LinkedHashMap.containsKey/get are simple enough to be inlined by the JIT and are not a reliable JFR-sampled-frame signal. Structural confirmation instead reads the exact patched (or, for baseline, unmodified) source tree the image was built from (/opt/protos-source) and inspects ProtosObjectValue.readLocalSlot's method body directly, scoped to that single method so other legitimate containsKey usages elsewhere in the file do not produce false positives.",
+  "structural_confirmation_note": "Unlike ablation 1/2, this ablation does not bypass a call site at the ProtosActivation.lookup level in a way that removes a distinguishable frame (readLocalSlot's own fully-qualified name is still called somewhere in both variants); java.util.LinkedHashMap.containsKey/get are also simple enough to be inlined by the JIT and are not a reliable JFR-sampled-frame signal. Structural confirmation instead reads the exact patched (or, for baseline, unmodified) source tree the image was built from (/opt/protos-source), scoped per-method/per-file, and proves both what changed and what stayed on the baseline path: (1) ProtosObjectValue.readLocalSlot's own method body is byte-for-byte identical between baseline and ablation; (2) a new readLocalSlotSingleProbe helper exists only in the ablation image, with the diagnostic marker comment, no containsKey, and exactly one get(name); (3) ProtosActivation.lookup calls the diagnostic helper at exactly its two lexical call sites in the ablation image and calls ordinary readLocalSlot at those same two call sites in the baseline image; (4) the captured-lexical-context traversal loop is present, unchanged, in both; (5) ProtosValueLookup's receiver/delegation member-lookup call site still calls ordinary readLocalSlot in both images. This is one per-image confirmation, not repeated independently per workload.",
   "structural_source_markers": {
-    "target_file": "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java",
-    "target_method_signature": "public Optional<Object> readLocalSlot(String name)",
-    "marker_present_in_ablation_only": "PERF010A_ABLATION_3",
-    "redundant_pattern_absent_in_ablation": "containsKey",
-    "single_read_pattern_present_in_ablation": ".get(name)",
-    "captured_lexical_traversal_file": "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java",
-    "captured_lexical_traversal_marker_present_in_both": "for (ProtosObjectValue lexicalContext : capturedLexicalContexts)"
+    "object_value_file": "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java",
+    "baseline_method_signature": "public Optional<Object> readLocalSlot(String name)",
+    "diagnostic_method_signature": "Optional<Object> readLocalSlotSingleProbe(String name)",
+    "diagnostic_marker_comment": "PERF010A_ABLATION_3",
+    "redundant_pattern_absent_from_diagnostic_helper": "containsKey",
+    "single_read_pattern_present_in_diagnostic_helper": ".get(name)",
+    "activation_file": "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java",
+    "lookup_method_signature": "public Optional<Object> lookup(String name)",
+    "diagnostic_call_site_pattern": ".readLocalSlotSingleProbe(name)",
+    "diagnostic_call_site_count_in_ablation_lookup": 2,
+    "baseline_call_site_pattern": ".readLocalSlot(name)",
+    "baseline_call_site_count_in_baseline_lookup": 2,
+    "captured_lexical_traversal_marker_present_in_both": "for (ProtosObjectValue lexicalContext : capturedLexicalContexts)",
+    "value_lookup_file": "src/main/java/com/guillermomolina/protos/runtime/ProtosValueLookup.java",
+    "value_lookup_call_site_pattern": "ordinary.readLocalSlot(name)",
+    "value_lookup_call_site_present_in_both": true
   },
   "output": "results/perf010a-3"
 }

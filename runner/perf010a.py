@@ -30,13 +30,22 @@ This module now backs three distinct causal ablations sharing this one harness, 
     language, and expected to fail closed (correctness FAIL) for any workload whose
     unqualified-name lookups are not resolved by the activation's own local context.
   * `--ablation 3` (`config/perf010a-3.json`, `docker/protos-perf010a/ablation-3.patch`) -
-    PERF010A_ABLATION_3, replaces the redundant `containsKey(name)` + `get(name)`
-    probe-then-read inside `ProtosObjectValue.readLocalSlot` with a single `get(name)`,
-    relying on the invariant that no local slot value is ever null. Unlike ablations 1/2,
-    this does not bypass a call site - `ProtosActivation.lookup`'s local/captured-lexical
-    traversal, precedence, shadowing, and missing-name behavior are all untouched - so it is
-    claimed to be semantically equivalent by construction, not diagnostic-only-and-expected-
-    to-fail-closed.
+    PERF010A_ABLATION_3, adds a diagnostic-only `ProtosObjectValue.readLocalSlotSingleProbe`
+    helper (the redundant `containsKey(name)` + `get(name)` probe-then-read replaced with a
+    single `get(name)`, relying on the invariant that no local slot value is ever null) and
+    redirects *only* the two lexical local-slot-read call sites inside
+    `ProtosActivation.lookup` (current context, then each captured lexical context) to it.
+    Ordinary `ProtosObjectValue.readLocalSlot` stays byte-for-byte unchanged and is still used
+    by every other caller, including `ProtosValueLookup`'s receiver/delegation member lookup.
+    `ProtosActivation.lookup`'s traversal order, precedence, shadowing, and missing-name
+    behavior are all untouched, so this is claimed to be semantically equivalent by
+    construction, not diagnostic-only-and-expected-to-fail-closed like ablation 2. This is the
+    exact scope an earlier readiness investigation established for this slice; an earlier
+    execution instead transformed `readLocalSlot` globally (correct call sites, wrong blast
+    radius - it also changed every other caller) and was rejected by this harness's exact-scope
+    validation (`validate_patch_shape_3`/`ABLATION_3_PATCH_SCOPE_MATCH`), even though it was
+    semantically equivalent by construction, because it could no longer be attributed to only
+    the established causal component.
 
 Two separate run types are collected per (workload, mode, variant) combination, matching
 `AGENTS.work/REPRODUCIBILITY.md` ("Diagnostic instrumentation ... SHOULD be kept separate from
@@ -55,14 +64,24 @@ timing when it materially perturbs execution."):
                mechanism for its structural confirmation (see below) but still collects it at
                `reference` scale as supplementary evidence.
 
-Ablation 3's structural confirmation is source-derived, not JFR-derived: `readLocalSlot` is
-still called from the exact same call sites with the exact same fully-qualified frame name in
-both variants, and `java.util.LinkedHashMap.containsKey`/`get` are simple enough to be
-JIT-inlined, so their absence/presence is not a reliable sampled-frame signal. Instead,
-`source_structural_probe` reads `/opt/protos-source` (the exact patched-or-unmodified source
-tree each image was built from, copied verbatim by the Dockerfile) and inspects
-`ProtosObjectValue.readLocalSlot`'s method body directly, scoped to that one method so other
-legitimate `containsKey` call sites elsewhere in the file cannot produce a false positive.
+Ablation 3's structural confirmation is source-derived, not JFR-derived: both variants still
+call a `ProtosObjectValue` reader method with a resolvable fully-qualified frame name at
+`ProtosActivation.lookup`'s two lexical call sites, and `java.util.LinkedHashMap.containsKey`/
+`get` are simple enough to be JIT-inlined, so neither is a reliable sampled-frame signal.
+Instead, `source_structural_probe` reads `/opt/protos-source` (the exact patched-or-unmodified
+source tree each image was built from, copied verbatim by the Dockerfile) and
+`structural_contract_confirmed_ablation_3` proves the full established exact-scope contract as
+one per-image comparison: the diagnostic helper exists only in the ablation image; ordinary
+`readLocalSlot`'s own method body is byte-for-byte identical between images; the ablation image
+calls the diagnostic helper (and the baseline image calls ordinary `readLocalSlot`) at exactly
+`ProtosActivation.lookup`'s two lexical positions; the captured-lexical-traversal loop and the
+`ProtosValueLookup` fallback are present, unchanged, in both; and `ProtosValueLookup`'s own
+receiver/delegation member-lookup call site still calls ordinary `readLocalSlot` in both
+images. `validate_patch_shape_3` proves the same exact-scope contract statically from the patch
+diff itself (required call sites changed; explicitly excluded call sites/files untouched)
+before any image is even built, and `reference`/`smoke` re-derive and re-check it from the
+built image before running (`reference`) or after running (`smoke`, for reporting) the
+workload matrix, per AGENTS.work/PERFORMANCE.md's causal-ablation exact-scope validation rule.
 
 `smoke` is an admission/correctness gate, not a reduced reference run: it exercises all four
 workloads at a small fixed iteration count (`SMOKE_WARMUP_ITERATIONS`/
@@ -122,13 +141,21 @@ HELPER_MARKER = "ProtosBytecodeRootNodeGen$CachedBytecodeNode.continueAt"
 LOOKUP_MARKERS = ("com.guillermomolina.protos.runtime.ProtosActivation.lookup",)
 READ_LOCAL_SLOT_MARKER = "com.guillermomolina.protos.runtime.ProtosObjectValue.readLocalSlot"
 
-# Ablation 3 (ProtosObjectValue.readLocalSlot's redundant containsKey+get) source markers.
-# Not JFR-frame-based: see module docstring for why. `SOURCE_ROOT` is where the Dockerfile
-# copies the exact patched-or-unmodified /src tree in every image (both variants).
+# Ablation 3 (ProtosActivation.lookup's two lexical local-slot-read call sites, redirected to a
+# new diagnostic-only ProtosObjectValue.readLocalSlotSingleProbe helper) source markers. Not
+# JFR-frame-based: see module docstring for why. `SOURCE_ROOT` is where the Dockerfile copies
+# the exact patched-or-unmodified /src tree in every image (both variants).
 SOURCE_ROOT = "/opt/protos-source"
 READ_LOCAL_SLOT_SOURCE_PATH = "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java"
 ACTIVATION_SOURCE_PATH = "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java"
+VALUE_LOOKUP_SOURCE_PATH = "src/main/java/com/guillermomolina/protos/runtime/ProtosValueLookup.java"
 READ_LOCAL_SLOT_SIGNATURE = "public Optional<Object> readLocalSlot(String name)"
+DIAGNOSTIC_HELPER_SIGNATURE = "Optional<Object> readLocalSlotSingleProbe(String name)"
+LOOKUP_METHOD_SIGNATURE = "public Optional<Object> lookup(String name)"
+DIAGNOSTIC_CALL_SITE_PATTERN = ".readLocalSlotSingleProbe(name)"
+BASELINE_CALL_SITE_PATTERN = ".readLocalSlot(name)"
+VALUE_LOOKUP_CALL_SITE_PATTERN = "ordinary.readLocalSlot(name)"
+LOOKUP_FALLBACK_MARKER = "return ProtosValueLookup.readMember(receiver, name, prelude);"
 ABLATION_3_MARKER_COMMENT = "PERF010A_ABLATION_3"
 CAPTURED_LEXICAL_TRAVERSAL_MARKER = (
     "for (ProtosObjectValue lexicalContext : capturedLexicalContexts)"
@@ -266,31 +293,90 @@ def validate_patch_shape_2(patch_text: str) -> None:
         assert forbidden not in patch_text, forbidden
 
 
+def _parse_unified_diff(patch_text: str) -> dict[str, dict[str, list[str]]]:
+    """Splits a `git diff`-style patch into per-file added/removed content lines (the `+`/`-`
+    prefix stripped, hunk headers and `---`/`+++` file markers excluded). Used by
+    `validate_patch_shape_3` to check exact scope by diff *content*, not just substring presence
+    in the whole patch text, so an addition and a removal touching the same identifier cannot be
+    confused with each other."""
+    files: dict[str, dict[str, list[str]]] = {}
+    current: dict[str, list[str]] | None = None
+    for line in patch_text.splitlines():
+        if line.startswith("diff --git "):
+            parts = line.split()
+            path = parts[2][2:] if parts[2].startswith("a/") else parts[2]
+            current = files.setdefault(path, {"added": [], "removed": []})
+            continue
+        if current is None:
+            continue
+        if line.startswith("+++") or line.startswith("---") or line.startswith("@@"):
+            continue
+        if line.startswith("+"):
+            current["added"].append(line[1:])
+        elif line.startswith("-"):
+            current["removed"].append(line[1:])
+    return files
+
+
 def validate_patch_shape_3(patch_text: str) -> None:
-    # The patch must touch only ProtosObjectValue.java, replacing the redundant
-    # containsKey(name)+get(name) probe-then-read inside readLocalSlot with a single
-    # get(name) plus a null discrimination, and must not touch ProtosActivation.java (the
-    # local/captured-lexical traversal, precedence, shadowing, and missing-name behavior all
-    # live there and must stay byte-for-byte untouched) or any other production mechanism.
-    assert patch_text.count("--- a/") == 1
-    assert "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java" in patch_text
-    assert ABLATION_3_MARKER_COMMENT in patch_text
-    assert "localSlots.get(name)" in patch_text
-    assert "value != null" in patch_text
+    # The established causal-ablation contract (AGENTS.work/PERFORMANCE.md's exact-scope
+    # validation rule) is: add a new diagnostic-only single-probe reader to ProtosObjectValue,
+    # and redirect exactly the two lexical local-slot-read call sites inside
+    # ProtosActivation.lookup (current context, then each captured lexical context) to it. The
+    # ordinary ProtosObjectValue.readLocalSlot method (used by every other caller, including
+    # ProtosValueLookup's receiver/delegation member lookup) MUST stay byte-for-byte untouched -
+    # a patch that instead transforms readLocalSlot's own body globally (as the first, invalid
+    # ablation-3 execution did) must fail this check even though it is semantically equivalent
+    # and even though it still targets ProtosObjectValue.java.
+    files = _parse_unified_diff(patch_text)
+    object_value_path = "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java"
+    activation_path = "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java"
+    assert set(files.keys()) == {object_value_path, activation_path}, sorted(files.keys())
+
+    object_value = files[object_value_path]
+    activation = files[activation_path]
+
+    # ProtosObjectValue.java: purely additive. Any removed line at all means the existing
+    # baseline method body (readLocalSlot or anything else) was touched, which this slice's
+    # contract forbids.
+    assert object_value["removed"] == [], object_value["removed"]
+    added_ov_text = "\n".join(object_value["added"])
+    assert ABLATION_3_MARKER_COMMENT in added_ov_text
+    assert DIAGNOSTIC_HELPER_SIGNATURE in added_ov_text
+    assert added_ov_text.count("localSlots.get(name)") == 1
+    assert "localSlots.containsKey" not in added_ov_text
+    assert READ_LOCAL_SLOT_SIGNATURE not in added_ov_text
+
+    # ProtosActivation.java: removed content must be exactly the two lexical readLocalSlot(name)
+    # call-site lines (nothing else - not the captured-lexical-traversal loop header, not the
+    # ProtosValueLookup fallback, not lookup ordering), and added content must be exactly their
+    # two readLocalSlotSingleProbe(name) replacements (plus comments).
+    removed_calls = [l for l in activation["removed"] if BASELINE_CALL_SITE_PATTERN in l]
+    non_call_removed = [l for l in activation["removed"] if BASELINE_CALL_SITE_PATTERN not in l]
+    assert len(removed_calls) == 2, removed_calls
+    assert non_call_removed == [], non_call_removed
+
+    added_act_text = "\n".join(activation["added"])
+    removed_act_text = "\n".join(activation["removed"])
+    assert added_act_text.count(DIAGNOSTIC_CALL_SITE_PATTERN) == 2, added_act_text
+    assert "context." + DIAGNOSTIC_CALL_SITE_PATTERN.lstrip(".") in added_act_text
+    assert "lexicalContext." + DIAGNOSTIC_CALL_SITE_PATTERN.lstrip(".") in added_act_text
     for forbidden in (
-        "ProtosActivation.java",
+        CAPTURED_LEXICAL_TRAVERSAL_MARKER,
+        LOOKUP_FALLBACK_MARKER,
         "ProtosBytecodeRootNode.java",
         "CanonicalToBytecodeLowerer.java",
         "ProtosSourceCompiler.java",
         "ProtosBytecodeClosureExecutionPlan.java",
         "ProtosRootTaskExecution.java",
-        "capturedLexicalContexts",
+        "ProtosValueLookup.java",
         "continueAt",
         "RootTag",
         "ContinuationResult",
         "ProtosSemanticBytecodeRootNode",
     ):
-        assert forbidden not in patch_text, forbidden
+        assert forbidden not in added_act_text, forbidden
+        assert forbidden not in removed_act_text, forbidden
 
 
 VALIDATE_PATCH_SHAPE = {
@@ -516,15 +602,43 @@ def _extract_method_body(source_text: str, signature: str) -> str:
         i += 1
 
 
-def source_structural_probe(tag: str, cpu: str) -> dict[str, bool]:
-    """Ablation 3's structural confirmation. `ProtosObjectValue.readLocalSlot` is called from
-    the exact same call sites with the exact same fully-qualified frame name in both variants
-    (unlike ablations 1/2, which bypass a call site entirely), and the ablated
-    `java.util.LinkedHashMap.containsKey`/`get` are simple enough to be JIT-inlined, so their
-    absence/presence is not a reliable JFR-sampled-frame signal (see module docstring). This
-    instead reads `/opt/protos-source` - the exact patched-or-unmodified source tree the image
-    was built from, copied verbatim by the Dockerfile - and inspects `readLocalSlot`'s method
-    body directly."""
+def _leading_comment_block(source_text: str, signature: str) -> str:
+    """Returns the contiguous run of `//` comment (and blank) lines immediately preceding
+    `signature`'s declaration line, stopping at the first non-comment/non-blank line (e.g. the
+    previous method's closing brace). Used to scope the `PERF010A_ABLATION_3` marker-comment
+    check to the diagnostic helper's own preceding comment, without also matching the
+    `{ ... }` body text (whose prose, e.g. explaining what was replaced, legitimately mentions
+    `containsKey`/`get(name)` and must not be misread as code)."""
+    sig_idx = source_text.index(signature)
+    line_start = source_text.rfind("\n", 0, sig_idx) + 1
+    lines_before = source_text[:line_start].splitlines()
+    leading: list[str] = []
+    for line in reversed(lines_before):
+        stripped = line.strip()
+        if stripped.startswith("//") or stripped == "":
+            leading.append(line)
+            continue
+        break
+    leading.reverse()
+    return "\n".join(leading)
+
+
+def source_structural_probe(tag: str, cpu: str) -> dict[str, Any]:
+    """Ablation 3's structural confirmation. Unlike ablations 1/2 (which bypass a call site
+    entirely, leaving a JFR-visible frame gap), this ablation's call sites keep calling a
+    `ProtosObjectValue` method with the exact same fully-qualified name in both variants, and the
+    ablated `java.util.LinkedHashMap.containsKey`/`get` are simple enough to be JIT-inlined, so
+    presence/absence in a sampled call stack is not a reliable signal either way (see module
+    docstring). This instead reads `/opt/protos-source` - the exact patched-or-unmodified source
+    tree the image was built from, copied verbatim by the Dockerfile - and inspects, per image:
+    `ProtosObjectValue.readLocalSlot`'s own body (must be byte-for-byte identical across
+    variants - compared by the caller); whether the new diagnostic
+    `readLocalSlotSingleProbe` helper exists and what it contains; which of the two call-site
+    patterns (`readLocalSlot(name)` vs. the diagnostic `readLocalSlotSingleProbe(name)`) each of
+    `ProtosActivation.lookup`'s two lexical read positions (current context, then the captured-
+    lexical-context loop) uses; whether the captured-lexical-traversal loop and the
+    `ProtosValueLookup` fallback are still present; and whether `ProtosValueLookup`'s own
+    receiver/delegation member-lookup call site still calls ordinary `readLocalSlot`."""
     object_value_source = output([
         "docker", "run", "--rm", "--network", "none",
         "--cpuset-cpus", cpu,
@@ -537,15 +651,107 @@ def source_structural_probe(tag: str, cpu: str) -> dict[str, bool]:
         "--entrypoint", "cat", tag,
         f"{SOURCE_ROOT}/{ACTIVATION_SOURCE_PATH}",
     ])
-    method_body = _extract_method_body(object_value_source, READ_LOCAL_SLOT_SIGNATURE)
+    value_lookup_source = output([
+        "docker", "run", "--rm", "--network", "none",
+        "--cpuset-cpus", cpu,
+        "--entrypoint", "cat", tag,
+        f"{SOURCE_ROOT}/{VALUE_LOOKUP_SOURCE_PATH}",
+    ])
+
+    baseline_body = _extract_method_body(object_value_source, READ_LOCAL_SLOT_SIGNATURE)
+
+    diagnostic_helper_present = DIAGNOSTIC_HELPER_SIGNATURE in object_value_source
+    diagnostic_helper_body = (
+        _extract_method_body(object_value_source, DIAGNOSTIC_HELPER_SIGNATURE)
+        if diagnostic_helper_present
+        else ""
+    )
+    diagnostic_helper_leading_comment = (
+        _leading_comment_block(object_value_source, DIAGNOSTIC_HELPER_SIGNATURE)
+        if diagnostic_helper_present
+        else ""
+    )
+
+    lookup_body = _extract_method_body(activation_source, LOOKUP_METHOD_SIGNATURE)
+    loop_idx = (
+        lookup_body.index(CAPTURED_LEXICAL_TRAVERSAL_MARKER)
+        if CAPTURED_LEXICAL_TRAVERSAL_MARKER in lookup_body
+        else len(lookup_body)
+    )
+    current_context_section = lookup_body[:loop_idx]
+    captured_context_section = lookup_body[loop_idx:]
+
     return {
-        "marker_present": ABLATION_3_MARKER_COMMENT in method_body,
-        "contains_key_absent": "containsKey" not in method_body,
-        "single_get_present": method_body.count(".get(name)") == 1,
+        "baseline_read_local_slot_body": baseline_body,
+        "diagnostic_helper_present": diagnostic_helper_present,
+        "diagnostic_marker_present": (
+            ABLATION_3_MARKER_COMMENT in diagnostic_helper_leading_comment
+        ),
+        "diagnostic_helper_contains_key_absent": "containsKey" not in diagnostic_helper_body,
+        "diagnostic_helper_single_get_count": diagnostic_helper_body.count(".get(name)"),
+        "current_context_diagnostic": DIAGNOSTIC_CALL_SITE_PATTERN in current_context_section,
+        "current_context_baseline": BASELINE_CALL_SITE_PATTERN in current_context_section,
+        "captured_context_diagnostic": DIAGNOSTIC_CALL_SITE_PATTERN in captured_context_section,
+        "captured_context_baseline": BASELINE_CALL_SITE_PATTERN in captured_context_section,
         "captured_lexical_traversal_present": (
             CAPTURED_LEXICAL_TRAVERSAL_MARKER in activation_source
         ),
+        "lookup_fallback_present": LOOKUP_FALLBACK_MARKER in lookup_body,
+        "value_lookup_call_site_present": (
+            VALUE_LOOKUP_CALL_SITE_PATTERN in value_lookup_source
+        ),
     }
+
+
+def structural_contract_confirmed_ablation_3(
+    baseline_probe: dict[str, Any], ablation_probe: dict[str, Any]
+) -> dict[str, bool]:
+    """Ablation 3's exact-scope structural gate (AGENTS.work/PERFORMANCE.md's causal-ablation
+    exact-scope validation rule): proves both that the required diagnostic call sites ARE
+    changed and that everything the investigation explicitly excluded stays on the baseline
+    path, as a single per-image comparison (not repeated independently per workload)."""
+    checks: dict[str, bool] = {
+        "ABLATION_3_TARGET_HELPER_PRESENT": (
+            not baseline_probe["diagnostic_helper_present"]
+            and ablation_probe["diagnostic_helper_present"]
+            and ablation_probe["diagnostic_marker_present"]
+            and ablation_probe["diagnostic_helper_contains_key_absent"]
+            and ablation_probe["diagnostic_helper_single_get_count"] == 1
+        ),
+        "ABLATION_3_CURRENT_CONTEXT_CALLSITE": (
+            baseline_probe["current_context_baseline"]
+            and not baseline_probe["current_context_diagnostic"]
+            and ablation_probe["current_context_diagnostic"]
+            and not ablation_probe["current_context_baseline"]
+        ),
+        "ABLATION_3_CAPTURED_CONTEXT_CALLSITE": (
+            baseline_probe["captured_context_baseline"]
+            and not baseline_probe["captured_context_diagnostic"]
+            and ablation_probe["captured_context_diagnostic"]
+            and not ablation_probe["captured_context_baseline"]
+        ),
+        "ABLATION_3_BASELINE_READ_LOCAL_SLOT_UNCHANGED": (
+            bool(baseline_probe["baseline_read_local_slot_body"])
+            and baseline_probe["baseline_read_local_slot_body"]
+            == ablation_probe["baseline_read_local_slot_body"]
+        ),
+        "ABLATION_3_PROTOS_VALUE_LOOKUP_PATH_UNCHANGED": (
+            baseline_probe["value_lookup_call_site_present"]
+            and ablation_probe["value_lookup_call_site_present"]
+        ),
+        "ABLATION_3_CAPTURED_LEXICAL_TRAVERSAL_PRESERVED": (
+            baseline_probe["captured_lexical_traversal_present"]
+            and ablation_probe["captured_lexical_traversal_present"]
+        ),
+    }
+    checks["ABLATION_3_LOOKUP_ORDER_PRESERVED"] = (
+        checks["ABLATION_3_CURRENT_CONTEXT_CALLSITE"]
+        and checks["ABLATION_3_CAPTURED_CONTEXT_CALLSITE"]
+        and baseline_probe["lookup_fallback_present"]
+        and ablation_probe["lookup_fallback_present"]
+    )
+    checks["ABLATION_3_PATCH_SCOPE_MATCH"] = all(checks.values())
+    return checks
 
 
 def control_source(tag: str, work: Path, item: dict[str, Any]) -> tuple[str, Path]:
@@ -804,7 +1010,7 @@ def run_matrix(
 def classify_workload(
     entry: dict[str, Any],
     ablation: str = "1",
-    source_markers: dict[str, dict[str, bool]] | None = None,
+    structural_contract_3: dict[str, bool] | None = None,
 ) -> dict[str, Any]:
     baseline = entry["variants"]["baseline"]
     ablation_variant = entry["variants"]["ablation"]
@@ -819,21 +1025,12 @@ def classify_workload(
     structural_ok = correctness_confirmed
     if correctness_confirmed and ablation == "3":
         # Source-derived, not JFR-derived (see source_structural_probe): a single per-image
-        # check, identical across all four workloads, rather than a per-workload JFR profile.
-        if source_markers is None:
-            structural_ok = False
-        else:
-            b_src = source_markers["baseline"]
-            a_src = source_markers["ablation"]
-            structural_ok = (
-                a_src["marker_present"]
-                and a_src["contains_key_absent"]
-                and a_src["single_get_present"]
-                and a_src["captured_lexical_traversal_present"]
-                and b_src["captured_lexical_traversal_present"]
-                and not b_src["marker_present"]
-                and not b_src["contains_key_absent"]
-            )
+        # exact-scope structural contract (structural_contract_confirmed_ablation_3), identical
+        # across all four workloads, rather than a per-workload JFR profile.
+        structural_ok = bool(
+            structural_contract_3 is not None
+            and structural_contract_3.get("ABLATION_3_PATCH_SCOPE_MATCH", False)
+        )
     elif correctness_confirmed:
         for mode in ("canonical", "control"):
             b_markers = baseline[mode]["structural"]["markers"]
@@ -897,17 +1094,32 @@ def smoke(ablation: str = "1") -> None:
                 f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
             )
 
-    # Ablation 3's structural confirmation is a single per-image source-marker check (see
-    # source_structural_probe), not a per-workload JFR profile, so smoke skips the JFR
-    # structural stage for it entirely (collect_structural=False below) rather than running it
-    # at any scale. Ablations 1/2 still need JFR to confirm their call-site bypass is actually
-    # in effect - that is the "specific correctness assertion" this admission gate exists to
-    # make - so they keep it, just at SMOKE_* scale instead of the config's reference scale.
-    source_markers = (
-        {variant: source_structural_probe(tags[variant], cpu) for variant in VARIANTS}
-        if ablation == "3"
-        else None
-    )
+    # Ablation 3's structural confirmation is a single per-image source-derived exact-scope
+    # contract (see source_structural_probe/structural_contract_confirmed_ablation_3), not a
+    # per-workload JFR profile, so smoke skips the JFR structural stage for it entirely
+    # (collect_structural=False below) rather than running it at any scale. Ablations 1/2 still
+    # need JFR to confirm their call-site bypass is actually in effect - that is the "specific
+    # correctness assertion" this admission gate exists to make - so they keep it, just at
+    # SMOKE_* scale instead of the config's reference scale.
+    #
+    # This static, per-image contract can be known before the (comparatively) expensive
+    # four-workload smoke matrix runs at all, so it is checked and, on failure, fails the gate
+    # here rather than after the matrix has already executed.
+    structural_contract_3 = None
+    if ablation == "3":
+        source_markers = {variant: source_structural_probe(tags[variant], cpu) for variant in VARIANTS}
+        structural_contract_3 = structural_contract_confirmed_ablation_3(
+            source_markers["baseline"], source_markers["ablation"]
+        )
+        for key, ok in structural_contract_3.items():
+            print(f"{key}={'PASS' if ok else 'FAIL'}")
+        if not structural_contract_3["ABLATION_3_PATCH_SCOPE_MATCH"]:
+            print("PERF010A_SMOKE=BLOCKED")
+            print(f"{profile['expected_slice']}=INVALID")
+            raise RuntimeError(
+                "PERF010A_ABLATION_3 exact-scope structural contract failed; "
+                "see printed ABLATION_3_* gate results above"
+            )
 
     with tempfile.TemporaryDirectory(prefix="perf010a-smoke-") as tmp:
         work = Path(tmp)
@@ -918,7 +1130,7 @@ def smoke(ablation: str = "1") -> None:
         )
 
     classifications = [
-        classify_workload(entry, ablation, source_markers) for entry in matrix
+        classify_workload(entry, ablation, structural_contract_3) for entry in matrix
     ]
 
     print("PERF010A_SMOKE_HARNESS_REVISION=" + harness_revision)
@@ -929,9 +1141,6 @@ def smoke(ablation: str = "1") -> None:
     )
     print("PERF010A_SMOKE_WORKLOADS=" + str(len(matrix)))
     print("PERF010A_SMOKE_EVIDENCE_UNITS=" + str(len(matrix) * len(VARIANTS) * 2 * 2))
-    if source_markers is not None:
-        print("PERF010A_SMOKE_SOURCE_MARKERS_BASELINE=" + json.dumps(source_markers["baseline"]))
-        print("PERF010A_SMOKE_SOURCE_MARKERS_ABLATION=" + json.dumps(source_markers["ablation"]))
     for entry, classification in zip(matrix, classifications):
         print(
             f"PERF010A_SMOKE_WORKLOAD workload={entry['workload']} "
@@ -947,44 +1156,60 @@ def scope_of_ablation_readme(ablation: str, cfg: dict[str, Any]) -> list[str]:
         return [
             "## Scope of the ablation",
             "",
-            "`ProtosObjectValue.readLocalSlot` (called from `ProtosActivation.lookup`'s own "
-            "local context and captured-lexical-context walk, and from many other production "
-            "call sites throughout the codebase) is the single method transformed by "
-            "`ablation-3.patch`: the redundant `localSlots.containsKey(name)` probe followed "
-            "by a second `localSlots.get(name)` read is replaced with a single "
-            "`localSlots.get(name)`, discriminating ABSENT from any stored value via "
-            "`localSlots`' own invariant that no local slot value is ever null "
-            "(`createLocalSlot`/`assignLocalSlot` both require `Objects.requireNonNull(value, "
-            "...)`; `composeLocalSlotsFrom` only copies values already subject to that "
-            "invariant from another `ProtosObjectValue`).",
+            "`ablation-3.patch` adds a new diagnostic-only "
+            "`ProtosObjectValue.readLocalSlotSingleProbe` helper (a single `localSlots.get"
+            "(name)`, discriminating ABSENT from any stored value via `localSlots`' own "
+            "invariant that no local slot value is ever null - `createLocalSlot`/"
+            "`assignLocalSlot` both require `Objects.requireNonNull(value, ...)`; "
+            "`composeLocalSlotsFrom` only copies values already subject to that invariant "
+            "from another `ProtosObjectValue`) and redirects **exactly** the two lexical "
+            "local-slot-read call sites inside `ProtosActivation.lookup` - the current "
+            "activation context, then each captured lexical context in "
+            "`capturedLexicalContexts` - to it. The ordinary `ProtosObjectValue.readLocalSlot` "
+            "method (its redundant `containsKey(name)` + `get(name)` probe-then-read) is "
+            "**not** modified and stays byte-for-byte unchanged; it remains the path used by "
+            "every other caller, including `ProtosValueLookup`'s receiver/delegation member "
+            "lookup (the fallback `ProtosActivation.lookup` reaches via "
+            "`ProtosValueLookup.readMember` when neither lexical position resolves the name) "
+            "and every interop/other production call site.",
             "",
-            "Unlike ablations 1 and 2, this is **not** a call-site bypass: `readLocalSlot` is "
-            "called from exactly the same sites, in exactly the same order, with exactly the "
-            "same fully-qualified name, in both variants. `ProtosActivation.lookup`'s local-"
-            "context-then-captured-lexical-contexts-then-receiver/prelude-fallback traversal, "
-            "lexical precedence, shadowing, and missing-name behavior are all untouched by "
-            "this patch (`ProtosActivation.java` is not one of `ablation-3.patch`'s targets). "
-            "This transformation is therefore claimed to be semantically equivalent by "
+            "This is narrower than an earlier, invalid execution of this same slice, which "
+            "instead transformed `readLocalSlot`'s own body globally - changing every caller, "
+            "not just the two established lexical call sites - and was rejected by this "
+            "harness's exact-scope validation (`ABLATION_3_PATCH_SCOPE_MATCH`) as measuring "
+            "more than the established causal component, even though it was semantically "
+            "equivalent by construction. That invalid attempt is retained as historical "
+            "evidence of an invalid intent, not as a valid measurement.",
+            "",
+            "Unlike ablations 1 and 2, this is **not** a call-site bypass in the sense of "
+            "dropping a step: `ProtosActivation.lookup`'s local-context-then-captured-lexical-"
+            "contexts-then-receiver/prelude-fallback traversal, lexical precedence, shadowing, "
+            "and missing-name behavior are all preserved, in the same order, in both variants - "
+            "only which `ProtosObjectValue` reader method the two lexical positions call "
+            "differs. This transformation is therefore claimed to be semantically equivalent by "
             "construction, not diagnostic-only-and-expected-to-fail-closed like ablation 2.",
             "",
-            "Because `readLocalSlot`'s call sites and frame name are unchanged, this "
-            "ablation's structural confirmation is source-derived rather than JFR-derived: "
-            "`java.util.LinkedHashMap.containsKey`/`get` are simple enough to be JIT-inlined "
-            "and are not a reliable sampled-frame signal either way. `source_structural_probe` "
-            "reads `/opt/protos-source` (the exact patched-or-unmodified source tree the image "
-            "was built from) and confirms, scoped to `readLocalSlot`'s own method body: the "
-            "diagnostic marker comment is present, the redundant `containsKey` probe is "
-            "absent, the single `get(name)` read is present (ablation variant only), and "
-            "`ProtosActivation.lookup`'s captured-lexical-context traversal loop is present, "
-            "byte-for-byte unchanged, in both variants.",
+            "Because both variants still call a `ProtosObjectValue` reader method with a "
+            "resolvable frame name at the same call sites, and `java.util.LinkedHashMap."
+            "containsKey`/`get` are simple enough to be JIT-inlined, this ablation's structural "
+            "confirmation is source-derived rather than JFR-derived: "
+            "`source_structural_probe`/`structural_contract_confirmed_ablation_3` reads "
+            "`/opt/protos-source` (the exact patched-or-unmodified source tree the image was "
+            "built from) and confirms, as one per-image contract: the diagnostic helper exists "
+            "only in the ablation image; `readLocalSlot`'s own body is byte-for-byte identical "
+            "across both images; the diagnostic helper is called at both of "
+            "`ProtosActivation.lookup`'s lexical positions in the ablation image and ordinary "
+            "`readLocalSlot` is called at those same two positions in the baseline image; the "
+            "captured-lexical-context traversal loop and the `ProtosValueLookup` fallback are "
+            "present, unchanged, in both; and `ProtosValueLookup`'s own receiver/delegation "
+            "member-lookup call site still calls ordinary `readLocalSlot` in both images.",
             "",
-            "`ProtosActivation.java`, `ProtosBytecodeRootNode.java`, "
-            "`CanonicalToBytecodeLowerer.java`, the RootTag topology, the continuation "
-            "machinery, the `CallTarget` architecture, and source/debugger identity are all "
-            "untouched by this patch. This is a diagnostic ablation, not (by itself) a "
-            "production optimization change; per this slice's scope, no change is made to "
-            "`guillermomolina/protos` regardless of this experiment's outcome. Never "
-            "published to `guillermomolina/protos`.",
+            "`ProtosBytecodeRootNode.java`, `CanonicalToBytecodeLowerer.java`, the RootTag "
+            "topology, the continuation machinery, the `CallTarget` architecture, and source/"
+            "debugger identity are all untouched by this patch. This is a diagnostic ablation, "
+            "not (by itself) a production optimization change; per this slice's scope, no "
+            "change is made to `guillermomolina/protos` regardless of this experiment's "
+            "outcome. Never published to `guillermomolina/protos`.",
         ]
     if ablation == "1":
         return [
@@ -1079,11 +1304,29 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
                 f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
             )
 
-    source_markers = (
-        {variant: source_structural_probe(tags[variant], cpu) for variant in VARIANTS}
-        if ablation == "3"
-        else None
-    )
+    # Ablation 3's exact-scope structural contract is a static, per-image property (see
+    # source_structural_probe/structural_contract_confirmed_ablation_3) knowable before the
+    # expensive four-workload x two-variant x (timing + JFR structural) reference matrix runs at
+    # all. Per AGENTS.work/PERFORMANCE.md's exact-scope validation rule, a failure here MUST
+    # block reference before that matrix executes - not merely be reported as INVALID after
+    # spending the expensive run to discover a condition that was already knowable statically.
+    structural_contract_3 = None
+    if ablation == "3":
+        source_markers = {variant: source_structural_probe(tags[variant], cpu) for variant in VARIANTS}
+        structural_contract_3 = structural_contract_confirmed_ablation_3(
+            source_markers["baseline"], source_markers["ablation"]
+        )
+        for key, ok in structural_contract_3.items():
+            print(f"{key}={'PASS' if ok else 'FAIL'}")
+        if not structural_contract_3["ABLATION_3_PATCH_SCOPE_MATCH"]:
+            print("PERF010A_REFERENCE=BLOCKED")
+            print(f"{cfg['slice']}=INVALID")
+            print("ATTRIBUTABLE_FRACTION=NOT_ESTABLISHED")
+            raise RuntimeError(
+                "PERF010A_ABLATION_3 exact-scope structural contract failed before the "
+                "expensive reference matrix; see printed ABLATION_3_* gate results above. No "
+                "reference evidence was produced."
+            )
 
     with tempfile.TemporaryDirectory(prefix="perf010a-") as tmp:
         work = Path(tmp)
@@ -1092,7 +1335,7 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         )
 
     classifications = {
-        entry["workload"]: classify_workload(entry, ablation, source_markers)
+        entry["workload"]: classify_workload(entry, ablation, structural_contract_3)
         for entry in matrix
     }
     overall_valid = all(c[status_key] == "VALID" for c in classifications.values())
@@ -1126,7 +1369,7 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         "jfr_recording_phase": cfg["jfr_recording_phase"],
         "timing_recording_phase": cfg["timing_recording_phase"],
         "external_baseline": cfg["external_baseline"],
-        "source_structural_markers": source_markers,
+        "source_structural_markers": structural_contract_3,
         "matrix": matrix,
         "classifications": classifications,
         "overall_result": "VALID" if overall_valid else "INVALID",

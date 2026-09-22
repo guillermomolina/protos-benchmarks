@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF008",
+  "slice": "PERF008",
+  "phase": "steady-state-full-stack-jfr-evidence-harness",
+  "diagnostic_claim": false,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "529ab58c2cf57a2e4170dd5ffa972651e89ac92e",
+  "historical_protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+  "historical_evidence": {
+    "perf004_b2d": "results/perf004-b2d",
+    "perf006_d3": "results/perf006-d3"
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 20,
+  "steady_iterations": 100,
+  "execution_sample_period": "10 ms",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "steady_only",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "output": "results/perf008"
+}

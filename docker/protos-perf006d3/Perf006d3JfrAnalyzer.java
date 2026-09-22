@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,12 +36,40 @@ import jdk.jfr.consumer.RecordedStackTrace;
 import jdk.jfr.consumer.RecordedThread;
 import jdk.jfr.consumer.RecordingFile;
 
-/** Streaming PERF006-D3 JFR structural analyzer. */
+/**
+ * Streaming PERF006-D3 / PERF008 JFR structural analyzer.
+ *
+ * <p>Schema version 1 fields (event totals, thread shares, leaf-frame {@code top_frames},
+ * deoptimization breakdowns) are computed exactly as before and MUST NOT change value for the
+ * same input recording. Schema version 2 adds a bounded full call stack per {@code
+ * jdk.ExecutionSample} (see {@link #MAX_STACK_DEPTH}), a ranked {@code call_paths} table, and a
+ * {@code continueAt}/{@code Builder} relationship section answering caller/callee/co-occurrence
+ * questions that a leaf-only frame count cannot answer.
+ */
 public final class Perf006d3JfrAnalyzer {
     private static final String EXECUTION_SAMPLE = "jdk.ExecutionSample";
     private static final String DEOPT = "jdk.Deoptimization";
     private static final String TRUFFLE_DEOPT = "jdk.graal.compiler.truffle.Deoptimization";
     private static final String HISTORICAL_SYMBOL = "java.util.HashMap$KeyIterator.next";
+
+    /** Bounded stack depth retained per execution sample (leaf-first). Deliberately finite. */
+    private static final int MAX_STACK_DEPTH = 32;
+
+    private static final int CALL_PATHS_LIMIT = 200;
+    private static final int CONTINUE_AT_RANKED_LIMIT = 100;
+
+    /**
+     * Method-and-declaring-type markers whose ancestor/descendant relationship to {@code
+     * CachedBytecodeNode.continueAt} is reported explicitly, rather than assumed from top-frame
+     * percentages. Order is preserved verbatim in the output.
+     */
+    private static final List<String> CONTINUE_AT_MARKERS =
+            List.of(
+                    "Unsafe.putObject",
+                    "FrameExtensionsUnsafe",
+                    "ProtosObjectValue.readLocalSlot",
+                    "ProtosActivation.lookup",
+                    "CallTarget");
 
     private Perf006d3JfrAnalyzer() {}
 
@@ -71,6 +100,20 @@ public final class Perf006d3JfrAnalyzer {
         Map<String, Long> deoptActions = new HashMap<>();
         Map<String, Long> deoptMethods = new HashMap<>();
 
+        Map<String, Long> callPaths = new HashMap<>();
+        long continueAtAnyDepth = 0;
+        long continueAtLeaf = 0;
+        Map<String, Long> continueAtCallers = new HashMap<>();
+        Map<String, Long> continueAtCallees = new HashMap<>();
+        Map<String, Long> continueAtStacks = new HashMap<>();
+        Map<String, long[]> continueAtMarkerStats = new LinkedHashMap<>();
+        for (String marker : CONTINUE_AT_MARKERS) {
+            continueAtMarkerStats.put(marker, new long[3]);
+        }
+        long builderAnyDepth = 0;
+        long builderLeaf = 0;
+        long builderCoOccursWithContinueAt = 0;
+
         try (RecordingFile recording = new RecordingFile(input)) {
             while (recording.hasMoreEvents()) {
                 RecordedEvent event = recording.readEvent();
@@ -80,8 +123,48 @@ public final class Perf006d3JfrAnalyzer {
                         executionSamples++;
                         String thread = sampledThreadName(event);
                         threadSamples.merge(thread, 1L, Long::sum);
-                        String frame = topFrameSymbol(event);
+                        List<String> stack = boundedStackFrames(event);
+                        String frame = stack.isEmpty() ? "<no-stack>" : stack.get(0);
                         topFrames.merge(frame, 1L, Long::sum);
+
+                        String signature = pathSignature(stack);
+                        callPaths.merge(signature, 1L, Long::sum);
+
+                        int continueAtIndex = indexOfMatch(stack, Perf006d3JfrAnalyzer::isContinueAtFrame);
+                        int builderIndex = indexOfMatch(stack, Perf006d3JfrAnalyzer::isBuilderFrame);
+
+                        if (continueAtIndex >= 0) {
+                            continueAtAnyDepth++;
+                            if (continueAtIndex == 0) continueAtLeaf++;
+                            String caller =
+                                    (continueAtIndex + 1 < stack.size())
+                                            ? stack.get(continueAtIndex + 1)
+                                            : "<root>";
+                            String callee = (continueAtIndex > 0) ? stack.get(continueAtIndex - 1) : "<leaf>";
+                            continueAtCallers.merge(caller, 1L, Long::sum);
+                            continueAtCallees.merge(callee, 1L, Long::sum);
+                            continueAtStacks.merge(signature, 1L, Long::sum);
+                            for (String marker : CONTINUE_AT_MARKERS) {
+                                long[] counts = continueAtMarkerStats.get(marker);
+                                boolean any = false;
+                                boolean ancestor = false;
+                                boolean descendant = false;
+                                for (int i = 0; i < stack.size(); i++) {
+                                    if (!stack.get(i).contains(marker)) continue;
+                                    any = true;
+                                    if (i > continueAtIndex) ancestor = true;
+                                    else if (i < continueAtIndex) descendant = true;
+                                }
+                                if (any) counts[0]++;
+                                if (ancestor) counts[1]++;
+                                if (descendant) counts[2]++;
+                            }
+                            if (builderIndex >= 0) builderCoOccursWithContinueAt++;
+                        }
+                        if (builderIndex >= 0) {
+                            builderAnyDepth++;
+                            if (builderIndex == 0) builderLeaf++;
+                        }
                     }
                     case DEOPT -> {
                         deoptimizations++;
@@ -91,16 +174,26 @@ public final class Perf006d3JfrAnalyzer {
                     }
                     case TRUFFLE_DEOPT -> truffleDeoptimizations++;
                     default -> {
-                        // D3 only aggregates events required by the contract.
+                        // D3/PERF008 only aggregate events required by the contract.
                     }
                 }
             }
         }
 
-        StringBuilder json = new StringBuilder(32768);
+        StringBuilder json = new StringBuilder(65536);
         json.append("{\n");
-        json.append("  \"schema_version\": 1,\n");
+        json.append("  \"schema_version\": 2,\n");
         json.append("  \"recording\": ").append(quote(input.getFileName().toString())).append(",\n");
+        json.append("  \"stack_depth_limit\": ").append(MAX_STACK_DEPTH).append(",\n");
+        json.append("  \"stack_semantics\": {\n");
+        json.append(
+                "    \"frame_order\": \"index 0 is the leaf (currently executing) frame; "
+                        + "increasing index moves toward the call-chain root\",\n");
+        json.append(
+                "    \"multiple_occurrences_policy\": \"when a matched method appears more than "
+                        + "once in one bounded stack, caller/callee/marker-position statistics use "
+                        + "its shallowest (leaf-closest) occurrence\"\n");
+        json.append("  },\n");
         json.append("  \"event_type_available\": {\n");
         json.append("    \"jdk.ExecutionSample\": ").append(availableTypes.contains(EXECUTION_SAMPLE)).append(",\n");
         json.append("    \"jdk.Deoptimization\": ").append(availableTypes.contains(DEOPT)).append(",\n");
@@ -115,12 +208,51 @@ public final class Perf006d3JfrAnalyzer {
         json.append("    \"top_frames\": ");
         appendRanked(json, topFrames, executionSamples, 100);
         json.append(",\n");
+        json.append("    \"call_paths\": ");
+        appendRanked(json, callPaths, executionSamples, CALL_PATHS_LIMIT);
+        json.append(",\n");
         long historicalCount = topFrames.getOrDefault(HISTORICAL_SYMBOL, 0L);
         json.append("    \"historical_hashmap_keyiterator_next\": {\"count\": ")
                 .append(historicalCount)
                 .append(", \"percent\": ")
                 .append(percent(historicalCount, executionSamples))
                 .append("}\n");
+        json.append("  },\n");
+        json.append("  \"continue_at\": {\n");
+        json.append(
+                "    \"matcher\": \"method named 'continueAt' declared on a type whose name "
+                        + "contains 'CachedBytecodeNode'\",\n");
+        json.append("    \"leaf_count\": ").append(continueAtLeaf).append(",\n");
+        json.append("    \"leaf_percent\": ").append(percent(continueAtLeaf, executionSamples)).append(",\n");
+        json.append("    \"any_depth_count\": ").append(continueAtAnyDepth).append(",\n");
+        json.append("    \"any_depth_percent\": ")
+                .append(percent(continueAtAnyDepth, executionSamples))
+                .append(",\n");
+        json.append("    \"callers\": ");
+        appendRanked(json, continueAtCallers, continueAtAnyDepth, CONTINUE_AT_RANKED_LIMIT);
+        json.append(",\n");
+        json.append("    \"callees\": ");
+        appendRanked(json, continueAtCallees, continueAtAnyDepth, CONTINUE_AT_RANKED_LIMIT);
+        json.append(",\n");
+        json.append("    \"stacks\": ");
+        appendRanked(json, continueAtStacks, continueAtAnyDepth, CONTINUE_AT_RANKED_LIMIT);
+        json.append(",\n");
+        json.append("    \"co_occurring_markers\": ");
+        appendMarkerCoOccurrence(json, CONTINUE_AT_MARKERS, continueAtMarkerStats, continueAtAnyDepth);
+        json.append("\n");
+        json.append("  },\n");
+        json.append("  \"builder\": {\n");
+        json.append("    \"matcher\": \"type name contains '$Builder'\",\n");
+        json.append("    \"leaf_count\": ").append(builderLeaf).append(",\n");
+        json.append("    \"leaf_percent\": ").append(percent(builderLeaf, executionSamples)).append(",\n");
+        json.append("    \"any_depth_count\": ").append(builderAnyDepth).append(",\n");
+        json.append("    \"any_depth_percent\": ").append(percent(builderAnyDepth, executionSamples)).append(",\n");
+        json.append("    \"co_occurs_with_continue_at_count\": ")
+                .append(builderCoOccursWithContinueAt)
+                .append(",\n");
+        json.append("    \"co_occurs_with_continue_at_percent_of_builder\": ")
+                .append(percent(builderCoOccursWithContinueAt, builderAnyDepth))
+                .append("\n");
         json.append("  },\n");
         json.append("  \"deoptimizations\": {\n");
         json.append("    \"jdk_total\": ").append(deoptimizations).append(",\n");
@@ -145,6 +277,9 @@ public final class Perf006d3JfrAnalyzer {
         System.out.println("PERF006D3_JDK_DEOPTIMIZATIONS=" + deoptimizations);
         System.out.println("PERF006D3_TRUFFLE_DEOPTIMIZATIONS=" + truffleDeoptimizations);
         System.out.println("PERF006D3_HISTORICAL_HASHMAP_SAMPLES=" + historicalCount);
+        System.out.println("PERF006D3_STACK_DEPTH_LIMIT=" + MAX_STACK_DEPTH);
+        System.out.println("PERF006D3_CONTINUE_AT_ANY_DEPTH_SAMPLES=" + continueAtAnyDepth);
+        System.out.println("PERF006D3_BUILDER_ANY_DEPTH_SAMPLES=" + builderAnyDepth);
     }
 
     private static String sampledThreadName(RecordedEvent event) {
@@ -165,18 +300,49 @@ public final class Perf006d3JfrAnalyzer {
         return javaName == null ? "<unnamed>" : javaName;
     }
 
-    private static String topFrameSymbol(RecordedEvent event) {
+    /** Leaf-first bounded stack, capped at {@link #MAX_STACK_DEPTH} frames. Empty if unavailable. */
+    private static List<String> boundedStackFrames(RecordedEvent event) {
         RecordedStackTrace stack = event.getStackTrace();
         if (stack == null || stack.getFrames().isEmpty()) {
-            return "<no-stack>";
+            return List.of();
         }
-        RecordedFrame frame = stack.getFrames().get(0);
+        List<RecordedFrame> frames = stack.getFrames();
+        int depth = Math.min(frames.size(), MAX_STACK_DEPTH);
+        List<String> symbols = new ArrayList<>(depth);
+        for (int index = 0; index < depth; index++) {
+            symbols.add(frameSymbol(frames.get(index)));
+        }
+        return symbols;
+    }
+
+    private static String frameSymbol(RecordedFrame frame) {
         RecordedMethod method = frame.getMethod();
         if (method == null) {
             return "<no-method>";
         }
         String type = method.getType() == null ? "<no-type>" : method.getType().getName();
         return type + "." + method.getName();
+    }
+
+    private static String pathSignature(List<String> stack) {
+        return stack.isEmpty() ? "<no-stack>" : String.join(" -> ", stack);
+    }
+
+    private static boolean isContinueAtFrame(String symbol) {
+        return symbol.endsWith(".continueAt") && symbol.contains("CachedBytecodeNode");
+    }
+
+    private static boolean isBuilderFrame(String symbol) {
+        return symbol.contains("$Builder");
+    }
+
+    private static int indexOfMatch(List<String> stack, java.util.function.Predicate<String> matcher) {
+        for (int index = 0; index < stack.size(); index++) {
+            if (matcher.test(stack.get(index))) {
+                return index;
+            }
+        }
+        return -1;
     }
 
     private static String methodField(RecordedEvent event, String name) {
@@ -225,6 +391,29 @@ public final class Perf006d3JfrAnalyzer {
                     .append("}");
         }
         if (count != 0) out.append("\n    ");
+        out.append("]");
+    }
+
+    private static void appendMarkerCoOccurrence(
+            StringBuilder out, List<String> markers, Map<String, long[]> stats, long continueAtTotal) {
+        out.append("[");
+        for (int index = 0; index < markers.size(); index++) {
+            if (index != 0) out.append(",");
+            String marker = markers.get(index);
+            long[] counts = stats.getOrDefault(marker, new long[3]);
+            out.append("\n      {\"marker\": ")
+                    .append(quote(marker))
+                    .append(", \"co_occurring_count\": ")
+                    .append(counts[0])
+                    .append(", \"co_occurring_percent_of_continue_at\": ")
+                    .append(percent(counts[0], continueAtTotal))
+                    .append(", \"ancestor_count\": ")
+                    .append(counts[1])
+                    .append(", \"descendant_count\": ")
+                    .append(counts[2])
+                    .append("}");
+        }
+        if (!markers.isEmpty()) out.append("\n    ");
         out.append("]");
     }
 

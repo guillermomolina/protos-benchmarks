@@ -20,12 +20,29 @@ ARG MAVEN_VERSION=3.9.9
 ARG PROTOS_REPOSITORY=https://github.com/guillermomolina/protos.git
 ARG PROTOS_REVISION=4a03efc15620b37b2e418b3df30b4a26486446ec
 
+# Expected toolchain identity declared by protos' own toolchain.json at PROTOS_REVISION. Defaults
+# match the PERF004-B2-D/PERF006-D3 historical revision; PERF008-style builds pinning a newer
+# revision override these explicitly so drift (e.g. a container OS-image bump) is caught here
+# instead of silently producing evidence with an unverified toolchain identity.
+ARG EXPECTED_GRAALVM_RELEASE=25.3.4.1
+ARG EXPECTED_JDK_VERSION=25.0.4.1
+ARG EXPECTED_CONTAINER_IMAGE=ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825
+ARG EXPECTED_GRAAL_COMPONENTS_VERSION=25.3.4.1
+ARG EXPECTED_MAVEN_VERSION=3.9.9
+
+# The build environment's Python 3 package name is base-OS-dependent, not part of the
+# protos/GraalVM toolchain identity: Oracle Linux 8's unversioned `python3` is a restricted
+# platform-python, so it needs the versioned `python39` module package, while Oracle Linux 10
+# removed versioned Python module packages and ships a sufficient `python3` (3.12) directly.
+ARG PYTHON_PACKAGE=python39
+
 COPY docker/protos-perf006d/Perf006dRuntimeProbe.java /tmp/Perf006dRuntimeProbe.java
 COPY docker/protos-perf006d/Perf006dPersistentDriver.java /tmp/Perf006dPersistentDriver.java
+COPY docker/protos-perf006d3/Perf008SteadyStateDriver.java /tmp/Perf008SteadyStateDriver.java
 COPY docker/protos-perf006d3/Perf006d3JfrAnalyzer.java /tmp/Perf006d3JfrAnalyzer.java
 COPY docker/protos-perf006d3/jfr-java /tmp/perf006d3-jfr-java
 
-RUN microdnf install -y git gzip tar findutils ca-certificates python39 unzip \
+RUN microdnf install -y git gzip tar findutils ca-certificates ${PYTHON_PACKAGE} unzip \
     && microdnf clean all
 RUN curl --fail --location --silent --show-error \
         "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
@@ -42,15 +59,21 @@ RUN git init /src \
     && git fetch --depth 1 origin "$PROTOS_REVISION" \
     && git checkout --detach FETCH_HEAD \
     && test "$(git rev-parse HEAD)" = "$PROTOS_REVISION" \
-    && python3 - <<'PY'
+    && EXPECTED_GRAALVM_RELEASE="$EXPECTED_GRAALVM_RELEASE" \
+       EXPECTED_JDK_VERSION="$EXPECTED_JDK_VERSION" \
+       EXPECTED_CONTAINER_IMAGE="$EXPECTED_CONTAINER_IMAGE" \
+       EXPECTED_GRAAL_COMPONENTS_VERSION="$EXPECTED_GRAAL_COMPONENTS_VERSION" \
+       EXPECTED_MAVEN_VERSION="$EXPECTED_MAVEN_VERSION" \
+       python3 - <<'PY'
 import json
+import os
 from pathlib import Path
 cfg = json.loads(Path("/src/toolchain.json").read_text(encoding="utf-8"))
-assert cfg["graalvm"]["release"] == "25.3.4.1"
-assert cfg["graalvm"]["jdk_version"] == "25.0.4.1"
-assert cfg["graalvm"]["container_image"] == "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol8-20260825"
-assert cfg["graal_components"]["version"] == "25.3.4.1"
-assert cfg["maven"]["version"] == "3.9.9"
+assert cfg["graalvm"]["release"] == os.environ["EXPECTED_GRAALVM_RELEASE"]
+assert cfg["graalvm"]["jdk_version"] == os.environ["EXPECTED_JDK_VERSION"]
+assert cfg["graalvm"]["container_image"] == os.environ["EXPECTED_CONTAINER_IMAGE"]
+assert cfg["graal_components"]["version"] == os.environ["EXPECTED_GRAAL_COMPONENTS_VERSION"]
+assert cfg["maven"]["version"] == os.environ["EXPECTED_MAVEN_VERSION"]
 print("PERF006D3_SOURCE_TOOLCHAIN=PASS")
 PY
 
@@ -67,6 +90,8 @@ RUN cd /src \
     && cp -a protos/benchmarks/. /out/corpus/ \
     && javac -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
          -d /out/diagnostic /tmp/Perf006dRuntimeProbe.java /tmp/Perf006dPersistentDriver.java \
+    && javac --add-modules jdk.jfr -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
+         -d /out/diagnostic /tmp/Perf008SteadyStateDriver.java \
     && javac --add-modules jdk.jfr -d /out/analyzer /tmp/Perf006d3JfrAnalyzer.java \
     && jfr configure \
          --input "$JAVA_HOME/lib/jfr/profile.jfc" \

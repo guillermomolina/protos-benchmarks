@@ -334,6 +334,58 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertFalse(markers["any_semantic_marker_present"])
         self.assertTrue(markers["helper_continue_at_present"])
 
+    def test_classify_workload_records_ablation_execution_failure_without_crashing(self):
+        # Observed in practice for PERF010A_ABLATION_2: the diagnostic bypass fails closed
+        # inside Core prelude bootstrap itself (before any workload code runs), so every
+        # ablation-variant (mode) combination fails at the `timing` stage. classify_workload
+        # must record this per this slice's fail-closed contract, not raise/crash.
+        def cell(execution_failure=None, median_ns=None, marker_present=None):
+            return {
+                "timing": (
+                    None
+                    if execution_failure
+                    else {"steady_summary": {"median_ns": median_ns}}
+                ),
+                "structural": (
+                    None
+                    if execution_failure
+                    else {
+                        "markers": {
+                            "any_semantic_marker_present": marker_present,
+                            "helper_continue_at_present": True,
+                        }
+                    }
+                ),
+                "execution_failure": execution_failure,
+            }
+
+        entry = {
+            "workload": "micro/slot-read",
+            "variants": {
+                "baseline": {
+                    "canonical": cell(median_ns=1000, marker_present=True),
+                    "control": cell(median_ns=100, marker_present=True),
+                },
+                "ablation": {
+                    "canonical": cell(
+                        execution_failure={"stage": "timing", "detail": "boom"}
+                    ),
+                    "control": cell(
+                        execution_failure={"stage": "timing", "detail": "boom"}
+                    ),
+                },
+            },
+        }
+        classification = perf010a.classify_workload(entry, "2")
+        self.assertFalse(classification["correctness_confirmed"])
+        self.assertFalse(classification["structural_ablation_confirmed"])
+        self.assertEqual("INVALID", classification["perf010a_ablation_2"])
+        self.assertIsNone(classification["protos_ablation_steady_median_ns"])
+        self.assertIsNone(classification["removed_ns"])
+        self.assertIsNone(classification["removed_fraction_of_baseline"])
+        self.assertEqual(1000, classification["protos_baseline_steady_median_ns"])
+        self.assertEqual({"canonical", "control"}, set(classification["execution_failures"]))
+
 
 if __name__ == "__main__":
     unittest.main()

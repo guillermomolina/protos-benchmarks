@@ -566,31 +566,66 @@ def run_matrix(
                 ("control", control_host, "/work/source.protos"),
             ):
                 label = f"{slug}-{variant}-{mode}"
+
+                # A baseline execution failure is a harness/infrastructure problem (the
+                # unmodified Protos build is expected to always complete) and aborts hard, as
+                # before. An ablation execution failure is itself possible evidence (the
+                # diagnostic bypass fails closed) and is captured instead of aborting the
+                # whole run, so the other workloads/modes still get attempted and the exact
+                # failure is retained per this slice's correctness-before-timing contract.
+                timing_result = None
+                structural_result = None
+                execution_failure = None
                 print(f"TIMING BEGIN workload={workload} variant={variant} mode={mode}", flush=True)
-                timing_result = timing(
-                    tag, cpu, work, source_host, source_container,
-                    item["expected"], label, cfg["warmup_iterations"], cfg["steady_iterations"],
-                )
-                print(
-                    f"TIMING PASS workload={workload} variant={variant} mode={mode} "
-                    f"median_ns={timing_result['steady_summary']['median_ns']}",
-                    flush=True,
-                )
+                try:
+                    timing_result = timing(
+                        tag, cpu, work, source_host, source_container,
+                        item["expected"], label, cfg["warmup_iterations"], cfg["steady_iterations"],
+                    )
+                    print(
+                        f"TIMING PASS workload={workload} variant={variant} mode={mode} "
+                        f"median_ns={timing_result['steady_summary']['median_ns']}",
+                        flush=True,
+                    )
+                except RuntimeError as exc:
+                    if variant != "ablation":
+                        raise
+                    execution_failure = {"stage": "timing", "detail": str(exc)[:6000]}
+                    print(
+                        f"TIMING FAIL workload={workload} variant={variant} mode={mode} "
+                        f"detail={execution_failure['detail'][:200]!r}",
+                        flush=True,
+                    )
 
-                print(f"STRUCTURAL BEGIN workload={workload} variant={variant} mode={mode}", flush=True)
-                structural_result = structural(
-                    tag, cpu, work, source_host, source_container,
-                    item["expected"], label, cfg["warmup_iterations"], cfg["steady_iterations"],
-                    absent_markers, present_marker,
-                )
-                print(
-                    f"STRUCTURAL PASS workload={workload} variant={variant} mode={mode} "
-                    f"any_semantic_marker_present={structural_result['markers']['any_semantic_marker_present']} "
-                    f"helper_continue_at_present={structural_result['markers']['helper_continue_at_present']}",
-                    flush=True,
-                )
+                if execution_failure is None:
+                    print(f"STRUCTURAL BEGIN workload={workload} variant={variant} mode={mode}", flush=True)
+                    try:
+                        structural_result = structural(
+                            tag, cpu, work, source_host, source_container,
+                            item["expected"], label, cfg["warmup_iterations"], cfg["steady_iterations"],
+                            absent_markers, present_marker,
+                        )
+                        print(
+                            f"STRUCTURAL PASS workload={workload} variant={variant} mode={mode} "
+                            f"any_semantic_marker_present={structural_result['markers']['any_semantic_marker_present']} "
+                            f"helper_continue_at_present={structural_result['markers']['helper_continue_at_present']}",
+                            flush=True,
+                        )
+                    except RuntimeError as exc:
+                        if variant != "ablation":
+                            raise
+                        execution_failure = {"stage": "structural", "detail": str(exc)[:6000]}
+                        print(
+                            f"STRUCTURAL FAIL workload={workload} variant={variant} mode={mode} "
+                            f"detail={execution_failure['detail'][:200]!r}",
+                            flush=True,
+                        )
 
-                by_mode[mode] = {"timing": timing_result, "structural": structural_result}
+                by_mode[mode] = {
+                    "timing": timing_result,
+                    "structural": structural_result,
+                    "execution_failure": execution_failure,
+                }
             by_variant[variant] = by_mode
         results.append({"workload": workload, "variants": by_variant})
     return results
@@ -600,25 +635,47 @@ def classify_workload(entry: dict[str, Any], ablation: str = "1") -> dict[str, A
     baseline = entry["variants"]["baseline"]
     ablation_variant = entry["variants"]["ablation"]
 
-    structural_ok = True
-    for mode in ("canonical", "control"):
-        b_markers = baseline[mode]["structural"]["markers"]
-        a_markers = ablation_variant[mode]["structural"]["markers"]
-        if not b_markers["any_semantic_marker_present"]:
-            structural_ok = False
-        if a_markers["any_semantic_marker_present"]:
-            structural_ok = False
-        if not (b_markers["helper_continue_at_present"] and a_markers["helper_continue_at_present"]):
-            structural_ok = False
+    execution_failures = {
+        mode: ablation_variant[mode]["execution_failure"]
+        for mode in ("canonical", "control")
+        if ablation_variant[mode]["execution_failure"] is not None
+    }
+    correctness_confirmed = not execution_failures
+
+    structural_ok = correctness_confirmed
+    if correctness_confirmed:
+        for mode in ("canonical", "control"):
+            b_markers = baseline[mode]["structural"]["markers"]
+            a_markers = ablation_variant[mode]["structural"]["markers"]
+            if not b_markers["any_semantic_marker_present"]:
+                structural_ok = False
+            if a_markers["any_semantic_marker_present"]:
+                structural_ok = False
+            if not (b_markers["helper_continue_at_present"] and a_markers["helper_continue_at_present"]):
+                structural_ok = False
 
     canonical_baseline_ns = baseline["canonical"]["timing"]["steady_summary"]["median_ns"]
-    canonical_ablation_ns = ablation_variant["canonical"]["timing"]["steady_summary"]["median_ns"]
-    removed_ns = canonical_baseline_ns - canonical_ablation_ns
-    removed_fraction_of_baseline = removed_ns / canonical_baseline_ns if canonical_baseline_ns else None
+    canonical_ablation_ns = (
+        ablation_variant["canonical"]["timing"]["steady_summary"]["median_ns"]
+        if correctness_confirmed
+        else None
+    )
+    removed_ns = (
+        canonical_baseline_ns - canonical_ablation_ns
+        if canonical_ablation_ns is not None
+        else None
+    )
+    removed_fraction_of_baseline = (
+        removed_ns / canonical_baseline_ns
+        if removed_ns is not None and canonical_baseline_ns
+        else None
+    )
 
     status = "VALID" if structural_ok else "INVALID"
 
     return {
+        "correctness_confirmed": correctness_confirmed,
+        "execution_failures": execution_failures,
         "structural_ablation_confirmed": structural_ok,
         "protos_baseline_steady_median_ns": canonical_baseline_ns,
         "protos_ablation_steady_median_ns": canonical_ablation_ns,
@@ -816,12 +873,20 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
 
     rows = [
         "workload\tvariant\tmode\tsteady_median_ns\tsteady_mad_ns\tsteady_p95_ns\t"
-        "steady_min_ns\tsteady_max_ns\tany_semantic_marker_present\thelper_continue_at_present"
+        "steady_min_ns\tsteady_max_ns\tany_semantic_marker_present\thelper_continue_at_present\t"
+        "execution_failure_stage"
     ]
     for entry in matrix:
         for variant in VARIANTS:
             for mode in ("canonical", "control"):
                 cell = entry["variants"][variant][mode]
+                failure = cell["execution_failure"]
+                if failure is not None:
+                    rows.append("\t".join([
+                        entry["workload"], variant, mode,
+                        "NA", "NA", "NA", "NA", "NA", "NA", "NA", failure["stage"],
+                    ]))
+                    continue
                 s = cell["timing"]["steady_summary"]
                 m = cell["structural"]["markers"]
                 rows.append("\t".join([
@@ -829,6 +894,7 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
                     str(s["median_ns"]), str(s["mad_ns"]), str(s["p95_ns"]),
                     str(s["min_ns"]), str(s["max_ns"]),
                     str(m["any_semantic_marker_present"]), str(m["helper_continue_at_present"]),
+                    "",
                 ]))
     (output_dir / "summary.tsv").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
@@ -884,14 +950,41 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         "| ablation steady median (ns) | removed (ns) | removed fraction of baseline |",
         "|---|---|---|---|---|---|---|",
     ]
+    def fmt(value: float | None, spec: str) -> str:
+        return format(value, spec) if value is not None else "NA (correctness FAIL)"
+
     for workload, c in classifications.items():
         readme.append(
             f"| {workload} | {c[status_key]} | {c['structural_ablation_confirmed']} "
-            f"| {c['protos_baseline_steady_median_ns']:.0f} "
-            f"| {c['protos_ablation_steady_median_ns']:.0f} "
-            f"| {c['removed_ns']:.0f} "
-            f"| {c['removed_fraction_of_baseline']:.4f} |"
+            f"| {fmt(c['protos_baseline_steady_median_ns'], '.0f')} "
+            f"| {fmt(c['protos_ablation_steady_median_ns'], '.0f')} "
+            f"| {fmt(c['removed_ns'], '.0f')} "
+            f"| {fmt(c['removed_fraction_of_baseline'], '.4f')} |"
         )
+
+    any_correctness_failure = any(
+        not c["correctness_confirmed"] for c in classifications.values()
+    )
+    if any_correctness_failure:
+        readme += [
+            "",
+            "## Correctness failures",
+            "",
+            "Per this slice's fail-closed contract, the diagnostic bypass was not adjusted to "
+            "make any of the following pass; each is recorded here exactly as observed "
+            "(`raw.json`'s `matrix[].variants.ablation[mode].execution_failure` carries the "
+            "full, untruncated detail) and its workload is reported `INVALID` above with no "
+            "timing claimed for the ablation variant.",
+            "",
+        ]
+        for workload, c in classifications.items():
+            for mode, failure in c["execution_failures"].items():
+                readme += [
+                    f"- `{workload}` ({mode}, {failure['stage']} stage):",
+                    "  ```",
+                    *(f"  {line}" for line in failure["detail"].splitlines()[:40]),
+                    "  ```",
+                ]
 
     readme += [
         "",

@@ -27,6 +27,23 @@ not a substitute for it. If static inspection already shows that the
 intervention changes required semantics, stop before implementing or running
 the ablation.
 
+When a causal investigation establishes a specific intervention, its scope is
+part of the experiment contract, not merely implementation guidance. Before
+smoke or reference execution, validation MUST compare the actual diagnostic
+patch against that established contract and fail closed unless it proves both:
+
+- the required target operations or call sites are changed; and
+- operations or call sites explicitly excluded by the investigation remain on
+  the baseline path.
+
+Semantic equivalence alone does not satisfy this gate: a broader
+semantics-preserving patch may measure additional components and therefore
+cannot be attributed to the established target. Structural checks MUST be
+strong enough to prove the relevant inclusion and exclusion boundaries rather
+than merely proving that some expected marker exists. If this exact scope
+cannot be established statically, do not proceed to smoke or reference until
+the experiment contract or structural check is reconciled.
+
 Cross-language comparisons MUST use materially equivalent algorithms, inputs,
 work amounts, and observable results. Idiomatic/library-accelerated
 comparisons may be added as a separately labelled category, but MUST NOT be
@@ -43,7 +60,9 @@ clearly different costs:
     validate << smoke << reference
 
 Validation checks static/configuration/structural preconditions without trying
-to measure performance.
+to measure performance. For a causal ablation with an established intervention,
+this includes the exact-scope structural contract above; a failed scope check
+MUST prevent both smoke and reference execution.
 
 A smoke run is an admission and correctness gate. It MUST exercise the
 workloads and paths needed to establish that the experiment can execute with
@@ -52,6 +71,12 @@ that purpose. It MUST NOT attempt to produce statistically meaningful
 performance evidence, reproduce reference-scale warmup or steady-state work,
 or collect expensive profiling evidence unless that evidence is itself needed
 by the gate. Performance conclusions MUST NOT be drawn from smoke timing.
+
+A smoke MUST NOT weaken or bypass a structural admission gate merely because
+runtime correctness passes. Reference execution MUST independently fail closed
+if any required structural confirmation is absent or false; a structurally
+invalid run is retained only as invalid diagnostic evidence and its timing
+MUST NOT be interpreted causally.
 
 A reference run performs the full measurement policy required for retained
 performance evidence.

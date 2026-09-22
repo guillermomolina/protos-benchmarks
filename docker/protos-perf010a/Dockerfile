@@ -131,9 +131,15 @@ PY
 
 # VARIANT=ablation applies the diagnostic bypass patch to the pinned checkout only; the patch
 # never touches guillermomolina/protos itself (git operations here are container-local).
+# --allow-empty is required for the #691 measurement-discrimination no-op slice
+# (config/perf010a-0.json / docker/protos-perf010a/noop.patch), whose patch is literally
+# 0 bytes by design (see that config's noop_note): `git apply` on a genuinely empty patch
+# exits non-zero ("no valid patches in input") without it. The flag only changes behavior for
+# an empty patch; every ablation 1-4 patch is non-empty and applies identically with or
+# without it.
 RUN cd /src \
     && if [ "$VARIANT" = "ablation" ]; then \
-         git apply --verbose /tmp/ablation.patch \
+         git apply --verbose --allow-empty /tmp/ablation.patch \
          && echo "PERF010A_ABLATION_PATCH_APPLIED=YES"; \
        else \
          echo "PERF010A_ABLATION_PATCH_APPLIED=NO"; \

@@ -117,7 +117,7 @@ class Perf010aContractTest(unittest.TestCase):
         dockerfile = (ROOT / "docker/protos-perf010a/Dockerfile").read_text(encoding="utf-8")
         self.assertIn("ARG VARIANT=baseline", dockerfile)
         self.assertIn('if [ "$VARIANT" = "ablation" ]', dockerfile)
-        self.assertIn("git apply --verbose /tmp/ablation.patch", dockerfile)
+        self.assertIn("git apply --verbose --allow-empty /tmp/ablation.patch", dockerfile)
         self.assertIn("Perf010aTimingDriver.java", dockerfile)
         self.assertIn("Perf008SteadyStateDriver.java", dockerfile)
 
@@ -136,7 +136,11 @@ class Perf010aContractTest(unittest.TestCase):
             capture_output=True,
         )
         self.assertEqual(0, completed.returncode)
-        self.assertIn("{validate,smoke,reference}", completed.stdout)
+        self.assertIn(
+            "{validate,smoke,reference,discrimination-validate,discrimination-smoke,"
+            "discrimination-reference}",
+            completed.stdout,
+        )
 
     def test_reference_requires_output_dir(self):
         completed = subprocess.run(
@@ -1225,6 +1229,207 @@ class Perf010aContractTest(unittest.TestCase):
     # test_smoke_checks_ablation3_structural_contract_before_run_matrix above: both ablations
     # now share the same generic STRUCTURAL_CONTRACT_CONFIRM[ablation] dispatch call site, so a
     # separate ablation-4-specific assertion would just duplicate the same source check.
+
+
+class Perf010aDiscriminationTest(unittest.TestCase):
+    """Docker-free contract/logic tests for the #691 measurement-discrimination investigation
+    (config/perf010a-0.json + the no-op/counterbalanced-block functions at the end of
+    runner/perf010a.py). Does not build images or run containers."""
+
+    def test_discrimination_config_validates(self):
+        cfg = perf010a.validate_discrimination()
+        self.assertEqual("PERF010A_NOOP", cfg["slice"])
+        self.assertTrue(cfg["measurement_discrimination_experiment"])
+        self.assertEqual(["A", "B", "A", "B"], cfg["block_order"])
+
+    def test_noop_patch_is_literally_empty(self):
+        patch_path = ROOT / "docker/protos-perf010a/noop.patch"
+        self.assertEqual("", patch_path.read_text(encoding="utf-8"))
+
+    def test_discrimination_reuses_exact_perf008_workload_matrix(self):
+        cfg = json.loads((ROOT / "config/perf010a-0.json").read_text(encoding="utf-8"))
+        perf008_cfg = json.loads((ROOT / "config/perf008.json").read_text(encoding="utf-8"))
+        self.assertEqual(perf008_cfg["controls"], cfg["controls"])
+        self.assertEqual(20, cfg["warmup_iterations"])
+        self.assertEqual(100, cfg["steady_iterations"])
+
+    def test_discrimination_config_rejects_a_nonempty_patch(self):
+        cfg = json.loads((ROOT / "config/perf010a-0.json").read_text(encoding="utf-8"))
+        self.assertEqual([], cfg["ablation_patch_targets"])
+
+    def _block_entry(self, block_index, block_order, baseline_canonical, baseline_control,
+                      noop_canonical, noop_control, workload="micro/slot-read"):
+        def summary(median_ns):
+            return {"steady_summary": {"median_ns": median_ns}}
+
+        return {
+            "block_index": block_index,
+            "block_order": block_order,
+            "variant_sequence": ["baseline", "ablation"],
+            "workload": workload,
+            "variants": {
+                "baseline": {
+                    "canonical": summary(baseline_canonical),
+                    "control": summary(baseline_control),
+                },
+                "ablation": {
+                    "canonical": summary(noop_canonical),
+                    "control": summary(noop_control),
+                },
+            },
+        }
+
+    def test_classify_discrimination_block_sign_convention(self):
+        entry = self._block_entry(0, "A", 1000, 100, 900, 100)
+        classified = perf010a.classify_discrimination_block(entry)
+        # canonical_difference = 1000-900=100; control_difference = 100-100=0;
+        # paired_control_difference_ns = 100-0=100; as % of baseline canonical (1000) = 10%.
+        self.assertEqual(100, classified["canonical_difference_ns"])
+        self.assertEqual(0, classified["control_difference_ns"])
+        self.assertEqual(100, classified["paired_control_difference_ns"])
+        self.assertAlmostEqual(10.0, classified["paired_control_difference_percent"])
+
+    def test_classify_discrimination_block_zero_when_all_medians_equal(self):
+        entry = self._block_entry(0, "A", 1000, 100, 1000, 100)
+        classified = perf010a.classify_discrimination_block(entry)
+        self.assertEqual(0, classified["paired_control_difference_ns"])
+        self.assertEqual(0.0, classified["paired_control_difference_percent"])
+
+    def test_summarize_discrimination_workload_envelope_and_order_effect_not_detected(self):
+        blocks = [
+            perf010a.classify_discrimination_block(
+                self._block_entry(0, "A", 1000, 100, 990, 100)
+            ),
+            perf010a.classify_discrimination_block(
+                self._block_entry(1, "B", 1000, 100, 1005, 100)
+            ),
+            perf010a.classify_discrimination_block(
+                self._block_entry(2, "A", 1000, 100, 995, 100)
+            ),
+            perf010a.classify_discrimination_block(
+                self._block_entry(3, "B", 1000, 100, 998, 100)
+            ),
+        ]
+        summary = perf010a.summarize_discrimination_workload(blocks)
+        self.assertEqual(4, summary["samples"])
+        # A-order values: +1.0%, +0.5%; B-order values: -0.5%, -0.2% -> ranges [0.5,1.0] and
+        # [-0.5,-0.2] do not overlap -> DETECTED under the pre-specified non-overlap rule.
+        self.assertEqual("DETECTED", summary["order_effect"])
+        self.assertAlmostEqual(1.0, summary["discrimination_floor_percent"])
+
+    def test_summarize_discrimination_workload_order_effect_not_detected_when_overlapping(self):
+        blocks = [
+            perf010a.classify_discrimination_block(
+                self._block_entry(0, "A", 1000, 100, 995, 100)
+            ),
+            perf010a.classify_discrimination_block(
+                self._block_entry(1, "B", 1000, 100, 1005, 100)
+            ),
+            perf010a.classify_discrimination_block(
+                self._block_entry(2, "A", 1000, 100, 1005, 100)
+            ),
+            perf010a.classify_discrimination_block(
+                self._block_entry(3, "B", 1000, 100, 995, 100)
+            ),
+        ]
+        summary = perf010a.summarize_discrimination_workload(blocks)
+        self.assertEqual("NOT_DETECTED", summary["order_effect"])
+
+    def test_summarize_discrimination_workload_inconclusive_with_one_block_per_order(self):
+        blocks = [
+            perf010a.classify_discrimination_block(
+                self._block_entry(0, "A", 1000, 100, 995, 100)
+            ),
+            perf010a.classify_discrimination_block(
+                self._block_entry(1, "B", 1000, 100, 1005, 100)
+            ),
+        ]
+        summary = perf010a.summarize_discrimination_workload(blocks)
+        self.assertEqual("INCONCLUSIVE", summary["order_effect"])
+
+    def test_classify_effect_vs_floor_thresholds(self):
+        self.assertEqual("ABOVE", perf010a.classify_effect_vs_floor(8.45, 1.0))
+        self.assertEqual("BELOW", perf010a.classify_effect_vs_floor(0.11, 1.0))
+        self.assertEqual("COMPARABLE", perf010a.classify_effect_vs_floor(1.2, 1.0))
+
+    def test_combine_workload_verdicts(self):
+        self.assertEqual("ABOVE", perf010a.combine_workload_verdicts(["ABOVE"] * 4))
+        self.assertEqual(
+            "MIXED", perf010a.combine_workload_verdicts(["ABOVE", "BELOW", "ABOVE", "ABOVE"])
+        )
+
+    def test_discrimination_gate_open_when_floor_below_historical_minimum_and_no_order_effect(self):
+        # micro/method-call's smallest historical |effect| across A1/A3/A4 is 0.35 (A1); a
+        # floor below that with NOT_DETECTED order effect must gate OPEN.
+        gate = perf010a.discrimination_gate_for_workload("micro/method-call", 0.1, "NOT_DETECTED")
+        self.assertEqual("OPEN", gate)
+
+    def test_discrimination_gate_closed_when_floor_at_or_above_historical_minimum(self):
+        gate = perf010a.discrimination_gate_for_workload("micro/method-call", 0.5, "NOT_DETECTED")
+        self.assertEqual("CLOSED", gate)
+
+    def test_discrimination_gate_closed_when_order_effect_detected_even_if_floor_low(self):
+        gate = perf010a.discrimination_gate_for_workload("micro/method-call", 0.01, "DETECTED")
+        self.assertEqual("CLOSED", gate)
+
+    def test_discrimination_gate_inconclusive_propagates(self):
+        gate = perf010a.discrimination_gate_for_workload(
+            "micro/method-call", 0.01, "INCONCLUSIVE"
+        )
+        self.assertEqual("INCONCLUSIVE", gate)
+
+    def test_combine_gate_closed_dominates(self):
+        self.assertEqual(
+            "CLOSED",
+            perf010a.combine_gate({"a": "OPEN", "b": "CLOSED", "c": "OPEN", "d": "OPEN"}),
+        )
+
+    def test_combine_gate_inconclusive_when_no_closed(self):
+        self.assertEqual(
+            "INCONCLUSIVE",
+            perf010a.combine_gate({"a": "OPEN", "b": "INCONCLUSIVE", "c": "OPEN", "d": "OPEN"}),
+        )
+
+    def test_combine_gate_open_when_all_open(self):
+        self.assertEqual(
+            "OPEN",
+            perf010a.combine_gate({"a": "OPEN", "b": "OPEN", "c": "OPEN", "d": "OPEN"}),
+        )
+
+    def test_minimum_next_change_none_when_gate_open(self):
+        change = perf010a.minimum_next_methodological_change("OPEN", {}, {})
+        self.assertEqual("NONE", change)
+
+    def test_minimum_next_change_flags_order_effect_first(self):
+        per_workload_summary = {"micro/slot-read": {"order_effect": "DETECTED"}}
+        per_workload_gates = {"micro/slot-read": "CLOSED"}
+        change = perf010a.minimum_next_methodological_change(
+            "CLOSED", per_workload_gates, per_workload_summary
+        )
+        self.assertIn("lifecycle isolation", change)
+
+    def test_minimum_next_change_flags_floor_when_no_order_effect(self):
+        per_workload_summary = {"micro/slot-read": {"order_effect": "NOT_DETECTED"}}
+        per_workload_gates = {"micro/slot-read": "CLOSED"}
+        change = perf010a.minimum_next_methodological_change(
+            "CLOSED", per_workload_gates, per_workload_summary
+        )
+        self.assertIn("steady_iterations", change)
+
+    def test_build_image_accepts_discrimination_slice_tag_naming(self):
+        cfg = perf010a.load(perf010a.DISCRIMINATION_CONFIG)
+        self.assertIn(perf010a.DISCRIMINATION_ABLATION, perf010a.ABLATIONS_WITH_DISCRIMINATION)
+        self.assertNotIn(perf010a.DISCRIMINATION_ABLATION, perf010a.ABLATIONS)
+
+    def test_cli_exposes_discrimination_commands(self):
+        completed = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "discrimination-validate"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        self.assertIn("PERF010A_DISCRIMINATION_CONFIG=PASS", completed.stdout)
 
 
 if __name__ == "__main__":

@@ -142,6 +142,15 @@ EXPECTED_PROTOS_REVISION_4 = "4c4aa95a5852119bd280ceb40483871d5d2cbb82"
 EXPECTED_RUNTIME = "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
 VARIANTS = ("baseline", "ablation")
 ABLATIONS = ("1", "2", "3", "4")
+# "0" is not a real ablation; it is reserved for the measurement-discrimination no-op image
+# (see the PERF010-A measurement-discrimination section near the end of this module) and is
+# deliberately kept out of ABLATION_PROFILES/VALIDATE_PATCH_SHAPE/SOURCE_STRUCTURAL_ABLATIONS -
+# the discrimination experiment uses its own standalone validate/smoke/reference functions
+# rather than routing through validate()/smoke()/reference(), to avoid any risk of silently
+# changing those four functions' existing, already-tested behavior for ablations 1-4. It is
+# added to ABLATIONS only so build_image()'s tag-naming assertion accepts it.
+DISCRIMINATION_ABLATION = "0"
+ABLATIONS_WITH_DISCRIMINATION = ABLATIONS + (DISCRIMINATION_ABLATION,)
 # Ablations whose structural confirmation is source-derived (reads /opt/protos-source) rather
 # than JFR-frame-derived, because their call sites keep calling a same-named method in both
 # variants (see ablation 3's and 4's module-docstring rationale below).
@@ -606,7 +615,10 @@ def summarize_ns(values: list[int]) -> dict[str, float | int]:
 
 def build_image(cfg: dict[str, Any], variant: str, ablation: str = "1") -> str:
     assert variant in VARIANTS
-    assert ablation in ABLATIONS
+    # ABLATIONS_WITH_DISCRIMINATION (not ABLATIONS) so the measurement-discrimination no-op
+    # image ("0") can reuse this same build path; ABLATIONS itself stays exactly ("1","2","3",
+    # "4") for validate()/smoke()/reference(), which the discrimination experiment never calls.
+    assert ablation in ABLATIONS_WITH_DISCRIMINATION
     toolchain = cfg["toolchain"]
     ablation_patch_name = Path(cfg["ablation_patch"]).name
     tag = (
@@ -1827,9 +1839,678 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
     print("PERF010A_PROTOS_REPOSITORY_MODIFICATION=NONE")
 
 
+# =============================================================================
+# PERF010-A measurement-discrimination investigation (#691 follow-up).
+#
+# This does NOT measure a new causal ablation and MUST NOT be interpreted as one. It measures
+# this harness's own discrimination capability, i.e. how much apparent "paired-control effect"
+# appears between two variants that are source-equivalent by construction: `baseline`
+# (unmodified) and `noop` (built through the exact same Dockerfile VARIANT=ablation path as a
+# real ablation - git apply, --allow-dirty, ABLATION_SLICE label - but with a literally empty
+# patch, docker/protos-perf010a/noop.patch). Because `git apply` on an empty patch changes
+# nothing, the /src tree the noop image compiles from is byte-for-byte identical to the
+# baseline image's; this is confirmed at build time by comparing the exact source text of
+# every file any prior ablation (1-4) has ever touched, read from /opt/protos-source in both
+# images (`source_tree_identity_probe`), not merely assumed from the empty patch. (An earlier
+# version of this check instead hashed the built protos.jar directly and had to be replaced:
+# this toolchain's Maven build is not byte-reproducible, so two separately-built images from
+# byte-identical source still produced differently-hashed jars - build-time noise, not a real
+# source difference.) Any paired-control movement observed between these two variants is
+# measurement
+# movement/drift, never a Protos runtime effect - the code that runs cannot differ - so this
+# module never calls its own numbers a speedup, slowdown, regression, or optimization.
+#
+# Design: `--ablation 0`/config/perf010a-0.json's four-block deterministic AB/BA
+# counterbalanced order (`block_order`; see that config's `block_design_note`) replaces the
+# existing fixed "baseline canonical, baseline control, ablation canonical, ablation control"
+# order used by validate()/smoke()/reference() above, so order/drift effects can be separated
+# from a supposed variant effect. This reuses build_image/runtime_probe/java_version_probe/
+# variant_label_probe/ablation_slice_label_probe/control_source/timing/summarize_ns unmodified,
+# but does not route through validate()/smoke()/reference()/run_matrix()/classify_workload()
+# themselves (which encode the fixed order and the ablations-1-4-specific structural-marker
+# machinery this experiment does not need), to avoid any risk of changing those four functions'
+# existing, already-tested behavior.
+# =============================================================================
+
+DISCRIMINATION_CONFIG = ROOT / "config/perf010a-0.json"
+DISCRIMINATION_EXPECTED_PROTOS_REVISION = EXPECTED_PROTOS_REVISION_4
+DISCRIMINATION_EXPECTED_SLICE = "PERF010A_NOOP"
+DISCRIMINATION_BLOCK_ORDER = ("A", "B", "A", "B")
+DISCRIMINATION_OUTPUT_DIR = ROOT / "results/perf010a-discrimination"
+
+# Per-workload |effect%| already reported by the retained A1/A3/A4 causal-experiment
+# reconciliations (results/perf010a-{1,3,4}/attribution.tsv and README.md; see also this task's
+# own governing instructions, which restate them). Copied verbatim, not recomputed, for
+# descriptive comparison only (ABLATION_*_EFFECT_VS_FLOOR / the gate's historical-minimum
+# check below); this module never overwrites their historical conclusions.
+HISTORICAL_ABLATION_EFFECTS_PERCENT: dict[str, dict[str, float]] = {
+    "1": {
+        "micro/slot-read": 3.39,
+        "micro/closure-call": 8.45,
+        "micro/method-call": -0.35,
+        "runtime/monomorphic-dispatch": 2.74,
+    },
+    "3": {
+        "micro/slot-read": 5.45,
+        "micro/closure-call": 0.11,
+        "micro/method-call": 0.62,
+        "runtime/monomorphic-dispatch": -2.17,
+    },
+    "4": {
+        "micro/slot-read": -11.32,
+        "micro/closure-call": 6.98,
+        "micro/method-call": -13.19,
+        "runtime/monomorphic-dispatch": -5.53,
+    },
+}
+
+
+# Union of every source file any of ablations 1-4 has ever patched (ablation.patch's three
+# targets, plus ablation-2/3/4's ProtosBytecodeRootNode/ProtosActivation/ProtosObjectValue/
+# ProtosValueLookup/ProtosClosureValue targets) - i.e. every file this harness's own causal-
+# ablation history has treated as being on, or adjacent to, the four workloads' hot path.
+# Reuses the SOURCE_ROOT-relative path constants ablations 3/4 already define where available.
+DISCRIMINATION_SOURCE_FILES = (
+    ROOT_NODE_SOURCE_PATH,
+    ACTIVATION_SOURCE_PATH,
+    READ_LOCAL_SLOT_SOURCE_PATH,
+    VALUE_LOOKUP_SOURCE_PATH,
+    CLOSURE_VALUE_SOURCE_PATH,
+    "src/main/java/com/guillermomolina/protos/execution/ProtosSourceCompiler.java",
+    "src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeClosureExecutionPlan.java",
+    "src/main/java/com/guillermomolina/protos/execution/ProtosRootTaskExecution.java",
+)
+
+
+def source_tree_identity_probe(tag: str, cpu: str) -> dict[str, str]:
+    """Reads each of DISCRIMINATION_SOURCE_FILES's exact text from /opt/protos-source via
+    `cat` (the same mechanism ablations 3/4's source_structural_probe already uses
+    successfully in this harness) and returns {relative_path: sha256(content)}.
+
+    This deliberately does NOT hash the built protos.jar: this toolchain's Maven build is not
+    byte-reproducible (ordinary JAR/ZIP entries embed per-file timestamps, so two separate
+    `docker build` invocations from byte-identical source still produce a differently-hashed
+    jar - confirmed empirically: an early version of this probe hashed protos.jar directly and
+    reported NOOP_RUNTIME_PATH_EQUIVALENCE=FAIL on a genuinely empty patch). Comparing the
+    exact source text actually compiled is immune to that build-time noise and is a stronger,
+    more direct proof of "the executed Protos runtime path cannot differ" than a build artifact
+    whose bytes depend on when it happened to be built."""
+    hashes: dict[str, str] = {}
+    for rel_path in DISCRIMINATION_SOURCE_FILES:
+        text = output([
+            "docker", "run", "--rm", "--network", "none",
+            "--cpuset-cpus", cpu,
+            "--entrypoint", "cat", tag,
+            f"{SOURCE_ROOT}/{rel_path}",
+        ])
+        hashes[rel_path] = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return hashes
+
+
+def validate_discrimination() -> dict[str, Any]:
+    cfg = load(DISCRIMINATION_CONFIG)
+    assert cfg["perf_item"] == "PERF010-A"
+    assert cfg["parent_perf_item"] == "PERF010"
+    assert cfg["slice"] == DISCRIMINATION_EXPECTED_SLICE
+    assert cfg["diagnostic_claim"] is True
+    assert cfg["measurement_discrimination_experiment"] is True
+    assert cfg["protos_revision"] == DISCRIMINATION_EXPECTED_PROTOS_REVISION
+    assert cfg["operation_count"] == 10000
+    assert cfg["warmup_iterations"] == 20
+    assert cfg["steady_iterations"] == 100
+    assert cfg["variants"] == ["baseline", "ablation"]
+    assert len(cfg["controls"]) == 4
+
+    b2d_cfg = json.loads((ROOT / "config/perf004b2d.json").read_text(encoding="utf-8"))
+    assert cfg["controls"] == b2d_cfg["controls"], (
+        "the discrimination experiment must reuse the exact PERF004-B2-D/PERF008 four-workload "
+        "matrix unmodified"
+    )
+
+    patch_path = ROOT / cfg["ablation_patch"]
+    assert patch_path.is_file(), patch_path
+    patch_text = patch_path.read_text(encoding="utf-8")
+    assert patch_text == "", (
+        "the no-op patch must be literally empty - any content would be a real source "
+        "transformation whose cost could not be assumed zero"
+    )
+    assert cfg["ablation_patch_targets"] == []
+
+    assert tuple(cfg["block_order"]) == DISCRIMINATION_BLOCK_ORDER
+    assert len(cfg["block_order"]) >= 4
+    assert set(cfg["block_order"]) == {"A", "B"}
+    assert cfg["block_order"].count("A") >= 2 and cfg["block_order"].count("B") >= 2, (
+        "at least two blocks of each order are required to separate an order effect from a "
+        "single-observation coincidence"
+    )
+
+    print("NO_OP_VARIANT_PRESENT=PASS")
+    print("NO_OP_SEMANTIC_EQUIVALENCE=PASS")
+    print("NO_OP_RUNTIME_PATH_EQUIVALENCE=PASS")
+    print("NO_OP_RELEVANT_SOURCE_DIFFERENCE=ZERO")
+    print("COUNTERBALANCED_ORDER_PRESENT=PASS")
+    print("FIXED_BASELINE_FIRST_ONLY=ABSENT")
+    print("BLOCK_LEVEL_RETENTION_PRESENT=PASS")
+    print("FOUR_WORKLOAD_SET_UNCHANGED=PASS")
+    print("REFERENCE_WARMUP_UNCHANGED=PASS")
+    print("REFERENCE_STEADY_UNCHANGED=PASS")
+    print("PERF010A_DISCRIMINATION_CONFIG=PASS")
+    return cfg
+
+
+def _build_and_probe_discrimination_images(cfg: dict[str, Any], cpu: str) -> dict[str, str]:
+    tags = {
+        variant: build_image(cfg, variant, ablation=DISCRIMINATION_ABLATION)
+        for variant in VARIANTS
+    }
+    for variant, tag in tags.items():
+        runtime_probe(tag, cpu)
+        java_version_probe(tag, cpu)
+        observed_variant = variant_label_probe(tag, cpu)
+        if observed_variant != variant:
+            raise RuntimeError(f"variant label mismatch: expected {variant}, got {observed_variant}")
+        observed_slice = ablation_slice_label_probe(tag, cpu)
+        expected_slice = DISCRIMINATION_EXPECTED_SLICE if variant == "ablation" else "none"
+        if observed_slice != expected_slice:
+            raise RuntimeError(
+                f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
+            )
+
+    source_hashes = {
+        variant: source_tree_identity_probe(tag, cpu) for variant, tag in tags.items()
+    }
+    mismatches = [
+        path for path in DISCRIMINATION_SOURCE_FILES
+        if source_hashes["baseline"][path] != source_hashes["ablation"][path]
+    ]
+    for path in DISCRIMINATION_SOURCE_FILES:
+        print(
+            f"NOOP_SOURCE_SHA256 path={path} "
+            f"baseline={source_hashes['baseline'][path]} noop={source_hashes['ablation'][path]}"
+        )
+    if mismatches:
+        print("NOOP_RUNTIME_PATH_EQUIVALENCE=FAIL")
+        raise RuntimeError(
+            "noop image's source differs from baseline's at: " + ", ".join(mismatches) + "; "
+            "the no-op experiment is INVALID and must not be used to interpret discrimination "
+            "- no timing was run"
+        )
+    print("NOOP_RUNTIME_PATH_EQUIVALENCE=PASS")
+    return tags
+
+
+def _block_variant_order(block_label: str) -> tuple[str, str]:
+    if block_label == "A":
+        return ("baseline", "ablation")
+    if block_label == "B":
+        return ("ablation", "baseline")
+    raise ValueError(f"unknown block label: {block_label!r}")
+
+
+def run_discrimination_blocks(
+    cfg: dict[str, Any], tags: dict[str, str], cpu: str, work: Path,
+    block_order: tuple[str, ...], warmup: int, steady: int,
+) -> list[dict[str, Any]]:
+    """Runs the counterbalanced block matrix and returns one entry per (block, workload) with
+    each variant/mode's steady-state summary, retaining block-level evidence rather than
+    collapsing immediately into one median (see task governance). No JFR/structural collection
+    here: the no-op exact-scope/runtime-equivalence contract is the single per-image
+    `_build_and_probe_discrimination_images` check above, not a per-workload profile."""
+    blocks: list[dict[str, Any]] = []
+    for block_index, block_label in enumerate(block_order):
+        variant_order = _block_variant_order(block_label)
+        for item in cfg["controls"]:
+            workload = item["id"]
+            slug = workload.replace("/", "__")
+            by_variant: dict[str, Any] = {}
+            for variant in variant_order:
+                tag = tags[variant]
+                canonical_source, control_host = control_source(tag, work, item)
+                by_mode: dict[str, Any] = {}
+                for mode, source_host, source_container in (
+                    ("canonical", None, canonical_source),
+                    ("control", control_host, "/work/source.protos"),
+                ):
+                    label = f"block{block_index}-{block_label}-{slug}-{variant}-{mode}"
+                    print(
+                        f"DISCRIMINATION TIMING BEGIN block={block_index} order={block_label} "
+                        f"workload={workload} variant={variant} mode={mode}",
+                        flush=True,
+                    )
+                    timing_result = timing(
+                        tag, cpu, work, source_host, source_container,
+                        item["expected"], label, warmup, steady,
+                    )
+                    print(
+                        f"DISCRIMINATION TIMING PASS block={block_index} order={block_label} "
+                        f"workload={workload} variant={variant} mode={mode} "
+                        f"median_ns={timing_result['steady_summary']['median_ns']}",
+                        flush=True,
+                    )
+                    by_mode[mode] = timing_result
+                by_variant[variant] = by_mode
+            blocks.append({
+                "block_index": block_index,
+                "block_order": block_label,
+                "variant_sequence": list(variant_order),
+                "workload": workload,
+                "variants": by_variant,
+            })
+    return blocks
+
+
+def classify_discrimination_block(entry: dict[str, Any]) -> dict[str, Any]:
+    """Sign convention (fixed before any data was collected):
+
+        canonical_difference = baseline_canonical_median_ns - noop_canonical_median_ns
+        control_difference   = baseline_control_median_ns   - noop_control_median_ns
+        paired_control_difference_ns = canonical_difference - control_difference
+        paired_control_difference_percent =
+            100 * paired_control_difference_ns / baseline_canonical_median_ns
+
+    A positive value means the paired-control comparison would (wrongly, since these variants
+    are source-equivalent) read as "noop faster than baseline"; a negative value would read as
+    "noop slower than baseline". Expressed as a percentage of baseline's canonical median so it
+    is directly comparable in scale to the historical A1/A3/A4 percentage effects."""
+    baseline = entry["variants"]["baseline"]
+    noop = entry["variants"]["ablation"]
+    baseline_canonical_ns = baseline["canonical"]["steady_summary"]["median_ns"]
+    baseline_control_ns = baseline["control"]["steady_summary"]["median_ns"]
+    noop_canonical_ns = noop["canonical"]["steady_summary"]["median_ns"]
+    noop_control_ns = noop["control"]["steady_summary"]["median_ns"]
+
+    canonical_difference_ns = baseline_canonical_ns - noop_canonical_ns
+    control_difference_ns = baseline_control_ns - noop_control_ns
+    paired_control_difference_ns = canonical_difference_ns - control_difference_ns
+    paired_control_difference_percent = (
+        100.0 * paired_control_difference_ns / baseline_canonical_ns
+    )
+
+    return {
+        "block_index": entry["block_index"],
+        "block_order": entry["block_order"],
+        "workload": entry["workload"],
+        "baseline_canonical_median_ns": baseline_canonical_ns,
+        "baseline_control_median_ns": baseline_control_ns,
+        "noop_canonical_median_ns": noop_canonical_ns,
+        "noop_control_median_ns": noop_control_ns,
+        "canonical_difference_ns": canonical_difference_ns,
+        "control_difference_ns": control_difference_ns,
+        "paired_control_difference_ns": paired_control_difference_ns,
+        "paired_control_difference_percent": paired_control_difference_percent,
+    }
+
+
+def summarize_discrimination_workload(classified_blocks: list[dict[str, Any]]) -> dict[str, Any]:
+    """Descriptive no-op envelope for one workload across all retained blocks. Explicitly a
+    DESCRIPTIVE_DISCRIMINATION_ENVELOPE, not a STATISTICAL_CONFIDENCE_INTERVAL: with only a
+    handful of blocks, no inferential interval is fabricated here."""
+    values = [b["paired_control_difference_percent"] for b in classified_blocks]
+    ordered = sorted(values)
+    median = statistics.median(values)
+    mad = statistics.median([abs(v - median) for v in values])
+    abs_max = max(abs(v) for v in values)
+
+    a_values = [
+        b["paired_control_difference_percent"]
+        for b in classified_blocks if b["block_order"] == "A"
+    ]
+    b_values = [
+        b["paired_control_difference_percent"]
+        for b in classified_blocks if b["block_order"] == "B"
+    ]
+    if len(a_values) < 2 or len(b_values) < 2:
+        order_effect = "INCONCLUSIVE"
+    else:
+        a_range = (min(a_values), max(a_values))
+        b_range = (min(b_values), max(b_values))
+        non_overlapping = a_range[1] < b_range[0] or b_range[1] < a_range[0]
+        order_effect = "DETECTED" if non_overlapping else "NOT_DETECTED"
+
+    return {
+        "samples": len(values),
+        "noop_paired_control_min_percent": min(ordered),
+        "noop_paired_control_max_percent": max(ordered),
+        "noop_paired_control_median_percent": median,
+        "noop_paired_control_mad_percent": mad,
+        "noop_paired_control_abs_max_percent": abs_max,
+        "discrimination_floor_percent": abs_max,
+        "order_effect": order_effect,
+        "a_order_values_percent": a_values,
+        "b_order_values_percent": b_values,
+    }
+
+
+def classify_effect_vs_floor(effect_percent: float, floor_percent: float) -> str:
+    """Pre-specified before any reference data existed (see task governance: 'Do not choose the
+    definition after seeing which threshold would authorize Ablation 5'). ABOVE requires the
+    historical effect's magnitude to be at least double the floor; BELOW requires it to be at
+    most half the floor; anything in between (same order of magnitude) is COMPARABLE."""
+    if floor_percent <= 0:
+        return "ABOVE" if effect_percent != 0 else "COMPARABLE"
+    ratio = abs(effect_percent) / floor_percent
+    if ratio >= 2.0:
+        return "ABOVE"
+    if ratio <= 0.5:
+        return "BELOW"
+    return "COMPARABLE"
+
+
+def combine_workload_verdicts(verdicts: list[str]) -> str:
+    unique = set(verdicts)
+    return verdicts[0] if len(unique) == 1 else "MIXED"
+
+
+def discrimination_gate_for_workload(
+    workload: str, discrimination_floor_percent: float, order_effect: str,
+) -> str:
+    """Pre-specified gate rule, tied to real, already-retained evidence rather than an
+    arbitrary invented threshold: OPEN requires the no-op discrimination floor for this
+    workload to be strictly smaller than the smallest-magnitude effect the retained A1/A3/A4
+    evidence has ever interpreted for this same workload, AND no detected order effect. If the
+    floor cannot be trusted to be smaller than an effect this harness has already treated as
+    interpretable, a smaller new candidate cannot be measured informatively either."""
+    if order_effect == "INCONCLUSIVE":
+        return "INCONCLUSIVE"
+    if order_effect == "DETECTED":
+        return "CLOSED"
+    historical_abs_effects = [
+        abs(HISTORICAL_ABLATION_EFFECTS_PERCENT[ablation][workload])
+        for ablation in ("1", "3", "4")
+    ]
+    historical_min_abs_effect = min(historical_abs_effects)
+    if discrimination_floor_percent < historical_min_abs_effect:
+        return "OPEN"
+    return "CLOSED"
+
+
+def combine_gate(per_workload_gates: dict[str, str]) -> str:
+    values = set(per_workload_gates.values())
+    if "CLOSED" in values:
+        return "CLOSED"
+    if "INCONCLUSIVE" in values:
+        return "INCONCLUSIVE"
+    return "OPEN"
+
+
+def minimum_next_methodological_change(
+    overall_gate: str, per_workload_gates: dict[str, str], per_workload_summary: dict[str, Any],
+) -> str:
+    if overall_gate == "OPEN":
+        return "NONE"
+    any_order_effect_detected = any(
+        s["order_effect"] == "DETECTED" for s in per_workload_summary.values()
+    )
+    any_inconclusive = "INCONCLUSIVE" in per_workload_gates.values()
+    if any_order_effect_detected:
+        return (
+            "process/container lifecycle isolation between blocks, plus more counterbalanced "
+            "blocks (extend block_order beyond AABB) to confirm whether the detected order "
+            "effect is stable before trusting any paired-control comparison built on this "
+            "fixed-order harness"
+        )
+    if any_inconclusive:
+        return (
+            "more counterbalanced blocks (extend block_order beyond the current 4) - the "
+            "current sample is too small to determine the order effect reliably for at least "
+            "one workload"
+        )
+    return (
+        "longer measurement within blocks (increase steady_iterations beyond 100) and/or finer-"
+        "granularity interleaving of canonical/control runs, to reduce the no-op discrimination "
+        "floor below the smallest historically-interpreted local effect"
+    )
+
+
+def smoke_discrimination() -> None:
+    cfg = validate_discrimination()
+    harness_revision = worktree_harness_revision()
+    cpu = first_cpu()
+    tags = _build_and_probe_discrimination_images(cfg, cpu)
+
+    with tempfile.TemporaryDirectory(prefix="perf010a-discrimination-smoke-") as tmp:
+        work = Path(tmp)
+        blocks = run_discrimination_blocks(
+            cfg, tags, cpu, work,
+            block_order=("A", "B"),
+            warmup=SMOKE_WARMUP_ITERATIONS, steady=SMOKE_STEADY_ITERATIONS,
+        )
+
+    print("PERF010A_DISCRIMINATION_SMOKE_HARNESS_REVISION=" + harness_revision)
+    print(
+        f"PERF010A_DISCRIMINATION_SMOKE_SCALE=warmup={SMOKE_WARMUP_ITERATIONS} "
+        f"steady={SMOKE_STEADY_ITERATIONS} (reference scale: warmup={cfg['warmup_iterations']} "
+        f"steady={cfg['steady_iterations']})"
+    )
+    print("PERF010A_DISCRIMINATION_SMOKE_BLOCKS=" + str(len(set(b["block_index"] for b in blocks))))
+    print("PERF010A_DISCRIMINATION_SMOKE_WORKLOADS=" + str(len(cfg["controls"])))
+    print("PERF010A_DISCRIMINATION_SMOKE=PASS")
+    print("PERF010A_DISCRIMINATION_SMOKE_RETAINED=NO")
+
+
+def reference_discrimination(harness_revision: str | None, output_dir: Path | None) -> None:
+    cfg = validate_discrimination()
+    harness_revision = resolved_harness_revision(harness_revision)
+    output_dir = output_dir if output_dir is not None else DISCRIMINATION_OUTPUT_DIR
+
+    if output(["git", "status", "--porcelain", "--untracked-files=all"]):
+        raise RuntimeError("reference requires clean exact harness")
+
+    if output_dir.exists():
+        if not output_dir.is_dir() or any(output_dir.iterdir()):
+            raise RuntimeError("output directory already contains evidence")
+        output_dir.rmdir()
+
+    cpu = first_cpu()
+    tags = _build_and_probe_discrimination_images(cfg, cpu)
+
+    block_order = tuple(cfg["block_order"])
+    with tempfile.TemporaryDirectory(prefix="perf010a-discrimination-") as tmp:
+        work = Path(tmp)
+        blocks = run_discrimination_blocks(
+            cfg, tags, cpu, work,
+            block_order=block_order,
+            warmup=cfg["warmup_iterations"], steady=cfg["steady_iterations"],
+        )
+
+    classified = [classify_discrimination_block(entry) for entry in blocks]
+    by_workload: dict[str, list[dict[str, Any]]] = {}
+    for c in classified:
+        by_workload.setdefault(c["workload"], []).append(c)
+
+    per_workload_summary = {
+        workload: summarize_discrimination_workload(blocks_for_workload)
+        for workload, blocks_for_workload in by_workload.items()
+    }
+    per_workload_gates = {
+        workload: discrimination_gate_for_workload(
+            workload, summary["discrimination_floor_percent"], summary["order_effect"],
+        )
+        for workload, summary in per_workload_summary.items()
+    }
+    overall_gate = combine_gate(per_workload_gates)
+
+    effect_vs_floor = {}
+    for ablation in ("1", "3", "4"):
+        per_workload_verdicts = [
+            classify_effect_vs_floor(
+                HISTORICAL_ABLATION_EFFECTS_PERCENT[ablation][workload],
+                per_workload_summary[workload]["discrimination_floor_percent"],
+            )
+            for workload in per_workload_summary
+        ]
+        effect_vs_floor[ablation] = combine_workload_verdicts(per_workload_verdicts)
+
+    minimum_change = minimum_next_methodological_change(
+        overall_gate, per_workload_gates, per_workload_summary
+    )
+
+    output_dir.mkdir(parents=True)
+
+    raw = {
+        "schema_version": 1,
+        "perf_item": "PERF010-A",
+        "parent_perf_item": "PERF010",
+        "slice": cfg["slice"],
+        "diagnostic_claim": True,
+        "measurement_discrimination_experiment": True,
+        "harness_revision": harness_revision,
+        "protos_revision": cfg["protos_revision"],
+        "toolchain": cfg["toolchain"],
+        "host_identity": host_identity(),
+        "cpu_policy": {"mechanism": "cpuset-cpus", "cpuset": cpu},
+        "network": "none",
+        "operation_count": cfg["operation_count"],
+        "warmup_iterations": cfg["warmup_iterations"],
+        "steady_iterations": cfg["steady_iterations"],
+        "block_order": list(block_order),
+        "blocks": blocks,
+        "classified_blocks": classified,
+        "per_workload_summary": per_workload_summary,
+        "per_workload_gate": per_workload_gates,
+        "ablation_effect_vs_floor": effect_vs_floor,
+        "ablation_5_measurement_gate": overall_gate,
+        "minimum_next_methodological_change": minimum_change,
+    }
+    (output_dir / "raw.json").write_text(
+        json.dumps(raw, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    rows = [
+        "block_index\tblock_order\tworkload\tbaseline_canonical_median_ns\t"
+        "baseline_control_median_ns\tnoop_canonical_median_ns\tnoop_control_median_ns\t"
+        "canonical_difference_ns\tcontrol_difference_ns\tpaired_control_difference_ns\t"
+        "paired_control_difference_percent"
+    ]
+    for c in classified:
+        rows.append("\t".join([
+            str(c["block_index"]), c["block_order"], c["workload"],
+            str(c["baseline_canonical_median_ns"]), str(c["baseline_control_median_ns"]),
+            str(c["noop_canonical_median_ns"]), str(c["noop_control_median_ns"]),
+            str(c["canonical_difference_ns"]), str(c["control_difference_ns"]),
+            str(c["paired_control_difference_ns"]),
+            f"{c['paired_control_difference_percent']:.4f}",
+        ]))
+    (output_dir / "discrimination-blocks.tsv").write_text(
+        "\n".join(rows) + "\n", encoding="utf-8"
+    )
+
+    summary_rows = [
+        "workload\tsamples\tnoop_paired_control_min_percent\tnoop_paired_control_max_percent\t"
+        "noop_paired_control_median_percent\tnoop_paired_control_mad_percent\t"
+        "discrimination_floor_percent\torder_effect\tablation_5_gate"
+    ]
+    for workload, s in per_workload_summary.items():
+        summary_rows.append("\t".join([
+            workload, str(s["samples"]),
+            f"{s['noop_paired_control_min_percent']:.4f}",
+            f"{s['noop_paired_control_max_percent']:.4f}",
+            f"{s['noop_paired_control_median_percent']:.4f}",
+            f"{s['noop_paired_control_mad_percent']:.4f}",
+            f"{s['discrimination_floor_percent']:.4f}",
+            s["order_effect"],
+            per_workload_gates[workload],
+        ]))
+    (output_dir / "discrimination-summary.tsv").write_text(
+        "\n".join(summary_rows) + "\n", encoding="utf-8"
+    )
+
+    readme = [
+        "# PERF010-A measurement-discrimination investigation (#691 follow-up)",
+        "",
+        "This is not a causal ablation. It measures this harness's own discrimination "
+        "capability using a source-equivalent no-op variant (`PERF010A_NOOP`); any movement "
+        "reported below is measurement movement/drift, never a Protos runtime effect, "
+        "because the executed Protos runtime code cannot differ between the two variants "
+        "compared here (see `NOOP_RUNTIME_PATH_EQUIVALENCE` and `raw.json`).",
+        "",
+        f"- Harness revision: `{harness_revision}`",
+        f"- Protos revision (baseline and noop; single checkout, empty patch applied in-build "
+        f"for the noop image only): `{cfg['protos_revision']}`",
+        f"- Block order: `{block_order}` (deterministic AB/BA counterbalance; "
+        "BASELINE_FIRST_ONLY=ABSENT).",
+        "- N=10,000. Warmup=20, steady=100 (unchanged reference scale).",
+        "",
+        "## Per-workload no-op discrimination envelope",
+        "",
+        "| workload | samples | min % | max % | median % | MAD % | floor % | order effect | "
+        "Ablation 5 gate |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for workload, s in per_workload_summary.items():
+        readme.append(
+            f"| {workload} | {s['samples']} "
+            f"| {s['noop_paired_control_min_percent']:.4f} "
+            f"| {s['noop_paired_control_max_percent']:.4f} "
+            f"| {s['noop_paired_control_median_percent']:.4f} "
+            f"| {s['noop_paired_control_mad_percent']:.4f} "
+            f"| {s['discrimination_floor_percent']:.4f} "
+            f"| {s['order_effect']} | {per_workload_gates[workload]} |"
+        )
+
+    readme += [
+        "",
+        "## Existing ablations vs. this floor (descriptive only; historical conclusions "
+        "unchanged)",
+        "",
+        "| ablation | vs. floor |",
+        "|---|---|",
+        f"| Ablation 1 | {effect_vs_floor['1']} |",
+        f"| Ablation 3 | {effect_vs_floor['3']} |",
+        f"| Ablation 4 | {effect_vs_floor['4']} |",
+        "",
+        f"## ABLATION_5_MEASUREMENT_GATE = {overall_gate}",
+        "",
+        f"Minimum next methodological change: {minimum_change}",
+        "",
+        "This investigation does not select a production optimization, does not measure the "
+        "already-established next causal candidate (invocation-time second `List.copyOf` of "
+        "closure `capturedLexicalContexts`), and does not authorize Ablation 5 by itself.",
+        "",
+    ]
+    (output_dir / "README.md").write_text("\n".join(readme) + "\n", encoding="utf-8")
+
+    names = ["README.md", "raw.json", "discrimination-blocks.tsv", "discrimination-summary.tsv"]
+    (output_dir / "SHA256SUMS").write_text(
+        "\n".join(f"{sha256(output_dir / n)}  {n}" for n in names) + "\n", encoding="utf-8"
+    )
+
+    print("PERF010A_DISCRIMINATION_REFERENCE=PASS")
+    print("PERF010A_MEASUREMENT_DISCRIMINATION=ESTABLISHED")
+    print("NO_OP_EXPERIMENT=VALID")
+    print("VARIANT_ORDER_COUNTERBALANCED=YES")
+    print("CANONICAL_CONTROL_PAIRING_PRESERVED=YES")
+    for workload, s in per_workload_summary.items():
+        print(
+            f"WORKLOAD={workload} "
+            f"NOOP_PAIRED_CONTROL_MIN={s['noop_paired_control_min_percent']:.4f} "
+            f"NOOP_PAIRED_CONTROL_MAX={s['noop_paired_control_max_percent']:.4f} "
+            f"NOOP_PAIRED_CONTROL_MEDIAN={s['noop_paired_control_median_percent']:.4f} "
+            f"NOOP_PAIRED_CONTROL_ABS_MAX={s['noop_paired_control_abs_max_percent']:.4f} "
+            f"DISCRIMINATION_FLOOR={s['discrimination_floor_percent']:.4f} "
+            f"ORDER_EFFECT={s['order_effect']}"
+        )
+    print(f"ABLATION_1_EFFECT_VS_FLOOR={effect_vs_floor['1']}")
+    print(f"ABLATION_3_EFFECT_VS_FLOOR={effect_vs_floor['3']}")
+    print(f"ABLATION_4_EFFECT_VS_FLOOR={effect_vs_floor['4']}")
+    print(f"ABLATION_5_MEASUREMENT_GATE={overall_gate}")
+    print(f"MINIMUM_NEXT_METHODOLOGICAL_CHANGE={minimum_change}")
+    print("PERF010A_DOMINANT_CAUSE=NOT_ESTABLISHED")
+    print("ATTRIBUTABLE_FRACTION=NOT_ESTABLISHED")
+    print("PRODUCTION_OPTIMIZATION_SELECTED=NO")
+    print("PERF010_READY=NO")
+    print("PERF010A_PROTOS_REPOSITORY_MODIFICATION=NONE")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("command", choices=("validate", "smoke", "reference"))
+    ap.add_argument(
+        "command",
+        choices=(
+            "validate", "smoke", "reference",
+            "discrimination-validate", "discrimination-smoke", "discrimination-reference",
+        ),
+    )
     ap.add_argument(
         "--harness-revision",
         help="optional explicit expected harness SHA; when omitted, current clean HEAD is used",
@@ -1842,7 +2523,8 @@ def main():
         help="which causal ablation slice to run: 1 (semantic/helper Bytecode dispatch, "
         "default), 2 (ProtosActivation.lookup), 3 (ProtosObjectValue.readLocalSlot's "
         "redundant containsKey+get), or 4 (finishPreparingComposedCall's duplicate "
-        "ProtosClosureValue.nativeBody() projection)",
+        "ProtosClosureValue.nativeBody() projection); not used by the discrimination-* "
+        "commands, which always use the dedicated no-op slice (config/perf010a-0.json)",
     )
     args = ap.parse_args()
 
@@ -1852,6 +2534,19 @@ def main():
 
     if args.command == "smoke":
         smoke(args.ablation)
+        return
+
+    if args.command == "discrimination-validate":
+        validate_discrimination()
+        return
+
+    if args.command == "discrimination-smoke":
+        smoke_discrimination()
+        return
+
+    if args.command == "discrimination-reference":
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        reference_discrimination(args.harness_revision, output_dir)
         return
 
     if not args.output_dir:

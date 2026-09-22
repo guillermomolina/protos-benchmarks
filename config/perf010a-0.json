@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_NOOP",
+  "phase": "measurement-discrimination-noop-envelope",
+  "diagnostic_claim": true,
+  "measurement_discrimination_experiment": true,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "4c4aa95a5852119bd280ceb40483871d5d2cbb82",
+  "protos_revision_note": "reuses the exact pin already validated by ablation 4 (results/perf010a-4), so this Evidence Unit's toolchain/source identity needs no fresh re-derivation; this investigation makes no new claim about that revision's runtime behavior, only about this harness's own measurement discrimination capability",
+  "ablation_patch": "docker/protos-perf010a/noop.patch",
+  "ablation_patch_targets": [],
+  "noop_note": "docker/protos-perf010a/noop.patch is a literally empty file (0 bytes). It is built through the exact same Dockerfile VARIANT=ablation path as a real ablation (git apply --allow-empty, --allow-dirty, ABLATION_SLICE label) so it exercises identical build/image machinery, but `git apply` on an empty patch changes nothing: the /src tree the noop image compiles is byte-for-byte identical to the baseline image's /src tree. Runtime equivalence is not merely assumed from this: `reference_discrimination`/`smoke_discrimination` additionally assert (via `source_tree_identity_probe`) that the exact source text of every file any prior ablation (1-4) has ever touched is byte-for-byte identical between the baseline and noop images, read from /opt/protos-source, before any timing block runs (NOOP_RUNTIME_PATH_EQUIVALENCE). This deliberately compares source text, not the built protos.jar: this toolchain's Maven build is not byte-reproducible (JAR/ZIP entries embed per-build timestamps), so hashing protos.jar across two separately-built images is build-time noise, not a source-identity proof - an earlier version of this check did that and incorrectly reported FAIL on a genuinely empty patch. The only difference between the two images is harness-local build metadata (ABLATION_SLICE label, /opt/perf010a/ablation-slice.txt, the --allow-empty/--allow-dirty build flags, and non-reproducible build artifact timestamps) - outside the executed Protos runtime path.",
+  "historical_evidence": {
+    "perf004_a_cross_language_baseline": "results/perf004-a",
+    "perf004_b2c_causal_control": "results/perf004-b2c",
+    "perf004_b2d_paired_jfr": "results/perf004-b2d",
+    "perf006_d3": "results/perf006-d3",
+    "perf008_steady_state_full_stack": "results/perf008",
+    "perf010a_ablation_1": "results/perf010a-1",
+    "perf010a_ablation_2": "results/perf010a-2",
+    "perf010a_ablation_3": "results/perf010a-3",
+    "perf010a_ablation_4": "results/perf010a-4"
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 20,
+  "steady_iterations": 100,
+  "execution_sample_period": "10 ms",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "not_collected",
+  "jfr_recording_note": "the discrimination experiment does not collect per-block JFR structural evidence; the exact-scope/no-op structural contract (source-tree and built-jar identity) is a single per-image static comparison performed once before any block runs, exactly like ablations 3/4's source-derived structural confirmation, not a repeated per-workload JFR profile",
+  "timing_recording_phase": "steady_only_no_jfr",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "variants": ["baseline", "ablation"],
+  "variant_note": "the 'ablation' tag slot holds the no-op image for this experiment, reusing the existing baseline/ablation image-build plumbing unmodified; its ABLATION_SLICE label is PERF010A_NOOP, not a real ablation slice",
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "block_order": ["A", "B", "A", "B"],
+  "block_design_note": "Deterministic AB/BA counterbalanced design, 4 blocks (2 reps of each order), no randomness. Block 'A' order: baseline canonical, baseline control, noop canonical, noop control (matches the existing fixed reference order). Block 'B' order: noop canonical, noop control, baseline canonical, baseline control. Canonical/control pairing within a variant is preserved in both orders; only which variant runs first is counterbalanced. 4 blocks is the smallest design that both (a) separates 'baseline precedes noop' from 'noop precedes baseline' with more than one observation per order, and (b) yields a minimal 4-point descriptive envelope (min/max/median/abs-max) per workload without fabricating an inferential confidence interval from an inadequate sample.",
+  "output": "results/perf010a-discrimination"
+}

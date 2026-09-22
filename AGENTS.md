@@ -117,6 +117,95 @@ created only while both the local repository and the remote repository have no
 commits. If another initial commit appears remotely, abort instead of reconciling
 or replacing it automatically.
 
+## Adding or extending benchmark harnesses
+
+These rules apply whenever a new benchmark harness is created, or an existing
+one is substantially changed (new container base, new language/JDK helper,
+new profiling/JFR capture path, new measurement mechanism). They make durable
+the recurring failure modes seen in past harness work; treat each point as a
+precondition to check before considering the implementation done, not as a
+retrospective explanation of any one past incident.
+
+**Toolchain and container drift.** When a harness installs packages inside a
+container, do not assume a package name is stable across base-image
+generations. Verify each required package against the image actually in use;
+do not infer availability from an older image. Prefer the canonical package
+form for the current pinned toolchain. If a build-arg parameterizes package
+selection for historical compatibility, document its default and the value
+the current configuration actually uses. (Conceptual pattern, not a fixed
+dependency of any one benchmark: a package named one way in an older base
+image and another way in a newer one — e.g. `python39` vs `python3` across
+Oracle Linux major versions.)
+
+**Exact JDK/API compatibility.** Java helpers and JFR-based instrumentation
+MUST compile against the exact JDK the harness pins, using only types,
+exceptions, modules, and methods that JDK version actually provides. Do not
+assume APIs from a different JDK, and do not resolve an incompatibility by
+silently changing which JDK the harness targets. Compiling successfully
+against a locally installed JDK is not evidence of compatibility with the
+pinned harness JDK.
+
+**Define the evidence unit first.** Before implementing a measurement
+harness, define what one evidence unit is: exact Protos revision, exact
+benchmark revision, workload, canonical/control variant, toolchain identity,
+host/resource policy, correctness result, measurement policy, and raw
+artifact identity, as applicable (see `AGENTS.work/REPRODUCIBILITY.md` for
+the full identity/retention requirements — do not re-derive them here).
+Do not start producing results and decide afterward what a unit of evidence
+means.
+
+**Measurement phase boundaries.** Startup, warmup, and steady-state are
+distinct measurement classes (`AGENTS.work/PERFORMANCE.md`). A capture MUST
+NOT be labelled steady-state if its capture mechanism can also include
+bootstrap or warmup without an objective boundary. For profiling/JFR
+captures, the phase boundary MUST be implemented in the harness itself, not
+left to a later, ad hoc interpretation by whoever analyzes the data; if
+analysis needs to filter by timestamp or phase marker, that mechanism must be
+unambiguous and reproducible.
+
+**Profiling depth and causal evidence.** When the investigation question is
+causal and depends on call paths, do not reduce profiling to top-frame
+histograms; retain the stack depth needed to answer the question, bounded to
+a reasonable limit, and retain enough raw evidence to reconstruct the
+analysis. Hotspot frequency is not causal attribution: a figure such as "35%
+of samples land in frame X" does not by itself establish what work happens
+inside that frame.
+
+**Correctness before timing.** This restates and applies
+`AGENTS.work/PERFORMANCE.md`'s correctness-before-timing rule to harness work
+specifically, including diagnostics: correctness MUST be PASS for the same
+variant and workload being measured before any timing or profile is accepted
+as evidence. If correctness fails, there is no timing, no performance claim,
+and no retained performance evidence — this applies to profiling/diagnostic
+captures as much as to wall-clock benchmarks.
+
+**Uncommitted iteration.** This restates the Universal repository workflow
+commit-timing rule above as it applies to harness work: the edit → build/test
+→ fix loop stays uncommitted while a harness is being implemented or
+repaired. Do not create intermediate commits merely to checkpoint a failure,
+a compilation fix, a package-name correction, a test fix, or another
+in-progress harness adjustment. Commit only once the requested slice is
+complete, required validation has passed, the changed-file set has been
+reviewed, and the diff is coherent — normally one coherent commit per slice.
+This does not change Human-executor mode: the human still runs
+builds/tests/benchmarks and still performs `add`/`commit`/push.
+
+### Benchmark-harness precheck
+
+Before editing a new or substantially changed benchmark harness:
+
+- [ ] Read `AGENTS.md`, `AGENTS.work/PERFORMANCE.md`, and
+      `AGENTS.work/REPRODUCIBILITY.md`.
+- [ ] Verify the actual container/toolchain identity in use.
+- [ ] Verify every required OS package against the actual base image.
+- [ ] Compile new Java helpers against the exact pinned JDK.
+- [ ] Define the evidence unit before implementing the harness.
+- [ ] Define startup/warmup/steady-state boundaries before adding profiling.
+- [ ] Preserve the stack depth required for causal attribution.
+- [ ] Require correctness PASS before accepting timing/profile evidence.
+- [ ] Keep the implementation slice uncommitted while iterating.
+- [ ] Do not reuse historical measurements as current-`main` evidence.
+
 ## Licensing
 
 The repository is licensed under APL-1.0. `LICENSE.TXT` is authoritative and

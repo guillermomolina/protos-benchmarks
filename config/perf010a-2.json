@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_ABLATION_2",
+  "phase": "causal-activation-lookup-ablation",
+  "diagnostic_claim": true,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "bc0471184bf6dbbf03d0c6b09ef7b9e28aede014",
+  "protos_revision_note": "same pinned revision as PERF010A_ABLATION_1 (config/perf010a.json); the single file touched by ablation-2.patch (ProtosBytecodeRootNode.java) is patched in-build only, never committed to guillermomolina/protos, so this second ablation stays directly comparable to PERF010A_ABLATION_1's evidence unit",
+  "ablation_patch": "docker/protos-perf010a/ablation-2.patch",
+  "ablation_patch_targets": [
+    "src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java"
+  ],
+  "second_ablation_target": "ProtosActivation.lookup",
+  "diagnostic_bypass": "activation.context().readLocalSlot(name)",
+  "historical_evidence": {
+    "perf004_a_cross_language_baseline": "results/perf004-a",
+    "perf004_b2c_causal_control": "results/perf004-b2c",
+    "perf004_b2d_paired_jfr": "results/perf004-b2d",
+    "perf006_d3": "results/perf006-d3",
+    "perf008_steady_state_full_stack": "results/perf008",
+    "perf010a_ablation_1": "results/perf010a-1"
+  },
+  "external_baseline": {
+    "source": "results/perf004-a",
+    "same_run_as_protos_measurement": false,
+    "reason": "results/perf004-a pins a different Protos revision (4a03efc15620b37b2e418b3df30b4a26486446ec) and a different container base image (ol8, not this harness's ol10) than this experiment; AGENTS.work/REPRODUCIBILITY.md's revision-pinning discipline forbids combining it directly with a current-revision PROTOS_BASELINE_COST/PROTOS_ABLATION_COST measurement into a single EXCESS_COST/ATTRIBUTABLE_FRACTION number. It is retained here as a labelled historical reference only; ATTRIBUTABLE_FRACTION is reported as NOT_ESTABLISHED unless and until a current-revision, current-host external (e.g. Python/JavaScript) measurement is added under the same Evidence Unit."
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 20,
+  "steady_iterations": 100,
+  "execution_sample_period": "10 ms",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "steady_only",
+  "timing_recording_phase": "steady_only_no_jfr",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "variants": ["baseline", "ablation"],
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "continuation_markers": [
+    "ContinuationResult",
+    "continueWith",
+    "yield"
+  ],
+  "structural_markers_expected_absent_in_ablation": [
+    "com.guillermomolina.protos.runtime.ProtosActivation.lookup"
+  ],
+  "structural_marker_expected_present_both_variants": "com.guillermomolina.protos.runtime.ProtosObjectValue.readLocalSlot",
+  "output": "results/perf010a-2"
+}

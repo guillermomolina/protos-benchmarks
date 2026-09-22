@@ -1,0 +1,24 @@
+diff --git a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
+index 66fa52c..e3a21bd 100644
+--- a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
++++ b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
+@@ -262,7 +262,18 @@ abstract class ProtosBytecodeRootNode extends RootNode implements BytecodeRootNo
+     public static final class Lookup {
+         @Specialization
+         public static Object perform(ProtosActivation activation, String name) {
+-            return activation.lookup(name)
++            // PERF010A_ABLATION_2 diagnostic bypass (protos-benchmarks
++            // docker/protos-perf010a/ablation-2.patch): bypass ProtosActivation.lookup(name)
++            // (activation's own local context, then captured lexical contexts, then the
++            // receiver/prelude member fallback) and read only the activation's own local
++            // context slot directly via ProtosObjectValue.readLocalSlot(name). This is a
++            // diagnostic-only evidence intervention for PERF010-A's second causal ablation
++            // (SECOND_ABLATION_TARGET=ProtosActivation.lookup); it is not claimed to be
++            // semantically equivalent to activation.lookup(name) in the general language, and
++            // it fails closed (ProtosSignalException below) whenever the targeted name is not
++            // a direct local slot of the activation's own context. Never publish this change
++            // to guillermomolina/protos.
++            return activation.context().readLocalSlot(name)
+                     .orElseThrow(
+                             () ->
+                                     new ProtosSignalException(

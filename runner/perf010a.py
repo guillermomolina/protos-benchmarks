@@ -10,13 +10,25 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-"""PERF010-A / #691 causal semantic/helper-dispatch ablation harness.
+"""PERF010-A / #691 causal ablation harness.
 
 Builds two images from the exact same pinned Protos revision - `baseline` (unmodified) and
-`ablation` (`docker/protos-perf010a/ablation.patch` applied during the Docker build only,
-never published to `guillermomolina/protos`) - and runs the identical PERF004-B2-D/PERF008
-four-workload canonical/control matrix (slot-read, closure-call, method-call,
-monomorphic-dispatch; N=10,000; warmup=20; steady=100) against both.
+`ablation` (a diagnostic patch applied during the Docker build only, never published to
+`guillermomolina/protos`) - and runs the identical PERF004-B2-D/PERF008 four-workload
+canonical/control matrix (slot-read, closure-call, method-call, monomorphic-dispatch;
+N=10,000; warmup=20; steady=100) against both.
+
+This module now backs two distinct causal ablations sharing this one harness, selected via
+`--ablation` (default `1`, preserving every prior invocation's exact behavior):
+
+  * `--ablation 1` (`config/perf010a.json`, `docker/protos-perf010a/ablation.patch`) -
+    PERF010A_ABLATION_1, bypasses the semantic/helper Bytecode dispatch wrapper.
+  * `--ablation 2` (`config/perf010a-2.json`, `docker/protos-perf010a/ablation-2.patch`) -
+    PERF010A_ABLATION_2, bypasses `ProtosActivation.lookup(name)` with
+    `activation.context().readLocalSlot(name)` (`ProtosBytecodeRootNode.Lookup.perform`).
+    Diagnostic only; not claimed to be semantically equivalent to `lookup` in the general
+    language, and expected to fail closed (correctness FAIL) for any workload whose
+    unqualified-name lookups are not resolved by the activation's own local context.
 
 Two separate run types are collected per (workload, mode, variant) combination, matching
 `AGENTS.work/REPRODUCIBILITY.md` ("Diagnostic instrumentation ... SHOULD be kept separate from
@@ -26,14 +38,16 @@ timing when it materially perturbs execution."):
                reduced to median/MAD/p95/min/max by this module (raw samples retained).
   * STRUCTURAL - `Perf008SteadyStateDriver` + `Perf006d3JfrAnalyzer` (steady-state-only,
                full-bounded-stack JFR), reused unmodified from `docker/protos-perf006d3`.
-               Used only to confirm the ablation actually removed the semantic/helper wrapper
-               from the sampled call paths (`ProtosSemanticBytecodeRootNodeGen` /
-               `InvokeSemanticHelper`) while the helper `continueAt`
-               (`ProtosBytecodeRootNodeGen$CachedBytecodeNode.continueAt`) remains present in
-               both variants; never used to interpret timing.
+               Used only to confirm the ablation actually removed its targeted mechanism from
+               the sampled call paths while its counterpart marker remains present in both
+               variants (ablation 1: `ProtosSemanticBytecodeRootNodeGen`/
+               `InvokeSemanticHelper` absent, `*CachedBytecodeNode.continueAt` present;
+               ablation 2: `ProtosActivation.lookup` absent, `ProtosObjectValue.readLocalSlot`
+               present); never used to interpret timing.
 
 This module does not select or implement a PERF010 optimization. It is a diagnostic ablation
-experiment only (`diagnostic_claim: true` in `config/perf010a.json`).
+experiment only (`diagnostic_claim: true` in `config/perf010a.json` and
+`config/perf010a-2.json`).
 """
 
 from __future__ import annotations
@@ -51,11 +65,52 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config/perf010a.json"
+CONFIG_2 = ROOT / "config/perf010a-2.json"
 EXPECTED_PROTOS_REVISION = "bc0471184bf6dbbf03d0c6b09ef7b9e28aede014"
 EXPECTED_RUNTIME = "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
 VARIANTS = ("baseline", "ablation")
+ABLATIONS = ("1", "2")
+
+# Ablation 1 (semantic/helper Bytecode dispatch wrapper) markers.
 SEMANTIC_MARKERS = ("ProtosSemanticBytecodeRootNodeGen", "InvokeSemanticHelper.perform")
 HELPER_MARKER = "ProtosBytecodeRootNodeGen$CachedBytecodeNode.continueAt"
+
+# Ablation 2 (ProtosActivation.lookup) markers.
+LOOKUP_MARKERS = ("com.guillermomolina.protos.runtime.ProtosActivation.lookup",)
+READ_LOCAL_SLOT_MARKER = "com.guillermomolina.protos.runtime.ProtosObjectValue.readLocalSlot"
+
+# Per-ablation config path, expected slice, structural-marker pair (markers expected absent
+# from a correctly-ablated call path, marker expected present in both variants), and the
+# required historical-evidence files `validate()` checks for that slice.
+ABLATION_PROFILES = {
+    "1": {
+        "config_path": CONFIG,
+        "expected_slice": "PERF010A_ABLATION_1",
+        "absent_markers": SEMANTIC_MARKERS,
+        "present_marker": HELPER_MARKER,
+        "required_files": (
+            "results/perf004-a/summary.tsv",
+            "results/perf004-b2c/summary.tsv",
+            "results/perf004-b2d/SHA256SUMS",
+            "results/perf006-d3/SHA256SUMS",
+            "results/perf008/SHA256SUMS",
+        ),
+    },
+    "2": {
+        "config_path": CONFIG_2,
+        "expected_slice": "PERF010A_ABLATION_2",
+        "absent_markers": LOOKUP_MARKERS,
+        "present_marker": READ_LOCAL_SLOT_MARKER,
+        "required_files": (
+            "results/perf004-a/summary.tsv",
+            "results/perf004-b2c/summary.tsv",
+            "results/perf004-b2d/SHA256SUMS",
+            "results/perf006-d3/SHA256SUMS",
+            "results/perf008/SHA256SUMS",
+            "results/perf010a-1/SHA256SUMS",
+        ),
+    },
+}
 
 
 def run(command: list[str], *, capture=False, check=True):
@@ -80,8 +135,8 @@ def output(command: list[str]) -> str:
     return (p.stdout or "").rstrip("\n")
 
 
-def load() -> dict[str, Any]:
-    return json.loads(CONFIG.read_text(encoding="utf-8"))
+def load(config_path: Path = CONFIG) -> dict[str, Any]:
+    return json.loads(config_path.read_text(encoding="utf-8"))
 
 
 def sha256(path: Path) -> str:
@@ -106,12 +161,50 @@ def resolved_harness_revision(explicit: str | None) -> str:
     return explicit
 
 
-def validate() -> dict[str, Any]:
-    cfg = load()
+def validate_patch_shape_1(patch_text: str) -> None:
+    # The patch must remove exactly the semantic wrapper call sites, not touch the lowering
+    # or the helper Bytecode interpreter itself.
+    assert "ProtosBytecodeRootNode.java" not in patch_text
+    assert "CanonicalToBytecodeLowerer.java" not in patch_text
+    assert "return helper.getCallTarget();" in patch_text
+    assert "this.activationTarget = activationRoot.getCallTarget();" in patch_text
+    assert "instanceof ProtosBytecodeRootNode" in patch_text
+
+
+def validate_patch_shape_2(patch_text: str) -> None:
+    # The patch must touch only ProtosBytecodeRootNode.java's Lookup.perform, replacing
+    # activation.lookup(name) with activation.context().readLocalSlot(name), and must not
+    # touch any other production mechanism (lowering, RootTag topology, continuation
+    # machinery, CallTarget architecture, source/debugger identity).
+    assert patch_text.count("--- a/") == 1
+    assert "activation.context().readLocalSlot(name)" in patch_text
+    for forbidden in (
+        "CanonicalToBytecodeLowerer.java",
+        "ProtosSourceCompiler.java",
+        "ProtosBytecodeClosureExecutionPlan.java",
+        "ProtosRootTaskExecution.java",
+        "continueAt",
+        "RootTag",
+        "ContinuationResult",
+        "ProtosSemanticBytecodeRootNode",
+    ):
+        assert forbidden not in patch_text, forbidden
+
+
+VALIDATE_PATCH_SHAPE = {
+    "1": validate_patch_shape_1,
+    "2": validate_patch_shape_2,
+}
+
+
+def validate(ablation: str = "1") -> dict[str, Any]:
+    assert ablation in ABLATIONS, ablation
+    profile = ABLATION_PROFILES[ablation]
+    cfg = load(profile["config_path"])
 
     assert cfg["perf_item"] == "PERF010-A"
     assert cfg["parent_perf_item"] == "PERF010"
-    assert cfg["slice"] == "PERF010A_ABLATION_1"
+    assert cfg["slice"] == profile["expected_slice"]
     assert cfg["diagnostic_claim"] is True
     assert cfg["protos_revision"] == EXPECTED_PROTOS_REVISION
     assert cfg["operation_count"] == 10000
@@ -130,13 +223,7 @@ def validate() -> dict[str, Any]:
         "PERF010-A must reuse the exact PERF004-B2-D/PERF008 workload matrix unmodified"
     )
 
-    for p in (
-        "results/perf004-a/summary.tsv",
-        "results/perf004-b2c/summary.tsv",
-        "results/perf004-b2d/SHA256SUMS",
-        "results/perf006-d3/SHA256SUMS",
-        "results/perf008/SHA256SUMS",
-    ):
+    for p in profile["required_files"]:
         assert (ROOT / p).is_file(), p
 
     patch_path = ROOT / cfg["ablation_patch"]
@@ -145,17 +232,13 @@ def validate() -> dict[str, Any]:
     for target in cfg["ablation_patch_targets"]:
         assert f"--- a/{target}" in patch_text, target
         assert f"+++ b/{target}" in patch_text, target
-    # The patch must remove exactly the semantic wrapper call sites, not touch the lowering
-    # or the helper Bytecode interpreter itself.
-    assert "ProtosBytecodeRootNode.java" not in patch_text
-    assert "CanonicalToBytecodeLowerer.java" not in patch_text
-    assert "return helper.getCallTarget();" in patch_text
-    assert "this.activationTarget = activationRoot.getCallTarget();" in patch_text
-    assert "instanceof ProtosBytecodeRootNode" in patch_text
+    VALIDATE_PATCH_SHAPE[ablation](patch_text)
 
     dockerfile = (ROOT / "docker/protos-perf010a/Dockerfile").read_text(encoding="utf-8")
     for required in (
         "ARG VARIANT=baseline",
+        "ARG ABLATION_PATCH=ablation.patch",
+        "${ABLATION_PATCH}",
         "ablation.patch",
         "Perf010aTimingDriver.java",
         "Perf008SteadyStateDriver.java",
@@ -179,6 +262,7 @@ def validate() -> dict[str, Any]:
     print("PERF010A_TIMING_DRIVER_JFR_FREE=PASS")
     print("PERF010A_PROTOS_REPOSITORY_MODIFICATION=NONE")
     print("PERF010A_WORKLOADS=4")
+    print(f"PERF010A_ABLATION_SELECTED={profile['expected_slice']}")
     return cfg
 
 
@@ -217,16 +301,23 @@ def summarize_ns(values: list[int]) -> dict[str, float | int]:
     }
 
 
-def build_image(cfg: dict[str, Any], variant: str) -> str:
+def build_image(cfg: dict[str, Any], variant: str, ablation: str = "1") -> str:
     assert variant in VARIANTS
+    assert ablation in ABLATIONS
     toolchain = cfg["toolchain"]
-    tag = f"protos-benchmarks-perf010a-{variant}:" + cfg["protos_revision"][:12]
+    ablation_patch_name = Path(cfg["ablation_patch"]).name
+    tag = (
+        f"protos-benchmarks-perf010a-ablation{ablation}-{variant}:"
+        + cfg["protos_revision"][:12]
+    )
     run([
         "docker", "build",
         "--build-arg", "GRAAL_BASE=" + toolchain["container_image"],
         "--build-arg", "PROTOS_REPOSITORY=" + cfg["protos_repository"],
         "--build-arg", "PROTOS_REVISION=" + cfg["protos_revision"],
         "--build-arg", "VARIANT=" + variant,
+        "--build-arg", "ABLATION_PATCH=" + ablation_patch_name,
+        "--build-arg", "ABLATION_SLICE=" + cfg["slice"],
         "--build-arg", "EXPECTED_GRAALVM_RELEASE=" + toolchain["graalvm_release"],
         "--build-arg", "EXPECTED_JDK_VERSION=" + toolchain["jdk_version"],
         "--build-arg", "EXPECTED_CONTAINER_IMAGE=" + toolchain["container_image"],
@@ -235,6 +326,7 @@ def build_image(cfg: dict[str, Any], variant: str) -> str:
         "--build-arg", "PYTHON_PACKAGE=" + toolchain["python_package"],
         "--label", "org.opencontainers.image.revision=" + cfg["protos_revision"],
         "--label", "org.protos-benchmarks.perf010a.variant=" + variant,
+        "--label", "org.protos-benchmarks.perf010a.ablation-slice=" + cfg["slice"],
         "-t", tag,
         "-f", "docker/protos-perf010a/Dockerfile", ".",
     ])
@@ -286,6 +378,18 @@ def variant_label_probe(tag: str, cpu: str) -> str:
     ], capture=True, check=False)
     if p.returncode != 0:
         raise RuntimeError("variant probe failed: " + (p.stderr or "")[-2000:])
+    return (p.stdout or "").strip()
+
+
+def ablation_slice_label_probe(tag: str, cpu: str) -> str:
+    p = run([
+        "docker", "run", "--rm", "--network", "none",
+        "--cpuset-cpus", cpu,
+        "--entrypoint", "cat", tag,
+        "/opt/perf010a/ablation-slice.txt",
+    ], capture=True, check=False)
+    if p.returncode != 0:
+        raise RuntimeError("ablation-slice probe failed: " + (p.stderr or "")[-2000:])
     return (p.stdout or "").strip()
 
 
@@ -367,6 +471,8 @@ def structural(
     tag: str, cpu: str, work: Path,
     source_host: Path | None, source_container: str,
     expected: str, label: str, warmup: int, steady: int,
+    absent_markers: tuple[str, ...] = SEMANTIC_MARKERS,
+    present_marker: str = HELPER_MARKER,
 ) -> dict[str, Any]:
     jfr = work / f"{label}.jfr"
     analysis = work / f"{label}.json"
@@ -400,7 +506,7 @@ def structural(
     if payload["execution_samples"]["total"] <= 0:
         raise RuntimeError("no execution samples: " + label)
 
-    markers = marker_presence(payload)
+    markers = marker_presence(payload, absent_markers, present_marker)
     return {
         "profile": payload,
         "markers": markers,
@@ -412,11 +518,19 @@ def structural(
     }
 
 
-def marker_presence(payload: dict[str, Any]) -> dict[str, Any]:
+def marker_presence(
+    payload: dict[str, Any],
+    absent_markers: tuple[str, ...] = SEMANTIC_MARKERS,
+    present_marker: str = HELPER_MARKER,
+) -> dict[str, Any]:
     """Structural-ablation check: substring-matches fully-qualified frame names retained by
     `Perf006d3JfrAnalyzer` (`top_frames`, `call_paths`, `continue_at.callers/callees/stacks`)
-    for the semantic-wrapper markers and the helper `continueAt` marker, without modifying the
-    analyzer (which aggregates all `*CachedBytecodeNode.continueAt` frames generically)."""
+    against `absent_markers` (expected gone from a correctly-ablated call path - the
+    semantic-wrapper markers for ablation 1, `ProtosActivation.lookup` for ablation 2) and
+    `present_marker` (expected present in both variants - the helper `continueAt` marker for
+    ablation 1, `ProtosObjectValue.readLocalSlot` for ablation 2), without modifying the
+    analyzer (which aggregates all `*CachedBytecodeNode.continueAt` frames generically). Field
+    names are kept generic across both ablations' call sites."""
     names: list[str] = []
     names.extend(e["name"] for e in payload["execution_samples"]["top_frames"])
     names.extend(e["name"] for e in payload["execution_samples"]["call_paths"])
@@ -424,15 +538,19 @@ def marker_presence(payload: dict[str, Any]) -> dict[str, Any]:
     names.extend(e["name"] for e in payload["continue_at"]["callees"])
     names.extend(e["name"] for e in payload["continue_at"]["stacks"])
     joined = "\n".join(names)
-    semantic_present = {marker: marker in joined for marker in SEMANTIC_MARKERS}
+    semantic_present = {marker: marker in joined for marker in absent_markers}
     return {
         "semantic_markers_present": semantic_present,
         "any_semantic_marker_present": any(semantic_present.values()),
-        "helper_continue_at_present": HELPER_MARKER in joined,
+        "helper_continue_at_present": present_marker in joined,
     }
 
 
-def run_matrix(cfg: dict[str, Any], tags: dict[str, str], cpu: str, work: Path) -> list[dict[str, Any]]:
+def run_matrix(
+    cfg: dict[str, Any], tags: dict[str, str], cpu: str, work: Path,
+    absent_markers: tuple[str, ...] = SEMANTIC_MARKERS,
+    present_marker: str = HELPER_MARKER,
+) -> list[dict[str, Any]]:
     results = []
     for item in cfg["controls"]:
         workload = item["id"]
@@ -463,6 +581,7 @@ def run_matrix(cfg: dict[str, Any], tags: dict[str, str], cpu: str, work: Path) 
                 structural_result = structural(
                     tag, cpu, work, source_host, source_container,
                     item["expected"], label, cfg["warmup_iterations"], cfg["steady_iterations"],
+                    absent_markers, present_marker,
                 )
                 print(
                     f"STRUCTURAL PASS workload={workload} variant={variant} mode={mode} "
@@ -477,14 +596,14 @@ def run_matrix(cfg: dict[str, Any], tags: dict[str, str], cpu: str, work: Path) 
     return results
 
 
-def classify_workload(entry: dict[str, Any]) -> dict[str, Any]:
+def classify_workload(entry: dict[str, Any], ablation: str = "1") -> dict[str, Any]:
     baseline = entry["variants"]["baseline"]
-    ablation = entry["variants"]["ablation"]
+    ablation_variant = entry["variants"]["ablation"]
 
     structural_ok = True
     for mode in ("canonical", "control"):
         b_markers = baseline[mode]["structural"]["markers"]
-        a_markers = ablation[mode]["structural"]["markers"]
+        a_markers = ablation_variant[mode]["structural"]["markers"]
         if not b_markers["any_semantic_marker_present"]:
             structural_ok = False
         if a_markers["any_semantic_marker_present"]:
@@ -493,7 +612,7 @@ def classify_workload(entry: dict[str, Any]) -> dict[str, Any]:
             structural_ok = False
 
     canonical_baseline_ns = baseline["canonical"]["timing"]["steady_summary"]["median_ns"]
-    canonical_ablation_ns = ablation["canonical"]["timing"]["steady_summary"]["median_ns"]
+    canonical_ablation_ns = ablation_variant["canonical"]["timing"]["steady_summary"]["median_ns"]
     removed_ns = canonical_baseline_ns - canonical_ablation_ns
     removed_fraction_of_baseline = removed_ns / canonical_baseline_ns if canonical_baseline_ns else None
 
@@ -505,43 +624,120 @@ def classify_workload(entry: dict[str, Any]) -> dict[str, Any]:
         "protos_ablation_steady_median_ns": canonical_ablation_ns,
         "removed_ns": removed_ns,
         "removed_fraction_of_baseline": removed_fraction_of_baseline,
-        "perf010a_ablation_1": status,
+        f"perf010a_ablation_{ablation}": status,
     }
 
 
-def smoke() -> None:
-    cfg = validate()
+def smoke(ablation: str = "1") -> None:
+    assert ablation in ABLATIONS
+    profile = ABLATION_PROFILES[ablation]
+    status_key = f"perf010a_ablation_{ablation}"
+    cfg = validate(ablation)
     harness_revision = worktree_harness_revision()
     cpu = first_cpu()
-    tags = {variant: build_image(cfg, variant) for variant in VARIANTS}
+    tags = {variant: build_image(cfg, variant, ablation) for variant in VARIANTS}
     for variant, tag in tags.items():
         runtime = runtime_probe(tag, cpu)
         java_version_probe(tag, cpu)
         observed_variant = variant_label_probe(tag, cpu)
         if observed_variant != variant:
             raise RuntimeError(f"variant label mismatch: expected {variant}, got {observed_variant}")
+        observed_slice = ablation_slice_label_probe(tag, cpu)
+        expected_slice = profile["expected_slice"] if variant == "ablation" else "none"
+        if observed_slice != expected_slice:
+            raise RuntimeError(
+                f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
+            )
 
     with tempfile.TemporaryDirectory(prefix="perf010a-smoke-") as tmp:
         work = Path(tmp)
-        matrix = run_matrix(cfg, tags, cpu, work)
+        matrix = run_matrix(
+            cfg, tags, cpu, work, profile["absent_markers"], profile["present_marker"]
+        )
 
-    classifications = [classify_workload(entry) for entry in matrix]
+    classifications = [classify_workload(entry, ablation) for entry in matrix]
 
     print("PERF010A_SMOKE_HARNESS_REVISION=" + harness_revision)
+    print(f"PERF010A_SMOKE_SLICE={profile['expected_slice']}")
     print("PERF010A_SMOKE_WORKLOADS=" + str(len(matrix)))
     print("PERF010A_SMOKE_EVIDENCE_UNITS=" + str(len(matrix) * len(VARIANTS) * 2 * 2))
     for entry, classification in zip(matrix, classifications):
         print(
             f"PERF010A_SMOKE_WORKLOAD workload={entry['workload']} "
-            f"result={classification['perf010a_ablation_1']} "
+            f"result={classification[status_key]} "
             f"structural_confirmed={classification['structural_ablation_confirmed']}"
         )
     print("PERF010A_SMOKE=PASS")
     print("PERF010A_SMOKE_RETAINED=NO")
 
 
-def reference(harness_revision: str | None, output_dir: Path) -> None:
-    cfg = validate()
+def scope_of_ablation_readme(ablation: str, cfg: dict[str, Any]) -> list[str]:
+    if ablation == "1":
+        return [
+            "## Scope of the ablation",
+            "",
+            "The semantic/helper wrapper (`ProtosSemanticBytecodeRootNode.wrap(...)`) is created "
+            "at two call sites, both bypassed by `ablation.patch`:",
+            "",
+            "1. `ProtosSourceCompiler.compileBytecode` - the top-level module/program root "
+            "(executed once per process in these workloads).",
+            "2. `ProtosBytecodeClosureExecutionPlan`'s constructor - the activation root for "
+            "every closure and method value (`repeat`, `operation`, `identity`, "
+            "`receiver.identity`, `receiver.run`), which is what the 10,000-iteration hot loop "
+            "actually calls repeatedly in all four workloads. Ablating only the top-level "
+            "compiler entry point would leave this call site - and therefore the measured hot "
+            "path - unchanged; both were confirmed present in the pinned revision before the "
+            "patch was written (see `docker/protos-perf010a/ablation.patch` inline comments).",
+            "",
+            "`ProtosRootTaskExecution.isProductionBytecodeRoot` is widened to accept the bare "
+            "helper `ProtosBytecodeRootNode` in addition to the semantic wrapper; without this, "
+            "every root-task execution in the ablation build throws `IllegalArgumentException` "
+            "before producing any result, since compiled roots stop being "
+            "`ProtosSemanticBytecodeRootNode` instances. `ProtosBytecodeRootNode` and "
+            "`CanonicalToBytecodeLowerer` themselves are untouched.",
+            "",
+            "This is a diagnostic ablation, not a production optimization candidate; it is "
+            "acceptable (and expected) that the ablation build loses the RootTag the semantic "
+            "shell provides. Never published to `guillermomolina/protos`.",
+        ]
+    return [
+        "## Scope of the ablation",
+        "",
+        "`ProtosBytecodeRootNode.Lookup.perform` (the unqualified-name-lookup Bytecode "
+        "operation) is the single call site bypassed by `ablation-2.patch`: "
+        "`activation.lookup(name)` (activation's own local context, then captured lexical "
+        "contexts, then the receiver/prelude member fallback - "
+        "`ProtosActivation.lookup(String)`) is replaced with "
+        "`activation.context().readLocalSlot(name)` (`ProtosObjectValue.readLocalSlot`), "
+        "reading only the activation's own local context slot directly.",
+        "",
+        "This diagnostic bypass is **not** claimed to be semantically equivalent to "
+        "`activation.lookup(name)` in the general language: it silently drops the captured-"
+        "lexical-context walk and the receiver/prelude member fallback that `lookup` performs "
+        "for any name not bound as a direct local slot of the activation's own context. It is "
+        "expected to fail closed (a `ProtosSignalException` from the unchanged "
+        "`orElseThrow(...)` below the bypass, surfacing as a non-`COMPLETED` execution outcome "
+        "and a driver-level correctness failure) for any workload whose unqualified-name "
+        "lookups are not resolved by the activation's own local context - which is the case "
+        "for all four PERF010-A workloads' hot-path references to their top-level module "
+        "bindings (`repeat`, `sink`, `holder`, `identity`, `receiver`), captured into each "
+        "closure's `capturedLexicalContexts` rather than its own fresh, per-invocation "
+        "`context`. Per `AGENTS.work/PERFORMANCE.md`'s and this slice's own correctness-"
+        "before-timing rule, a workload that fails this way contributes no timing evidence "
+        "and is reported `INVALID`, not adjusted to pass.",
+        "",
+        "`ProtosBytecodeRootNode`, `CanonicalToBytecodeLowerer`, the RootTag topology, the "
+        "continuation machinery, the `CallTarget` architecture, and source/debugger identity "
+        "are all untouched by this patch. This is a diagnostic ablation, not a production "
+        "optimization candidate. Never published to `guillermomolina/protos`.",
+    ]
+
+
+def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1") -> None:
+    assert ablation in ABLATIONS
+    profile = ABLATION_PROFILES[ablation]
+    status_key = f"perf010a_ablation_{ablation}"
+    cfg = validate(ablation)
     harness_revision = resolved_harness_revision(harness_revision)
 
     if output(["git", "status", "--porcelain", "--untracked-files=all"]):
@@ -553,7 +749,7 @@ def reference(harness_revision: str | None, output_dir: Path) -> None:
         output_dir.rmdir()
 
     cpu = first_cpu()
-    tags = {variant: build_image(cfg, variant) for variant in VARIANTS}
+    tags = {variant: build_image(cfg, variant, ablation) for variant in VARIANTS}
     runtimes = {}
     java_versions = {}
     for variant, tag in tags.items():
@@ -562,13 +758,23 @@ def reference(harness_revision: str | None, output_dir: Path) -> None:
         observed_variant = variant_label_probe(tag, cpu)
         if observed_variant != variant:
             raise RuntimeError(f"variant label mismatch: expected {variant}, got {observed_variant}")
+        observed_slice = ablation_slice_label_probe(tag, cpu)
+        expected_slice = profile["expected_slice"] if variant == "ablation" else "none"
+        if observed_slice != expected_slice:
+            raise RuntimeError(
+                f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
+            )
 
     with tempfile.TemporaryDirectory(prefix="perf010a-") as tmp:
         work = Path(tmp)
-        matrix = run_matrix(cfg, tags, cpu, work)
+        matrix = run_matrix(
+            cfg, tags, cpu, work, profile["absent_markers"], profile["present_marker"]
+        )
 
-    classifications = {entry["workload"]: classify_workload(entry) for entry in matrix}
-    overall_valid = all(c["perf010a_ablation_1"] == "VALID" for c in classifications.values())
+    classifications = {
+        entry["workload"]: classify_workload(entry, ablation) for entry in matrix
+    }
+    overall_valid = all(c[status_key] == "VALID" for c in classifications.values())
 
     output_dir.mkdir(parents=True)
 
@@ -627,13 +833,13 @@ def reference(harness_revision: str | None, output_dir: Path) -> None:
     (output_dir / "summary.tsv").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
     attribution_rows = [
-        "workload\tPERF010A_ABLATION_1\tstructural_ablation_confirmed\t"
+        f"workload\t{cfg['slice']}\tstructural_ablation_confirmed\t"
         "protos_baseline_steady_median_ns\tprotos_ablation_steady_median_ns\t"
         "removed_ns\tremoved_fraction_of_baseline"
     ]
     for workload, c in classifications.items():
         attribution_rows.append("\t".join([
-            workload, c["perf010a_ablation_1"], str(c["structural_ablation_confirmed"]),
+            workload, c[status_key], str(c["structural_ablation_confirmed"]),
             str(c["protos_baseline_steady_median_ns"]), str(c["protos_ablation_steady_median_ns"]),
             str(c["removed_ns"]), str(c["removed_fraction_of_baseline"]),
         ]))
@@ -642,7 +848,7 @@ def reference(harness_revision: str | None, output_dir: Path) -> None:
     )
 
     readme = [
-        "# PERF010-A causal semantic/helper-dispatch ablation",
+        f"# PERF010-A causal ablation ({cfg['slice']}, {cfg['phase']})",
         "",
         f"- Harness revision: `{harness_revision}`",
         f"- Protos revision (baseline and ablation; single checkout, patched in-build for "
@@ -663,24 +869,24 @@ def reference(harness_revision: str | None, output_dir: Path) -> None:
         "",
         f"## Result",
         "",
-        f"PERF010A_ABLATION_1 = {raw['overall_result']}"
+        f"{cfg['slice']} = {raw['overall_result']}"
         + (
             ""
             if overall_valid
             else " (see per-workload results below; at least one workload's structural "
-            "ablation was not confirmed, so its timing is not interpreted as attributable "
-            "to the semantic/helper wrapper)"
+            "ablation was not confirmed and/or failed correctness, so its timing is not "
+            "interpreted as attributable to the ablated mechanism)"
         ),
         "",
         "Per workload:",
         "",
-        "| workload | PERF010A_ABLATION_1 | structural confirmed | baseline steady median (ns) "
+        f"| workload | {cfg['slice']} | structural confirmed | baseline steady median (ns) "
         "| ablation steady median (ns) | removed (ns) | removed fraction of baseline |",
         "|---|---|---|---|---|---|---|",
     ]
     for workload, c in classifications.items():
         readme.append(
-            f"| {workload} | {c['perf010a_ablation_1']} | {c['structural_ablation_confirmed']} "
+            f"| {workload} | {c[status_key]} | {c['structural_ablation_confirmed']} "
             f"| {c['protos_baseline_steady_median_ns']:.0f} "
             f"| {c['protos_ablation_steady_median_ns']:.0f} "
             f"| {c['removed_ns']:.0f} "
@@ -718,32 +924,8 @@ def reference(harness_revision: str | None, output_dir: Path) -> None:
         "`ProtosSemanticBytecodeRootNode` vs. the bare helper root, so the ablation does not "
         "change observable continuation behavior for this measured experiment.",
         "",
-        "## Scope of the ablation",
-        "",
-        "The semantic/helper wrapper (`ProtosSemanticBytecodeRootNode.wrap(...)`) is created "
-        "at two call sites, both bypassed by `ablation.patch`:",
-        "",
-        "1. `ProtosSourceCompiler.compileBytecode` - the top-level module/program root "
-        "(executed once per process in these workloads).",
-        "2. `ProtosBytecodeClosureExecutionPlan`'s constructor - the activation root for "
-        "every closure and method value (`repeat`, `operation`, `identity`, "
-        "`receiver.identity`, `receiver.run`), which is what the 10,000-iteration hot loop "
-        "actually calls repeatedly in all four workloads. Ablating only the top-level "
-        "compiler entry point would leave this call site - and therefore the measured hot "
-        "path - unchanged; both were confirmed present in the pinned revision before the "
-        "patch was written (see `docker/protos-perf010a/ablation.patch` inline comments).",
-        "",
-        "`ProtosRootTaskExecution.isProductionBytecodeRoot` is widened to accept the bare "
-        "helper `ProtosBytecodeRootNode` in addition to the semantic wrapper; without this, "
-        "every root-task execution in the ablation build throws `IllegalArgumentException` "
-        "before producing any result, since compiled roots stop being "
-        "`ProtosSemanticBytecodeRootNode` instances. `ProtosBytecodeRootNode` and "
-        "`CanonicalToBytecodeLowerer` themselves are untouched.",
-        "",
-        "This is a diagnostic ablation, not a production optimization candidate; it is "
-        "acceptable (and expected) that the ablation build loses the RootTag the semantic "
-        "shell provides. Never published to `guillermomolina/protos`.",
     ]
+    readme += scope_of_ablation_readme(ablation, cfg)
     (output_dir / "README.md").write_text("\n".join(readme) + "\n", encoding="utf-8")
 
     names = ["README.md", "raw.json", "summary.tsv", "attribution.tsv"]
@@ -754,7 +936,7 @@ def reference(harness_revision: str | None, output_dir: Path) -> None:
     print("PERF010A_REFERENCE=PASS")
     print("PERF010A_WORKLOADS=" + str(len(matrix)))
     print("PERF010A_EVIDENCE_UNITS=" + str(len(matrix) * len(VARIANTS) * 2 * 2))
-    print("PERF010A_ABLATION_1=" + raw["overall_result"])
+    print(f"{cfg['slice']}=" + raw["overall_result"])
     print("PERF010A_PROTOS_REPOSITORY_MODIFICATION=NONE")
 
 
@@ -766,20 +948,27 @@ def main():
         help="optional explicit expected harness SHA; when omitted, current clean HEAD is used",
     )
     ap.add_argument("--output-dir")
+    ap.add_argument(
+        "--ablation",
+        choices=ABLATIONS,
+        default="1",
+        help="which causal ablation slice to run: 1 (semantic/helper Bytecode dispatch, "
+        "default) or 2 (ProtosActivation.lookup)",
+    )
     args = ap.parse_args()
 
     if args.command == "validate":
-        validate()
+        validate(args.ablation)
         return
 
     if args.command == "smoke":
-        smoke()
+        smoke(args.ablation)
         return
 
     if not args.output_dir:
         ap.error("reference requires --output-dir")
 
-    reference(args.harness_revision, Path(args.output_dir))
+    reference(args.harness_revision, Path(args.output_dir), args.ablation)
 
 
 if __name__ == "__main__":

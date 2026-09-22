@@ -201,6 +201,119 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertTrue(markers["any_semantic_marker_present"])
         self.assertTrue(markers["helper_continue_at_present"])
 
+    # --- PERF010A_ABLATION_2 (ProtosActivation.lookup) coverage ---
+
+    def test_ablation2_static_contract(self):
+        cfg = perf010a.validate("2")
+        self.assertEqual("PERF010-A", cfg["perf_item"])
+        self.assertEqual("PERF010", cfg["parent_perf_item"])
+        self.assertEqual("PERF010A_ABLATION_2", cfg["slice"])
+        self.assertTrue(cfg["diagnostic_claim"])
+        self.assertEqual(
+            "bc0471184bf6dbbf03d0c6b09ef7b9e28aede014", cfg["protos_revision"]
+        )
+
+    def test_ablation2_experiment_matrix_matches_ablation1_exactly(self):
+        cfg1 = json.loads((ROOT / "config/perf010a.json").read_text(encoding="utf-8"))
+        cfg2 = json.loads((ROOT / "config/perf010a-2.json").read_text(encoding="utf-8"))
+        self.assertEqual(cfg1["controls"], cfg2["controls"])
+        self.assertEqual(cfg1["operation_count"], cfg2["operation_count"])
+        self.assertEqual(cfg1["warmup_iterations"], cfg2["warmup_iterations"])
+        self.assertEqual(cfg1["steady_iterations"], cfg2["steady_iterations"])
+        self.assertEqual(cfg1["execution_sample_period"], cfg2["execution_sample_period"])
+        self.assertEqual(cfg1["variants"], cfg2["variants"])
+        self.assertEqual(cfg1["protos_revision"], cfg2["protos_revision"])
+        self.assertEqual(cfg1["toolchain"], cfg2["toolchain"])
+
+    def test_ablation2_patch_touches_exactly_lookup_perform(self):
+        cfg = json.loads((ROOT / "config/perf010a-2.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        targets = cfg["ablation_patch_targets"]
+        self.assertEqual(1, len(targets))
+        self.assertEqual(
+            "src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java",
+            targets[0],
+        )
+        self.assertEqual(1, patch_text.count("--- a/"))
+        self.assertIn("activation.context().readLocalSlot(name)", patch_text)
+
+    def test_ablation2_patch_does_not_touch_other_production_mechanisms(self):
+        cfg = json.loads((ROOT / "config/perf010a-2.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        for forbidden in (
+            "CanonicalToBytecodeLowerer.java",
+            "ProtosSourceCompiler.java",
+            "ProtosBytecodeClosureExecutionPlan.java",
+            "ProtosRootTaskExecution.java",
+            "continueAt",
+            "RootTag",
+            "ContinuationResult",
+            "ProtosSemanticBytecodeRootNode",
+        ):
+            self.assertNotIn(forbidden, patch_text, forbidden)
+
+    def test_ablation2_dockerfile_supports_selectable_patch(self):
+        dockerfile = (ROOT / "docker/protos-perf010a/Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("ARG ABLATION_PATCH=ablation.patch", dockerfile)
+        self.assertIn("${ABLATION_PATCH}", dockerfile)
+        self.assertIn("ablation-slice.txt", dockerfile)
+
+    def test_marker_presence_detects_lookup_marker(self):
+        payload = {
+            "execution_samples": {
+                "top_frames": [
+                    {
+                        "name": (
+                            "com.guillermomolina.protos.runtime."
+                            "ProtosActivation.lookup"
+                        ),
+                        "count": 1,
+                    }
+                ],
+                "call_paths": [],
+            },
+            "continue_at": {
+                "callers": [],
+                "callees": [
+                    {
+                        "name": (
+                            "com.guillermomolina.protos.runtime."
+                            "ProtosObjectValue.readLocalSlot"
+                        ),
+                        "count": 1,
+                    }
+                ],
+                "stacks": [],
+            },
+        }
+        markers = perf010a.marker_presence(
+            payload, perf010a.LOOKUP_MARKERS, perf010a.READ_LOCAL_SLOT_MARKER
+        )
+        self.assertTrue(markers["any_semantic_marker_present"])
+        self.assertTrue(markers["helper_continue_at_present"])
+
+    def test_marker_presence_absent_in_pure_ablation2_profile(self):
+        payload = {
+            "execution_samples": {
+                "top_frames": [
+                    {
+                        "name": (
+                            "com.guillermomolina.protos.runtime."
+                            "ProtosObjectValue.readLocalSlot"
+                        ),
+                        "count": 1,
+                    }
+                ],
+                "call_paths": [],
+            },
+            "continue_at": {"callers": [], "callees": [], "stacks": []},
+        }
+        markers = perf010a.marker_presence(
+            payload, perf010a.LOOKUP_MARKERS, perf010a.READ_LOCAL_SLOT_MARKER
+        )
+        self.assertFalse(markers["any_semantic_marker_present"])
+        self.assertTrue(markers["helper_continue_at_present"])
+
     def test_marker_presence_absent_in_pure_ablation_profile(self):
         payload = {
             "execution_samples": {

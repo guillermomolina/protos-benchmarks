@@ -17,10 +17,18 @@
 #
 # Builds either of two images from the exact same pinned Protos revision:
 #
-#   VARIANT=baseline  - unmodified Protos, ProtosSemanticBytecodeRootNode wrapper present.
-#   VARIANT=ablation   - docker/protos-perf010a/ablation.patch applied before the build,
-#                        diagnostically bypassing the semantic/helper wrapper (see the
-#                        patch itself and PERF010A_ABLATION_1 in results/perf010a-*).
+#   VARIANT=baseline  - unmodified Protos, no diagnostic patch applied.
+#   VARIANT=ablation   - the patch named by ABLATION_PATCH applied before the build. This
+#                        harness now backs two distinct causal ablations sharing this same
+#                        Dockerfile/image layout, selected only by which patch is supplied:
+#                          - ABLATION_PATCH=ablation.patch (default) - PERF010A_ABLATION_1,
+#                            bypasses the semantic/helper Bytecode dispatch wrapper (see
+#                            docker/protos-perf010a/ablation.patch).
+#                          - ABLATION_PATCH=ablation-2.patch - PERF010A_ABLATION_2, bypasses
+#                            ProtosActivation.lookup with activation.context().readLocalSlot(name)
+#                            (see docker/protos-perf010a/ablation-2.patch).
+#                        ABLATION_SLICE records which slice produced the image, for the
+#                        structural marker written to /opt/perf010a/ablation-slice.txt.
 #
 # The patch is applied inside this Docker build only; the checked-out `guillermomolina/protos`
 # source tree this harness pins is never modified or republished. Both images reuse the
@@ -36,6 +44,8 @@ USER root
 ARG PROTOS_REPOSITORY=https://github.com/guillermomolina/protos.git
 ARG PROTOS_REVISION
 ARG VARIANT=baseline
+ARG ABLATION_PATCH=ablation.patch
+ARG ABLATION_SLICE=PERF010A_ABLATION_1
 
 # Expected toolchain identity declared by protos' own toolchain.json at PROTOS_REVISION.
 ARG EXPECTED_GRAALVM_RELEASE=25.3.4.1
@@ -51,7 +61,7 @@ COPY docker/protos-perf006d3/Perf008SteadyStateDriver.java /tmp/Perf008SteadySta
 COPY docker/protos-perf006d3/Perf006d3JfrAnalyzer.java /tmp/Perf006d3JfrAnalyzer.java
 COPY docker/protos-perf006d3/jfr-java /tmp/perf006d3-jfr-java
 COPY docker/protos-perf010a/Perf010aTimingDriver.java /tmp/Perf010aTimingDriver.java
-COPY docker/protos-perf010a/ablation.patch /tmp/ablation.patch
+COPY docker/protos-perf010a/${ABLATION_PATCH} /tmp/ablation.patch
 
 # Maven comes from the base image's own OS package repository (ol10 AppStream), not a
 # hand-downloaded archive.apache.org tarball: investigation in the `protos` devcontainer
@@ -141,11 +151,17 @@ RUN cd /src \
          '+jdk.graal.compiler.truffle.Deoptimization#enabled=true' \
     && test -s /out/jfr/perf010a.jfc \
     && install -m 0755 /tmp/perf006d3-jfr-java /out/jfr-java \
-    && echo "$VARIANT" > /out/variant.txt
+    && echo "$VARIANT" > /out/variant.txt \
+    && if [ "$VARIANT" = "ablation" ]; then \
+         echo "$ABLATION_SLICE" > /out/ablation-slice.txt; \
+       else \
+         echo "none" > /out/ablation-slice.txt; \
+       fi
 
 FROM ${GRAAL_BASE}
 USER root
 ARG VARIANT=baseline
+ARG ABLATION_SLICE=PERF010A_ABLATION_1
 COPY --from=build /out/protos /opt/protos
 COPY --from=build /out/source /opt/protos-source
 COPY --from=build /out/corpus /opt/perf010a/corpus
@@ -154,7 +170,9 @@ COPY --from=build /out/analyzer /opt/perf010a/analyzer
 COPY --from=build /out/jfr/perf010a.jfc /opt/perf010a/perf010a.jfc
 COPY --from=build /out/jfr-java /opt/perf010a/jfr-java
 COPY --from=build /out/variant.txt /opt/perf010a/variant.txt
+COPY --from=build /out/ablation-slice.txt /opt/perf010a/ablation-slice.txt
 LABEL org.protos-benchmarks.perf010a.variant="${VARIANT}"
+LABEL org.protos-benchmarks.perf010a.ablation-slice="${ABLATION_SLICE}"
 ENV PROTOS_HOME=/opt/protos
 ENV PERF010A_VARIANT="${VARIANT}"
 WORKDIR /opt/protos-source

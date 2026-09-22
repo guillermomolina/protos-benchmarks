@@ -25,6 +25,30 @@ publish the project record in `guillermomolina/protos-project-docs` and referenc
 the exact benchmark-repository revision or immutable artifact identity rather
 than copying product-local evidence merely for convenience.
 
+## Human-executor mode
+
+This repository uses a human-executor workflow, matching the model already
+established in `guillermomolina/protos`.
+
+The agent investigates, reasons, and edits: it reads the applicable
+instructions, inspects the repository, and creates or changes files.
+Read-only inspection (file reads, searches, `git status`/`diff`/`log`, and a
+non-mutating `git fetch`) is agent-executable at any time.
+
+The human executes builds, benchmark runs, tests, validation commands, and
+any Git operation that changes repository or remote state (`add`, `commit`,
+merge, rebase, push, pull, or a `checkout`/`reset`/`clean` that discards
+work). Never infer that a build, benchmark, test, or validation succeeded
+because the change looks correct; hand over the smallest useful command and
+wait for the reported result.
+
+Live GitHub coordination (Issues, status, project boards) may remain a
+governed exception under an explicit `AGENTS.work/` coordination instruction;
+this repository does not currently define one. There is no standing
+autonomous exception for repository-content publication: commit, push, and
+publication are human-executed for every repository this work touches,
+including `guillermomolina/protos-project-docs`.
+
 ## Semantic firewall
 
 Performance work MUST NOT redefine, weaken, bypass, or special-case observable
@@ -39,69 +63,41 @@ Benchmark-specific hidden semantics, privileged guest objects, correctness
 shortcuts, or implementation paths that exist only to improve a score are not
 allowed.
 
-## Reproducibility
+## Instruction composition
 
-Reference benchmark evidence MUST pin the exact Protos Git revision and exact
-benchmark-harness Git revision. It MUST also record materially relevant runtime
-and host information, including runtime/JDK/GraalVM versions where applicable,
-container image identity, CPU/architecture, kernel, resource/CPU affinity, and
-the declared warmup and measurement policy.
+This file is a binding floor: a work-type file may add detail but never
+weaken it. Before starting work, read the file that matches the task's
+nature:
 
-Floating branch names such as `main` are not sufficient identities for retained
-reference results.
+- Benchmark methodology, correctness gates, microbenchmark interpretation,
+  and cross-language comparison rules: `AGENTS.work/PERFORMANCE.md`.
+- Reproducibility and measurement-evidence policy — exact revision pinning,
+  runtime/host/container identity, CPU affinity, and raw-measurement
+  retention: `AGENTS.work/REPRODUCIBILITY.md`.
 
-Raw measurements MUST be retained. Human-readable tables and reports are
-derived views, not replacements for raw evidence.
+`BENCHMARKING.md` holds the detailed benchmark-by-benchmark methodology, exact
+commands, and result narratives; the two files above hold the binding
+agent-facing rules, not the full write-up.
 
-## Correctness before timing
+There is currently no dedicated implementation or GitHub-coordination
+work-type file. Generic implementation discipline is covered by Universal
+repository workflow below, and GitHub coordination follows the Human-executor
+mode exception rule above until this repository defines its own
+`AGENTS.work/COORDINATION.md`. Add a scoped file, and a line here, only when
+one of these genuinely grows enough to need its own instruction.
 
-Every benchmark implementation MUST produce and validate its documented
-observable result before its timing is accepted. A wrong result invalidates the
-measurement; it is not a performance result.
-
-Cross-language comparisons MUST use materially equivalent algorithms, inputs,
-work amounts, and observable results. Idiomatic/library-accelerated comparisons
-may be added as a separately labelled category, but MUST NOT be mixed with the
-primary algorithm-equivalent comparison.
-
-No single microbenchmark may be generalized into a claim that one complete
-language is faster than another.
-
-## Measurement classes
-
-Startup, warmup, and steady-state execution are separate measurement classes.
-For JIT-capable runtimes, early warmup iterations MUST NOT be silently merged
-into steady-state results.
-
-When containers are used, container creation/start latency is outside the
-language-startup timing boundary unless a benchmark explicitly states that
-container startup itself is the subject being measured.
-
-Diagnostic instrumentation such as compilation tracing SHOULD be kept separate
-from timing when it materially perturbs execution.
-
-## Containers and host control
-
-Docker/container execution is an accepted reproducibility mechanism on Linux.
-Compared runtimes in a reference comparison SHOULD execute on the same host.
-CPU-focused measurements SHOULD prefer explicit CPU affinity/cpuset over CPU
-quota as the primary CPU-isolation mechanism. Parallel benchmarks MUST record
-the CPU set available to the workload.
-
-Networking SHOULD be disabled for workloads that do not require it. Filesystem,
-network, process-creation, and other environment-heavy benchmarks require an
-explicit methodology that states which container/host effects are in scope.
-
-## Repository and Git workflow
+## Universal repository workflow
 
 Work directly from the current `origin/main`; other agents may publish
 concurrently. Before modifying tracked work, fetch the remote and re-read
-applicable repository instructions.
+applicable repository instructions. Keep changes scoped to the requested
+task, and preserve any unrelated tracked or untracked work already present
+rather than deleting or overwriting it.
 
-Do not force-push. Do not use temporary remote branches unless the user
-explicitly requests them. Before publishing, validate the exact intended changed
-file set and stage only those paths; do not use `git add .` or `git add -A` in
-automated publication scripts.
+Do not force-push and do not rewrite published history. Do not use temporary
+remote branches unless the user explicitly requests them. Before publishing,
+validate the exact intended changed file set and stage only those paths; do
+not use `git add .` or `git add -A` in automated publication scripts.
 
 Repository bootstrap is a special one-time case: the initial commit may be
 created only while both the local repository and the remote repository have no

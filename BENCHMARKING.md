@@ -841,3 +841,43 @@ evidence remains the authoritative reproduction identity.
 Repository tooling and retained evidence MUST remain independent of developer
 checkout locations. Local clone/worktree paths are execution details and are
 not part of analyzer contracts or evidence identity.
+
+## PERF010-A causal semantic/helper-dispatch ablation
+
+`PERF010-A` (`guillermomolina/protos#691`, child of `#680`) is a diagnostic
+ablation experiment, not a production optimization. `docker/protos-perf010a/`
+builds two images — `baseline` (unmodified Protos) and `ablation`
+(`docker/protos-perf010a/ablation.patch` applied at build time only, never
+published to `guillermomolina/protos`) — from the exact same pinned revision,
+and reuses the PERF004-B2-D/PERF008 four-workload canonical/control matrix
+unchanged (`micro/slot-read`, `micro/closure-call`, `micro/method-call`,
+`runtime/monomorphic-dispatch`; N=10,000; warmup=20; steady=100).
+
+The ablation patch bypasses `ProtosSemanticBytecodeRootNode.wrap(...)` at both
+of its call sites in the pinned revision — `ProtosSourceCompiler.compileBytecode`
+(the top-level module root) and `ProtosBytecodeClosureExecutionPlan`'s
+constructor (the closure/method activation root, which is what all four
+workloads' hot loop actually calls repeatedly) — and widens
+`ProtosRootTaskExecution.isProductionBytecodeRoot` to accept the resulting bare
+helper root. `ProtosBytecodeRootNode` and `CanonicalToBytecodeLowerer` are
+untouched. See `runner/perf010a.py` and `results/perf010a-*/README.md` for the
+full experimental design, structural-ablation verification, and timing
+methodology (separate JFR-free timing runs vs. steady-state-only JFR structural
+runs, per the diagnostic-instrumentation/timing separation rule in
+`AGENTS.work/REPRODUCIBILITY.md`).
+
+### Maven install method
+
+`docker/protos-perf010a/Dockerfile` installs Maven with `microdnf install
+maven` from the base image's own OS package repository (Oracle Linux 10
+AppStream), rather than downloading an `archive.apache.org` tarball as the
+older `docker/protos-perf006d*` Dockerfiles do. Investigation in the `protos`
+devcontainer established that this base image's packaged Maven
+(`maven-3.9.9-3.el10_1`) is a compatible, usable `3.9.9` build that already
+runs under the image's own `JAVA_HOME` (GraalVM), matching the version pinned
+by `toolchain.json`/`EXPECTED_MAVEN_VERSION` exactly; the Dockerfile still
+asserts `mvn -version` against `EXPECTED_MAVEN_VERSION` at build time so a
+future OS-image bump that changes the packaged Maven version is caught rather
+than silently drifting. This applies to the PERF010-A image only; other
+retained-evidence Dockerfiles keep their existing pinned-tarball install
+mechanism unless a later PERF item explicitly re-audits and migrates them.

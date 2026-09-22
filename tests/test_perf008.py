@@ -158,18 +158,39 @@ class Perf008ContractTest(unittest.TestCase):
         self.assertEqual(0, completed.returncode)
         self.assertIn("{validate,smoke,reference}", completed.stdout)
 
-    def test_reference_still_requires_harness_revision_and_output_dir(self):
-        # Unchanged strict-gate behavior: a plain `reference` run must keep requiring the
-        # exact clean --harness-revision (retained evidence is never produced from a dirty
-        # or undeclared working tree; that is what `smoke` is for).
+    def test_reference_still_requires_output_dir(self):
+        # --harness-revision is now optional (auto-detected from HEAD); --output-dir
+        # remains mandatory.
         completed = subprocess.run(
-            [sys.executable, str(MODULE_PATH), "reference", "--output-dir", "/tmp/perf008-not-used"],
+            [sys.executable, str(MODULE_PATH), "reference"],
             cwd=ROOT,
             text=True,
             capture_output=True,
         )
         self.assertNotEqual(0, completed.returncode)
-        self.assertIn("--harness-revision", completed.stderr)
+        self.assertIn("--output-dir", completed.stderr)
+
+    def test_resolved_harness_revision_auto_detects_head(self):
+        head = perf008.output(["git", "rev-parse", "HEAD"])
+        self.assertEqual(head, perf008.resolved_harness_revision(None))
+
+    def test_resolved_harness_revision_accepts_matching_explicit_head(self):
+        head = perf008.output(["git", "rev-parse", "HEAD"])
+        self.assertEqual(head, perf008.resolved_harness_revision(head))
+
+    def test_resolved_harness_revision_rejects_mismatched_explicit_sha(self):
+        with self.assertRaises(RuntimeError):
+            perf008.resolved_harness_revision("0" * 40)
+
+    def test_help_no_longer_implies_harness_revision_is_mandatory(self):
+        completed = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--help"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(0, completed.returncode)
+        self.assertIn("optional explicit expected harness SHA", completed.stdout)
 
 
 if __name__ == "__main__":

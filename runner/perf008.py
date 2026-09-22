@@ -94,6 +94,23 @@ def worktree_harness_revision() -> str:
     return head if not dirty else "WORKTREE_PRECOMMIT"
 
 
+def resolved_harness_revision(explicit: str | None) -> str:
+    """Resolves the exact harness SHA retained by `reference()`.
+
+    Always reads current `HEAD`. When `explicit` is omitted (`None`), `HEAD` itself is
+    the resolved identity. When `explicit` is given, it must match `HEAD` exactly -
+    this preserves the previous strict behavior for automation/reproduction callers
+    that want to assert an expected SHA rather than merely trust whatever is checked
+    out. Cleanliness of the working tree is validated separately by `reference()`.
+    """
+    head = output(["git", "rev-parse", "HEAD"])
+    if explicit is None:
+        return head
+    if explicit != head:
+        raise RuntimeError("exact harness revision mismatch")
+    return explicit
+
+
 def validate() -> dict[str, Any]:
     cfg = load()
     b2d_cfg = json.loads(B2D_CONFIG.read_text(encoding="utf-8"))
@@ -452,11 +469,10 @@ def smoke() -> None:
     print("PERF008_DIAGNOSTIC_CLAIM=NO")
 
 
-def reference(harness_revision: str, output_dir: Path) -> None:
+def reference(harness_revision: str | None, output_dir: Path) -> None:
     cfg = validate()
 
-    if output(["git", "rev-parse", "HEAD"]) != harness_revision:
-        raise RuntimeError("exact harness revision mismatch")
+    harness_revision = resolved_harness_revision(harness_revision)
 
     if output(["git", "status", "--porcelain", "--untracked-files=all"]):
         raise RuntimeError("reference requires clean exact harness")
@@ -609,7 +625,13 @@ def reference(harness_revision: str, output_dir: Path) -> None:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("command", choices=("validate", "smoke", "reference"))
-    ap.add_argument("--harness-revision")
+    ap.add_argument(
+        "--harness-revision",
+        help=(
+            "optional explicit expected harness SHA; when omitted, current clean "
+            "HEAD is used"
+        ),
+    )
     ap.add_argument("--output-dir")
     args = ap.parse_args()
 
@@ -621,8 +643,8 @@ def main():
         smoke()
         return
 
-    if not args.harness_revision or not args.output_dir:
-        ap.error("reference requires --harness-revision and --output-dir")
+    if not args.output_dir:
+        ap.error("reference requires --output-dir")
 
     reference(args.harness_revision, Path(args.output_dir))
 

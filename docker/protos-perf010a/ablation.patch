@@ -1,0 +1,61 @@
+--- a/src/main/java/com/guillermomolina/protos/execution/ProtosSourceCompiler.java
++++ b/src/main/java/com/guillermomolina/protos/execution/ProtosSourceCompiler.java
+@@ -42,11 +42,11 @@
+         ProtosBytecodeRootNode helper =
+                 new CanonicalToBytecodeLowerer(language, source)
+                         .lowerRoot(canonical);
+-        return ProtosSemanticBytecodeRootNode.wrap(
+-                language,
+-                source,
+-                canonical.span(),
+-                helper.getCallTarget());
++        // PERF010A_ABLATION_1 diagnostic bypass (protos-benchmarks
++        // docker/protos-perf010a/ablation.patch): return the helper Bytecode root's
++        // own CallTarget directly, skipping ProtosSemanticBytecodeRootNode.wrap(...).
++        // Diagnostic-only; never publish this change to guillermomolina/protos.
++        return helper.getCallTarget();
+     }
+
+ }
+--- a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeClosureExecutionPlan.java
++++ b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeClosureExecutionPlan.java
+@@ -126,12 +126,13 @@
+                 Objects.requireNonNull(
+                         activationRoot,
+                         "activationRoot");
+-        this.activationTarget =
+-                ProtosSemanticBytecodeRootNode.wrap(
+-                        language,
+-                        source,
+-                        definition.body().span(),
+-                        activationRoot.getCallTarget());
++        // PERF010A_ABLATION_1 diagnostic bypass (protos-benchmarks
++        // docker/protos-perf010a/ablation.patch): closures/methods are activated via
++        // this plan's own activationRoot, not ProtosSourceCompiler; the semantic wrapper
++        // must be bypassed here too for the ablation to remove it from the hot
++        // closure/method-call path exercised by the PERF010-A workloads. Diagnostic-only;
++        // never publish this change to guillermomolina/protos.
++        this.activationTarget = activationRoot.getCallTarget();
+     }
+
+     CanonicalClosure definition() {
+--- a/src/main/java/com/guillermomolina/protos/execution/ProtosRootTaskExecution.java
++++ b/src/main/java/com/guillermomolina/protos/execution/ProtosRootTaskExecution.java
+@@ -87,8 +87,16 @@
+         };
+     }
+     private static boolean isProductionBytecodeRoot(CallTarget target) {
++        // PERF010A_ABLATION_1 diagnostic bypass (protos-benchmarks
++        // docker/protos-perf010a/ablation.patch): the diagnostic build compiles module and
++        // closure/method roots directly to the plain helper ProtosBytecodeRootNode, without
++        // ProtosSemanticBytecodeRootNode.wrap(...). Without also widening this gate, every
++        // root-task execution would throw IllegalArgumentException here, so the ablation
++        // build could never reach a correctness result at all. Diagnostic-only; never
++        // publish this change to guillermomolina/protos.
+         return target instanceof RootCallTarget rootTarget
+-                && rootTarget.getRootNode() instanceof ProtosSemanticBytecodeRootNode;
++                && (rootTarget.getRootNode() instanceof ProtosSemanticBytecodeRootNode
++                        || rootTarget.getRootNode() instanceof ProtosBytecodeRootNode);
+     }
+
+ }

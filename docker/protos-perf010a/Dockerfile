@@ -42,6 +42,17 @@
 #                            call-stack frames, since readLocalSlot's own frame name and the
 #                            ablated Map operations are not a reliable sampled-frame signal
 #                            either way.
+#                          - ABLATION_PATCH=ablation-4.patch - PERF010A_ABLATION_4, removes the
+#                            second, redundant ProtosClosureValue.nativeBody() Optional
+#                            projection inside ProtosBytecodeRootNode.finishPreparingComposedCall
+#                            (closure.nativeBody().isPresent() followed by
+#                            closure.nativeBody().orElseThrow()), reusing a single local
+#                            projection for both instead; every other nativeBody() call site,
+#                            and ProtosClosureValue.java itself, are untouched (see
+#                            docker/protos-perf010a/ablation-4.patch). Like ablation 3, this
+#                            ablation's structural confirmation reads /opt/protos-source
+#                            directly, since both variants call the same fully-qualified
+#                            ProtosClosureValue.nativeBody() method at the retained call site.
 #                        ABLATION_SLICE records which slice produced the image, for the
 #                        structural marker written to /opt/perf010a/ablation-slice.txt.
 #

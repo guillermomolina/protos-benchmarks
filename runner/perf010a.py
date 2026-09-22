@@ -18,7 +18,7 @@ Builds two images from the exact same pinned Protos revision - `baseline` (unmod
 canonical/control matrix (slot-read, closure-call, method-call, monomorphic-dispatch;
 N=10,000; warmup=20; steady=100) against both.
 
-This module now backs three distinct causal ablations sharing this one harness, selected via
+This module now backs four distinct causal ablations sharing this one harness, selected via
 `--ablation` (default `1`, preserving every prior invocation's exact behavior):
 
   * `--ablation 1` (`config/perf010a.json`, `docker/protos-perf010a/ablation.patch`) -
@@ -46,6 +46,18 @@ This module now backs three distinct causal ablations sharing this one harness, 
     validation (`validate_patch_shape_3`/`ABLATION_3_PATCH_SCOPE_MATCH`), even though it was
     semantically equivalent by construction, because it could no longer be attributed to only
     the established causal component.
+  * `--ablation 4` (`config/perf010a-4.json`, `docker/protos-perf010a/ablation-4.patch`) -
+    PERF010A_ABLATION_4, removes the second, redundant `ProtosClosureValue.nativeBody()`
+    Optional projection inside `ProtosBytecodeRootNode.finishPreparingComposedCall`'s native
+    branch (`closure.nativeBody().isPresent()` followed by
+    `closure.nativeBody().orElseThrow()`), reusing a single local projection for both instead.
+    `nativeBody()` is `Optional.ofNullable(nativeBody)` over a `final` field, so both
+    projections always observe the same value; this is claimed to be semantically equivalent
+    by construction, not diagnostic-only-and-expected-to-fail-closed like ablation 2. Every
+    other `nativeBody()` call site in `ProtosBytecodeRootNode`, and `ProtosClosureValue.java`
+    itself, stay byte-for-byte unchanged. This is the exact scope the established next-causal-
+    candidate investigation identified (guillermomolina/protos-project-docs@
+    474b8779e31c643a815cf67452d0acf4ee8da367).
 
 Two separate run types are collected per (workload, mode, variant) combination, matching
 `AGENTS.work/REPRODUCIBILITY.md` ("Diagnostic instrumentation ... SHOULD be kept separate from
@@ -60,28 +72,36 @@ timing when it materially perturbs execution."):
                variants (ablation 1: `ProtosSemanticBytecodeRootNodeGen`/
                `InvokeSemanticHelper` absent, `*CachedBytecodeNode.continueAt` present;
                ablation 2: `ProtosActivation.lookup` absent, `ProtosObjectValue.readLocalSlot`
-               present); never used to interpret timing. Ablation 3 does not use this
-               mechanism for its structural confirmation (see below) but still collects it at
+               present); never used to interpret timing. Ablations 3 and 4 do not use this
+               mechanism for their structural confirmation (see below) but still collect it at
                `reference` scale as supplementary evidence.
 
-Ablation 3's structural confirmation is source-derived, not JFR-derived: both variants still
-call a `ProtosObjectValue` reader method with a resolvable fully-qualified frame name at
-`ProtosActivation.lookup`'s two lexical call sites, and `java.util.LinkedHashMap.containsKey`/
-`get` are simple enough to be JIT-inlined, so neither is a reliable sampled-frame signal.
-Instead, `source_structural_probe` reads `/opt/protos-source` (the exact patched-or-unmodified
-source tree each image was built from, copied verbatim by the Dockerfile) and
-`structural_contract_confirmed_ablation_3` proves the full established exact-scope contract as
-one per-image comparison: the diagnostic helper exists only in the ablation image; ordinary
-`readLocalSlot`'s own method body is byte-for-byte identical between images; the ablation image
-calls the diagnostic helper (and the baseline image calls ordinary `readLocalSlot`) at exactly
-`ProtosActivation.lookup`'s two lexical positions; the captured-lexical-traversal loop and the
-`ProtosValueLookup` fallback are present, unchanged, in both; and `ProtosValueLookup`'s own
-receiver/delegation member-lookup call site still calls ordinary `readLocalSlot` in both
-images. `validate_patch_shape_3` proves the same exact-scope contract statically from the patch
-diff itself (required call sites changed; explicitly excluded call sites/files untouched)
-before any image is even built, and `reference`/`smoke` re-derive and re-check it from the
-built image before running (`reference`) or after running (`smoke`, for reporting) the
-workload matrix, per AGENTS.work/PERFORMANCE.md's causal-ablation exact-scope validation rule.
+Ablations 3 and 4's structural confirmation is source-derived, not JFR-derived: both variants
+still call the *same* fully-qualified reader method at the retained call site(s) - a
+`ProtosObjectValue` method at `ProtosActivation.lookup`'s two lexical call sites for ablation 3
+(and `java.util.LinkedHashMap.containsKey`/`get` are simple enough to be JIT-inlined besides),
+`ProtosClosureValue.nativeBody()` for ablation 4 - so neither call-count difference is a
+reliable sampled-frame signal. Instead, `source_structural_probe`/`source_structural_probe_4`
+read `/opt/protos-source` (the exact patched-or-unmodified source tree each image was built
+from, copied verbatim by the Dockerfile) and
+`structural_contract_confirmed_ablation_3`/`structural_contract_confirmed_ablation_4` prove the
+full established exact-scope contract as one per-image comparison. For ablation 3: the
+diagnostic helper exists only in the ablation image; ordinary `readLocalSlot`'s own method body
+is byte-for-byte identical between images; the ablation image calls the diagnostic helper (and
+the baseline image calls ordinary `readLocalSlot`) at exactly `ProtosActivation.lookup`'s two
+lexical positions; the captured-lexical-traversal loop and the `ProtosValueLookup` fallback are
+present, unchanged, in both; and `ProtosValueLookup`'s own receiver/delegation member-lookup
+call site still calls ordinary `readLocalSlot` in both images. For ablation 4:
+`finishPreparingComposedCall`'s body calls `closure.nativeBody()` twice in the baseline image
+and once (reusing a single `nativeBodyProjection` local) in the ablation image; the rest of
+`ProtosBytecodeRootNode.java` outside that one method body, and all of
+`ProtosClosureValue.java`, are byte-for-byte identical between images.
+`validate_patch_shape_3`/`validate_patch_shape_4` prove the same exact-scope contracts
+statically from the patch diff itself (required call sites changed; explicitly excluded call
+sites/files untouched) before any image is even built, and `reference`/`smoke` re-derive and
+re-check them from the built image before running (`reference`) or after running (`smoke`, for
+reporting) the workload matrix, per AGENTS.work/PERFORMANCE.md's causal-ablation exact-scope
+validation rule.
 
 `smoke` is an admission/correctness gate, not a reduced reference run: it exercises all four
 workloads at a small fixed iteration count (`SMOKE_WARMUP_ITERATIONS`/
@@ -95,7 +115,7 @@ output is retained as evidence.
 
 This module does not select or implement a PERF010 optimization. It is a diagnostic ablation
 experiment only (`diagnostic_claim: true` in `config/perf010a.json`, `config/perf010a-2.json`,
-and `config/perf010a-3.json`).
+`config/perf010a-3.json`, and `config/perf010a-4.json`).
 """
 
 from __future__ import annotations
@@ -115,11 +135,17 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config/perf010a.json"
 CONFIG_2 = ROOT / "config/perf010a-2.json"
 CONFIG_3 = ROOT / "config/perf010a-3.json"
+CONFIG_4 = ROOT / "config/perf010a-4.json"
 EXPECTED_PROTOS_REVISION = "bc0471184bf6dbbf03d0c6b09ef7b9e28aede014"
 EXPECTED_PROTOS_REVISION_3 = "6e7d89194925ba9fa2cd9c5c45aefa72d9939621"
+EXPECTED_PROTOS_REVISION_4 = "4c4aa95a5852119bd280ceb40483871d5d2cbb82"
 EXPECTED_RUNTIME = "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
 VARIANTS = ("baseline", "ablation")
-ABLATIONS = ("1", "2", "3")
+ABLATIONS = ("1", "2", "3", "4")
+# Ablations whose structural confirmation is source-derived (reads /opt/protos-source) rather
+# than JFR-frame-derived, because their call sites keep calling a same-named method in both
+# variants (see ablation 3's and 4's module-docstring rationale below).
+SOURCE_STRUCTURAL_ABLATIONS = ("3", "4")
 
 # `smoke` admission/correctness-gate scale: deliberately far smaller than any config's
 # reference-scale `warmup_iterations`/`steady_iterations` (20/100). Every steady iteration is
@@ -160,6 +186,23 @@ ABLATION_3_MARKER_COMMENT = "PERF010A_ABLATION_3"
 CAPTURED_LEXICAL_TRAVERSAL_MARKER = (
     "for (ProtosObjectValue lexicalContext : capturedLexicalContexts)"
 )
+
+# Ablation 4 (ProtosBytecodeRootNode.finishPreparingComposedCall's duplicate
+# ProtosClosureValue.nativeBody() Optional projection, reused via a single local instead of a
+# second projection) source markers. Not JFR-frame-based: both variants call the same
+# fully-qualified ProtosClosureValue.nativeBody() method at the retained call site, so a sampled
+# frame count cannot distinguish one call from two. `SOURCE_ROOT` is shared with ablation 3
+# above.
+ROOT_NODE_SOURCE_PATH = (
+    "src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java"
+)
+CLOSURE_VALUE_SOURCE_PATH = "src/main/java/com/guillermomolina/protos/runtime/ProtosClosureValue.java"
+FINISH_PREPARING_COMPOSED_CALL_SIGNATURE = (
+    "private static PreparedClosureCall finishPreparingComposedCall("
+)
+NATIVE_BODY_CALL_PATTERN = "closure.nativeBody()"
+NATIVE_BODY_PROJECTION_LOCAL = "nativeBodyProjection"
+ABLATION_4_MARKER_COMMENT = "PERF010A_ABLATION_4"
 
 # Per-ablation config path, expected slice, expected pinned Protos revision, structural-marker
 # pair (markers expected absent from a correctly-ablated call path, marker expected present in
@@ -210,6 +253,23 @@ ABLATION_PROFILES = {
             "results/perf008/SHA256SUMS",
             "results/perf010a-1/SHA256SUMS",
             "results/perf010a-2/SHA256SUMS",
+        ),
+    },
+    "4": {
+        "config_path": CONFIG_4,
+        "expected_slice": "PERF010A_ABLATION_4",
+        "expected_protos_revision": EXPECTED_PROTOS_REVISION_4,
+        "absent_markers": (),
+        "present_marker": "com.guillermomolina.protos.runtime.ProtosClosureValue.nativeBody",
+        "required_files": (
+            "results/perf004-a/summary.tsv",
+            "results/perf004-b2c/summary.tsv",
+            "results/perf004-b2d/SHA256SUMS",
+            "results/perf006-d3/SHA256SUMS",
+            "results/perf008/SHA256SUMS",
+            "results/perf010a-1/SHA256SUMS",
+            "results/perf010a-2/SHA256SUMS",
+            "results/perf010a-3/SHA256SUMS",
         ),
     },
 }
@@ -379,10 +439,64 @@ def validate_patch_shape_3(patch_text: str) -> None:
         assert forbidden not in removed_act_text, forbidden
 
 
+def validate_patch_shape_4(patch_text: str) -> None:
+    # The established causal-ablation contract (guillermomolina/protos-project-docs@
+    # 474b8779e31c643a815cf67452d0acf4ee8da367, PERF010A_NEXT_CAUSAL_CANDIDATE.md) is: inside
+    # ProtosBytecodeRootNode.finishPreparingComposedCall's native branch, introduce a single
+    # local Optional projection from closure.nativeBody() and reuse it for both the
+    # isPresent() check and the orElseThrow() projection, removing only the second, redundant
+    # closure.nativeBody() call. Every other nativeBody() call site in ProtosBytecodeRootNode,
+    # ProtosClosureValue.java (including nativeBody() itself), and
+    # finishPreparingComposedCallByImplementation MUST stay byte-for-byte untouched - a patch
+    # that touches any of those, or that removes/adds anything beyond this one bounded
+    # rewrite, must fail this check even if it is semantically equivalent.
+    files = _parse_unified_diff(patch_text)
+    root_node_path = ROOT_NODE_SOURCE_PATH
+    assert set(files.keys()) == {root_node_path}, sorted(files.keys())
+
+    root_node = files[root_node_path]
+
+    # Removed content must be exactly the two original closure.nativeBody() call-site lines
+    # (the isPresent() check and the orElseThrow() projection) - nothing else.
+    removed_calls = [l for l in root_node["removed"] if NATIVE_BODY_CALL_PATTERN in l]
+    non_call_removed = [l for l in root_node["removed"] if NATIVE_BODY_CALL_PATTERN not in l]
+    assert len(removed_calls) == 2, removed_calls
+    assert non_call_removed == [], non_call_removed
+
+    added_text = "\n".join(root_node["added"])
+    removed_text = "\n".join(root_node["removed"])
+    assert ABLATION_4_MARKER_COMMENT in added_text
+    # Exactly one closure.nativeBody() call remains (the new projection's initializer); the
+    # second, redundant call is gone, and both uses of the projected value go through the new
+    # local instead.
+    assert added_text.count(NATIVE_BODY_CALL_PATTERN) == 1, added_text
+    assert added_text.count(NATIVE_BODY_PROJECTION_LOCAL) >= 3, added_text
+    assert f"{NATIVE_BODY_PROJECTION_LOCAL}.isPresent()" in added_text
+    assert f"{NATIVE_BODY_PROJECTION_LOCAL}.orElseThrow()" in added_text
+
+    for forbidden in (
+        "ProtosClosureValue.java",
+        "ProtosActivation.java",
+        "ProtosValueLookup.java",
+        "CanonicalToBytecodeLowerer.java",
+        "ProtosSourceCompiler.java",
+        "ProtosBytecodeClosureExecutionPlan.java",
+        "ProtosRootTaskExecution.java",
+        "finishPreparingComposedCallByImplementation",
+        "continueAt",
+        "RootTag",
+        "ContinuationResult",
+        "ProtosSemanticBytecodeRootNode",
+    ):
+        assert forbidden not in added_text, forbidden
+        assert forbidden not in removed_text, forbidden
+
+
 VALIDATE_PATCH_SHAPE = {
     "1": validate_patch_shape_1,
     "2": validate_patch_shape_2,
     "3": validate_patch_shape_3,
+    "4": validate_patch_shape_4,
 }
 
 
@@ -754,6 +868,105 @@ def structural_contract_confirmed_ablation_3(
     return checks
 
 
+def source_structural_probe_4(tag: str, cpu: str) -> dict[str, Any]:
+    """Ablation 4's structural confirmation. Both variants call the same fully-qualified
+    `ProtosClosureValue.nativeBody()` method at the retained call site inside
+    `finishPreparingComposedCall`, so a JFR-sampled-frame count cannot distinguish one call from
+    two - the frame name is identical either way (see module docstring / ablation 3's identical
+    rationale). This instead reads `/opt/protos-source` (the exact patched-or-unmodified source
+    tree the image was built from) and inspects, per image: `finishPreparingComposedCall`'s own
+    method body (how many `closure.nativeBody()` calls it contains, whether it reuses a single
+    `nativeBodyProjection` local, and whether the `PERF010A_ABLATION_4` marker comment is
+    present); the rest of `ProtosBytecodeRootNode.java` outside that one method body (must be
+    byte-for-byte identical across variants - compared by the caller, proving every other
+    `nativeBody()` call site is untouched); and the full `ProtosClosureValue.java` source (must
+    also be byte-for-byte identical across variants)."""
+    root_node_source = output([
+        "docker", "run", "--rm", "--network", "none",
+        "--cpuset-cpus", cpu,
+        "--entrypoint", "cat", tag,
+        f"{SOURCE_ROOT}/{ROOT_NODE_SOURCE_PATH}",
+    ])
+    closure_value_source = output([
+        "docker", "run", "--rm", "--network", "none",
+        "--cpuset-cpus", cpu,
+        "--entrypoint", "cat", tag,
+        f"{SOURCE_ROOT}/{CLOSURE_VALUE_SOURCE_PATH}",
+    ])
+
+    method_body = _extract_method_body(
+        root_node_source, FINISH_PREPARING_COMPOSED_CALL_SIGNATURE
+    )
+    # _extract_method_body's returned slice starts at the method's opening brace (not at the
+    # signature text), so the "outside" cut must use that same brace_start offset - not
+    # signature_start - or it would remove the wrong span (either leaving body content behind
+    # or cutting into the signature/parameter list).
+    signature_start = root_node_source.index(FINISH_PREPARING_COMPOSED_CALL_SIGNATURE)
+    brace_start = root_node_source.index("{", signature_start)
+    body_end = brace_start + len(method_body)
+    outside_method_source = root_node_source[:brace_start] + root_node_source[body_end:]
+
+    return {
+        "native_body_call_count": method_body.count(NATIVE_BODY_CALL_PATTERN),
+        "projection_local_present": NATIVE_BODY_PROJECTION_LOCAL in method_body,
+        "projection_is_present_use": f"{NATIVE_BODY_PROJECTION_LOCAL}.isPresent()" in method_body,
+        "projection_or_else_throw_use": (
+            f"{NATIVE_BODY_PROJECTION_LOCAL}.orElseThrow()" in method_body
+        ),
+        "diagnostic_marker_present": ABLATION_4_MARKER_COMMENT in method_body,
+        "outside_method_source": outside_method_source,
+        "closure_value_source": closure_value_source,
+    }
+
+
+def structural_contract_confirmed_ablation_4(
+    baseline_probe: dict[str, Any], ablation_probe: dict[str, Any]
+) -> dict[str, bool]:
+    """Ablation 4's exact-scope structural gate (AGENTS.work/PERFORMANCE.md's causal-ablation
+    exact-scope validation rule): proves both that the duplicate `nativeBody()` projection is
+    removed inside `finishPreparingComposedCall` and that everything else - every other
+    `nativeBody()` call site, and all of `ProtosClosureValue.java` - stays on the baseline path,
+    as a single per-image comparison (not repeated independently per workload)."""
+    checks: dict[str, bool] = {
+        "ABLATION_4_BASELINE_HAS_TWO_PROJECTIONS": (
+            baseline_probe["native_body_call_count"] == 2
+            and not baseline_probe["projection_local_present"]
+            and not baseline_probe["diagnostic_marker_present"]
+        ),
+        "ABLATION_4_ABLATION_HAS_ONE_PROJECTION": (
+            ablation_probe["native_body_call_count"] == 1
+            and ablation_probe["projection_local_present"]
+            and ablation_probe["projection_is_present_use"]
+            and ablation_probe["projection_or_else_throw_use"]
+            and ablation_probe["diagnostic_marker_present"]
+        ),
+        "ABLATION_4_OTHER_CALL_SITES_UNCHANGED": (
+            bool(baseline_probe["outside_method_source"])
+            and baseline_probe["outside_method_source"] == ablation_probe["outside_method_source"]
+        ),
+        "ABLATION_4_CLOSURE_VALUE_UNCHANGED": (
+            bool(baseline_probe["closure_value_source"])
+            and baseline_probe["closure_value_source"] == ablation_probe["closure_value_source"]
+        ),
+    }
+    checks["ABLATION_4_PATCH_SCOPE_MATCH"] = all(checks.values())
+    return checks
+
+
+STRUCTURAL_PROBE = {
+    "3": source_structural_probe,
+    "4": source_structural_probe_4,
+}
+STRUCTURAL_CONTRACT_CONFIRM = {
+    "3": structural_contract_confirmed_ablation_3,
+    "4": structural_contract_confirmed_ablation_4,
+}
+STRUCTURAL_SCOPE_MATCH_KEY = {
+    "3": "ABLATION_3_PATCH_SCOPE_MATCH",
+    "4": "ABLATION_4_PATCH_SCOPE_MATCH",
+}
+
+
 def control_source(tag: str, work: Path, item: dict[str, Any]) -> tuple[str, Path]:
     canonical_source = "/opt/perf010a/corpus/" + item["source"]
     source_text = output([
@@ -1011,6 +1224,7 @@ def classify_workload(
     entry: dict[str, Any],
     ablation: str = "1",
     structural_contract_3: dict[str, bool] | None = None,
+    structural_contract_4: dict[str, bool] | None = None,
 ) -> dict[str, Any]:
     baseline = entry["variants"]["baseline"]
     ablation_variant = entry["variants"]["ablation"]
@@ -1023,13 +1237,16 @@ def classify_workload(
     correctness_confirmed = not execution_failures
 
     structural_ok = correctness_confirmed
-    if correctness_confirmed and ablation == "3":
-        # Source-derived, not JFR-derived (see source_structural_probe): a single per-image
-        # exact-scope structural contract (structural_contract_confirmed_ablation_3), identical
-        # across all four workloads, rather than a per-workload JFR profile.
+    if correctness_confirmed and ablation in SOURCE_STRUCTURAL_ABLATIONS:
+        # Source-derived, not JFR-derived (see source_structural_probe/
+        # source_structural_probe_4): a single per-image exact-scope structural contract,
+        # identical across all four workloads, rather than a per-workload JFR profile.
+        structural_contract = (
+            structural_contract_3 if ablation == "3" else structural_contract_4
+        )
         structural_ok = bool(
-            structural_contract_3 is not None
-            and structural_contract_3.get("ABLATION_3_PATCH_SCOPE_MATCH", False)
+            structural_contract is not None
+            and structural_contract.get(STRUCTURAL_SCOPE_MATCH_KEY[ablation], False)
         )
     elif correctness_confirmed:
         for mode in ("canonical", "control"):
@@ -1094,31 +1311,38 @@ def smoke(ablation: str = "1") -> None:
                 f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
             )
 
-    # Ablation 3's structural confirmation is a single per-image source-derived exact-scope
-    # contract (see source_structural_probe/structural_contract_confirmed_ablation_3), not a
-    # per-workload JFR profile, so smoke skips the JFR structural stage for it entirely
-    # (collect_structural=False below) rather than running it at any scale. Ablations 1/2 still
-    # need JFR to confirm their call-site bypass is actually in effect - that is the "specific
-    # correctness assertion" this admission gate exists to make - so they keep it, just at
-    # SMOKE_* scale instead of the config's reference scale.
+    # Ablations 3 and 4's structural confirmation is a single per-image source-derived
+    # exact-scope contract (see SOURCE_STRUCTURAL_ABLATIONS / STRUCTURAL_PROBE /
+    # STRUCTURAL_CONTRACT_CONFIRM), not a per-workload JFR profile, so smoke skips the JFR
+    # structural stage for them entirely (collect_structural=False below) rather than running
+    # it at any scale. Ablations 1/2 still need JFR to confirm their call-site bypass is
+    # actually in effect - that is the "specific correctness assertion" this admission gate
+    # exists to make - so they keep it, just at SMOKE_* scale instead of the config's
+    # reference scale.
     #
     # This static, per-image contract can be known before the (comparatively) expensive
     # four-workload smoke matrix runs at all, so it is checked and, on failure, fails the gate
     # here rather than after the matrix has already executed.
     structural_contract_3 = None
-    if ablation == "3":
-        source_markers = {variant: source_structural_probe(tags[variant], cpu) for variant in VARIANTS}
-        structural_contract_3 = structural_contract_confirmed_ablation_3(
-            source_markers["baseline"], source_markers["ablation"]
-        )
-        for key, ok in structural_contract_3.items():
+    structural_contract_4 = None
+    if ablation in SOURCE_STRUCTURAL_ABLATIONS:
+        probe_fn = STRUCTURAL_PROBE[ablation]
+        confirm_fn = STRUCTURAL_CONTRACT_CONFIRM[ablation]
+        scope_key = STRUCTURAL_SCOPE_MATCH_KEY[ablation]
+        source_markers = {variant: probe_fn(tags[variant], cpu) for variant in VARIANTS}
+        structural_contract = confirm_fn(source_markers["baseline"], source_markers["ablation"])
+        if ablation == "3":
+            structural_contract_3 = structural_contract
+        else:
+            structural_contract_4 = structural_contract
+        for key, ok in structural_contract.items():
             print(f"{key}={'PASS' if ok else 'FAIL'}")
-        if not structural_contract_3["ABLATION_3_PATCH_SCOPE_MATCH"]:
+        if not structural_contract[scope_key]:
             print("PERF010A_SMOKE=BLOCKED")
             print(f"{profile['expected_slice']}=INVALID")
             raise RuntimeError(
-                "PERF010A_ABLATION_3 exact-scope structural contract failed; "
-                "see printed ABLATION_3_* gate results above"
+                f"PERF010A_ABLATION_{ablation} exact-scope structural contract failed; "
+                "see printed ABLATION_* gate results above"
             )
 
     with tempfile.TemporaryDirectory(prefix="perf010a-smoke-") as tmp:
@@ -1126,11 +1350,12 @@ def smoke(ablation: str = "1") -> None:
         matrix = run_matrix(
             cfg, tags, cpu, work, profile["absent_markers"], profile["present_marker"],
             warmup=SMOKE_WARMUP_ITERATIONS, steady=SMOKE_STEADY_ITERATIONS,
-            collect_structural=(ablation != "3"),
+            collect_structural=(ablation not in SOURCE_STRUCTURAL_ABLATIONS),
         )
 
     classifications = [
-        classify_workload(entry, ablation, structural_contract_3) for entry in matrix
+        classify_workload(entry, ablation, structural_contract_3, structural_contract_4)
+        for entry in matrix
     ]
 
     print("PERF010A_SMOKE_HARNESS_REVISION=" + harness_revision)
@@ -1152,6 +1377,56 @@ def smoke(ablation: str = "1") -> None:
 
 
 def scope_of_ablation_readme(ablation: str, cfg: dict[str, Any]) -> list[str]:
+    if ablation == "4":
+        return [
+            "## Scope of the ablation",
+            "",
+            "`ablation-4.patch` touches exactly one method: "
+            "`ProtosBytecodeRootNode.finishPreparingComposedCall`. Its native branch currently "
+            "projects `ProtosClosureValue.nativeBody()` twice - once for "
+            "`closure.nativeBody().isPresent()`, once for `closure.nativeBody().orElseThrow()` "
+            "- even though both projections observe the same value (`nativeBody()` is "
+            "`Optional.ofNullable(nativeBody)` over a `final` field). The patch introduces a "
+            "single local `java.util.Optional<ProtosNativeClosureBody> nativeBodyProjection = "
+            "closure.nativeBody();` and reuses it for both the `isPresent()` check and the "
+            "`orElseThrow()` projection, removing only the second, redundant call.",
+            "",
+            "Every other `nativeBody()` call site in `ProtosBytecodeRootNode` (there are five: "
+            "two `isPresent()`/`isEmpty()` pairs at two other call-preparation entry points, "
+            "plus one more `isPresent()` check) is untouched, and `ProtosClosureValue.java` "
+            "itself - including `nativeBody()`'s own `Optional.ofNullable(nativeBody)` body and "
+            "the `nativeBody` field's `final` declaration - is not modified at all.",
+            "",
+            "This transformation preserves the same native/source classification and the same "
+            "`ProtosNativeClosureBody` reference on every call, so it is claimed to be "
+            "semantically equivalent by construction, not diagnostic-only-and-expected-to-fail-"
+            "closed like ablation 2. It does not change lookup, receiver/delegation, method "
+            "binding, closure capture, arguments, activation identity, return home, errors, "
+            "nonlocal return, continuations, RootTag/source/debugger identity, interop, or "
+            "native execution.",
+            "",
+            "Because both variants call the same fully-qualified `ProtosClosureValue."
+            "nativeBody()` method at the retained call site, a JFR-sampled-frame count cannot "
+            "distinguish one call from two, so this ablation's structural confirmation is "
+            "source-derived rather than JFR-derived, exactly like ablation 3: "
+            "`source_structural_probe_4`/`structural_contract_confirmed_ablation_4` reads "
+            "`/opt/protos-source` (the exact patched-or-unmodified source tree the image was "
+            "built from) and confirms, as one per-image contract: the baseline image's "
+            "`finishPreparingComposedCall` body calls `closure.nativeBody()` exactly twice with "
+            "no `nativeBodyProjection` local; the ablation image's body calls it exactly once, "
+            "reusing a single `nativeBodyProjection` local for both uses, carrying the "
+            "`PERF010A_ABLATION_4` marker comment; the rest of `ProtosBytecodeRootNode.java` "
+            "outside that one method body is byte-for-byte identical across both images; and "
+            "`ProtosClosureValue.java` is byte-for-byte identical across both images.",
+            "",
+            "`ProtosBytecodeRootNode.finishPreparingComposedCallByImplementation`, "
+            "`ProtosActivation.java`, `ProtosValueLookup.java`, `CanonicalToBytecodeLowerer."
+            "java`, the RootTag topology, the continuation machinery, the `CallTarget` "
+            "architecture, and source/debugger identity are all untouched by this patch. This "
+            "is a diagnostic ablation, not (by itself) a production optimization change; per "
+            "this slice's scope, no change is made to `guillermomolina/protos` regardless of "
+            "this experiment's outcome. Never published to `guillermomolina/protos`.",
+        ]
     if ablation == "3":
         return [
             "## Scope of the ablation",
@@ -1304,27 +1579,34 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
                 f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
             )
 
-    # Ablation 3's exact-scope structural contract is a static, per-image property (see
-    # source_structural_probe/structural_contract_confirmed_ablation_3) knowable before the
-    # expensive four-workload x two-variant x (timing + JFR structural) reference matrix runs at
-    # all. Per AGENTS.work/PERFORMANCE.md's exact-scope validation rule, a failure here MUST
-    # block reference before that matrix executes - not merely be reported as INVALID after
-    # spending the expensive run to discover a condition that was already knowable statically.
+    # Ablations 3 and 4's exact-scope structural contract is a static, per-image property (see
+    # SOURCE_STRUCTURAL_ABLATIONS / STRUCTURAL_PROBE / STRUCTURAL_CONTRACT_CONFIRM) knowable
+    # before the expensive four-workload x two-variant x (timing + JFR structural) reference
+    # matrix runs at all. Per AGENTS.work/PERFORMANCE.md's exact-scope validation rule, a
+    # failure here MUST block reference before that matrix executes - not merely be reported as
+    # INVALID after spending the expensive run to discover a condition that was already
+    # knowable statically.
     structural_contract_3 = None
-    if ablation == "3":
-        source_markers = {variant: source_structural_probe(tags[variant], cpu) for variant in VARIANTS}
-        structural_contract_3 = structural_contract_confirmed_ablation_3(
-            source_markers["baseline"], source_markers["ablation"]
-        )
-        for key, ok in structural_contract_3.items():
+    structural_contract_4 = None
+    if ablation in SOURCE_STRUCTURAL_ABLATIONS:
+        probe_fn = STRUCTURAL_PROBE[ablation]
+        confirm_fn = STRUCTURAL_CONTRACT_CONFIRM[ablation]
+        scope_key = STRUCTURAL_SCOPE_MATCH_KEY[ablation]
+        source_markers = {variant: probe_fn(tags[variant], cpu) for variant in VARIANTS}
+        structural_contract = confirm_fn(source_markers["baseline"], source_markers["ablation"])
+        if ablation == "3":
+            structural_contract_3 = structural_contract
+        else:
+            structural_contract_4 = structural_contract
+        for key, ok in structural_contract.items():
             print(f"{key}={'PASS' if ok else 'FAIL'}")
-        if not structural_contract_3["ABLATION_3_PATCH_SCOPE_MATCH"]:
+        if not structural_contract[scope_key]:
             print("PERF010A_REFERENCE=BLOCKED")
             print(f"{cfg['slice']}=INVALID")
             print("ATTRIBUTABLE_FRACTION=NOT_ESTABLISHED")
             raise RuntimeError(
-                "PERF010A_ABLATION_3 exact-scope structural contract failed before the "
-                "expensive reference matrix; see printed ABLATION_3_* gate results above. No "
+                f"PERF010A_ABLATION_{ablation} exact-scope structural contract failed before "
+                "the expensive reference matrix; see printed ABLATION_* gate results above. No "
                 "reference evidence was produced."
             )
 
@@ -1335,7 +1617,9 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         )
 
     classifications = {
-        entry["workload"]: classify_workload(entry, ablation, structural_contract_3)
+        entry["workload"]: classify_workload(
+            entry, ablation, structural_contract_3, structural_contract_4
+        )
         for entry in matrix
     }
     overall_valid = all(c[status_key] == "VALID" for c in classifications.values())
@@ -1369,7 +1653,9 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         "jfr_recording_phase": cfg["jfr_recording_phase"],
         "timing_recording_phase": cfg["timing_recording_phase"],
         "external_baseline": cfg["external_baseline"],
-        "source_structural_markers": structural_contract_3,
+        "source_structural_markers": (
+            structural_contract_3 if ablation == "3" else structural_contract_4
+        ),
         "matrix": matrix,
         "classifications": classifications,
         "overall_result": "VALID" if overall_valid else "INVALID",
@@ -1554,8 +1840,9 @@ def main():
         choices=ABLATIONS,
         default="1",
         help="which causal ablation slice to run: 1 (semantic/helper Bytecode dispatch, "
-        "default), 2 (ProtosActivation.lookup), or 3 (ProtosObjectValue.readLocalSlot's "
-        "redundant containsKey+get)",
+        "default), 2 (ProtosActivation.lookup), 3 (ProtosObjectValue.readLocalSlot's "
+        "redundant containsKey+get), or 4 (finishPreparingComposedCall's duplicate "
+        "ProtosClosureValue.nativeBody() projection)",
     )
     args = ap.parse_args()
 

@@ -703,13 +703,19 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertIn("/opt/protos-source", dockerfile)
 
     def test_ablation3_image_identity_distinct_from_1_and_2(self):
-        self.assertEqual(("1", "2", "3"), perf010a.ABLATIONS)
+        self.assertEqual(("1", "2", "3", "4"), perf010a.ABLATIONS)
         cfg1 = perf010a.load(perf010a.CONFIG)
         cfg2 = perf010a.load(perf010a.CONFIG_2)
         cfg3 = perf010a.load(perf010a.CONFIG_3)
+        cfg4 = perf010a.load(perf010a.CONFIG_4)
         self.assertEqual(
-            {"PERF010A_ABLATION_1", "PERF010A_ABLATION_2", "PERF010A_ABLATION_3"},
-            {cfg1["slice"], cfg2["slice"], cfg3["slice"]},
+            {
+                "PERF010A_ABLATION_1",
+                "PERF010A_ABLATION_2",
+                "PERF010A_ABLATION_3",
+                "PERF010A_ABLATION_4",
+            },
+            {cfg1["slice"], cfg2["slice"], cfg3["slice"], cfg4["slice"]},
         )
 
     def test_extract_method_body_scopes_to_the_target_method_only(self):
@@ -920,14 +926,23 @@ class Perf010aContractTest(unittest.TestCase):
     # --- reference() fails closed on the static structural gate before the expensive matrix ---
 
     def test_reference_checks_ablation3_structural_contract_before_run_matrix(self):
+        # reference() now dispatches ablation 3's and 4's structural gate generically through
+        # STRUCTURAL_CONTRACT_CONFIRM[ablation] (see the shared STRUCTURAL_PROBE /
+        # STRUCTURAL_CONTRACT_CONFIRM / STRUCTURAL_SCOPE_MATCH_KEY dicts), so the source no
+        # longer names structural_contract_confirmed_ablation_3 literally; the generic dispatch
+        # call site is what must precede run_matrix instead.
         import inspect
 
         source = inspect.getsource(perf010a.reference)
-        gate_idx = source.index("structural_contract_confirmed_ablation_3(")
+        self.assertIs(
+            perf010a.STRUCTURAL_CONTRACT_CONFIRM["3"],
+            perf010a.structural_contract_confirmed_ablation_3,
+        )
+        gate_idx = source.index("STRUCTURAL_CONTRACT_CONFIRM[ablation]")
         matrix_idx = source.index("run_matrix(")
         self.assertLess(
             gate_idx, matrix_idx,
-            "ablation 3's structural exact-scope gate must be checked before the expensive "
+            "ablation 3's/4's structural exact-scope gate must be checked before the expensive "
             "reference matrix runs, not after",
         )
 
@@ -935,9 +950,281 @@ class Perf010aContractTest(unittest.TestCase):
         import inspect
 
         source = inspect.getsource(perf010a.smoke)
-        gate_idx = source.index("structural_contract_confirmed_ablation_3(")
+        gate_idx = source.index("STRUCTURAL_CONTRACT_CONFIRM[ablation]")
         matrix_idx = source.index("run_matrix(")
         self.assertLess(gate_idx, matrix_idx)
+
+    # --- PERF010A_ABLATION_4 (duplicate ProtosClosureValue.nativeBody() projection) coverage ---
+
+    def test_ablation4_static_contract(self):
+        cfg = perf010a.validate("4")
+        self.assertEqual("PERF010-A", cfg["perf_item"])
+        self.assertEqual("PERF010", cfg["parent_perf_item"])
+        self.assertEqual("PERF010A_ABLATION_4", cfg["slice"])
+        self.assertTrue(cfg["diagnostic_claim"])
+        self.assertEqual(
+            "4c4aa95a5852119bd280ceb40483871d5d2cbb82", cfg["protos_revision"]
+        )
+
+    def test_ablation4_pinned_revision_differs_from_earlier_ablations(self):
+        cfg1 = json.loads((ROOT / "config/perf010a.json").read_text(encoding="utf-8"))
+        cfg3 = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        cfg4 = json.loads((ROOT / "config/perf010a-4.json").read_text(encoding="utf-8"))
+        self.assertNotEqual(cfg1["protos_revision"], cfg4["protos_revision"])
+        self.assertNotEqual(cfg3["protos_revision"], cfg4["protos_revision"])
+        self.assertIn("protos_revision_note", cfg4)
+
+    def test_ablation4_experiment_matrix_matches_ablation1_exactly(self):
+        cfg1 = json.loads((ROOT / "config/perf010a.json").read_text(encoding="utf-8"))
+        cfg4 = json.loads((ROOT / "config/perf010a-4.json").read_text(encoding="utf-8"))
+        self.assertEqual(cfg1["controls"], cfg4["controls"])
+        self.assertEqual(cfg1["operation_count"], cfg4["operation_count"])
+        self.assertEqual(cfg1["warmup_iterations"], cfg4["warmup_iterations"])
+        self.assertEqual(cfg1["steady_iterations"], cfg4["steady_iterations"])
+        self.assertEqual(cfg1["execution_sample_period"], cfg4["execution_sample_period"])
+        self.assertEqual(cfg1["variants"], cfg4["variants"])
+        self.assertEqual(cfg1["toolchain"], cfg4["toolchain"])
+
+    def test_ablation4_patch_touches_exactly_the_one_declared_target(self):
+        # The established causal-ablation contract touches exactly one file
+        # (ProtosBytecodeRootNode.java): a bounded local-variable rewrite inside
+        # finishPreparingComposedCall, not a new helper (unlike ablation 3, which needed a
+        # second file for its diagnostic helper).
+        cfg = json.loads((ROOT / "config/perf010a-4.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        targets = cfg["ablation_patch_targets"]
+        self.assertEqual(1, len(targets))
+        self.assertEqual(
+            "src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java",
+            targets[0],
+        )
+        self.assertEqual(1, patch_text.count("--- a/"))
+
+    def test_ablation4_patch_removes_exactly_the_two_original_call_sites(self):
+        cfg = json.loads((ROOT / "config/perf010a-4.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        files = perf010a._parse_unified_diff(patch_text)
+        root_node = files[perf010a.ROOT_NODE_SOURCE_PATH]
+        removed_calls = [
+            l for l in root_node["removed"] if perf010a.NATIVE_BODY_CALL_PATTERN in l
+        ]
+        non_call_removed = [
+            l for l in root_node["removed"] if perf010a.NATIVE_BODY_CALL_PATTERN not in l
+        ]
+        self.assertEqual(2, len(removed_calls))
+        self.assertEqual([], non_call_removed)
+        added_text = "\n".join(root_node["added"])
+        self.assertEqual(1, added_text.count(perf010a.NATIVE_BODY_CALL_PATTERN))
+        self.assertIn(f"{perf010a.NATIVE_BODY_PROJECTION_LOCAL}.isPresent()", added_text)
+        self.assertIn(f"{perf010a.NATIVE_BODY_PROJECTION_LOCAL}.orElseThrow()", added_text)
+
+    def test_ablation4_patch_carries_the_diagnostic_marker_comment(self):
+        cfg = json.loads((ROOT / "config/perf010a-4.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        self.assertIn("PERF010A_ABLATION_4", patch_text)
+
+    def test_ablation4_patch_does_not_touch_other_production_mechanisms(self):
+        cfg = json.loads((ROOT / "config/perf010a-4.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        for forbidden in (
+            "ProtosClosureValue.java",
+            "ProtosActivation.java",
+            "ProtosValueLookup.java",
+            "CanonicalToBytecodeLowerer.java",
+            "ProtosSourceCompiler.java",
+            "ProtosBytecodeClosureExecutionPlan.java",
+            "ProtosRootTaskExecution.java",
+            "finishPreparingComposedCallByImplementation",
+            "continueAt",
+            "RootTag",
+            "ContinuationResult",
+            "ProtosSemanticBytecodeRootNode",
+        ):
+            self.assertNotIn(forbidden, patch_text, forbidden)
+
+    # --- exact-scope validation (AGENTS.work/PERFORMANCE.md's causal-ablation rule) ---
+
+    def test_ablation4_patch_passes_exact_scope_validation(self):
+        cfg = json.loads((ROOT / "config/perf010a-4.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        perf010a.validate_patch_shape_4(patch_text)  # must not raise
+
+    def test_ablation4_patch_touching_closure_value_fails_validation(self):
+        # If ProtosClosureValue.java were touched too (even a no-op comment change), a second
+        # file would be part of the diagnostic, which this slice's established scope forbids.
+        base_patch = (ROOT / "docker/protos-perf010a/ablation-4.patch").read_text(
+            encoding="utf-8"
+        )
+        extra = (
+            "\ndiff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosClosureValue.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosClosureValue.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosClosureValue.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosClosureValue.java\n"
+            "@@ -251,7 +251,7 @@\n"
+            "     public java.util.Optional<ProtosNativeClosureBody> nativeBody() {\n"
+            "-        return java.util.Optional.ofNullable(nativeBody);\n"
+            "+        return java.util.Optional.ofNullable(nativeBody); // touched\n"
+            "     }\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_4(base_patch + extra)
+
+    def test_ablation4_patch_removing_only_one_call_site_fails_validation(self):
+        # Only the isPresent() call site redirected to the new projection; orElseThrow() still
+        # calls closure.nativeBody() a second time. Must fail (both uses must move together).
+        patch = (
+            "diff --git a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java "
+            "b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java\n"
+            "@@ -5569,9 +5569,13 @@\n"
+            "             ProtosModuleRuntime structuredImportRuntime) {\n"
+            "+        // PERF010A_ABLATION_4 diagnostic-only projection reuse\n"
+            "+        java.util.Optional<ProtosNativeClosureBody> nativeBodyProjection =\n"
+            "+                closure.nativeBody();\n"
+            "-        if (closure.nativeBody().isPresent()) {\n"
+            "+        if (nativeBodyProjection.isPresent()) {\n"
+            "             ProtosNativeClosureBody nativeBody =\n"
+            "                     closure.nativeBody().orElseThrow();\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_4(patch)
+
+    def test_ablation4_patch_touching_a_different_call_site_fails_validation(self):
+        # Widening the diagnostic to also cover one of the other (excluded) nativeBody() call
+        # sites in the same file must fail, even though the primary rewrite is otherwise
+        # correct - the exact-scope contract only permits the two call sites inside
+        # finishPreparingComposedCall.
+        base_patch = (ROOT / "docker/protos-perf010a/ablation-4.patch").read_text(
+            encoding="utf-8"
+        )
+        extra_hunk = (
+            "@@ -4436,7 +4441,7 @@\n"
+            "     ProtosModuleRuntime structuredImportRuntime) {\n"
+            "-        if (closure.nativeBody().isPresent()) {\n"
+            "+        if (closure.nativeBody().isPresent()) { // touched\n"
+        )
+        # Insert a second hunk into the same file's diff so the removed-line count for
+        # closure.nativeBody() departs from exactly 2.
+        patched = base_patch.rstrip("\n") + "\n" + extra_hunk
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_4(patched)
+
+    def test_ablation4_dockerfile_supports_selectable_patch(self):
+        dockerfile = (ROOT / "docker/protos-perf010a/Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("ARG ABLATION_PATCH=ablation.patch", dockerfile)
+        self.assertIn("${ABLATION_PATCH}", dockerfile)
+        self.assertIn("/opt/protos-source", dockerfile)
+
+    # --- structural_contract_confirmed_ablation_4 (per-image exact-scope proof) ---
+
+    def _valid_probe_pair_4(self):
+        baseline_probe = {
+            "native_body_call_count": 2,
+            "projection_local_present": False,
+            "projection_is_present_use": False,
+            "projection_or_else_throw_use": False,
+            "diagnostic_marker_present": False,
+            "outside_method_source": "{ rest of ProtosBytecodeRootNode.java }",
+            "closure_value_source": "{ ProtosClosureValue.java }",
+        }
+        ablation_probe = {
+            "native_body_call_count": 1,
+            "projection_local_present": True,
+            "projection_is_present_use": True,
+            "projection_or_else_throw_use": True,
+            "diagnostic_marker_present": True,
+            "outside_method_source": "{ rest of ProtosBytecodeRootNode.java }",
+            "closure_value_source": "{ ProtosClosureValue.java }",
+        }
+        return baseline_probe, ablation_probe
+
+    def test_structural_contract_4_confirmed_for_correct_probe_pair(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair_4()
+        checks = perf010a.structural_contract_confirmed_ablation_4(baseline_probe, ablation_probe)
+        self.assertTrue(checks["ABLATION_4_PATCH_SCOPE_MATCH"])
+        self.assertTrue(all(checks.values()))
+
+    def test_structural_contract_4_fails_when_ablation_still_has_two_calls(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair_4()
+        ablation_probe["native_body_call_count"] = 2
+        checks = perf010a.structural_contract_confirmed_ablation_4(baseline_probe, ablation_probe)
+        self.assertFalse(checks["ABLATION_4_ABLATION_HAS_ONE_PROJECTION"])
+        self.assertFalse(checks["ABLATION_4_PATCH_SCOPE_MATCH"])
+
+    def test_structural_contract_4_fails_when_other_call_sites_diverge(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair_4()
+        ablation_probe["outside_method_source"] = "{ different rest of file }"
+        checks = perf010a.structural_contract_confirmed_ablation_4(baseline_probe, ablation_probe)
+        self.assertFalse(checks["ABLATION_4_OTHER_CALL_SITES_UNCHANGED"])
+        self.assertFalse(checks["ABLATION_4_PATCH_SCOPE_MATCH"])
+
+    def test_structural_contract_4_fails_when_closure_value_diverges(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair_4()
+        ablation_probe["closure_value_source"] = "{ different ProtosClosureValue.java }"
+        checks = perf010a.structural_contract_confirmed_ablation_4(baseline_probe, ablation_probe)
+        self.assertFalse(checks["ABLATION_4_CLOSURE_VALUE_UNCHANGED"])
+        self.assertFalse(checks["ABLATION_4_PATCH_SCOPE_MATCH"])
+
+    def test_structural_contract_4_fails_when_baseline_already_has_marker(self):
+        baseline_probe, ablation_probe = self._valid_probe_pair_4()
+        baseline_probe["diagnostic_marker_present"] = True
+        checks = perf010a.structural_contract_confirmed_ablation_4(baseline_probe, ablation_probe)
+        self.assertFalse(checks["ABLATION_4_BASELINE_HAS_TWO_PROJECTIONS"])
+        self.assertFalse(checks["ABLATION_4_PATCH_SCOPE_MATCH"])
+
+    # --- classify_workload (ablation 4, source-derived structural contract) ---
+
+    def test_classify_workload_ablation4_uses_structural_contract_not_jfr(self):
+        def cell(median_ns):
+            return {
+                "timing": {"steady_summary": {"median_ns": median_ns}},
+                "structural": None,
+                "execution_failure": None,
+            }
+
+        entry = {
+            "workload": "micro/slot-read",
+            "variants": {
+                "baseline": {"canonical": cell(1000), "control": cell(100)},
+                "ablation": {"canonical": cell(900), "control": cell(100)},
+            },
+        }
+        structural_contract_4 = perf010a.structural_contract_confirmed_ablation_4(
+            *self._valid_probe_pair_4()
+        )
+        classification = perf010a.classify_workload(
+            entry, "4", None, structural_contract_4
+        )
+        self.assertTrue(classification["correctness_confirmed"])
+        self.assertTrue(classification["structural_ablation_confirmed"])
+        self.assertEqual("VALID", classification["perf010a_ablation_4"])
+        self.assertEqual(100, classification["removed_ns"])
+
+    def test_classify_workload_ablation4_without_structural_contract_is_invalid(self):
+        def cell(median_ns):
+            return {
+                "timing": {"steady_summary": {"median_ns": median_ns}},
+                "structural": None,
+                "execution_failure": None,
+            }
+
+        entry = {
+            "workload": "micro/slot-read",
+            "variants": {
+                "baseline": {"canonical": cell(1000), "control": cell(100)},
+                "ablation": {"canonical": cell(900), "control": cell(100)},
+            },
+        }
+        classification = perf010a.classify_workload(entry, "4", None, None)
+        self.assertFalse(classification["structural_ablation_confirmed"])
+        self.assertEqual("INVALID", classification["perf010a_ablation_4"])
+
+    # reference()/smoke()'s gate-before-run_matrix ordering for ablation 4 is covered by
+    # test_reference_checks_ablation3_structural_contract_before_run_matrix and
+    # test_smoke_checks_ablation3_structural_contract_before_run_matrix above: both ablations
+    # now share the same generic STRUCTURAL_CONTRACT_CONFIRM[ablation] dispatch call site, so a
+    # separate ablation-4-specific assertion would just duplicate the same source check.
 
 
 if __name__ == "__main__":

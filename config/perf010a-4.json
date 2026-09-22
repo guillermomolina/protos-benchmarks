@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_ABLATION_4",
+  "phase": "causal-duplicate-native-body-projection-ablation",
+  "diagnostic_claim": true,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "4c4aa95a5852119bd280ceb40483871d5d2cbb82",
+  "protos_revision_note": "current origin/main at this fourth-ablation investigation's start (2026-09-22), and the exact revision pinned by the established next-causal-candidate investigation (guillermomolina/protos-project-docs@474b8779e31c643a815cf67452d0acf4ee8da367, docs/project/work/PERF010-A/PERF010-A_NEXT_CAUSAL_CANDIDATE.md); confirmed to be current origin/main HEAD (git merge-base --is-ancestor) with no drift on ProtosBytecodeRootNode.java, ProtosClosureValue.java, or ProtosValueLookup.java relative to that pin",
+  "ablation_patch": "docker/protos-perf010a/ablation-4.patch",
+  "ablation_patch_targets": [
+    "src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java"
+  ],
+  "fourth_ablation_target": "the second, redundant ProtosClosureValue.nativeBody() Optional projection inside ProtosBytecodeRootNode.finishPreparingComposedCall's native branch (closure.nativeBody().isPresent() followed by closure.nativeBody().orElseThrow()); every other nativeBody() call site in ProtosBytecodeRootNode, and ProtosClosureValue.nativeBody() itself, are untouched",
+  "diagnostic_transformation": "finishPreparingComposedCall's native branch introduces a single local java.util.Optional<ProtosNativeClosureBody> nativeBodyProjection = closure.nativeBody(); both the isPresent() check and the orElseThrow() projection then reuse that one local instead of calling closure.nativeBody() a second time. ProtosClosureValue.nativeBody() is Optional.ofNullable(nativeBody) over a final field, so the two projections are guaranteed to observe the same value; reusing the first eliminates only the second projection and changes no other behavior (lookup, receiver/delegation, method binding, closure capture, arguments, activation identity, return home, errors, nonlocal return, continuations, RootTag/source/debugger identity, interop, or native execution).",
+  "historical_evidence": {
+    "perf004_a_cross_language_baseline": "results/perf004-a",
+    "perf004_b2c_causal_control": "results/perf004-b2c",
+    "perf004_b2d_paired_jfr": "results/perf004-b2d",
+    "perf006_d3": "results/perf006-d3",
+    "perf008_steady_state_full_stack": "results/perf008",
+    "perf010a_ablation_1": "results/perf010a-1",
+    "perf010a_ablation_2": "results/perf010a-2",
+    "perf010a_ablation_3": "results/perf010a-3"
+  },
+  "external_baseline": {
+    "source": "results/perf004-a",
+    "same_run_as_protos_measurement": false,
+    "reason": "results/perf004-a pins a different Protos revision (4a03efc15620b37b2e418b3df30b4a26486446ec) and a different container base image (ol8, not this harness's ol10) than this experiment; AGENTS.work/REPRODUCIBILITY.md's revision-pinning discipline forbids combining it directly with a current-revision PROTOS_BASELINE_COST/PROTOS_ABLATION_COST measurement into a single EXCESS_COST/ATTRIBUTABLE_FRACTION number. It is retained here as a labelled historical reference only; ATTRIBUTABLE_FRACTION is reported as NOT_ESTABLISHED unless and until a current-revision, current-host external (e.g. Python/JavaScript) measurement is added under the same Evidence Unit."
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 20,
+  "steady_iterations": 100,
+  "execution_sample_period": "10 ms",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "steady_only",
+  "timing_recording_phase": "steady_only_no_jfr",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "variants": ["baseline", "ablation"],
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "continuation_markers": [
+    "ContinuationResult",
+    "continueWith",
+    "yield"
+  ],
+  "structural_confirmation_mode": "source",
+  "structural_confirmation_note": "Both variants call the same fully-qualified ProtosClosureValue.nativeBody() method at the retained call site, so a JFR-sampled-frame count cannot distinguish one call from two (the frame name is identical either way, and a single 10ms-period execution sample cannot reliably resolve call-count within one activation). Structural confirmation instead reads the exact patched (or, for baseline, unmodified) source tree the image was built from (/opt/protos-source), scoped to finishPreparingComposedCall's method body, and proves both what changed and what stayed on the baseline path: (1) the ablation image's finishPreparingComposedCall body calls closure.nativeBody() exactly once and reuses a single nativeBodyProjection local for both isPresent() and orElseThrow(), carrying the PERF010A_ABLATION_4 marker comment; (2) the baseline image's finishPreparingComposedCall body calls closure.nativeBody() exactly twice, with no nativeBodyProjection local and no marker comment; (3) the rest of ProtosBytecodeRootNode.java (every text outside finishPreparingComposedCall's method body, including the other five nativeBody() call sites) is byte-for-byte identical between the two images; (4) ProtosClosureValue.java is byte-for-byte identical between the two images. This is one per-image confirmation, not repeated independently per workload.",
+  "structural_source_markers": {
+    "root_node_file": "src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java",
+    "closure_value_file": "src/main/java/com/guillermomolina/protos/runtime/ProtosClosureValue.java",
+    "target_method_signature": "private static PreparedClosureCall finishPreparingComposedCall(",
+    "diagnostic_marker_comment": "PERF010A_ABLATION_4",
+    "baseline_call_site_pattern": "closure.nativeBody()",
+    "baseline_call_site_count_in_baseline_method": 2,
+    "diagnostic_projection_local": "nativeBodyProjection",
+    "diagnostic_call_site_count_in_ablation_method": 1,
+    "diagnostic_projection_reuse_count_in_ablation_method": 2
+  },
+  "output": "results/perf010a-4"
+}

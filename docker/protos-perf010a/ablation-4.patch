@@ -1,0 +1,21 @@
+diff --git a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
+index 66fa52cb..7e3dee9b 100644
+--- a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
++++ b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
+@@ -5569,9 +5569,14 @@ abstract class ProtosBytecodeRootNode extends RootNode implements BytecodeRootNo
+             boolean directControlNative,
+             boolean structuredObjectCall,
+             ProtosModuleRuntime structuredImportRuntime) {
+-        if (closure.nativeBody().isPresent()) {
++        // PERF010A_ABLATION_4 diagnostic-only projection reuse (see
++        // AGENTS.work/PERFORMANCE.md's causal-ablation exact-scope rule); never publish to
++        // guillermomolina/protos.
++        java.util.Optional<ProtosNativeClosureBody> nativeBodyProjection =
++                closure.nativeBody();
++        if (nativeBodyProjection.isPresent()) {
+             ProtosNativeClosureBody nativeBody =
+-                    closure.nativeBody().orElseThrow();
++                    nativeBodyProjection.orElseThrow();
+             /*
+              * PLAT019 keeps the ordinary non-suspending native path direct and
+              * pay-only-when-used. Only bodies carrying the explicit suspension

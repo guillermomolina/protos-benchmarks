@@ -18,7 +18,7 @@ Builds two images from the exact same pinned Protos revision - `baseline` (unmod
 canonical/control matrix (slot-read, closure-call, method-call, monomorphic-dispatch;
 N=10,000; warmup=20; steady=100) against both.
 
-This module now backs two distinct causal ablations sharing this one harness, selected via
+This module now backs three distinct causal ablations sharing this one harness, selected via
 `--ablation` (default `1`, preserving every prior invocation's exact behavior):
 
   * `--ablation 1` (`config/perf010a.json`, `docker/protos-perf010a/ablation.patch`) -
@@ -29,6 +29,14 @@ This module now backs two distinct causal ablations sharing this one harness, se
     Diagnostic only; not claimed to be semantically equivalent to `lookup` in the general
     language, and expected to fail closed (correctness FAIL) for any workload whose
     unqualified-name lookups are not resolved by the activation's own local context.
+  * `--ablation 3` (`config/perf010a-3.json`, `docker/protos-perf010a/ablation-3.patch`) -
+    PERF010A_ABLATION_3, replaces the redundant `containsKey(name)` + `get(name)`
+    probe-then-read inside `ProtosObjectValue.readLocalSlot` with a single `get(name)`,
+    relying on the invariant that no local slot value is ever null. Unlike ablations 1/2,
+    this does not bypass a call site - `ProtosActivation.lookup`'s local/captured-lexical
+    traversal, precedence, shadowing, and missing-name behavior are all untouched - so it is
+    claimed to be semantically equivalent by construction, not diagnostic-only-and-expected-
+    to-fail-closed.
 
 Two separate run types are collected per (workload, mode, variant) combination, matching
 `AGENTS.work/REPRODUCIBILITY.md` ("Diagnostic instrumentation ... SHOULD be kept separate from
@@ -43,11 +51,32 @@ timing when it materially perturbs execution."):
                variants (ablation 1: `ProtosSemanticBytecodeRootNodeGen`/
                `InvokeSemanticHelper` absent, `*CachedBytecodeNode.continueAt` present;
                ablation 2: `ProtosActivation.lookup` absent, `ProtosObjectValue.readLocalSlot`
-               present); never used to interpret timing.
+               present); never used to interpret timing. Ablation 3 does not use this
+               mechanism for its structural confirmation (see below) but still collects it at
+               `reference` scale as supplementary evidence.
+
+Ablation 3's structural confirmation is source-derived, not JFR-derived: `readLocalSlot` is
+still called from the exact same call sites with the exact same fully-qualified frame name in
+both variants, and `java.util.LinkedHashMap.containsKey`/`get` are simple enough to be
+JIT-inlined, so their absence/presence is not a reliable sampled-frame signal. Instead,
+`source_structural_probe` reads `/opt/protos-source` (the exact patched-or-unmodified source
+tree each image was built from, copied verbatim by the Dockerfile) and inspects
+`ProtosObjectValue.readLocalSlot`'s method body directly, scoped to that one method so other
+legitimate `containsKey` call sites elsewhere in the file cannot produce a false positive.
+
+`smoke` is an admission/correctness gate, not a reduced reference run: it exercises all four
+workloads at a small fixed iteration count (`SMOKE_WARMUP_ITERATIONS`/
+`SMOKE_STEADY_ITERATIONS`), independent of each config's `warmup_iterations`/
+`steady_iterations` (which stay reference-scale and are never used by `smoke`), and every
+steady iteration is still individually correctness-checked by the driver
+(`requireCompletedInteger` in `Perf010aTimingDriver`/`Perf008SteadyStateDriver`) regardless of
+sample count, so this loses no correctness coverage. `reference` is the only command that uses
+each config's full `warmup_iterations`/`steady_iterations` and is the only command whose
+output is retained as evidence.
 
 This module does not select or implement a PERF010 optimization. It is a diagnostic ablation
-experiment only (`diagnostic_claim: true` in `config/perf010a.json` and
-`config/perf010a-2.json`).
+experiment only (`diagnostic_claim: true` in `config/perf010a.json`, `config/perf010a-2.json`,
+and `config/perf010a-3.json`).
 """
 
 from __future__ import annotations
@@ -66,10 +95,24 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config/perf010a.json"
 CONFIG_2 = ROOT / "config/perf010a-2.json"
+CONFIG_3 = ROOT / "config/perf010a-3.json"
 EXPECTED_PROTOS_REVISION = "bc0471184bf6dbbf03d0c6b09ef7b9e28aede014"
+EXPECTED_PROTOS_REVISION_3 = "6e7d89194925ba9fa2cd9c5c45aefa72d9939621"
 EXPECTED_RUNTIME = "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
 VARIANTS = ("baseline", "ablation")
-ABLATIONS = ("1", "2")
+ABLATIONS = ("1", "2", "3")
+
+# `smoke` admission/correctness-gate scale: deliberately far smaller than any config's
+# reference-scale `warmup_iterations`/`steady_iterations` (20/100). Every steady iteration is
+# still individually correctness-checked by the driver regardless of count
+# (`requireCompletedInteger` in `Perf010aTimingDriver`/`Perf008SteadyStateDriver`), so this
+# does not weaken the correctness assertion `smoke` exists to make; it only avoids collecting
+# statistically meaningful timing or reference-scale JFR structural evidence. Historical
+# workload steady medians (results/perf010a-1, results/perf010a-2) are tens of milliseconds
+# per iteration, comfortably longer than `execution_sample_period` (10 ms), so even this small
+# a steady count still yields JFR execution samples for ablations 1/2's structural check.
+SMOKE_WARMUP_ITERATIONS = 1
+SMOKE_STEADY_ITERATIONS = 2
 
 # Ablation 1 (semantic/helper Bytecode dispatch wrapper) markers.
 SEMANTIC_MARKERS = ("ProtosSemanticBytecodeRootNodeGen", "InvokeSemanticHelper.perform")
@@ -79,13 +122,28 @@ HELPER_MARKER = "ProtosBytecodeRootNodeGen$CachedBytecodeNode.continueAt"
 LOOKUP_MARKERS = ("com.guillermomolina.protos.runtime.ProtosActivation.lookup",)
 READ_LOCAL_SLOT_MARKER = "com.guillermomolina.protos.runtime.ProtosObjectValue.readLocalSlot"
 
-# Per-ablation config path, expected slice, structural-marker pair (markers expected absent
-# from a correctly-ablated call path, marker expected present in both variants), and the
-# required historical-evidence files `validate()` checks for that slice.
+# Ablation 3 (ProtosObjectValue.readLocalSlot's redundant containsKey+get) source markers.
+# Not JFR-frame-based: see module docstring for why. `SOURCE_ROOT` is where the Dockerfile
+# copies the exact patched-or-unmodified /src tree in every image (both variants).
+SOURCE_ROOT = "/opt/protos-source"
+READ_LOCAL_SLOT_SOURCE_PATH = "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java"
+ACTIVATION_SOURCE_PATH = "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java"
+READ_LOCAL_SLOT_SIGNATURE = "public Optional<Object> readLocalSlot(String name)"
+ABLATION_3_MARKER_COMMENT = "PERF010A_ABLATION_3"
+CAPTURED_LEXICAL_TRAVERSAL_MARKER = (
+    "for (ProtosObjectValue lexicalContext : capturedLexicalContexts)"
+)
+
+# Per-ablation config path, expected slice, expected pinned Protos revision, structural-marker
+# pair (markers expected absent from a correctly-ablated call path, marker expected present in
+# both variants; unused by ablation 3, whose structural confirmation is source-derived - see
+# `source_structural_probe`), and the required historical-evidence files `validate()` checks
+# for that slice.
 ABLATION_PROFILES = {
     "1": {
         "config_path": CONFIG,
         "expected_slice": "PERF010A_ABLATION_1",
+        "expected_protos_revision": EXPECTED_PROTOS_REVISION,
         "absent_markers": SEMANTIC_MARKERS,
         "present_marker": HELPER_MARKER,
         "required_files": (
@@ -99,6 +157,7 @@ ABLATION_PROFILES = {
     "2": {
         "config_path": CONFIG_2,
         "expected_slice": "PERF010A_ABLATION_2",
+        "expected_protos_revision": EXPECTED_PROTOS_REVISION,
         "absent_markers": LOOKUP_MARKERS,
         "present_marker": READ_LOCAL_SLOT_MARKER,
         "required_files": (
@@ -108,6 +167,22 @@ ABLATION_PROFILES = {
             "results/perf006-d3/SHA256SUMS",
             "results/perf008/SHA256SUMS",
             "results/perf010a-1/SHA256SUMS",
+        ),
+    },
+    "3": {
+        "config_path": CONFIG_3,
+        "expected_slice": "PERF010A_ABLATION_3",
+        "expected_protos_revision": EXPECTED_PROTOS_REVISION_3,
+        "absent_markers": (),
+        "present_marker": READ_LOCAL_SLOT_MARKER,
+        "required_files": (
+            "results/perf004-a/summary.tsv",
+            "results/perf004-b2c/summary.tsv",
+            "results/perf004-b2d/SHA256SUMS",
+            "results/perf006-d3/SHA256SUMS",
+            "results/perf008/SHA256SUMS",
+            "results/perf010a-1/SHA256SUMS",
+            "results/perf010a-2/SHA256SUMS",
         ),
     },
 }
@@ -191,9 +266,37 @@ def validate_patch_shape_2(patch_text: str) -> None:
         assert forbidden not in patch_text, forbidden
 
 
+def validate_patch_shape_3(patch_text: str) -> None:
+    # The patch must touch only ProtosObjectValue.java, replacing the redundant
+    # containsKey(name)+get(name) probe-then-read inside readLocalSlot with a single
+    # get(name) plus a null discrimination, and must not touch ProtosActivation.java (the
+    # local/captured-lexical traversal, precedence, shadowing, and missing-name behavior all
+    # live there and must stay byte-for-byte untouched) or any other production mechanism.
+    assert patch_text.count("--- a/") == 1
+    assert "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java" in patch_text
+    assert ABLATION_3_MARKER_COMMENT in patch_text
+    assert "localSlots.get(name)" in patch_text
+    assert "value != null" in patch_text
+    for forbidden in (
+        "ProtosActivation.java",
+        "ProtosBytecodeRootNode.java",
+        "CanonicalToBytecodeLowerer.java",
+        "ProtosSourceCompiler.java",
+        "ProtosBytecodeClosureExecutionPlan.java",
+        "ProtosRootTaskExecution.java",
+        "capturedLexicalContexts",
+        "continueAt",
+        "RootTag",
+        "ContinuationResult",
+        "ProtosSemanticBytecodeRootNode",
+    ):
+        assert forbidden not in patch_text, forbidden
+
+
 VALIDATE_PATCH_SHAPE = {
     "1": validate_patch_shape_1,
     "2": validate_patch_shape_2,
+    "3": validate_patch_shape_3,
 }
 
 
@@ -206,7 +309,7 @@ def validate(ablation: str = "1") -> dict[str, Any]:
     assert cfg["parent_perf_item"] == "PERF010"
     assert cfg["slice"] == profile["expected_slice"]
     assert cfg["diagnostic_claim"] is True
-    assert cfg["protos_revision"] == EXPECTED_PROTOS_REVISION
+    assert cfg["protos_revision"] == profile["expected_protos_revision"]
     assert cfg["operation_count"] == 10000
     assert cfg["warmup_iterations"] == 20
     assert cfg["steady_iterations"] == 100
@@ -393,6 +496,58 @@ def ablation_slice_label_probe(tag: str, cpu: str) -> str:
     return (p.stdout or "").strip()
 
 
+def _extract_method_body(source_text: str, signature: str) -> str:
+    """Returns the exact `{ ... }` body of the method whose declaration line contains
+    `signature`, by brace-depth counting from the first `{` after it. Used to scope ablation
+    3's structural markers to the single target method, so other legitimate `containsKey`
+    call sites elsewhere in the same file cannot produce a false positive."""
+    start = source_text.index(signature)
+    brace_start = source_text.index("{", start)
+    depth = 0
+    i = brace_start
+    while True:
+        ch = source_text[i]
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return source_text[brace_start : i + 1]
+        i += 1
+
+
+def source_structural_probe(tag: str, cpu: str) -> dict[str, bool]:
+    """Ablation 3's structural confirmation. `ProtosObjectValue.readLocalSlot` is called from
+    the exact same call sites with the exact same fully-qualified frame name in both variants
+    (unlike ablations 1/2, which bypass a call site entirely), and the ablated
+    `java.util.LinkedHashMap.containsKey`/`get` are simple enough to be JIT-inlined, so their
+    absence/presence is not a reliable JFR-sampled-frame signal (see module docstring). This
+    instead reads `/opt/protos-source` - the exact patched-or-unmodified source tree the image
+    was built from, copied verbatim by the Dockerfile - and inspects `readLocalSlot`'s method
+    body directly."""
+    object_value_source = output([
+        "docker", "run", "--rm", "--network", "none",
+        "--cpuset-cpus", cpu,
+        "--entrypoint", "cat", tag,
+        f"{SOURCE_ROOT}/{READ_LOCAL_SLOT_SOURCE_PATH}",
+    ])
+    activation_source = output([
+        "docker", "run", "--rm", "--network", "none",
+        "--cpuset-cpus", cpu,
+        "--entrypoint", "cat", tag,
+        f"{SOURCE_ROOT}/{ACTIVATION_SOURCE_PATH}",
+    ])
+    method_body = _extract_method_body(object_value_source, READ_LOCAL_SLOT_SIGNATURE)
+    return {
+        "marker_present": ABLATION_3_MARKER_COMMENT in method_body,
+        "contains_key_absent": "containsKey" not in method_body,
+        "single_get_present": method_body.count(".get(name)") == 1,
+        "captured_lexical_traversal_present": (
+            CAPTURED_LEXICAL_TRAVERSAL_MARKER in activation_source
+        ),
+    }
+
+
 def control_source(tag: str, work: Path, item: dict[str, Any]) -> tuple[str, Path]:
     canonical_source = "/opt/perf010a/corpus/" + item["source"]
     source_text = output([
@@ -550,7 +705,16 @@ def run_matrix(
     cfg: dict[str, Any], tags: dict[str, str], cpu: str, work: Path,
     absent_markers: tuple[str, ...] = SEMANTIC_MARKERS,
     present_marker: str = HELPER_MARKER,
+    *,
+    warmup: int | None = None,
+    steady: int | None = None,
+    collect_structural: bool = True,
 ) -> list[dict[str, Any]]:
+    # `warmup`/`steady` default to the config's reference-scale values (used by `reference`);
+    # `smoke` passes SMOKE_WARMUP_ITERATIONS/SMOKE_STEADY_ITERATIONS explicitly instead, since
+    # it is an admission/correctness gate, not a reduced reference run (see module docstring).
+    warmup = cfg["warmup_iterations"] if warmup is None else warmup
+    steady = cfg["steady_iterations"] if steady is None else steady
     results = []
     for item in cfg["controls"]:
         workload = item["id"]
@@ -580,7 +744,7 @@ def run_matrix(
                 try:
                     timing_result = timing(
                         tag, cpu, work, source_host, source_container,
-                        item["expected"], label, cfg["warmup_iterations"], cfg["steady_iterations"],
+                        item["expected"], label, warmup, steady,
                     )
                     print(
                         f"TIMING PASS workload={workload} variant={variant} mode={mode} "
@@ -597,12 +761,12 @@ def run_matrix(
                         flush=True,
                     )
 
-                if execution_failure is None:
+                if execution_failure is None and collect_structural:
                     print(f"STRUCTURAL BEGIN workload={workload} variant={variant} mode={mode}", flush=True)
                     try:
                         structural_result = structural(
                             tag, cpu, work, source_host, source_container,
-                            item["expected"], label, cfg["warmup_iterations"], cfg["steady_iterations"],
+                            item["expected"], label, warmup, steady,
                             absent_markers, present_marker,
                         )
                         print(
@@ -620,6 +784,12 @@ def run_matrix(
                             f"detail={execution_failure['detail'][:200]!r}",
                             flush=True,
                         )
+                elif execution_failure is None:
+                    print(
+                        f"STRUCTURAL SKIPPED workload={workload} variant={variant} mode={mode} "
+                        "(source-marker structural mode; see source_structural_probe)",
+                        flush=True,
+                    )
 
                 by_mode[mode] = {
                     "timing": timing_result,
@@ -631,7 +801,11 @@ def run_matrix(
     return results
 
 
-def classify_workload(entry: dict[str, Any], ablation: str = "1") -> dict[str, Any]:
+def classify_workload(
+    entry: dict[str, Any],
+    ablation: str = "1",
+    source_markers: dict[str, dict[str, bool]] | None = None,
+) -> dict[str, Any]:
     baseline = entry["variants"]["baseline"]
     ablation_variant = entry["variants"]["ablation"]
 
@@ -643,7 +817,24 @@ def classify_workload(entry: dict[str, Any], ablation: str = "1") -> dict[str, A
     correctness_confirmed = not execution_failures
 
     structural_ok = correctness_confirmed
-    if correctness_confirmed:
+    if correctness_confirmed and ablation == "3":
+        # Source-derived, not JFR-derived (see source_structural_probe): a single per-image
+        # check, identical across all four workloads, rather than a per-workload JFR profile.
+        if source_markers is None:
+            structural_ok = False
+        else:
+            b_src = source_markers["baseline"]
+            a_src = source_markers["ablation"]
+            structural_ok = (
+                a_src["marker_present"]
+                and a_src["contains_key_absent"]
+                and a_src["single_get_present"]
+                and a_src["captured_lexical_traversal_present"]
+                and b_src["captured_lexical_traversal_present"]
+                and not b_src["marker_present"]
+                and not b_src["contains_key_absent"]
+            )
+    elif correctness_confirmed:
         for mode in ("canonical", "control"):
             b_markers = baseline[mode]["structural"]["markers"]
             a_markers = ablation_variant[mode]["structural"]["markers"]
@@ -706,18 +897,41 @@ def smoke(ablation: str = "1") -> None:
                 f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
             )
 
+    # Ablation 3's structural confirmation is a single per-image source-marker check (see
+    # source_structural_probe), not a per-workload JFR profile, so smoke skips the JFR
+    # structural stage for it entirely (collect_structural=False below) rather than running it
+    # at any scale. Ablations 1/2 still need JFR to confirm their call-site bypass is actually
+    # in effect - that is the "specific correctness assertion" this admission gate exists to
+    # make - so they keep it, just at SMOKE_* scale instead of the config's reference scale.
+    source_markers = (
+        {variant: source_structural_probe(tags[variant], cpu) for variant in VARIANTS}
+        if ablation == "3"
+        else None
+    )
+
     with tempfile.TemporaryDirectory(prefix="perf010a-smoke-") as tmp:
         work = Path(tmp)
         matrix = run_matrix(
-            cfg, tags, cpu, work, profile["absent_markers"], profile["present_marker"]
+            cfg, tags, cpu, work, profile["absent_markers"], profile["present_marker"],
+            warmup=SMOKE_WARMUP_ITERATIONS, steady=SMOKE_STEADY_ITERATIONS,
+            collect_structural=(ablation != "3"),
         )
 
-    classifications = [classify_workload(entry, ablation) for entry in matrix]
+    classifications = [
+        classify_workload(entry, ablation, source_markers) for entry in matrix
+    ]
 
     print("PERF010A_SMOKE_HARNESS_REVISION=" + harness_revision)
     print(f"PERF010A_SMOKE_SLICE={profile['expected_slice']}")
+    print(
+        f"PERF010A_SMOKE_SCALE=warmup={SMOKE_WARMUP_ITERATIONS} steady={SMOKE_STEADY_ITERATIONS}"
+        f" (reference scale: warmup={cfg['warmup_iterations']} steady={cfg['steady_iterations']})"
+    )
     print("PERF010A_SMOKE_WORKLOADS=" + str(len(matrix)))
     print("PERF010A_SMOKE_EVIDENCE_UNITS=" + str(len(matrix) * len(VARIANTS) * 2 * 2))
+    if source_markers is not None:
+        print("PERF010A_SMOKE_SOURCE_MARKERS_BASELINE=" + json.dumps(source_markers["baseline"]))
+        print("PERF010A_SMOKE_SOURCE_MARKERS_ABLATION=" + json.dumps(source_markers["ablation"]))
     for entry, classification in zip(matrix, classifications):
         print(
             f"PERF010A_SMOKE_WORKLOAD workload={entry['workload']} "
@@ -729,6 +943,49 @@ def smoke(ablation: str = "1") -> None:
 
 
 def scope_of_ablation_readme(ablation: str, cfg: dict[str, Any]) -> list[str]:
+    if ablation == "3":
+        return [
+            "## Scope of the ablation",
+            "",
+            "`ProtosObjectValue.readLocalSlot` (called from `ProtosActivation.lookup`'s own "
+            "local context and captured-lexical-context walk, and from many other production "
+            "call sites throughout the codebase) is the single method transformed by "
+            "`ablation-3.patch`: the redundant `localSlots.containsKey(name)` probe followed "
+            "by a second `localSlots.get(name)` read is replaced with a single "
+            "`localSlots.get(name)`, discriminating ABSENT from any stored value via "
+            "`localSlots`' own invariant that no local slot value is ever null "
+            "(`createLocalSlot`/`assignLocalSlot` both require `Objects.requireNonNull(value, "
+            "...)`; `composeLocalSlotsFrom` only copies values already subject to that "
+            "invariant from another `ProtosObjectValue`).",
+            "",
+            "Unlike ablations 1 and 2, this is **not** a call-site bypass: `readLocalSlot` is "
+            "called from exactly the same sites, in exactly the same order, with exactly the "
+            "same fully-qualified name, in both variants. `ProtosActivation.lookup`'s local-"
+            "context-then-captured-lexical-contexts-then-receiver/prelude-fallback traversal, "
+            "lexical precedence, shadowing, and missing-name behavior are all untouched by "
+            "this patch (`ProtosActivation.java` is not one of `ablation-3.patch`'s targets). "
+            "This transformation is therefore claimed to be semantically equivalent by "
+            "construction, not diagnostic-only-and-expected-to-fail-closed like ablation 2.",
+            "",
+            "Because `readLocalSlot`'s call sites and frame name are unchanged, this "
+            "ablation's structural confirmation is source-derived rather than JFR-derived: "
+            "`java.util.LinkedHashMap.containsKey`/`get` are simple enough to be JIT-inlined "
+            "and are not a reliable sampled-frame signal either way. `source_structural_probe` "
+            "reads `/opt/protos-source` (the exact patched-or-unmodified source tree the image "
+            "was built from) and confirms, scoped to `readLocalSlot`'s own method body: the "
+            "diagnostic marker comment is present, the redundant `containsKey` probe is "
+            "absent, the single `get(name)` read is present (ablation variant only), and "
+            "`ProtosActivation.lookup`'s captured-lexical-context traversal loop is present, "
+            "byte-for-byte unchanged, in both variants.",
+            "",
+            "`ProtosActivation.java`, `ProtosBytecodeRootNode.java`, "
+            "`CanonicalToBytecodeLowerer.java`, the RootTag topology, the continuation "
+            "machinery, the `CallTarget` architecture, and source/debugger identity are all "
+            "untouched by this patch. This is a diagnostic ablation, not (by itself) a "
+            "production optimization change; per this slice's scope, no change is made to "
+            "`guillermomolina/protos` regardless of this experiment's outcome. Never "
+            "published to `guillermomolina/protos`.",
+        ]
     if ablation == "1":
         return [
             "## Scope of the ablation",
@@ -822,6 +1079,12 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
                 f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
             )
 
+    source_markers = (
+        {variant: source_structural_probe(tags[variant], cpu) for variant in VARIANTS}
+        if ablation == "3"
+        else None
+    )
+
     with tempfile.TemporaryDirectory(prefix="perf010a-") as tmp:
         work = Path(tmp)
         matrix = run_matrix(
@@ -829,7 +1092,8 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         )
 
     classifications = {
-        entry["workload"]: classify_workload(entry, ablation) for entry in matrix
+        entry["workload"]: classify_workload(entry, ablation, source_markers)
+        for entry in matrix
     }
     overall_valid = all(c[status_key] == "VALID" for c in classifications.values())
 
@@ -862,6 +1126,7 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         "jfr_recording_phase": cfg["jfr_recording_phase"],
         "timing_recording_phase": cfg["timing_recording_phase"],
         "external_baseline": cfg["external_baseline"],
+        "source_structural_markers": source_markers,
         "matrix": matrix,
         "classifications": classifications,
         "overall_result": "VALID" if overall_valid else "INVALID",
@@ -1046,7 +1311,8 @@ def main():
         choices=ABLATIONS,
         default="1",
         help="which causal ablation slice to run: 1 (semantic/helper Bytecode dispatch, "
-        "default) or 2 (ProtosActivation.lookup)",
+        "default), 2 (ProtosActivation.lookup), or 3 (ProtosObjectValue.readLocalSlot's "
+        "redundant containsKey+get)",
     )
     args = ap.parse_args()
 

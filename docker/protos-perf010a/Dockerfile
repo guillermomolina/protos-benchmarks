@@ -19,7 +19,7 @@
 #
 #   VARIANT=baseline  - unmodified Protos, no diagnostic patch applied.
 #   VARIANT=ablation   - the patch named by ABLATION_PATCH applied before the build. This
-#                        harness now backs two distinct causal ablations sharing this same
+#                        harness now backs three distinct causal ablations sharing this same
 #                        Dockerfile/image layout, selected only by which patch is supplied:
 #                          - ABLATION_PATCH=ablation.patch (default) - PERF010A_ABLATION_1,
 #                            bypasses the semantic/helper Bytecode dispatch wrapper (see
@@ -27,6 +27,15 @@
 #                          - ABLATION_PATCH=ablation-2.patch - PERF010A_ABLATION_2, bypasses
 #                            ProtosActivation.lookup with activation.context().readLocalSlot(name)
 #                            (see docker/protos-perf010a/ablation-2.patch).
+#                          - ABLATION_PATCH=ablation-3.patch - PERF010A_ABLATION_3, replaces the
+#                            redundant containsKey(name)+get(name) probe-then-read inside
+#                            ProtosObjectValue.readLocalSlot with a single get(name) (see
+#                            docker/protos-perf010a/ablation-3.patch). The full patched (or, for
+#                            baseline, unmodified) /src tree is copied to /opt/protos-source in
+#                            every image below; this ablation's structural confirmation reads
+#                            that source directly instead of JFR call-stack frames, since the
+#                            ablated Map operations are simple enough to be JIT-inlined and are
+#                            not a reliable sampled-frame signal.
 #                        ABLATION_SLICE records which slice produced the image, for the
 #                        structural marker written to /opt/perf010a/ablation-slice.txt.
 #

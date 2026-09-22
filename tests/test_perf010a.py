@@ -386,6 +386,255 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertEqual(1000, classification["protos_baseline_steady_median_ns"])
         self.assertEqual({"canonical", "control"}, set(classification["execution_failures"]))
 
+    # --- smoke cost boundary (must stay far cheaper than reference scale) ---
+
+    def test_smoke_scale_is_far_smaller_than_any_reference_scale(self):
+        for ablation in perf010a.ABLATIONS:
+            cfg = perf010a.validate(ablation)
+            self.assertLess(
+                perf010a.SMOKE_WARMUP_ITERATIONS, cfg["warmup_iterations"], ablation
+            )
+            self.assertLess(
+                perf010a.SMOKE_STEADY_ITERATIONS, cfg["steady_iterations"], ablation
+            )
+
+    def test_run_matrix_defaults_to_reference_scale_when_unspecified(self):
+        # run_matrix's warmup/steady default (None -> cfg's own reference-scale values) must
+        # stay reference's behavior; only smoke() is allowed to override it to SMOKE_* scale.
+        import inspect
+        sig = inspect.signature(perf010a.run_matrix)
+        self.assertIsNone(sig.parameters["warmup"].default)
+        self.assertIsNone(sig.parameters["steady"].default)
+        self.assertTrue(sig.parameters["collect_structural"].default)
+
+    # --- PERF010A_ABLATION_3 (ProtosObjectValue.readLocalSlot) coverage ---
+
+    def test_ablation3_static_contract(self):
+        cfg = perf010a.validate("3")
+        self.assertEqual("PERF010-A", cfg["perf_item"])
+        self.assertEqual("PERF010", cfg["parent_perf_item"])
+        self.assertEqual("PERF010A_ABLATION_3", cfg["slice"])
+        self.assertTrue(cfg["diagnostic_claim"])
+        self.assertEqual(
+            "6e7d89194925ba9fa2cd9c5c45aefa72d9939621", cfg["protos_revision"]
+        )
+
+    def test_ablation3_pinned_revision_differs_from_ablation1_and_2_deliberately(self):
+        cfg1 = json.loads((ROOT / "config/perf010a.json").read_text(encoding="utf-8"))
+        cfg3 = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        self.assertNotEqual(cfg1["protos_revision"], cfg3["protos_revision"])
+        self.assertIn("protos_revision_note", cfg3)
+
+    def test_ablation3_experiment_matrix_matches_ablation1_exactly(self):
+        cfg1 = json.loads((ROOT / "config/perf010a.json").read_text(encoding="utf-8"))
+        cfg3 = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        self.assertEqual(cfg1["controls"], cfg3["controls"])
+        self.assertEqual(cfg1["operation_count"], cfg3["operation_count"])
+        self.assertEqual(cfg1["warmup_iterations"], cfg3["warmup_iterations"])
+        self.assertEqual(cfg1["steady_iterations"], cfg3["steady_iterations"])
+        self.assertEqual(cfg1["execution_sample_period"], cfg3["execution_sample_period"])
+        self.assertEqual(cfg1["variants"], cfg3["variants"])
+        self.assertEqual(cfg1["toolchain"], cfg3["toolchain"])
+
+    def test_ablation3_patch_touches_exactly_read_local_slot(self):
+        cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        targets = cfg["ablation_patch_targets"]
+        self.assertEqual(1, len(targets))
+        self.assertEqual(
+            "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java",
+            targets[0],
+        )
+        self.assertEqual(1, patch_text.count("--- a/"))
+
+    def test_ablation3_patch_removes_redundant_contains_key_and_get(self):
+        cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        self.assertIn("-        return localSlots.containsKey(name)", patch_text)
+        self.assertIn("-                ? Optional.of(localSlots.get(name))", patch_text)
+        self.assertIn("+        Object value = localSlots.get(name);", patch_text)
+        self.assertIn("+        return value != null ? Optional.of(value) : Optional.empty();", patch_text)
+
+    def test_ablation3_patch_does_not_touch_lexical_traversal_or_other_mechanisms(self):
+        cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        for forbidden in (
+            "ProtosActivation.java",
+            "ProtosBytecodeRootNode.java",
+            "CanonicalToBytecodeLowerer.java",
+            "capturedLexicalContexts",
+            "continueAt",
+            "RootTag",
+            "ContinuationResult",
+            "ProtosSemanticBytecodeRootNode",
+        ):
+            self.assertNotIn(forbidden, patch_text, forbidden)
+
+    def test_ablation3_patch_carries_the_diagnostic_marker_comment(self):
+        cfg = json.loads((ROOT / "config/perf010a-3.json").read_text(encoding="utf-8"))
+        patch_text = (ROOT / cfg["ablation_patch"]).read_text(encoding="utf-8")
+        self.assertIn("PERF010A_ABLATION_3", patch_text)
+
+    def test_ablation3_dockerfile_supports_selectable_patch(self):
+        dockerfile = (ROOT / "docker/protos-perf010a/Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("ARG ABLATION_PATCH=ablation.patch", dockerfile)
+        self.assertIn("${ABLATION_PATCH}", dockerfile)
+        self.assertIn("/opt/protos-source", dockerfile)
+
+    def test_ablation3_image_identity_distinct_from_1_and_2(self):
+        self.assertEqual(("1", "2", "3"), perf010a.ABLATIONS)
+        cfg1 = perf010a.load(perf010a.CONFIG)
+        cfg2 = perf010a.load(perf010a.CONFIG_2)
+        cfg3 = perf010a.load(perf010a.CONFIG_3)
+        self.assertEqual(
+            {"PERF010A_ABLATION_1", "PERF010A_ABLATION_2", "PERF010A_ABLATION_3"},
+            {cfg1["slice"], cfg2["slice"], cfg3["slice"]},
+        )
+
+    def test_extract_method_body_scopes_to_the_target_method_only(self):
+        source = (
+            "class X {\n"
+            "    boolean hasLocalSlot(String name) {\n"
+            "        return localSlots.containsKey(name);\n"
+            "    }\n"
+            "\n"
+            "    public Optional<Object> readLocalSlot(String name) {\n"
+            "        Object value = localSlots.get(name);\n"
+            "        return value != null ? Optional.of(value) : Optional.empty();\n"
+            "    }\n"
+            "}\n"
+        )
+        body = perf010a._extract_method_body(source, perf010a.READ_LOCAL_SLOT_SIGNATURE)
+        self.assertNotIn("containsKey", body)
+        self.assertIn("localSlots.get(name)", body)
+
+    def test_source_structural_markers_true_for_ablated_method_body(self):
+        ablated_source = (
+            "public Optional<Object> readLocalSlot(String name) {\n"
+            "        Objects.requireNonNull(name, \"name\");\n"
+            "        // PERF010A_ABLATION_3 diagnostic transformation\n"
+            "        Object value = localSlots.get(name);\n"
+            "        return value != null ? Optional.of(value) : Optional.empty();\n"
+            "    }\n"
+        )
+        body = perf010a._extract_method_body(
+            "class X {\n    " + ablated_source + "}\n", perf010a.READ_LOCAL_SLOT_SIGNATURE
+        )
+        self.assertIn(perf010a.ABLATION_3_MARKER_COMMENT, body)
+        self.assertNotIn("containsKey", body)
+        self.assertEqual(1, body.count(".get(name)"))
+
+    def test_source_structural_markers_false_for_unmodified_baseline_method_body(self):
+        baseline_source = (
+            "public Optional<Object> readLocalSlot(String name) {\n"
+            "        Objects.requireNonNull(name, \"name\");\n"
+            "        return localSlots.containsKey(name)\n"
+            "                ? Optional.of(localSlots.get(name))\n"
+            "                : Optional.empty();\n"
+            "    }\n"
+        )
+        body = perf010a._extract_method_body(
+            "class X {\n    " + baseline_source + "}\n", perf010a.READ_LOCAL_SLOT_SIGNATURE
+        )
+        self.assertNotIn(perf010a.ABLATION_3_MARKER_COMMENT, body)
+        self.assertIn("containsKey", body)
+
+    def test_classify_workload_ablation3_uses_source_markers_not_jfr(self):
+        def cell(median_ns):
+            return {
+                "timing": {"steady_summary": {"median_ns": median_ns}},
+                "structural": None,
+                "execution_failure": None,
+            }
+
+        entry = {
+            "workload": "micro/slot-read",
+            "variants": {
+                "baseline": {
+                    "canonical": cell(1000),
+                    "control": cell(100),
+                },
+                "ablation": {
+                    "canonical": cell(700),
+                    "control": cell(100),
+                },
+            },
+        }
+        source_markers = {
+            "baseline": {
+                "marker_present": False,
+                "contains_key_absent": False,
+                "single_get_present": False,
+                "captured_lexical_traversal_present": True,
+            },
+            "ablation": {
+                "marker_present": True,
+                "contains_key_absent": True,
+                "single_get_present": True,
+                "captured_lexical_traversal_present": True,
+            },
+        }
+        classification = perf010a.classify_workload(entry, "3", source_markers)
+        self.assertTrue(classification["correctness_confirmed"])
+        self.assertTrue(classification["structural_ablation_confirmed"])
+        self.assertEqual("VALID", classification["perf010a_ablation_3"])
+        self.assertEqual(300, classification["removed_ns"])
+
+    def test_classify_workload_ablation3_without_source_markers_is_invalid(self):
+        def cell(median_ns):
+            return {
+                "timing": {"steady_summary": {"median_ns": median_ns}},
+                "structural": None,
+                "execution_failure": None,
+            }
+
+        entry = {
+            "workload": "micro/slot-read",
+            "variants": {
+                "baseline": {"canonical": cell(1000), "control": cell(100)},
+                "ablation": {"canonical": cell(700), "control": cell(100)},
+            },
+        }
+        classification = perf010a.classify_workload(entry, "3", None)
+        self.assertFalse(classification["structural_ablation_confirmed"])
+        self.assertEqual("INVALID", classification["perf010a_ablation_3"])
+
+    def test_classify_workload_ablation3_baseline_still_showing_ablation_marker_is_invalid(self):
+        # If the "baseline" image's source somehow already carries the ablation marker/
+        # single-get pattern, the source-marker check cannot distinguish baseline from
+        # ablation, so it must not be confirmed VALID.
+        def cell(median_ns):
+            return {
+                "timing": {"steady_summary": {"median_ns": median_ns}},
+                "structural": None,
+                "execution_failure": None,
+            }
+
+        entry = {
+            "workload": "micro/slot-read",
+            "variants": {
+                "baseline": {"canonical": cell(1000), "control": cell(100)},
+                "ablation": {"canonical": cell(700), "control": cell(100)},
+            },
+        }
+        source_markers = {
+            "baseline": {
+                "marker_present": True,
+                "contains_key_absent": True,
+                "single_get_present": True,
+                "captured_lexical_traversal_present": True,
+            },
+            "ablation": {
+                "marker_present": True,
+                "contains_key_absent": True,
+                "single_get_present": True,
+                "captured_lexical_traversal_present": True,
+            },
+        }
+        classification = perf010a.classify_workload(entry, "3", source_markers)
+        self.assertFalse(classification["structural_ablation_confirmed"])
+        self.assertEqual("INVALID", classification["perf010a_ablation_3"])
+
 
 if __name__ == "__main__":
     unittest.main()

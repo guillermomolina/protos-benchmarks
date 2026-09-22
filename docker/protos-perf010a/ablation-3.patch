@@ -1,0 +1,29 @@
+diff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java
+index 12f9f00b..a7cbdc5a 100644
+--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java
++++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java
+@@ -98,9 +98,21 @@ public class ProtosObjectValue implements TruffleObject {
+
+     public Optional<Object> readLocalSlot(String name) {
+         Objects.requireNonNull(name, "name");
+-        return localSlots.containsKey(name)
+-                ? Optional.of(localSlots.get(name))
+-                : Optional.empty();
++        // PERF010A_ABLATION_3 diagnostic transformation (protos-benchmarks
++        // docker/protos-perf010a/ablation-3.patch): replace the redundant
++        // containsKey(name) + get(name) probe-then-read with a single get(name), relying on
++        // localSlots' own invariant that no local slot value is ever null (createLocalSlot and
++        // assignLocalSlot both require a non-null value via Objects.requireNonNull, and
++        // composeLocalSlotsFrom only copies values already subject to that invariant from
++        // another ProtosObjectValue) to distinguish ABSENT from any semantically valid stored
++        // value without a second map probe. This is a diagnostic-only evidence intervention for
++        // PERF010-A's third causal ablation
++        // (THIRD_ABLATION_TARGET=ProtosObjectValue.readLocalSlot); it does not alter captured-
++        // lexical-context traversal, lexical precedence, shadowing, or missing-name behavior,
++        // all of which live in ProtosActivation.lookup and are untouched by this patch. Never
++        // publish this change to guillermomolina/protos.
++        Object value = localSlots.get(name);
++        return value != null ? Optional.of(value) : Optional.empty();
+     }
+
+     public Map<String, Object> localSlotsSnapshot() {

@@ -221,7 +221,8 @@ perf008-reference:
 .PHONY: perf010a-validate perf010a-smoke perf010a-reference
 
 # ABLATION selects which PERF010-A causal ablation slice runs: 1 (semantic/helper Bytecode
-# dispatch, config/perf010a.json) or 2 (ProtosActivation.lookup, config/perf010a-2.json).
+# dispatch, config/perf010a.json), 2 (ProtosActivation.lookup, config/perf010a-2.json), or 3
+# (ProtosObjectValue.readLocalSlot's redundant containsKey+get, config/perf010a-3.json).
 # Defaults to 1 so these targets' existing behavior (and PERF010A_ABLATION_1's already-
 # retained results/perf010a-1 evidence) is unchanged when ABLATION is not passed explicitly.
 ABLATION ?= 1
@@ -233,8 +234,8 @@ perf010a-smoke:
 	python3 runner/perf010a.py smoke --ablation $(ABLATION)
 
 perf010a-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-reference HARNESS_REVISION=<published-PERF010A-SHA> OUT=results/perf010a-1 [ABLATION=1|2]" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf010a-reference HARNESS_REVISION=<published-PERF010A-SHA> OUT=results/perf010a-1 [ABLATION=1|2]" >&2; exit 2; }
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-reference HARNESS_REVISION=<published-PERF010A-SHA> OUT=results/perf010a-1 [ABLATION=1|2|3]" >&2; exit 2; }
+	@test -n "$(OUT)" || { echo "usage: make perf010a-reference HARNESS_REVISION=<published-PERF010A-SHA> OUT=results/perf010a-1 [ABLATION=1|2|3]" >&2; exit 2; }
 	python3 runner/perf010a.py reference --ablation $(ABLATION) --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
 .PHONY: perf004a-validate perf004a-smoke perf004a-reference
 

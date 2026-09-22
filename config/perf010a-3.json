@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_ABLATION_3",
+  "phase": "causal-lexical-slot-read-ablation",
+  "diagnostic_claim": true,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "6e7d89194925ba9fa2cd9c5c45aefa72d9939621",
+  "protos_revision_note": "current origin/main at this third-ablation investigation's start (2026-09-22); the single file touched by ablation-3.patch (ProtosObjectValue.java), plus ProtosActivation.java and toolchain.json, are byte-identical between this revision and PERF010A_ABLATION_1/2's pin bc0471184bf6dbbf03d0c6b09ef7b9e28aede014, confirmed by `git diff` across both revisions for those exact paths; the commits between the two pins are unrelated Group/Actor conformance-corpus and tooling migration work (TOOL009-B/TOOL009-C), not execution-engine changes",
+  "ablation_patch": "docker/protos-perf010a/ablation-3.patch",
+  "ablation_patch_targets": [
+    "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java"
+  ],
+  "third_ablation_target": "ProtosObjectValue.readLocalSlot",
+  "diagnostic_transformation": "containsKey(name) + get(name) -> single get(name), discriminating ABSENT from any stored value via localSlots' own invariant that no local slot value is ever null (createLocalSlot/assignLocalSlot both require Objects.requireNonNull(value, ...); composeLocalSlotsFrom only copies values already subject to that invariant)",
+  "historical_evidence": {
+    "perf004_a_cross_language_baseline": "results/perf004-a",
+    "perf004_b2c_causal_control": "results/perf004-b2c",
+    "perf004_b2d_paired_jfr": "results/perf004-b2d",
+    "perf006_d3": "results/perf006-d3",
+    "perf008_steady_state_full_stack": "results/perf008",
+    "perf010a_ablation_1": "results/perf010a-1",
+    "perf010a_ablation_2": "results/perf010a-2"
+  },
+  "external_baseline": {
+    "source": "results/perf004-a",
+    "same_run_as_protos_measurement": false,
+    "reason": "results/perf004-a pins a different Protos revision (4a03efc15620b37b2e418b3df30b4a26486446ec) and a different container base image (ol8, not this harness's ol10) than this experiment; AGENTS.work/REPRODUCIBILITY.md's revision-pinning discipline forbids combining it directly with a current-revision PROTOS_BASELINE_COST/PROTOS_ABLATION_COST measurement into a single EXCESS_COST/ATTRIBUTABLE_FRACTION number. It is retained here as a labelled historical reference only; ATTRIBUTABLE_FRACTION is reported as NOT_ESTABLISHED unless and until a current-revision, current-host external (e.g. Python/JavaScript) measurement is added under the same Evidence Unit."
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 20,
+  "steady_iterations": 100,
+  "execution_sample_period": "10 ms",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "steady_only",
+  "timing_recording_phase": "steady_only_no_jfr",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "variants": ["baseline", "ablation"],
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "continuation_markers": [
+    "ContinuationResult",
+    "continueWith",
+    "yield"
+  ],
+  "structural_confirmation_mode": "source",
+  "structural_confirmation_note": "Unlike ablation 1/2, this ablation does not bypass a call site (readLocalSlot is still invoked from the same call sites, with the same fully-qualified frame name); java.util.LinkedHashMap.containsKey/get are simple enough to be inlined by the JIT and are not a reliable JFR-sampled-frame signal. Structural confirmation instead reads the exact patched (or, for baseline, unmodified) source tree the image was built from (/opt/protos-source) and inspects ProtosObjectValue.readLocalSlot's method body directly, scoped to that single method so other legitimate containsKey usages elsewhere in the file do not produce false positives.",
+  "structural_source_markers": {
+    "target_file": "src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java",
+    "target_method_signature": "public Optional<Object> readLocalSlot(String name)",
+    "marker_present_in_ablation_only": "PERF010A_ABLATION_3",
+    "redundant_pattern_absent_in_ablation": "containsKey",
+    "single_read_pattern_present_in_ablation": ".get(name)",
+    "captured_lexical_traversal_file": "src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java",
+    "captured_lexical_traversal_marker_present_in_both": "for (ProtosObjectValue lexicalContext : capturedLexicalContexts)"
+  },
+  "output": "results/perf010a-3"
+}

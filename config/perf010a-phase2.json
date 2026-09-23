@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_PHASE2_CAUSAL_TWO_REVISION_COMPARATOR",
+  "phase": "causal-two-revision-comparator",
+  "diagnostic_claim": false,
+  "causal_two_revision_comparator": true,
+  "authorizing_record": "guillermomolina/protos-project-docs@ed99717e5c31a607889f0cc03d24d736eab479aa docs/project/evidence/PERF010-A/PERF010-A_STABLE_IDENTITY_PHASE1_MEASUREMENT_ANALYSIS.md (PHASE2_ACTION=PROCEED_TO_CAUSAL_MEASUREMENT)",
+  "causal_question": "does correcting the accidentally polymorphic/megamorphic call-site identity produce a causal runtime speedup, and is it potentially relevant to the large PERF010-A performance gap under investigation?",
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "control": {
+    "role": "control",
+    "variant": "baseline",
+    "protos_revision": "2b3a88389da7228caed231a90b14091cf2841115",
+    "protos_revision_note": "the exact revision already pinned and human-confirmed by config/perf010a-guarded-call.json's PERF010A_GUARDED_CALL experiment; reused here unmodified as the CONTROL revision, built as an ordinary VARIANT=baseline image (no ablation/guarded-call patch is applied to either Phase 2 image - see both_variants_baseline/patches_applied below)."
+  },
+  "intervention": {
+    "role": "intervention",
+    "variant": "baseline",
+    "protos_revision": "3e8e6b565c95eb5098c2168d241536ba13ad19e9",
+    "protos_revision_note": "the real guillermomolina/protos revision this Evidence Unit compares against the CONTROL revision above, built as an ordinary VARIANT=baseline image from its own checkout. This harness makes no independent claim about the content of the commits between the two revisions beyond what building and running each pinned revision itself establishes; the Protos revision is the only intended difference in code between the two images."
+  },
+  "both_variants_baseline": true,
+  "patches_applied": "none",
+  "patches_applied_note": "Phase 2 never builds a VARIANT=ablation image and never supplies a non-empty ablation_patch for either role; docker/protos-perf010a/Dockerfile only applies a patch when VARIANT=ablation, so both the control and intervention images are ordinary, unmodified baseline builds of their own pinned protos_revision. The harness additionally reads back each built image's /opt/perf010a/ablation-slice.txt (must be exactly 'none' for both roles) before any timing runs - see _build_and_probe_phase2_images.",
+  "historical_evidence": {
+    "perf004_a_cross_language_baseline": "results/perf004-a",
+    "perf004_b2c_causal_control": "results/perf004-b2c",
+    "perf004_b2d_paired_jfr": "results/perf004-b2d",
+    "perf006_d3": "results/perf006-d3",
+    "perf008_steady_state_full_stack": "results/perf008",
+    "perf010a_ablation_1": "results/perf010a-1",
+    "perf010a_ablation_2": "results/perf010a-2",
+    "perf010a_ablation_3": "results/perf010a-3",
+    "perf010a_ablation_4": "results/perf010a-4",
+    "perf010a_measurement_discrimination": "results/perf010a-discrimination",
+    "perf010a_guarded_call_architecture": "results/perf010a-guarded-call",
+    "perf010a_stable_identity_phase1": "results/perf010a-stable-identity-phase1"
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 120,
+  "steady_iterations": 100,
+  "execution_sample_period": "10 ms",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "not_collected",
+  "jfr_recording_note": "Phase 2 is clean causal timing only (no JFR, no compiler tracing, no source-identity instrumentation) - see AGENTS.work/REPRODUCIBILITY.md's diagnostic-instrumentation/timing separation rule and this slice's own scope instructions.",
+  "timing_recording_phase": "steady_only_no_jfr",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "primary_causal_workloads": ["micro/method-call", "runtime/monomorphic-dispatch"],
+  "negative_coverage_workloads": ["micro/slot-read", "micro/closure-call"],
+  "workload_coverage_note": "micro/method-call and runtime/monomorphic-dispatch are the PRIMARY workloads for this causal question (they exercise a composed send / monomorphic dispatch call site); micro/slot-read and micro/closure-call are retained as negative coverage for comparability with prior PERF010-A slices, not as direct evidence for this specific call-site-identity question. The retained full Evidence Unit includes all four.",
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "block_order": ["A", "B", "A", "B"],
+  "block_order_note": "Deterministic AB/BA counterbalanced design, 4 blocks (2 reps of each order), no randomness - reuses the exact same counterbalancing discipline as config/perf010a-0.json and config/perf010a-0-phase1.json. Block 'A': CONTROL runs first, INTERVENTION second. Block 'B': INTERVENTION runs first, CONTROL second. Canonical/workload-control pairing within a revision/role is preserved in both orders; only which revision/role runs first is counterbalanced.",
+  "causal_formula": "canonical_improvement = control_canonical_median_ns - intervention_canonical_median_ns; control_movement = control_workload_control_median_ns - intervention_workload_control_median_ns; paired_control_effect = canonical_improvement - control_movement. A positive paired_control_effect means INTERVENTION is faster than CONTROL once the workload-control's own measured movement between the two revisions/images has been subtracted out.",
+  "not_decided_by_this_evidence_unit": [
+    "REAL_BUT_SMALL vs MATERIAL vs ORDER_OF_MAGNITUDE_RELEVANT classification",
+    "DOMINANT_GAP_CAUSE",
+    "ATTRIBUTABLE_FRACTION / % of the externally observed gap explained"
+  ],
+  "output": "results/perf010a-phase2"
+}

@@ -183,7 +183,17 @@ DISCRIMINATION_ABLATION = "0"
 # ABLATION_PROFILES for the same reason "0" is: it has its own standalone validate/smoke/
 # reference functions and never routes through validate()/smoke()/reference().
 STABLE_IDENTITY_PHASE1_ABLATION = "0-phase1"
-ABLATIONS_WITH_DISCRIMINATION = ABLATIONS + (DISCRIMINATION_ABLATION, STABLE_IDENTITY_PHASE1_ABLATION)
+# "0-phase2" is the Phase 2 clean two-product-revision causal comparator (see the dedicated
+# section near the end of this module): unlike "0"/"0-phase1", it never builds a
+# VARIANT=ablation image at all - both its "control" and "intervention" roles are ordinary
+# VARIANT=baseline builds of two different pinned protos_revision values. It exists only so
+# build_image()'s tag-namespace/ablation-in-ABLATIONS_WITH_DISCRIMINATION assertion accepts it,
+# exactly like "0"/"0-phase1" before it; Phase 2 has its own standalone validate/smoke/reference
+# functions and never routes through validate()/smoke()/reference().
+PHASE2_ABLATION = "0-phase2"
+ABLATIONS_WITH_DISCRIMINATION = ABLATIONS + (
+    DISCRIMINATION_ABLATION, STABLE_IDENTITY_PHASE1_ABLATION, PHASE2_ABLATION,
+)
 # Ablations whose structural confirmation is source-derived (reads /opt/protos-source) rather
 # than JFR-frame-derived, because their call sites keep calling a same-named method in both
 # variants (see ablation 3's and 4's module-docstring rationale below).
@@ -3714,6 +3724,692 @@ def smoke_source_identity() -> None:
     print("PERF010A_SOURCE_IDENTITY_SMOKE_RETAINED=NO")
 
 
+# ---------------------------------------------------------------------------------------------
+# PERF010-A Phase 2 clean two-product-revision causal comparator (#691, authorized by
+# guillermomolina/protos-project-docs@ed99717e5c31a607889f0cc03d24d736eab479aa
+# docs/project/evidence/PERF010-A/PERF010A_STABLE_IDENTITY_PHASE1_MEASUREMENT_ANALYSIS.md,
+# PHASE2_ACTION=PROCEED_TO_CAUSAL_MEASUREMENT).
+#
+# Unlike every ablation above (which builds two images from the SAME pinned Protos revision, one
+# unmodified and one with a harness-local diagnostic patch applied only inside the Docker build),
+# Phase 2 builds two images from TWO DIFFERENT real, pinned Protos revisions
+# (config/perf010a-phase2.json's "control"/"intervention" blocks), both as ordinary
+# VARIANT=baseline images. No patch is ever applied to either image: docker/protos-perf010a/
+# Dockerfile only applies ABLATION_PATCH when VARIANT=ablation, which Phase 2 never requests (see
+# _build_and_probe_phase2_images, which also reads back each image's own
+# /opt/perf010a/ablation-slice.txt and fails closed unless it is exactly "none" for both roles).
+# The pinned Protos revision is therefore the only intended difference in executed code between
+# the two images.
+#
+# This reuses this module's existing counterbalanced-block/canonical-control-pairing/
+# stationarity/visible-timing machinery (control_source, timing_visible,
+# stationarity_diagnostics, run_visible) completely unmodified; only the per-block "which side
+# runs first" role (control/intervention, not baseline/ablation) and the causal-effect formula
+# (paired_control_effect, not paired_control_difference - see config/perf010a-phase2.json's
+# causal_formula) are new, so this experiment's own numbers are never confused with the
+# unrelated historical no-op discrimination or Phase 1 measurement-system-admission numbers.
+#
+# Like every other command in this module, `validate_phase2`/`phase2_smoke`/
+# `reference_phase2` follow validate << smoke << reference: validation is static/config-only
+# (no Docker, no timing); smoke is a minimum-cost correctness/admission gate over the full
+# four-workload matrix at SMOKE_WARMUP_ITERATIONS/SMOKE_STEADY_ITERATIONS and is never retained
+# as evidence; reference performs the full warmup=120/steady=100 Evidence Unit and is the only
+# command whose output is retained. This slice does not execute the full retained reference run
+# and does not classify CAUSAL_RUNTIME_SPEEDUP, DOMINANT_GAP_CAUSE, or ATTRIBUTABLE_FRACTION -
+# see config/perf010a-phase2.json's not_decided_by_this_evidence_unit.
+PHASE2_CONFIG = ROOT / "config/perf010a-phase2.json"
+PHASE2_EXPECTED_SLICE = "PERF010A_PHASE2_CAUSAL_TWO_REVISION_COMPARATOR"
+PHASE2_EXPECTED_CONTROL_REVISION = "2b3a88389da7228caed231a90b14091cf2841115"
+PHASE2_EXPECTED_INTERVENTION_REVISION = "3e8e6b565c95eb5098c2168d241536ba13ad19e9"
+PHASE2_ROLES = ("control", "intervention")
+PHASE2_BLOCK_ORDER = ("A", "B", "A", "B")
+PHASE2_PRIMARY_WORKLOADS = ("micro/method-call", "runtime/monomorphic-dispatch")
+PHASE2_NEGATIVE_COVERAGE_WORKLOADS = ("micro/slot-read", "micro/closure-call")
+# Never applied: both Phase 2 images are built with VARIANT=baseline, and
+# docker/protos-perf010a/Dockerfile only runs `git apply` when VARIANT=ablation. Reusing the
+# existing, already-empty no-op patch (rather than inventing a new file) means Phase 2 needs no
+# Dockerfile change - the COPY of this file is unconditional, but its content is irrelevant to a
+# baseline build.
+PHASE2_UNUSED_PATCH = "docker/protos-perf010a/noop.patch"
+PHASE2_OUTPUT_DIR = ROOT / "results/perf010a-phase2"
+
+
+def validate_phase2() -> dict[str, Any]:
+    """Phase 2 validation stage: static/configuration preconditions only, no Docker/timing. Fails
+    closed if config/perf010a-phase2.json does not pin exactly the two authorized revisions as
+    two distinct VARIANT=baseline roles, does not declare any ablation_patch at all, does not
+    reuse the exact PERF004-B2-D/PERF008 four-workload matrix unmodified, or does not carry the
+    counterbalanced 4-block A/B/A/B order."""
+    cfg = load(PHASE2_CONFIG)
+
+    assert cfg["schema_version"] == 1
+    assert cfg["perf_item"] == "PERF010-A"
+    assert cfg["parent_perf_item"] == "PERF010"
+    assert cfg["slice"] == PHASE2_EXPECTED_SLICE
+    assert cfg["causal_two_revision_comparator"] is True
+    assert cfg["diagnostic_claim"] is False
+    assert "ablation_patch" not in cfg, (
+        "Phase 2 must never declare a product-level ablation_patch in its config; the only "
+        "intended difference between the two images is the pinned protos_revision"
+    )
+
+    for role, expected_revision in (
+        ("control", PHASE2_EXPECTED_CONTROL_REVISION),
+        ("intervention", PHASE2_EXPECTED_INTERVENTION_REVISION),
+    ):
+        role_block = cfg[role]
+        assert role_block["role"] == role
+        assert role_block["variant"] == "baseline", (
+            f"Phase 2 {role} role must be built as VARIANT=baseline, got "
+            f"{role_block['variant']!r}"
+        )
+        assert role_block["protos_revision"] == expected_revision, (
+            f"Phase 2 {role} protos_revision mismatch: expected {expected_revision}, "
+            f"got {role_block['protos_revision']}"
+        )
+    assert cfg["control"]["protos_revision"] != cfg["intervention"]["protos_revision"], (
+        "PHASE2_SAME_REVISION_REJECTED: control and intervention must pin two distinct Protos "
+        "revisions - two images accidentally built from the same revision would not answer the "
+        "causal question this comparator exists to measure"
+    )
+    assert cfg["both_variants_baseline"] is True
+    assert cfg["patches_applied"] == "none"
+
+    assert cfg["operation_count"] == 10000
+    assert cfg["warmup_iterations"] == 120
+    assert cfg["steady_iterations"] == 100
+
+    b2d_cfg = json.loads((ROOT / "config/perf004b2d.json").read_text(encoding="utf-8"))
+    assert cfg["controls"] == b2d_cfg["controls"], (
+        "Phase 2 must reuse the exact PERF004-B2-D/PERF008 four-workload matrix unmodified"
+    )
+    all_workload_ids = {item["id"] for item in cfg["controls"]}
+    assert set(cfg["primary_causal_workloads"]) == set(PHASE2_PRIMARY_WORKLOADS)
+    assert set(cfg["negative_coverage_workloads"]) == set(PHASE2_NEGATIVE_COVERAGE_WORKLOADS)
+    assert set(cfg["primary_causal_workloads"]) | set(cfg["negative_coverage_workloads"]) == (
+        all_workload_ids
+    )
+    assert set(cfg["primary_causal_workloads"]) & set(cfg["negative_coverage_workloads"]) == set()
+
+    assert tuple(cfg["block_order"]) == PHASE2_BLOCK_ORDER
+    assert len(cfg["block_order"]) >= 4
+    assert set(cfg["block_order"]) == {"A", "B"}
+    assert cfg["block_order"].count("A") >= 2 and cfg["block_order"].count("B") >= 2
+
+    print("PERF010A_PHASE2_CONFIG=PASS")
+    print("PERF010A_PHASE2_CONTROL_PROTOS_REVISION=" + cfg["control"]["protos_revision"])
+    print("PERF010A_PHASE2_INTERVENTION_PROTOS_REVISION=" + cfg["intervention"]["protos_revision"])
+    print("PERF010A_PHASE2_BOTH_PRODUCT_VARIANTS_BASELINE=YES")
+    print("PERF010A_PHASE2_PATCHES_APPLIED=NO")
+    print("PERF010A_PHASE2_WARMUP=" + str(cfg["warmup_iterations"]))
+    print("PERF010A_PHASE2_STEADY=" + str(cfg["steady_iterations"]))
+    print("PERF010A_PHASE2_OPERATION_COUNT=" + str(cfg["operation_count"]))
+    print("PERF010A_PHASE2_BLOCK_ORDER=" + ",".join(cfg["block_order"]))
+    print("PERF010A_PHASE2_PRIMARY_WORKLOADS=" + ",".join(cfg["primary_causal_workloads"]))
+    print(
+        "PERF010A_PHASE2_NEGATIVE_COVERAGE_WORKLOADS="
+        + ",".join(cfg["negative_coverage_workloads"])
+    )
+    print("CAUSAL_RUNTIME_SPEEDUP=NOT_MEASURED")
+    print("DOMINANT_GAP_CAUSE=NOT_ESTABLISHED")
+    print("ATTRIBUTABLE_FRACTION=NOT_ESTABLISHED")
+    return cfg
+
+
+def image_revision_label_probe(tag: str) -> str:
+    """Reads back the `org.opencontainers.image.revision` LABEL that `build_image` bakes into
+    the image from its own `cfg["protos_revision"]` build arg, directly from the built image via
+    `docker image inspect` - i.e. from the artifact itself, not merely echoing the Python-side
+    value that was passed in. Used by `_build_and_probe_phase2_images` as one more independent
+    check (in addition to the Dockerfile's own build-time
+    `test "$(git rev-parse HEAD)" = "$PROTOS_REVISION"` assertion, which already fails the build
+    closed for a revision that does not exist or a floating branch name) that each Phase 2 image
+    actually corresponds to its expected pinned revision before any timing runs."""
+    payload = json.loads(output(["docker", "image", "inspect", tag]))[0]
+    labels = ((payload.get("Config") or {}).get("Labels")) or {}
+    return labels.get("org.opencontainers.image.revision", "")
+
+
+def _build_and_probe_phase2_images(cfg: dict[str, Any], cpu: str) -> dict[str, Any]:
+    """Builds the control and intervention images (both VARIANT=baseline, from two different
+    pinned protos_revision values) under the dedicated PHASE2_ABLATION tag namespace, and fails
+    closed before returning unless all of the following hold for BOTH roles:
+
+      - the image's own /opt/perf010a/variant.txt reads "baseline" (variant_label_probe, reused
+        unmodified from the ablation/discrimination/Phase 1 paths above);
+      - the image's own /opt/perf010a/ablation-slice.txt reads "none" (ablation_slice_label_probe,
+        reused unmodified) - proving no patch was applied during this image's build, since only
+        VARIANT=ablation ever writes a non-"none" slice marker there;
+      - the image's own `org.opencontainers.image.revision` LABEL (image_revision_label_probe,
+        read back from the built artifact) matches that role's expected pinned protos_revision.
+
+    Also asserts control_revision != intervention_revision before building anything (redundant
+    with `validate_phase2`'s static check, but re-checked here so a caller that skips validation
+    still cannot build two images from what would collapse to the same revision).
+    """
+    control_revision = cfg["control"]["protos_revision"]
+    intervention_revision = cfg["intervention"]["protos_revision"]
+    if control_revision == intervention_revision:
+        raise RuntimeError(
+            "PHASE2_SAME_REVISION_REJECTED: control and intervention protos_revision must differ"
+        )
+
+    tags: dict[str, str] = {}
+    identities: dict[str, Any] = {}
+    for role in PHASE2_ROLES:
+        role_revision = cfg[role]["protos_revision"]
+        role_cfg = {
+            "toolchain": cfg["toolchain"],
+            "protos_repository": cfg["protos_repository"],
+            "protos_revision": role_revision,
+            "ablation_patch": PHASE2_UNUSED_PATCH,
+            "slice": f"{cfg['slice']}__{role.upper()}",
+        }
+        tag = build_image(role_cfg, "baseline", ablation=PHASE2_ABLATION)
+        tags[role] = tag
+
+        runtime_probe(tag, cpu)
+        java_version_probe(tag, cpu)
+
+        observed_variant = variant_label_probe(tag, cpu)
+        if observed_variant != "baseline":
+            raise RuntimeError(
+                f"PHASE2 variant label mismatch for role={role}: expected baseline, got "
+                f"{observed_variant!r}"
+            )
+
+        observed_slice = ablation_slice_label_probe(tag, cpu)
+        if observed_slice != "none":
+            raise RuntimeError(
+                f"PHASE2_PATCH_PATH_REJECTED: role={role} image reports "
+                f"ablation-slice={observed_slice!r}, expected 'none' - a baseline-variant image "
+                "must never have gone through the patch-apply path"
+            )
+
+        observed_revision_label = image_revision_label_probe(tag)
+        if observed_revision_label != role_revision:
+            raise RuntimeError(
+                f"PHASE2_REVISION_IDENTITY_MISMATCH: role={role} image's own "
+                f"org.opencontainers.image.revision label reads {observed_revision_label!r}, "
+                f"expected {role_revision!r}"
+            )
+
+        identities[role] = image_identity(tag)
+        print(
+            f"PHASE2 IMAGE role={role} protos_revision={role_revision} tag={tag} "
+            f"id={identities[role]['id']} repo_digests={identities[role]['repo_digests']}",
+            flush=True,
+        )
+
+    print("PHASE2_CONTROL_INTERVENTION_REVISIONS_DISTINCT=PASS")
+    print("PHASE2_BOTH_IMAGES_VARIANT_BASELINE=PASS")
+    print("PHASE2_BOTH_IMAGES_ABLATION_SLICE_NONE=PASS")
+    print("PHASE2_BOTH_IMAGES_REVISION_LABEL_MATCH=PASS")
+    return {"tags": tags, "image_identity": identities}
+
+
+def _phase2_block_role_order(block_label: str) -> tuple[str, str]:
+    if block_label == "A":
+        return ("control", "intervention")
+    if block_label == "B":
+        return ("intervention", "control")
+    raise ValueError(f"unknown Phase 2 block label: {block_label!r}")
+
+
+def run_phase2_blocks(
+    cfg: dict[str, Any], tags: dict[str, str], cpu: str, work: Path, logs_dir: Path,
+    block_order: tuple[str, ...], warmup: int, steady: int,
+    controls: list[dict[str, Any]] | None = None,
+    *, collect_stationarity: bool = True,
+) -> list[dict[str, Any]]:
+    """Phase 2 counterbalanced block matrix. Structurally identical to
+    `run_stable_identity_phase1_blocks` (same `control_source` canonical/workload-control
+    construction, same `timing_visible` per-timed-unit retention/stationarity), but iterates
+    "control"/"intervention" roles via `_phase2_block_role_order` instead of "baseline"/
+    "ablation" variants, so this experiment's block records can never be confused with the
+    unrelated no-op discrimination or Phase 1 records. `controls` defaults to `cfg["controls"]`
+    (the full four-workload matrix); a caller may pass a subset only for a bounded validation
+    run (see `reference_phase2`'s `workload_ids`), never for the retained reference run itself.
+    """
+    controls = cfg["controls"] if controls is None else controls
+    blocks: list[dict[str, Any]] = []
+    for block_index, block_label in enumerate(block_order):
+        role_order = _phase2_block_role_order(block_label)
+        for item in controls:
+            workload = item["id"]
+            slug = workload.replace("/", "__")
+            by_role: dict[str, Any] = {}
+            for role in role_order:
+                tag = tags[role]
+                canonical_source, control_host = control_source(tag, work, item)
+                by_mode: dict[str, Any] = {}
+                for mode, source_host, source_container in (
+                    ("canonical", None, canonical_source),
+                    ("control", control_host, "/work/source.protos"),
+                ):
+                    label = f"block{block_index}-{block_label}-{slug}-{role}-{mode}"
+                    timing_result = timing_visible(
+                        tag, cpu, work, logs_dir, source_host, source_container,
+                        item["expected"], label, warmup, steady,
+                        collect_stationarity=collect_stationarity,
+                    )
+                    stationarity_note = (
+                        f" last_vs_first_pct="
+                        f"{timing_result['stationarity']['last_quarter_vs_first_quarter_percent']:.4f}"
+                        if timing_result["stationarity"] is not None
+                        else ""
+                    )
+                    print(
+                        f"PHASE2 TIMING PASS block={block_index} order={block_label} "
+                        f"workload={workload} role={role} mode={mode} "
+                        f"median_ns={timing_result['steady_summary']['median_ns']}"
+                        f"{stationarity_note}",
+                        flush=True,
+                    )
+                    by_mode[mode] = timing_result
+                by_role[role] = by_mode
+            blocks.append({
+                "block_index": block_index,
+                "block_order": block_label,
+                "role_sequence": list(role_order),
+                "workload": workload,
+                "roles": by_role,
+            })
+    return blocks
+
+
+def classify_phase2_block(entry: dict[str, Any]) -> dict[str, Any]:
+    """Causal formula fixed by config/perf010a-phase2.json's `causal_formula`, before any data
+    was collected:
+
+        canonical_improvement  = control_canonical_median_ns - intervention_canonical_median_ns
+        control_movement       = control_workload_control_median_ns
+                                  - intervention_workload_control_median_ns
+        paired_control_effect  = canonical_improvement - control_movement
+
+    A positive `paired_control_effect` means INTERVENTION is faster than CONTROL once the
+    workload-control's own measured movement between the two revisions/images has been
+    subtracted out. Expressed as a percentage of the control canonical median. This function
+    does not classify REAL_BUT_SMALL/MATERIAL/DOMINANT_GAP_CAUSE/ATTRIBUTABLE_FRACTION - that
+    belongs to the later analysis of this Evidence Unit's raw retained data, per
+    config/perf010a-phase2.json's not_decided_by_this_evidence_unit."""
+    control = entry["roles"]["control"]
+    intervention = entry["roles"]["intervention"]
+    control_canonical_ns = control["canonical"]["steady_summary"]["median_ns"]
+    control_workload_control_ns = control["control"]["steady_summary"]["median_ns"]
+    intervention_canonical_ns = intervention["canonical"]["steady_summary"]["median_ns"]
+    intervention_workload_control_ns = intervention["control"]["steady_summary"]["median_ns"]
+
+    canonical_improvement_ns = control_canonical_ns - intervention_canonical_ns
+    control_movement_ns = control_workload_control_ns - intervention_workload_control_ns
+    paired_control_effect_ns = canonical_improvement_ns - control_movement_ns
+    paired_control_effect_percent = (
+        100.0 * paired_control_effect_ns / control_canonical_ns
+    )
+
+    return {
+        "block_index": entry["block_index"],
+        "block_order": entry["block_order"],
+        "workload": entry["workload"],
+        "control_canonical_median_ns": control_canonical_ns,
+        "control_workload_control_median_ns": control_workload_control_ns,
+        "intervention_canonical_median_ns": intervention_canonical_ns,
+        "intervention_workload_control_median_ns": intervention_workload_control_ns,
+        "canonical_improvement_ns": canonical_improvement_ns,
+        "control_movement_ns": control_movement_ns,
+        "paired_control_effect_ns": paired_control_effect_ns,
+        "paired_control_effect_percent": paired_control_effect_percent,
+    }
+
+
+def summarize_phase2_workload(classified_blocks: list[dict[str, Any]]) -> dict[str, Any]:
+    """Descriptive envelope for one workload across all retained blocks - explicitly a
+    DESCRIPTIVE_ENVELOPE, not a fabricated inferential confidence interval, matching
+    `summarize_discrimination_workload`'s discipline exactly. Does not classify REAL_BUT_SMALL/
+    MATERIAL/ORDER_OF_MAGNITUDE_RELEVANT/DOMINANT_GAP_CAUSE/ATTRIBUTABLE_FRACTION."""
+    values = [b["paired_control_effect_percent"] for b in classified_blocks]
+    ordered = sorted(values)
+    median = statistics.median(values)
+    mad = statistics.median([abs(v - median) for v in values])
+
+    a_values = [
+        b["paired_control_effect_percent"]
+        for b in classified_blocks if b["block_order"] == "A"
+    ]
+    b_values = [
+        b["paired_control_effect_percent"]
+        for b in classified_blocks if b["block_order"] == "B"
+    ]
+    if len(a_values) < 2 or len(b_values) < 2:
+        order_effect = "INCONCLUSIVE"
+    else:
+        a_range = (min(a_values), max(a_values))
+        b_range = (min(b_values), max(b_values))
+        non_overlapping = a_range[1] < b_range[0] or b_range[1] < a_range[0]
+        order_effect = "DETECTED" if non_overlapping else "NOT_DETECTED"
+
+    return {
+        "samples": len(values),
+        "paired_control_effect_min_percent": min(ordered),
+        "paired_control_effect_max_percent": max(ordered),
+        "paired_control_effect_median_percent": median,
+        "paired_control_effect_mad_percent": mad,
+        "order_effect": order_effect,
+        "a_order_values_percent": a_values,
+        "b_order_values_percent": b_values,
+    }
+
+
+def phase2_smoke() -> None:
+    """Admission/correctness gate for Phase 2, matching this module's existing smoke discipline:
+    deliberately far smaller than the Evidence Unit's own warmup=120/steady=100
+    (SMOKE_WARMUP_ITERATIONS/SMOKE_STEADY_ITERATIONS, independent of `cfg`'s reference-scale
+    values, exactly like every other `*_smoke` in this module), exercising the full four-workload
+    matrix for both control and intervention so no timing collected here is performance
+    evidence."""
+    cfg = validate_phase2()
+    harness_revision = worktree_harness_revision()
+    cpu = first_cpu()
+    build_result = _build_and_probe_phase2_images(cfg, cpu)
+    tags = build_result["tags"]
+
+    with tempfile.TemporaryDirectory(prefix="perf010a-phase2-smoke-") as tmp:
+        work = Path(tmp)
+        logs_dir = work / "logs"
+        blocks = run_phase2_blocks(
+            cfg, tags, cpu, work, logs_dir,
+            block_order=("A", "B"),
+            warmup=SMOKE_WARMUP_ITERATIONS, steady=SMOKE_STEADY_ITERATIONS,
+            collect_stationarity=False,
+        )
+
+    print("PERF010A_PHASE2_SMOKE_HARNESS_REVISION=" + harness_revision)
+    print(
+        f"PERF010A_PHASE2_SMOKE_SCALE=warmup={SMOKE_WARMUP_ITERATIONS} "
+        f"steady={SMOKE_STEADY_ITERATIONS} (Phase 2 Evidence Unit scale: "
+        f"warmup={cfg['warmup_iterations']} steady={cfg['steady_iterations']})"
+    )
+    print("PERF010A_PHASE2_SMOKE_BLOCKS=" + str(len({b['block_index'] for b in blocks})))
+    print("PERF010A_PHASE2_SMOKE_WORKLOADS=" + str(len(cfg["controls"])))
+    print("PERF010A_PHASE2_SMOKE=PASS")
+    print("PERF010A_PHASE2_SMOKE_RETAINED=NO")
+
+
+def reference_phase2(
+    harness_revision: str | None,
+    output_dir: Path | None,
+    *,
+    block_order_override: tuple[str, ...] | None = None,
+    workload_ids: tuple[str, ...] | None = None,
+) -> None:
+    """Phase 2 clean two-product-revision causal comparator reference run: warmup=120, steady=100,
+    operation_count=10000, block_order=A,B,A,B (config/perf010a-phase2.json), reusing this
+    module's counterbalanced-block/paired-workload-control machinery with the new control/
+    intervention causal formula (`classify_phase2_block`). This does not classify
+    CAUSAL_RUNTIME_SPEEDUP, DOMINANT_GAP_CAUSE, or ATTRIBUTABLE_FRACTION - the next investigation
+    slice does that from this Evidence Unit's raw retained data.
+
+    `block_order_override`/`workload_ids` exist only so a bounded, still full-warmup=120,
+    still-real-timed-unit validation run can exercise a small subset of the matrix - including
+    from the dirty working tree that contains the harness changes under validation, before they
+    are committed - exactly mirroring `reference_stable_identity_phase1`'s bounded-validation
+    contract (see that function's docstring for the full rationale, reused here unmodified):
+
+      - requires an explicit scratch `--output-dir` (never defaults to PHASE2_OUTPUT_DIR, which
+        is reserved for the retained run);
+      - rejects an explicit `--harness-revision` (only the retained run pins one);
+      - records `harness_revision` via `worktree_harness_revision()` instead; and
+      - is written out with `evidence_status="VALIDATION_ONLY_NOT_RETAINED"` in `raw.json`, a
+        printed `PERF010A_PHASE2_EVIDENCE_STATUS` marker, and a top-of-README banner.
+    """
+    cfg = validate_phase2()
+    is_bounded_run = block_order_override is not None or workload_ids is not None
+
+    if is_bounded_run:
+        if output_dir is None:
+            raise RuntimeError(
+                "a bounded phase2-reference validation run (--phase2-block-order/"
+                "--phase2-workload) requires an explicit scratch --output-dir; it must never "
+                "default to PHASE2_OUTPUT_DIR, which is reserved for the full-matrix retained "
+                "Phase 2 Evidence Unit"
+            )
+        if harness_revision is not None:
+            raise RuntimeError(
+                "--harness-revision is not accepted for a bounded phase2-reference validation "
+                "run; only the full retained Evidence Unit run (no --phase2-block-order/"
+                "--phase2-workload) pins an exact harness revision"
+            )
+        harness_revision = worktree_harness_revision()
+    else:
+        harness_revision = resolved_harness_revision(harness_revision)
+        if output(["git", "status", "--porcelain", "--untracked-files=all"]):
+            raise RuntimeError("reference requires clean exact harness")
+
+    output_dir = output_dir if output_dir is not None else PHASE2_OUTPUT_DIR
+
+    if output_dir.exists():
+        if not output_dir.is_dir() or any(output_dir.iterdir()):
+            raise RuntimeError("output directory already contains evidence")
+        output_dir.rmdir()
+
+    controls = cfg["controls"]
+    if workload_ids is not None:
+        controls = [item for item in cfg["controls"] if item["id"] in workload_ids]
+        if len(controls) != len(workload_ids):
+            raise RuntimeError(f"unknown workload id(s) in {workload_ids}")
+
+    block_order = (
+        block_order_override if block_order_override is not None else tuple(cfg["block_order"])
+    )
+    for label in block_order:
+        _phase2_block_role_order(label)  # raises on an unknown block label
+
+    cpu = first_cpu()
+    build_result = _build_and_probe_phase2_images(cfg, cpu)
+    tags = build_result["tags"]
+    image_identities = build_result["image_identity"]
+
+    output_dir.mkdir(parents=True)
+    logs_dir = output_dir / "logs"
+
+    with tempfile.TemporaryDirectory(prefix="perf010a-phase2-") as tmp:
+        work = Path(tmp)
+        blocks = run_phase2_blocks(
+            cfg, tags, cpu, work, logs_dir,
+            block_order=block_order,
+            warmup=cfg["warmup_iterations"], steady=cfg["steady_iterations"],
+            controls=controls,
+        )
+
+    classified = [classify_phase2_block(entry) for entry in blocks]
+    by_workload: dict[str, list[dict[str, Any]]] = {}
+    for c in classified:
+        by_workload.setdefault(c["workload"], []).append(c)
+    per_workload_summary = {
+        workload: summarize_phase2_workload(blocks_for_workload)
+        for workload, blocks_for_workload in by_workload.items()
+    }
+
+    stationarity_by_unit = [
+        {
+            "block_index": entry["block_index"],
+            "block_order": entry["block_order"],
+            "workload": entry["workload"],
+            "role": role,
+            "mode": mode,
+            **entry["roles"][role][mode]["stationarity"],
+        }
+        for entry in blocks
+        for role in entry["roles"]
+        for mode in entry["roles"][role]
+    ]
+
+    is_full_matrix_run = not is_bounded_run
+    evidence_status = "RETAINED" if is_full_matrix_run else "VALIDATION_ONLY_NOT_RETAINED"
+
+    raw: dict[str, Any] = {
+        "schema_version": 1,
+        "perf_item": "PERF010-A",
+        "parent_perf_item": "PERF010",
+        "slice": cfg["slice"],
+        "phase": cfg["phase"],
+        "diagnostic_claim": False,
+        "causal_two_revision_comparator": True,
+        "full_matrix_evidence_unit": is_full_matrix_run,
+        "evidence_status": evidence_status,
+        "harness_revision": harness_revision,
+        "control_protos_revision": cfg["control"]["protos_revision"],
+        "intervention_protos_revision": cfg["intervention"]["protos_revision"],
+        "both_product_variants_baseline": True,
+        "patches_applied": "none",
+        "toolchain": cfg["toolchain"],
+        "built_image_identity": image_identities,
+        "host_identity": host_identity(),
+        "cpu_policy": {"mechanism": "cpuset-cpus", "cpuset": cpu},
+        "network": "none",
+        "operation_count": cfg["operation_count"],
+        "warmup_iterations": cfg["warmup_iterations"],
+        "steady_iterations": cfg["steady_iterations"],
+        "block_order": list(block_order),
+        "primary_causal_workloads": list(cfg["primary_causal_workloads"]),
+        "negative_coverage_workloads": list(cfg["negative_coverage_workloads"]),
+        "blocks": blocks,
+        "classified_blocks": classified,
+        "per_timed_unit_stationarity": stationarity_by_unit,
+        "per_workload_summary": per_workload_summary,
+        "causal_runtime_speedup": "NOT_MEASURED",
+        "dominant_gap_cause": "NOT_ESTABLISHED",
+        "attributable_fraction": "NOT_ESTABLISHED",
+    }
+    (output_dir / "raw.json").write_text(
+        json.dumps(raw, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    stationarity_rows = [
+        "block_index\tblock_order\tworkload\trole\tmode\tsteady_median_ns\t"
+        "first_quarter_median_ns\tlast_quarter_median_ns\tlast_quarter_vs_first_quarter_percent"
+    ]
+    for s in stationarity_by_unit:
+        stationarity_rows.append("\t".join([
+            str(s["block_index"]), s["block_order"], s["workload"], s["role"], s["mode"],
+            str(s["steady_median_ns"]), str(s["first_quarter_median_ns"]),
+            str(s["last_quarter_median_ns"]),
+            f"{s['last_quarter_vs_first_quarter_percent']:.4f}",
+        ]))
+    (output_dir / "stationarity.tsv").write_text(
+        "\n".join(stationarity_rows) + "\n", encoding="utf-8"
+    )
+
+    summary_rows = [
+        "workload\tsamples\tpaired_control_effect_min_percent\tpaired_control_effect_max_percent\t"
+        "paired_control_effect_median_percent\tpaired_control_effect_mad_percent\torder_effect"
+    ]
+    for workload, s in per_workload_summary.items():
+        summary_rows.append("\t".join([
+            workload, str(s["samples"]),
+            f"{s['paired_control_effect_min_percent']:.4f}",
+            f"{s['paired_control_effect_max_percent']:.4f}",
+            f"{s['paired_control_effect_median_percent']:.4f}",
+            f"{s['paired_control_effect_mad_percent']:.4f}",
+            s["order_effect"],
+        ]))
+    (output_dir / "phase2-summary.tsv").write_text(
+        "\n".join(summary_rows) + "\n", encoding="utf-8"
+    )
+
+    readme = [
+        "# PERF010-A Phase 2 clean two-product-revision causal comparator Evidence Unit",
+        "",
+    ]
+    if not is_full_matrix_run:
+        readme += [
+            "> **VALIDATION_ONLY_NOT_RETAINED** - this is a bounded run "
+            "(`--phase2-block-order`/`--phase2-workload`) over a subset of the matrix, produced "
+            "to validate the harness itself, not the retained Phase 2 Evidence Unit. It may "
+            "have been executed from a dirty (uncommitted) working tree - see "
+            "`harness_revision` below, which reads `WORKTREE_PRECOMMIT` when that is the case. "
+            "It MUST NOT be cited as PERF010-A Phase 2 evidence. The retained Evidence Unit is "
+            "the full four-workload, full-block-order run with no overrides, executed from a "
+            "clean exact harness revision, written to `results/perf010a-phase2`.",
+            "",
+        ]
+    readme += [
+        cfg["causal_question"],
+        "",
+        f"- Harness revision: `{harness_revision}`",
+        f"- Control Protos revision (VARIANT=baseline): `{cfg['control']['protos_revision']}`",
+        f"- Intervention Protos revision (VARIANT=baseline): "
+        f"`{cfg['intervention']['protos_revision']}`",
+        "- Patches applied to either image: NONE (see `patches_applied` and "
+        "`PHASE2_BOTH_IMAGES_ABLATION_SLICE_NONE` in the run log).",
+        f"- Built image identity: `{json.dumps(image_identities, sort_keys=True)}`",
+        f"- Block order: `{list(block_order)}` (A: control first; B: intervention first).",
+        f"- N={cfg['operation_count']}. Warmup={cfg['warmup_iterations']}, "
+        f"steady={cfg['steady_iterations']}.",
+        f"- Full four-workload matrix: {'YES' if is_full_matrix_run else 'NO (bounded validation run)'}.",
+        f"- Evidence status: `{evidence_status}`.",
+        "",
+        f"`{cfg['causal_formula']}`",
+        "",
+        "## Per-workload paired-control effect (descriptive only)",
+        "",
+        "| workload | samples | min % | max % | median % | MAD % | order effect |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for workload, s in per_workload_summary.items():
+        readme.append(
+            f"| {workload} | {s['samples']} "
+            f"| {s['paired_control_effect_min_percent']:.4f} "
+            f"| {s['paired_control_effect_max_percent']:.4f} "
+            f"| {s['paired_control_effect_median_percent']:.4f} "
+            f"| {s['paired_control_effect_mad_percent']:.4f} "
+            f"| {s['order_effect']} |"
+        )
+
+    readme += [
+        "",
+        "## Stationarity (first-quarter vs. last-quarter of each 100-sample steady timed unit)",
+        "",
+        "See `stationarity.tsv` for the full per-timed-unit table (raw `raw.json` remains "
+        "authoritative).",
+        "",
+        "## CAUSAL_RUNTIME_SPEEDUP = NOT_MEASURED",
+        "## DOMINANT_GAP_CAUSE = NOT_ESTABLISHED",
+        "## ATTRIBUTABLE_FRACTION = NOT_ESTABLISHED",
+        "",
+        "This implementation slice deliberately does not classify any of the three fields "
+        "above, and does not decide REAL_BUT_SMALL vs. MATERIAL vs. ORDER_OF_MAGNITUDE_RELEVANT "
+        "- see AGENTS.work/PERFORMANCE.md and config/perf010a-phase2.json's "
+        "`not_decided_by_this_evidence_unit`. The next investigation slice classifies them from "
+        "this Evidence Unit's raw retained data.",
+        "",
+    ]
+    (output_dir / "README.md").write_text("\n".join(readme) + "\n", encoding="utf-8")
+
+    manifest_names = ["README.md", "raw.json", "stationarity.tsv", "phase2-summary.tsv"]
+    manifest_lines = [f"{sha256(output_dir / n)}  {n}" for n in manifest_names]
+    if logs_dir.is_dir():
+        for log_path in sorted(logs_dir.iterdir()):
+            manifest_lines.append(f"{sha256(log_path)}  logs/{log_path.name}")
+    (output_dir / "SHA256SUMS").write_text("\n".join(manifest_lines) + "\n", encoding="utf-8")
+
+    print("PERF010A_PHASE2_REFERENCE=PASS")
+    print("PERF010A_PHASE2_EVIDENCE_STATUS=" + evidence_status)
+    print("PERF010A_PHASE2_FULL_MATRIX_EVIDENCE_UNIT=" + ("YES" if is_full_matrix_run else "NO"))
+    print("PERF010A_PHASE2_WARMUP=" + str(cfg["warmup_iterations"]))
+    print("PERF010A_PHASE2_STEADY=" + str(cfg["steady_iterations"]))
+    for workload, s in per_workload_summary.items():
+        print(
+            f"WORKLOAD={workload} "
+            f"PAIRED_CONTROL_EFFECT_MEDIAN={s['paired_control_effect_median_percent']:.4f} "
+            f"ORDER_EFFECT={s['order_effect']}"
+        )
+    print("CAUSAL_RUNTIME_SPEEDUP=NOT_MEASURED")
+    print("DOMINANT_GAP_CAUSE=NOT_ESTABLISHED")
+    print("ATTRIBUTABLE_FRACTION=NOT_ESTABLISHED")
+    print("PERF010A_PROTOS_REPOSITORY_MODIFICATION=NONE")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -3724,6 +4420,7 @@ def main():
             "source-identity-validate", "source-identity-smoke",
             "stable-identity-phase1-validate", "stable-identity-phase1-smoke",
             "stable-identity-phase1-reference",
+            "phase2-validate", "phase2-smoke", "phase2-reference",
         ),
     )
     ap.add_argument(
@@ -3754,6 +4451,20 @@ def main():
         help="stable-identity-phase1-reference only: restrict to this workload id (repeatable, "
         "e.g. --phase1-workload micro/slot-read); defaults to all four workloads and must be "
         "omitted for the retained Phase 1 Evidence Unit run",
+    )
+    ap.add_argument(
+        "--phase2-block-order",
+        help="phase2-reference only: comma-separated override of the block order (e.g. 'A' for "
+        "a single-block bounded validation run); defaults to the full "
+        "config/perf010a-phase2.json block_order (A,B,A,B) and must be omitted for the retained "
+        "Phase 2 Evidence Unit run",
+    )
+    ap.add_argument(
+        "--phase2-workload",
+        action="append",
+        help="phase2-reference only: restrict to this workload id (repeatable, e.g. "
+        "--phase2-workload micro/method-call); defaults to all four workloads and must be "
+        "omitted for the retained Phase 2 Evidence Unit run",
     )
     args = ap.parse_args()
 
@@ -3801,6 +4512,26 @@ def main():
         )
         workload_ids = tuple(args.phase1_workload) if args.phase1_workload else None
         reference_stable_identity_phase1(
+            args.harness_revision, output_dir,
+            block_order_override=block_order_override, workload_ids=workload_ids,
+        )
+        return
+
+    if args.command == "phase2-validate":
+        validate_phase2()
+        return
+
+    if args.command == "phase2-smoke":
+        phase2_smoke()
+        return
+
+    if args.command == "phase2-reference":
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        block_order_override = (
+            tuple(args.phase2_block_order.split(",")) if args.phase2_block_order else None
+        )
+        workload_ids = tuple(args.phase2_workload) if args.phase2_workload else None
+        reference_phase2(
             args.harness_revision, output_dir,
             block_order_override=block_order_override, workload_ids=workload_ids,
         )

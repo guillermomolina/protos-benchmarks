@@ -1,0 +1,157 @@
+diff --git a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
+--- a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
++++ b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java
+@@ -4770,7 +4770,70 @@
+ 
+     @Operation
+     public static final class PrepareSendArguments {
+-        @Specialization
++        /*
++         * PERF010A_GUARDED_CALL diagnostic fast arm. The guard re-runs the exact
++         * authoritative D013 lookup (guardedOrdinaryComposedSendMatches) on every
++         * call, so a slot replacement, removal, or delegation change is observed
++         * before this specialization is trusted; a guard failure falls through
++         * to `perform` below, which is byte-for-byte the pre-existing generic
++         * path. On a hit, finishPreparingComposedCallByImplementation's 16
++         * implementation/category classifiers are not executed; they are not
++         * skipped unsafely, because every one of them is guaranteed false for a
++         * Closure whose nativeBody() is empty (guardedOrdinaryComposedSendClosureOrNull
++         * only ever caches such a Closure), so the classifiers would have
++         * computed exactly the values finishPreparingComposedCall's own
++         * structured-flags branch already requires to be false for a non-native
++         * Closure. This mirrors the retained prepareTaskOwnedSelectedCallIfBytecode
++         * precedent's exact shape (D013 already selected; construct the fresh
++         * activation; resolve the effective Bytecode plan via the unmodified
++         * taskOwnedBytecodePlan; fall back to the unmodified generic composed-call
++         * finisher whenever that plan cannot be resolved, e.g. a source-less
++         * context-local projection).
++         */
++        @Specialization(
++                guards = {
++                    "selector.equals(cachedSelector)",
++                    "cachedClosure != null",
++                    "cachedMethodHome != null",
++                    "guardedOrdinaryComposedSendMatches(receiver, cachedSelector, caller, cachedClosure, cachedMethodHome)"
++                },
++                limit = "1")
++        public static PreparedClosureCall performGuardedOrdinaryComposedSend(
++                Object receiver,
++                String selector,
++                ProtosActivation caller,
++                @Variadic Object[] supplied,
++                @Cached("selector") String cachedSelector,
++                @Cached("guardedOrdinaryComposedSendClosureOrNull(receiver, selector, caller)")
++                        ProtosClosureValue cachedClosure,
++                @Cached("guardedOrdinaryComposedSendHomeOrNull(receiver, selector, caller)")
++                        ProtosObjectValue cachedMethodHome) {
++            rejectComposedInvocationProjection(cachedClosure);
++            List<?> suppliedList = List.of(supplied);
++            ProtosActivation activation =
++                    ProtosActivation.forImmediateMethodInvocation(
++                            cachedClosure,
++                            suppliedList,
++                            receiver,
++                            cachedMethodHome,
++                            caller.prelude().orElse(null),
++                            caller.actorModuleState(),
++                            caller.currentModuleKey().orElse(null),
++                            caller.executionDomain());
++            attachTaskOrInheritDynamicControlState(activation, caller);
++            ProtosClosureExecutionPlan plan = taskOwnedBytecodePlan(cachedClosure);
++            if (plan == null) {
++                return finishPreparingComposedCallByImplementation(
++                        cachedClosure,
++                        suppliedList,
++                        activation);
++            }
++            return new PreparedClosureCall(
++                    plan.bytecodeActivationTargetForComposition(),
++                    activation);
++        }
++
++        @Specialization(replaces = "performGuardedOrdinaryComposedSend")
+         public static PreparedClosureCall perform(
+                 Object receiver,
+                 String selector,
+@@ -4782,6 +4845,81 @@
+                     caller,
+                     List.of(supplied));
+         }
++
++        /*
++         * PERF010A_GUARDED_CALL diagnostic-only helpers (guillermomolina/protos-benchmarks
++         * #691, applied only inside that repository's benchmark Docker build; never
++         * committed to this repository). Declared here, inside PrepareSendArguments itself
++         * (rather than on the enclosing ProtosBytecodeRootNode), because the Bytecode DSL's
++         * guard/@Cached expression resolver only looks up bare method names against the
++         * specialization's own enclosing operation class. Every helper re-runs the exact same
++         * ProtosValueLookup.lookup call prepareSend already performs; a lookup failure, an
++         * unsupported representation, a native Closure, or a non-Closure slot value all fold
++         * to a graceful "not eligible for the fast arm" result here rather than to an
++         * exception, so the guard above simply declines and `perform` (unchanged) runs the
++         * exact existing generic path and raises the exact existing exception.
++         */
++        static ProtosClosureValue guardedOrdinaryComposedSendClosureOrNull(
++                Object receiver,
++                String selector,
++                ProtosActivation caller) {
++            try {
++                return ProtosValueLookup.lookup(
++                                receiver,
++                                selector,
++                                caller.prelude().orElse(null))
++                        .map(ProtosSlotLookupResult::value)
++                        .filter(
++                                value ->
++                                        value instanceof ProtosClosureValue candidate
++                                                && candidate.nativeBody().isEmpty())
++                        .map(value -> (ProtosClosureValue) value)
++                        .orElse(null);
++            } catch (UnsupportedOperationException unsupportedRepresentation) {
++                return null;
++            }
++        }
++
++        static ProtosObjectValue guardedOrdinaryComposedSendHomeOrNull(
++                Object receiver,
++                String selector,
++                ProtosActivation caller) {
++            try {
++                return ProtosValueLookup.lookup(
++                                receiver,
++                                selector,
++                                caller.prelude().orElse(null))
++                        .filter(
++                                selected ->
++                                        selected.value() instanceof ProtosClosureValue candidate
++                                                && candidate.nativeBody().isEmpty())
++                        .map(ProtosSlotLookupResult::home)
++                        .orElse(null);
++            } catch (UnsupportedOperationException unsupportedRepresentation) {
++                return null;
++            }
++        }
++
++        static boolean guardedOrdinaryComposedSendMatches(
++                Object receiver,
++                String selector,
++                ProtosActivation caller,
++                ProtosClosureValue cachedClosure,
++                ProtosObjectValue cachedMethodHome) {
++            try {
++                return ProtosValueLookup.lookup(
++                                receiver,
++                                selector,
++                                caller.prelude().orElse(null))
++                        .filter(
++                                selected ->
++                                        selected.value() == cachedClosure
++                                                && selected.home() == cachedMethodHome)
++                        .isPresent();
++            } catch (UnsupportedOperationException unsupportedRepresentation) {
++                return false;
++            }
++        }
+     }
+ 
+     @Operation

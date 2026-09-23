@@ -707,7 +707,7 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertIn("/opt/protos-source", dockerfile)
 
     def test_ablation3_image_identity_distinct_from_1_and_2(self):
-        self.assertEqual(("1", "2", "3", "4"), perf010a.ABLATIONS)
+        self.assertEqual(("1", "2", "3", "4", "guarded-call"), perf010a.ABLATIONS)
         cfg1 = perf010a.load(perf010a.CONFIG)
         cfg2 = perf010a.load(perf010a.CONFIG_2)
         cfg3 = perf010a.load(perf010a.CONFIG_3)
@@ -1198,7 +1198,7 @@ class Perf010aContractTest(unittest.TestCase):
             *self._valid_probe_pair_4()
         )
         classification = perf010a.classify_workload(
-            entry, "4", None, structural_contract_4
+            entry, "4", structural_contract_4
         )
         self.assertTrue(classification["correctness_confirmed"])
         self.assertTrue(classification["structural_ablation_confirmed"])
@@ -1220,7 +1220,7 @@ class Perf010aContractTest(unittest.TestCase):
                 "ablation": {"canonical": cell(900), "control": cell(100)},
             },
         }
-        classification = perf010a.classify_workload(entry, "4", None, None)
+        classification = perf010a.classify_workload(entry, "4", None)
         self.assertFalse(classification["structural_ablation_confirmed"])
         self.assertEqual("INVALID", classification["perf010a_ablation_4"])
 
@@ -1430,6 +1430,197 @@ class Perf010aDiscriminationTest(unittest.TestCase):
         )
         self.assertEqual(0, completed.returncode, completed.stderr)
         self.assertIn("PERF010A_DISCRIMINATION_CONFIG=PASS", completed.stdout)
+
+
+class Perf010aGuardedCallTest(unittest.TestCase):
+    """PERF010A_GUARDED_CALL (guillermomolina/protos-benchmarks #691, with PERF011 / #693)
+    static exact-scope validation. Mirrors the ablation-4 test style: a positive pass on the
+    real patch, then targeted mutations that must each independently fail."""
+
+    def _real_patch_text(self):
+        return (ROOT / "docker/protos-perf010a/guarded-call.patch").read_text(encoding="utf-8")
+
+    def test_config_matches_expected_pin_and_slice(self):
+        cfg = json.loads((ROOT / "config/perf010a-guarded-call.json").read_text(encoding="utf-8"))
+        self.assertEqual("PERF010A_GUARDED_CALL", cfg["slice"])
+        self.assertEqual(
+            "2b3a88389da7228caed231a90b14091cf2841115", cfg["protos_revision"]
+        )
+        self.assertTrue(cfg["diagnostic_claim"])
+        self.assertEqual(
+            ["src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java"],
+            cfg["ablation_patch_targets"],
+        )
+
+    def test_guarded_call_patch_passes_exact_scope_validation(self):
+        perf010a.validate_patch_shape_guarded(self._real_patch_text())  # must not raise
+
+    def test_full_validate_passes_for_guarded_call_slice(self):
+        perf010a.validate("guarded-call")  # must not raise
+
+    def test_guarded_call_patch_touching_activation_fails_validation(self):
+        base_patch = self._real_patch_text()
+        extra = (
+            "\ndiff --git a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java "
+            "b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosActivation.java\n"
+            "@@ -1,3 +1,3 @@\n"
+            "-// touched\n"
+            "+// touched again\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_guarded(base_patch + extra)
+
+    def test_guarded_call_patch_removing_a_generic_call_site_fails_validation(self):
+        # Mutating the `perform` fallback's own body (not just its @Specialization
+        # annotation) means the generic path is no longer byte-for-byte unchanged; must fail.
+        patch = (
+            "diff --git a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java "
+            "b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java\n"
+            "--- a/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java\n"
+            "+++ b/src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java\n"
+            "@@ -4771,10 +4771,10 @@\n"
+            "         @Specialization\n"
+            "+        // PERF010A_GUARDED_CALL\n"
+            "         public static PreparedClosureCall perform(\n"
+            "                 Object receiver,\n"
+            "                 String selector,\n"
+            "                 ProtosActivation caller,\n"
+            "                 @Variadic Object[] supplied) {\n"
+            "-            return prepareSend(\n"
+            "+            return prepareSend( // touched\n"
+            "                     receiver,\n"
+            "                     selector,\n"
+        )
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_guarded(patch)
+
+    def test_guarded_call_patch_reimplementing_generic_classifier_fails_validation(self):
+        # A patch that inlines one of finishPreparingComposedCallByImplementation's 16
+        # classifiers into the new specialization, instead of only ever reaching them via the
+        # unmodified generic fallback call, must fail even if it otherwise matches the
+        # established shape.
+        base_patch = self._real_patch_text()
+        patched = base_patch.replace(
+            "guardedOrdinaryComposedSendMatches(receiver, cachedSelector, caller, cachedClosure, cachedMethodHome)",
+            "guardedOrdinaryComposedSendMatches(receiver, cachedSelector, caller, cachedClosure, cachedMethodHome)"
+            " && !ProtosStandardObjectProtocol.isStandardWhileImplementation(cachedClosure)",
+        )
+        self.assertNotEqual(base_patch, patched)
+        with self.assertRaises(AssertionError):
+            perf010a.validate_patch_shape_guarded(patched)
+
+    def test_guarded_call_dockerfile_supports_selectable_patch(self):
+        dockerfile = (ROOT / "docker/protos-perf010a/Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("ARG ABLATION_PATCH=ablation.patch", dockerfile)
+        self.assertIn("${ABLATION_PATCH}", dockerfile)
+
+    def test_guarded_call_ablation_in_source_structural_ablations(self):
+        self.assertIn("guarded-call", perf010a.SOURCE_STRUCTURAL_ABLATIONS)
+        self.assertIs(
+            perf010a.STRUCTURAL_PROBE["guarded-call"], perf010a.source_structural_probe_guarded
+        )
+        self.assertIs(
+            perf010a.STRUCTURAL_CONTRACT_CONFIRM["guarded-call"],
+            perf010a.structural_contract_confirmed_guarded,
+        )
+        self.assertEqual(
+            "PERF010A_GUARDED_CALL_PATCH_SCOPE_MATCH",
+            perf010a.STRUCTURAL_SCOPE_MATCH_KEY["guarded-call"],
+        )
+
+    def _valid_probe_pair_guarded(self):
+        baseline_probe = {
+            "class_present": True,
+            "guarded_specialization_present": False,
+            "diagnostic_marker_present": False,
+            "generic_perform_body_present": True,
+            "outside_class_source": "{ rest of ProtosBytecodeRootNode.java }",
+        }
+        guarded_probe = {
+            "class_present": True,
+            "guarded_specialization_present": True,
+            "diagnostic_marker_present": True,
+            "generic_perform_body_present": True,
+            "outside_class_source": "{ rest of ProtosBytecodeRootNode.java }",
+        }
+        return baseline_probe, guarded_probe
+
+    def test_structural_contract_guarded_confirmed_for_correct_probe_pair(self):
+        baseline_probe, guarded_probe = self._valid_probe_pair_guarded()
+        checks = perf010a.structural_contract_confirmed_guarded(baseline_probe, guarded_probe)
+        self.assertTrue(checks["PERF010A_GUARDED_CALL_PATCH_SCOPE_MATCH"])
+
+    def test_structural_contract_guarded_rejects_baseline_with_fast_arm(self):
+        baseline_probe, guarded_probe = self._valid_probe_pair_guarded()
+        baseline_probe["guarded_specialization_present"] = True
+        baseline_probe["diagnostic_marker_present"] = True
+        checks = perf010a.structural_contract_confirmed_guarded(baseline_probe, guarded_probe)
+        self.assertFalse(checks["PERF010A_GUARDED_CALL_PATCH_SCOPE_MATCH"])
+        self.assertFalse(checks["GUARDED_CALL_BASELINE_HAS_NO_FAST_ARM"])
+
+    def test_structural_contract_guarded_rejects_diverging_outside_class_source(self):
+        baseline_probe, guarded_probe = self._valid_probe_pair_guarded()
+        guarded_probe["outside_class_source"] = "{ rest of ProtosBytecodeRootNode.java, touched }"
+        checks = perf010a.structural_contract_confirmed_guarded(baseline_probe, guarded_probe)
+        self.assertFalse(checks["PERF010A_GUARDED_CALL_PATCH_SCOPE_MATCH"])
+        self.assertFalse(checks["GUARDED_CALL_OTHER_CALL_SITES_UNCHANGED"])
+
+    def test_classify_workload_guarded_call_valid_when_structural_contract_confirmed(self):
+        structural_contract = perf010a.structural_contract_confirmed_guarded(
+            *self._valid_probe_pair_guarded()
+        )
+
+        def cell(median_ns):
+            return {
+                "timing": {"steady_summary": {"median_ns": median_ns}},
+                "structural": None,
+                "execution_failure": None,
+            }
+
+        entry = {
+            "workload": "runtime/monomorphic-dispatch",
+            "variants": {
+                "baseline": {"canonical": cell(1000), "control": cell(100)},
+                "ablation": {"canonical": cell(850), "control": cell(100)},
+            },
+        }
+        classification = perf010a.classify_workload(entry, "guarded-call", structural_contract)
+        self.assertTrue(classification["correctness_confirmed"])
+        self.assertTrue(classification["structural_ablation_confirmed"])
+        self.assertEqual("VALID", classification["perf010a_ablation_guarded-call"])
+        self.assertEqual(150, classification["removed_ns"])
+
+    def test_classify_workload_guarded_call_without_structural_contract_is_invalid(self):
+        def cell(median_ns):
+            return {
+                "timing": {"steady_summary": {"median_ns": median_ns}},
+                "structural": None,
+                "execution_failure": None,
+            }
+
+        entry = {
+            "workload": "runtime/monomorphic-dispatch",
+            "variants": {
+                "baseline": {"canonical": cell(1000), "control": cell(100)},
+                "ablation": {"canonical": cell(850), "control": cell(100)},
+            },
+        }
+        classification = perf010a.classify_workload(entry, "guarded-call", None)
+        self.assertFalse(classification["structural_ablation_confirmed"])
+        self.assertEqual("INVALID", classification["perf010a_ablation_guarded-call"])
+
+    def test_scope_of_ablation_readme_guarded_call_has_dedicated_branch(self):
+        cfg = json.loads(
+            (ROOT / "config/perf010a-guarded-call.json").read_text(encoding="utf-8")
+        )
+        lines = perf010a.scope_of_ablation_readme("guarded-call", cfg)
+        text = "\n".join(lines)
+        self.assertIn("performGuardedOrdinaryComposedSend", text)
+        self.assertIn("PrepareSendArguments", text)
+        # Must not silently fall through to ablation 2's README text.
+        self.assertNotIn("ablation-2.patch", text)
 
 
 if __name__ == "__main__":

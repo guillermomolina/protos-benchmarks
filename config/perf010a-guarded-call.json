@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_GUARDED_CALL",
+  "phase": "causal-guarded-monomorphic-composed-send-experiment",
+  "diagnostic_claim": true,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "2b3a88389da7228caed231a90b14091cf2841115",
+  "protos_revision_note": "the exact revision the retained PERF011 / #693 runtime-representation-fit audit (guillermomolina/protos-project-docs@7dddadb8572a873f6881e20571e54bc5615f06d8, docs/project/evidence/PERF011/PERF011_RUNTIME_REPRESENTATION_FIT_AUDIT.md) inspected and pinned for this bounded experiment; the human has independently confirmed the movement from the PERF010-A architecture-investigation baseline (cd32d7d3228f88c6ebda65f357787a692b89c666) to this revision does not alter the relevant execution/specification surfaces",
+  "ablation_patch": "docker/protos-perf010a/guarded-call.patch",
+  "ablation_patch_targets": [
+    "src/main/java/com/guillermomolina/protos/execution/ProtosBytecodeRootNode.java"
+  ],
+  "guarded_call_target": "ProtosBytecodeRootNode.PrepareSendArguments (the constant-selector, ordinary composed-send Operation reached from a plain `receiver.selector(args)` send) gains one new leading @Specialization, performGuardedOrdinaryComposedSend, that is tried before the existing, byte-for-byte-unchanged perform specialization (renamed to `@Specialization(replaces = \"performGuardedOrdinaryComposedSend\")` but otherwise untouched). The new specialization's guard re-runs the exact authoritative ProtosValueLookup.lookup(receiver, selector, prelude) call every single invocation (three new private helpers - guardedOrdinaryComposedSendClosureOrNull, guardedOrdinaryComposedSendHomeOrNull, guardedOrdinaryComposedSendMatches - each independently call it) and only takes the fast arm when that fresh lookup still selects the exact cached (Closure identity, methodHome identity) pair this call site cached, and only ever caches a Closure whose nativeBody() is empty (immutable per Closure instance). On a guard hit it reuses ProtosActivation.forImmediateMethodInvocation and attachTaskOrInheritDynamicControlState exactly as prepareImmediateMethodCall already does, resolves the effective Bytecode execution plan via the existing, unmodified taskOwnedBytecodePlan helper (the same helper the retained prepareTaskOwnedSelectedCallIfBytecode precedent already uses in production), and either builds the PreparedClosureCall directly (bypassing finishPreparingComposedCallByImplementation's 16 implementation/category classifiers and the subsequent 19 structured-dispatch predicates) or, if taskOwnedBytecodePlan returns null (a source-less context-local projection case), falls back to calling the exact, unmodified finishPreparingComposedCallByImplementation. A guard miss (different Closure/methodHome, native Closure, or a lookup failure) falls through to the unchanged `perform` specialization, i.e. the exact current generic path.",
+  "why_import_check_is_safely_omitted": "prepareImmediateMethodCall's ProtosStandardImportProtocol.selectedRuntimeForBytecodeIntrinsic(...) check can only select a non-null runtime when the selected Closure's nativeBody() is present and holds a StandardImportBody; guardedOrdinaryComposedSendClosureOrNull only ever caches a Closure whose nativeBody() is empty, so that check is provably unreachable (always null) for any Closure the fast arm can take, and omitting it changes no observable behavior",
+  "historical_evidence": {
+    "perf004_a_cross_language_baseline": "results/perf004-a",
+    "perf004_b2c_causal_control": "results/perf004-b2c",
+    "perf004_b2d_paired_jfr": "results/perf004-b2d",
+    "perf006_d3": "results/perf006-d3",
+    "perf008_steady_state_full_stack": "results/perf008",
+    "perf010a_ablation_1": "results/perf010a-1",
+    "perf010a_ablation_2": "results/perf010a-2",
+    "perf010a_ablation_3": "results/perf010a-3",
+    "perf010a_ablation_4": "results/perf010a-4",
+    "perf010a_measurement_discrimination": "results/perf010a-discrimination",
+    "perf010a_guarded_call_architecture": "guillermomolina/protos-project-docs@56c31e4e899e2d75f2e6311493ab138ce82277e2 docs/project/evidence/PERF010-A/PERF010-A_GUARDED_MONOMORPHIC_CALL_PATH_ARCHITECTURE.md",
+    "perf011_runtime_fit_audit": "guillermomolina/protos-project-docs@7dddadb8572a873f6881e20571e54bc5615f06d8 docs/project/evidence/PERF011/PERF011_RUNTIME_REPRESENTATION_FIT_AUDIT.md"
+  },
+  "external_baseline": {
+    "source": "results/perf004-a",
+    "same_run_as_protos_measurement": false,
+    "reason": "results/perf004-a pins a different Protos revision (4a03efc15620b37b2e418b3df30b4a26486446ec) and a different container base image (ol8, not this harness's ol10) than this experiment; AGENTS.work/REPRODUCIBILITY.md's revision-pinning discipline forbids combining it directly with a current-revision PROTOS_BASELINE_COST/PROTOS_GUARDED_COST measurement into a single EXCESS_COST/ATTRIBUTABLE_FRACTION number. It is retained here as a labelled historical reference only; ATTRIBUTABLE_FRACTION is reported as NOT_ESTABLISHED unless and until a current-revision, current-host external (e.g. Python/JavaScript) measurement is added under the same Evidence Unit."
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 20,
+  "steady_iterations": 100,
+  "execution_sample_period": "10 ms",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "steady_only",
+  "timing_recording_phase": "steady_only_no_jfr",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "variants": ["baseline", "ablation"],
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "primary_causal_workloads": ["micro/method-call", "runtime/monomorphic-dispatch"],
+  "workload_coverage_note": "micro/slot-read and micro/closure-call are retained for historical comparability with prior PERF010-A slices but are INDIRECT coverage of this specific guarded PrepareSendArguments specialization (slot-read never reaches a composed send at all; closure-call reaches PrepareClosureCall, a different Operation, not PrepareSendArguments); only micro/method-call and runtime/monomorphic-dispatch DIRECTLY exercise the guarded call site under test.",
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "continuation_markers": [
+    "ContinuationResult",
+    "continueWith",
+    "yield"
+  ],
+  "structural_confirmation_mode": "source",
+  "structural_confirmation_note": "The guarded image's PrepareSendArguments Operation class contains a new performGuardedOrdinaryComposedSend specialization (and the PERF010A_GUARDED_CALL marker comments) that the baseline image's PrepareSendArguments class does not contain at all; the baseline image's PrepareSendArguments class has exactly one @Specialization method, `perform`, byte-for-byte identical to the guarded image's own (now `replaces`-annotated) `perform` specialization body. The rest of ProtosBytecodeRootNode.java outside the PrepareSendArguments class and the three new guardedOrdinaryComposedSend* helper methods (prepareSend, prepareImmediateMethodCall, finishPreparingComposedCall, finishPreparingComposedCallByImplementation, taskOwnedBytecodePlan, rejectComposedInvocationProjection, attachTaskOrInheritDynamicControlState, and every other Operation) is byte-for-byte identical between the two images. This is a stronger, more directly source-legible signal than ablations 3/4's same-named-call-site problem, because the new specialization method name itself (`performGuardedOrdinaryComposedSend`) exists only in the guarded image and, when exercised, appears as its own distinct frame in a JFR stack profile - so a JFR-sampled-frame marker check is also usable here as supplementary evidence, unlike ablations 3/4.",
+  "diagnostic_marker_comment": "PERF010A_GUARDED_CALL",
+  "guarded_call_frame_marker": "com.guillermomolina.protos.execution.ProtosBytecodeRootNodeGen$PrepareSendArguments.performGuardedOrdinaryComposedSend",
+  "output": "results/perf010a-guarded-call"
+}

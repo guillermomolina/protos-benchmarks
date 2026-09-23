@@ -58,6 +58,28 @@ This module now backs four distinct causal ablations sharing this one harness, s
     itself, stay byte-for-byte unchanged. This is the exact scope the established next-causal-
     candidate investigation identified (guillermomolina/protos-project-docs@
     474b8779e31c643a815cf67452d0acf4ee8da367).
+  * `--ablation guarded-call` (`config/perf010a-guarded-call.json`,
+    `docker/protos-perf010a/guarded-call.patch`) - PERF010A_GUARDED_CALL (#691, with PERF011 /
+    #693), the guarded monomorphic composed-send experiment: adds one new leading
+    `@Specialization` (`performGuardedOrdinaryComposedSend`) to
+    `ProtosBytecodeRootNode.PrepareSendArguments`, tried before the pre-existing single
+    specialization (now a `replaces`-annotated, otherwise byte-for-byte unchanged fallback).
+    Its guard re-runs the exact authoritative `ProtosValueLookup.lookup` call on every
+    invocation and only takes the fast arm when that fresh lookup still selects the same
+    non-native (Closure, methodHome) pair this call site cached; on a hit it reuses
+    `ProtosActivation.forImmediateMethodInvocation` and
+    `attachTaskOrInheritDynamicControlState` exactly as the generic path does, resolves the
+    effective Bytecode plan via the pre-existing, unmodified `taskOwnedBytecodePlan` helper
+    (the same helper the retained `prepareTaskOwnedSelectedCallIfBytecode` precedent already
+    uses in production), and either builds the `PreparedClosureCall` directly - bypassing
+    `finishPreparingComposedCallByImplementation`'s 16 implementation/category classifiers and
+    the subsequent 19 structured-dispatch predicates - or falls back to that exact, unmodified
+    method when the plan cannot be resolved. A guard miss falls through to the unchanged
+    generic specialization. This is only the diagnostic-code-change and static exact-scope
+    validation checkpoint for this slice: `validate_patch_shape_guarded`/`validate("guarded-
+    call")` are implemented and passing; `smoke`/`reference` structural confirmation and the
+    separate PERF011 compiler-visibility diagnostic collection are not yet wired for this slice
+    (see `SOURCE_STRUCTURAL_ABLATIONS`, which deliberately excludes `"guarded-call"` for now).
 
 Two separate run types are collected per (workload, mode, variant) combination, matching
 `AGENTS.work/REPRODUCIBILITY.md` ("Diagnostic instrumentation ... SHOULD be kept separate from
@@ -136,12 +158,14 @@ CONFIG = ROOT / "config/perf010a.json"
 CONFIG_2 = ROOT / "config/perf010a-2.json"
 CONFIG_3 = ROOT / "config/perf010a-3.json"
 CONFIG_4 = ROOT / "config/perf010a-4.json"
+CONFIG_GUARDED = ROOT / "config/perf010a-guarded-call.json"
 EXPECTED_PROTOS_REVISION = "bc0471184bf6dbbf03d0c6b09ef7b9e28aede014"
 EXPECTED_PROTOS_REVISION_3 = "6e7d89194925ba9fa2cd9c5c45aefa72d9939621"
 EXPECTED_PROTOS_REVISION_4 = "4c4aa95a5852119bd280ceb40483871d5d2cbb82"
+EXPECTED_PROTOS_REVISION_GUARDED = "2b3a88389da7228caed231a90b14091cf2841115"
 EXPECTED_RUNTIME = "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
 VARIANTS = ("baseline", "ablation")
-ABLATIONS = ("1", "2", "3", "4")
+ABLATIONS = ("1", "2", "3", "4", "guarded-call")
 # "0" is not a real ablation; it is reserved for the measurement-discrimination no-op image
 # (see the PERF010-A measurement-discrimination section near the end of this module) and is
 # deliberately kept out of ABLATION_PROFILES/VALIDATE_PATCH_SHAPE/SOURCE_STRUCTURAL_ABLATIONS -
@@ -154,7 +178,7 @@ ABLATIONS_WITH_DISCRIMINATION = ABLATIONS + (DISCRIMINATION_ABLATION,)
 # Ablations whose structural confirmation is source-derived (reads /opt/protos-source) rather
 # than JFR-frame-derived, because their call sites keep calling a same-named method in both
 # variants (see ablation 3's and 4's module-docstring rationale below).
-SOURCE_STRUCTURAL_ABLATIONS = ("3", "4")
+SOURCE_STRUCTURAL_ABLATIONS = ("3", "4", "guarded-call")
 
 # `smoke` admission/correctness-gate scale: deliberately far smaller than any config's
 # reference-scale `warmup_iterations`/`steady_iterations` (20/100). Every steady iteration is
@@ -212,6 +236,25 @@ FINISH_PREPARING_COMPOSED_CALL_SIGNATURE = (
 NATIVE_BODY_CALL_PATTERN = "closure.nativeBody()"
 NATIVE_BODY_PROJECTION_LOCAL = "nativeBodyProjection"
 ABLATION_4_MARKER_COMMENT = "PERF010A_ABLATION_4"
+
+# PERF010A_GUARDED_CALL (guarded monomorphic composed-send experiment, guillermomolina/
+# protos-benchmarks #691, with PERF011 / #693) source markers. Like ablations 3/4, structural
+# confirmation is source-derived (see `structural_confirmation_note` in
+# config/perf010a-guarded-call.json), not JFR-frame-derived by default; unlike ablations 3/4,
+# the new specialization method name itself never appears in the baseline image's source at
+# all, so `GUARDED_CALL_FRAME_MARKER` below is also usable as supplementary JFR evidence once
+# smoke/reference are wired for this slice (not yet implemented in this checkpoint - only
+# `validate` is wired for "guarded-call" so far).
+GUARDED_CALL_SOURCE_PATH = ROOT_NODE_SOURCE_PATH
+PREPARE_SEND_ARGUMENTS_SIGNATURE = "public static final class PrepareSendArguments {"
+GUARDED_SPECIALIZATION_SIGNATURE = (
+    "public static PreparedClosureCall performGuardedOrdinaryComposedSend("
+)
+GUARDED_CALL_MARKER_COMMENT = "PERF010A_GUARDED_CALL"
+GUARDED_CALL_FRAME_MARKER = (
+    "com.guillermomolina.protos.execution.ProtosBytecodeRootNodeGen$PrepareSendArguments"
+    ".performGuardedOrdinaryComposedSend"
+)
 
 # Per-ablation config path, expected slice, expected pinned Protos revision, structural-marker
 # pair (markers expected absent from a correctly-ablated call path, marker expected present in
@@ -279,6 +322,25 @@ ABLATION_PROFILES = {
             "results/perf010a-1/SHA256SUMS",
             "results/perf010a-2/SHA256SUMS",
             "results/perf010a-3/SHA256SUMS",
+        ),
+    },
+    "guarded-call": {
+        "config_path": CONFIG_GUARDED,
+        "expected_slice": "PERF010A_GUARDED_CALL",
+        "expected_protos_revision": EXPECTED_PROTOS_REVISION_GUARDED,
+        "absent_markers": (),
+        "present_marker": GUARDED_CALL_FRAME_MARKER,
+        "required_files": (
+            "results/perf004-a/summary.tsv",
+            "results/perf004-b2c/summary.tsv",
+            "results/perf004-b2d/SHA256SUMS",
+            "results/perf006-d3/SHA256SUMS",
+            "results/perf008/SHA256SUMS",
+            "results/perf010a-1/SHA256SUMS",
+            "results/perf010a-2/SHA256SUMS",
+            "results/perf010a-3/SHA256SUMS",
+            "results/perf010a-4/SHA256SUMS",
+            "results/perf010a-discrimination/SHA256SUMS",
         ),
     },
 }
@@ -501,11 +563,102 @@ def validate_patch_shape_4(patch_text: str) -> None:
         assert forbidden not in removed_text, forbidden
 
 
+def validate_patch_shape_guarded(patch_text: str) -> None:
+    # The established PERF010A_GUARDED_CALL contract (guillermomolina/protos-project-docs@
+    # 56c31e4e899e2d75f2e6311493ab138ce82277e2's guarded monomorphic call-path architecture,
+    # reconfirmed by the PERF011 / #693 audit at guillermomolina/protos-project-docs@
+    # 7dddadb8572a873f6881e20571e54bc5615f06d8) is: touch only ProtosBytecodeRootNode.java;
+    # add one new leading @Specialization (performGuardedOrdinaryComposedSend) plus three new
+    # private helper methods to the file, and turn the existing single-specialization
+    # PrepareSendArguments.perform into a `replaces`-annotated fallback with an UNCHANGED body;
+    # do not remove, or add a `-` line to, any existing production method (prepareSend,
+    # prepareImmediateMethodCall, finishPreparingComposedCall,
+    # finishPreparingComposedCallByImplementation, taskOwnedBytecodePlan,
+    # rejectComposedInvocationProjection, attachTaskOrInheritDynamicControlState, or D013 lookup
+    # itself); the post-D013 bypass and its exact generic fallback must both be provable from
+    # the diff alone.
+    files = _parse_unified_diff(patch_text)
+    assert set(files.keys()) == {GUARDED_CALL_SOURCE_PATH}, sorted(files.keys())
+
+    root_node = files[GUARDED_CALL_SOURCE_PATH]
+
+    # Almost purely additive: the only permitted removed line is the plain `@Specialization`
+    # annotation on the pre-existing `perform` method, replaced by an added
+    # `@Specialization(replaces = "performGuardedOrdinaryComposedSend")` line immediately
+    # below it - the method's own body/signature is untouched (no other removed line is
+    # permitted). Every existing method body - prepareSend, prepareImmediateMethodCall,
+    # finishPreparingComposedCall(ByImplementation), taskOwnedBytecodePlan, D013 lookup itself,
+    # and `perform`'s own body - therefore stays byte-for-byte identical to the baseline file.
+    assert root_node["removed"] == ["        @Specialization"], root_node["removed"]
+
+    added_text = "\n".join(root_node["added"])
+
+    assert GUARDED_CALL_MARKER_COMMENT in added_text
+    assert GUARDED_SPECIALIZATION_SIGNATURE in added_text
+    assert '@Specialization(replaces = "performGuardedOrdinaryComposedSend")' in added_text
+    assert "guardedOrdinaryComposedSendClosureOrNull" in added_text
+    assert "guardedOrdinaryComposedSendHomeOrNull" in added_text
+    assert "guardedOrdinaryComposedSendMatches" in added_text
+
+    # The guard must re-run authoritative D013 lookup (ProtosValueLookup.lookup) every call
+    # rather than trust a cache blindly; PERFORMANCE.md's causal-ablation rule and this
+    # experiment's own "do not bypass D013 lookup" boundary both require this observable in
+    # the diff, not merely asserted in prose.
+    assert added_text.count("ProtosValueLookup.lookup(") == 3, added_text
+
+    # A closure is only ever cached by this patch when its nativeBody() is empty (ordinary,
+    # non-native); this is what makes skipping finishPreparingComposedCallByImplementation's
+    # generic classifiers provably safe (see config/perf010a-guarded-call.json's
+    # `guarded_call_target`), so the diff must show that filter explicitly rather than caching
+    # any Closure unconditionally.
+    assert "candidate.nativeBody().isEmpty()" in added_text
+
+    # A guard miss (including a lookup failure) must fall through to the exact generic path,
+    # never re-implement generic classification inline; the only acceptable substitute for
+    # finishPreparingComposedCallByImplementation on the fast arm's own failure branch is a
+    # direct call to that exact, unmodified method.
+    assert "finishPreparingComposedCallByImplementation(" in added_text
+    assert "taskOwnedBytecodePlan(" in added_text
+    assert "rejectComposedInvocationProjection(" in added_text
+    assert "attachTaskOrInheritDynamicControlState(" in added_text
+
+    for forbidden in (
+        "ProtosActivation.java",
+        "ProtosClosureValue.java",
+        "ProtosObjectValue.java",
+        "ProtosValueLookup.java",
+        "CanonicalToBytecodeLowerer.java",
+        "ProtosSourceCompiler.java",
+        "ProtosBytecodeClosureExecutionPlan.java",
+        "ProtosRootTaskExecution.java",
+        # The generic classifiers/predicates this experiment bypasses on a guard hit must not
+        # be reimplemented inline in the new specialization; they must only ever be reached
+        # through the unmodified finishPreparingComposedCallByImplementation call captured
+        # above.
+        "isStandardEnsureImplementation",
+        "isStandardWhileImplementation",
+        "structuredCallbackKindForImplementation",
+        "isStandardEachImplementation",
+        "structuredReadLookupKindForImplementation",
+        "isStandardAtPutImplementation",
+        "isStandardRemoveImplementation",
+        "isStandardSignalImplementation",
+        "isStandardCallImplementation",
+        "runtimeForImplementation",
+        "continueAt",
+        "RootTag",
+        "ContinuationResult",
+        "ProtosSemanticBytecodeRootNode",
+    ):
+        assert forbidden not in added_text, forbidden
+
+
 VALIDATE_PATCH_SHAPE = {
     "1": validate_patch_shape_1,
     "2": validate_patch_shape_2,
     "3": validate_patch_shape_3,
     "4": validate_patch_shape_4,
+    "guarded-call": validate_patch_shape_guarded,
 }
 
 
@@ -965,17 +1118,98 @@ def structural_contract_confirmed_ablation_4(
     return checks
 
 
+def source_structural_probe_guarded(tag: str, cpu: str) -> dict[str, Any]:
+    """PERF010A_GUARDED_CALL's structural confirmation. Unlike ablations 3/4, the new
+    specialization method name (`performGuardedOrdinaryComposedSend`) exists only in the
+    guarded image's source at all - the baseline image's `PrepareSendArguments` class has
+    exactly one, byte-for-byte unchanged, `perform` specialization - so this is a stronger,
+    more directly source-legible signal (see the module docstring's guarded-call bullet and
+    config/perf010a-guarded-call.json's `structural_confirmation_note`). This reads
+    `/opt/protos-source` (the exact patched-or-unmodified source tree the image was built from)
+    and inspects, per image: the `PrepareSendArguments` class body (whether the new
+    specialization and its marker comment are present, and whether the pre-existing `perform`
+    specialization's own body is present unchanged); and the rest of
+    `ProtosBytecodeRootNode.java` outside that one class body (must be byte-for-byte identical
+    across variants - compared by the caller, proving every other Operation/method, including
+    prepareSend/prepareImmediateMethodCall/finishPreparingComposedCall(ByImplementation)/
+    taskOwnedBytecodePlan, is untouched)."""
+    root_node_source = output([
+        "docker", "run", "--rm", "--network", "none",
+        "--cpuset-cpus", cpu,
+        "--entrypoint", "cat", tag,
+        f"{SOURCE_ROOT}/{GUARDED_CALL_SOURCE_PATH}",
+    ])
+
+    class_present = PREPARE_SEND_ARGUMENTS_SIGNATURE in root_node_source
+    class_body = (
+        _extract_method_body(root_node_source, PREPARE_SEND_ARGUMENTS_SIGNATURE)
+        if class_present
+        else ""
+    )
+
+    if class_present:
+        signature_start = root_node_source.index(PREPARE_SEND_ARGUMENTS_SIGNATURE)
+        brace_start = root_node_source.index("{", signature_start)
+        body_end = brace_start + len(class_body)
+        outside_class_source = root_node_source[:brace_start] + root_node_source[body_end:]
+    else:
+        outside_class_source = root_node_source
+
+    return {
+        "class_present": class_present,
+        "guarded_specialization_present": GUARDED_SPECIALIZATION_SIGNATURE in class_body,
+        "diagnostic_marker_present": GUARDED_CALL_MARKER_COMMENT in class_body,
+        "generic_perform_body_present": (
+            "return prepareSend(" in class_body and "@Variadic Object[] supplied" in class_body
+        ),
+        "outside_class_source": outside_class_source,
+    }
+
+
+def structural_contract_confirmed_guarded(
+    baseline_probe: dict[str, Any], guarded_probe: dict[str, Any]
+) -> dict[str, bool]:
+    """PERF010A_GUARDED_CALL's exact-scope structural gate (AGENTS.work/PERFORMANCE.md's
+    causal-ablation exact-scope validation rule): proves both that the guarded specialization is
+    present only in the guarded image and that the rest of `ProtosBytecodeRootNode.java` -
+    including the generic `perform` fallback's own body - stays on the baseline path, as a
+    single per-image comparison (not repeated independently per workload)."""
+    checks: dict[str, bool] = {
+        "GUARDED_CALL_BASELINE_HAS_NO_FAST_ARM": (
+            baseline_probe["class_present"]
+            and not baseline_probe["guarded_specialization_present"]
+            and not baseline_probe["diagnostic_marker_present"]
+            and baseline_probe["generic_perform_body_present"]
+        ),
+        "GUARDED_CALL_IMAGE_HAS_FAST_ARM": (
+            guarded_probe["class_present"]
+            and guarded_probe["guarded_specialization_present"]
+            and guarded_probe["diagnostic_marker_present"]
+            and guarded_probe["generic_perform_body_present"]
+        ),
+        "GUARDED_CALL_OTHER_CALL_SITES_UNCHANGED": (
+            bool(baseline_probe["outside_class_source"])
+            and baseline_probe["outside_class_source"] == guarded_probe["outside_class_source"]
+        ),
+    }
+    checks["PERF010A_GUARDED_CALL_PATCH_SCOPE_MATCH"] = all(checks.values())
+    return checks
+
+
 STRUCTURAL_PROBE = {
     "3": source_structural_probe,
     "4": source_structural_probe_4,
+    "guarded-call": source_structural_probe_guarded,
 }
 STRUCTURAL_CONTRACT_CONFIRM = {
     "3": structural_contract_confirmed_ablation_3,
     "4": structural_contract_confirmed_ablation_4,
+    "guarded-call": structural_contract_confirmed_guarded,
 }
 STRUCTURAL_SCOPE_MATCH_KEY = {
     "3": "ABLATION_3_PATCH_SCOPE_MATCH",
     "4": "ABLATION_4_PATCH_SCOPE_MATCH",
+    "guarded-call": "PERF010A_GUARDED_CALL_PATCH_SCOPE_MATCH",
 }
 
 
@@ -1235,8 +1469,7 @@ def run_matrix(
 def classify_workload(
     entry: dict[str, Any],
     ablation: str = "1",
-    structural_contract_3: dict[str, bool] | None = None,
-    structural_contract_4: dict[str, bool] | None = None,
+    structural_contract: dict[str, bool] | None = None,
 ) -> dict[str, Any]:
     baseline = entry["variants"]["baseline"]
     ablation_variant = entry["variants"]["ablation"]
@@ -1250,12 +1483,12 @@ def classify_workload(
 
     structural_ok = correctness_confirmed
     if correctness_confirmed and ablation in SOURCE_STRUCTURAL_ABLATIONS:
-        # Source-derived, not JFR-derived (see source_structural_probe/
-        # source_structural_probe_4): a single per-image exact-scope structural contract,
-        # identical across all four workloads, rather than a per-workload JFR profile.
-        structural_contract = (
-            structural_contract_3 if ablation == "3" else structural_contract_4
-        )
+        # Source-derived, not JFR-derived (see source_structural_probe/source_structural_probe_4/
+        # source_structural_probe_guarded): a single per-image exact-scope structural contract,
+        # identical across all four workloads, rather than a per-workload JFR profile. The
+        # caller passes the one structural_contract relevant to `ablation` (there is only ever
+        # one, since a single run targets exactly one ablation slice); this function does not
+        # need to pick among several.
         structural_ok = bool(
             structural_contract is not None
             and structural_contract.get(STRUCTURAL_SCOPE_MATCH_KEY[ablation], False)
@@ -1335,18 +1568,13 @@ def smoke(ablation: str = "1") -> None:
     # This static, per-image contract can be known before the (comparatively) expensive
     # four-workload smoke matrix runs at all, so it is checked and, on failure, fails the gate
     # here rather than after the matrix has already executed.
-    structural_contract_3 = None
-    structural_contract_4 = None
+    structural_contract = None
     if ablation in SOURCE_STRUCTURAL_ABLATIONS:
         probe_fn = STRUCTURAL_PROBE[ablation]
         confirm_fn = STRUCTURAL_CONTRACT_CONFIRM[ablation]
         scope_key = STRUCTURAL_SCOPE_MATCH_KEY[ablation]
         source_markers = {variant: probe_fn(tags[variant], cpu) for variant in VARIANTS}
         structural_contract = confirm_fn(source_markers["baseline"], source_markers["ablation"])
-        if ablation == "3":
-            structural_contract_3 = structural_contract
-        else:
-            structural_contract_4 = structural_contract
         for key, ok in structural_contract.items():
             print(f"{key}={'PASS' if ok else 'FAIL'}")
         if not structural_contract[scope_key]:
@@ -1366,7 +1594,7 @@ def smoke(ablation: str = "1") -> None:
         )
 
     classifications = [
-        classify_workload(entry, ablation, structural_contract_3, structural_contract_4)
+        classify_workload(entry, ablation, structural_contract)
         for entry in matrix
     ]
 
@@ -1498,6 +1726,75 @@ def scope_of_ablation_readme(ablation: str, cfg: dict[str, Any]) -> list[str]:
             "change is made to `guillermomolina/protos` regardless of this experiment's "
             "outcome. Never published to `guillermomolina/protos`.",
         ]
+    if ablation == "guarded-call":
+        return [
+            "## Scope of the guarded-call experiment",
+            "",
+            "`guarded-call.patch` touches exactly one file, "
+            "`ProtosBytecodeRootNode.java`, and is almost purely additive: it adds one new "
+            "leading `@Specialization` (`performGuardedOrdinaryComposedSend`) to the "
+            "`PrepareSendArguments` Operation - the constant-selector, ordinary composed-send "
+            "Bytecode operation reached from a plain `receiver.selector(args)` send - plus "
+            "three new private helper methods. The pre-existing single specialization, "
+            "`perform`, keeps its exact body and becomes a `@Specialization(replaces = "
+            "\"performGuardedOrdinaryComposedSend\")` fallback; the only removed line in the "
+            "whole patch is its bare `@Specialization` annotation.",
+            "",
+            "The new specialization's guard re-runs the exact authoritative "
+            "`ProtosValueLookup.lookup(receiver, selector, prelude)` call on every single "
+            "invocation (three independent call sites in the new helpers), so D013 lookup "
+            "itself is unmodified and a slot replacement, removal, or delegation change is "
+            "always observed before the guard is trusted. The guard only takes the fast arm "
+            "when that fresh lookup still selects the exact same (Closure identity, methodHome "
+            "identity) pair this call site cached, and it only ever caches a Closure whose "
+            "`nativeBody()` is empty (a `final` field, so this fact never changes for a given "
+            "Closure instance).",
+            "",
+            "On a hit it reuses `ProtosActivation.forImmediateMethodInvocation` and "
+            "`attachTaskOrInheritDynamicControlState` exactly as the generic path "
+            "(`prepareImmediateMethodCall`) already does, resolves the effective Bytecode "
+            "execution plan via the pre-existing, unmodified `taskOwnedBytecodePlan` helper - "
+            "the same helper the retained `prepareTaskOwnedSelectedCallIfBytecode` precedent "
+            "already uses in production for the Task-owned path - and either builds the "
+            "`PreparedClosureCall` directly, bypassing "
+            "`finishPreparingComposedCallByImplementation`'s 16 implementation/category "
+            "classifiers and the subsequent 19 structured-dispatch predicates, or falls back to "
+            "that exact, unmodified method when the plan cannot be resolved (a source-less "
+            "context-local projection). Skipping those classifiers is provably safe rather than "
+            "merely likely safe: `finishPreparingComposedCall`'s own structured-flags branch "
+            "already requires every one of them to be false whenever the selected Closure is "
+            "non-native, which is the only case this specialization ever caches. A guard miss "
+            "- a different Closure/methodHome, a native Closure, or a lookup failure - falls "
+            "through to the unchanged `perform` specialization, i.e. the exact current generic "
+            "path.",
+            "",
+            "`ProtosStandardImportProtocol.selectedRuntimeForBytecodeIntrinsic`'s check (run by "
+            "the generic path before this experiment's target, `prepareImmediateMethodCall`) "
+            "can only select a non-null runtime when the selected Closure's `nativeBody()` is "
+            "present and holds a `StandardImportBody`; since this specialization only ever "
+            "caches a Closure whose `nativeBody()` is empty, that check is provably unreachable "
+            "(always null) for any Closure the fast arm can take, so omitting it changes no "
+            "observable behavior.",
+            "",
+            "`ProtosActivation.java`, `ProtosClosureValue.java`, `ProtosObjectValue.java`, "
+            "`ProtosValueLookup.java`, `CanonicalToBytecodeLowerer.java`, the RootTag topology, "
+            "the continuation machinery, the `CallTarget` architecture, and source/debugger "
+            "identity are all untouched by this patch. This is a diagnostic causal experiment, "
+            "not (by itself) a production optimization change; per this slice's scope, no "
+            "change is made to `guillermomolina/protos` regardless of this experiment's "
+            "outcome. Never published to `guillermomolina/protos`.",
+            "",
+            "Because the new specialization method exists only in the guarded image's source "
+            "(the baseline image's `PrepareSendArguments` class has exactly one, byte-for-byte "
+            "unchanged, `perform` specialization), structural confirmation is source-derived, "
+            "like ablations 3/4: `source_structural_probe_guarded`/"
+            "`structural_contract_confirmed_guarded` reads `/opt/protos-source` and confirms, "
+            "as one per-image contract, that the guarded image's `PrepareSendArguments` class "
+            "contains `performGuardedOrdinaryComposedSend` and the "
+            "`PERF010A_GUARDED_CALL` marker, that the baseline image's `PrepareSendArguments` "
+            "class does not, and that the rest of `ProtosBytecodeRootNode.java` is byte-for-"
+            "byte identical between the two images.",
+        ]
     if ablation == "1":
         return [
             "## Scope of the ablation",
@@ -1598,18 +1895,13 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
     # failure here MUST block reference before that matrix executes - not merely be reported as
     # INVALID after spending the expensive run to discover a condition that was already
     # knowable statically.
-    structural_contract_3 = None
-    structural_contract_4 = None
+    structural_contract = None
     if ablation in SOURCE_STRUCTURAL_ABLATIONS:
         probe_fn = STRUCTURAL_PROBE[ablation]
         confirm_fn = STRUCTURAL_CONTRACT_CONFIRM[ablation]
         scope_key = STRUCTURAL_SCOPE_MATCH_KEY[ablation]
         source_markers = {variant: probe_fn(tags[variant], cpu) for variant in VARIANTS}
         structural_contract = confirm_fn(source_markers["baseline"], source_markers["ablation"])
-        if ablation == "3":
-            structural_contract_3 = structural_contract
-        else:
-            structural_contract_4 = structural_contract
         for key, ok in structural_contract.items():
             print(f"{key}={'PASS' if ok else 'FAIL'}")
         if not structural_contract[scope_key]:
@@ -1629,9 +1921,7 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         )
 
     classifications = {
-        entry["workload"]: classify_workload(
-            entry, ablation, structural_contract_3, structural_contract_4
-        )
+        entry["workload"]: classify_workload(entry, ablation, structural_contract)
         for entry in matrix
     }
     overall_valid = all(c[status_key] == "VALID" for c in classifications.values())
@@ -1665,9 +1955,7 @@ def reference(harness_revision: str | None, output_dir: Path, ablation: str = "1
         "jfr_recording_phase": cfg["jfr_recording_phase"],
         "timing_recording_phase": cfg["timing_recording_phase"],
         "external_baseline": cfg["external_baseline"],
-        "source_structural_markers": (
-            structural_contract_3 if ablation == "3" else structural_contract_4
-        ),
+        "source_structural_markers": structural_contract,
         "matrix": matrix,
         "classifications": classifications,
         "overall_result": "VALID" if overall_valid else "INVALID",

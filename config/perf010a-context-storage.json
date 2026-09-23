@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_TIER_B_CONTEXT_STORAGE_CAUSAL",
+  "diagnostic_claim": true,
+  "causal_same_revision_patch_comparator": true,
+  "causal_question": "Does replacing only execution-context local-slot LinkedHashMap storage with a private array-backed representation produce a large causal reduction capable of explaining a dominant part of PERF010-A?",
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "3e8e6b565c95eb5098c2168d241536ba13ad19e9",
+  "ablation_patch": "docker/protos-perf010a/context-storage.patch",
+  "operation_count": 10000,
+  "warmup_iterations": 120,
+  "steady_iterations": 100,
+  "block_order": ["A", "B", "A", "B"],
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "python_package": "python3"
+  },
+  "output": "results/perf010a-context-storage",
+  "interpretation_rule": {
+    "small_or_moderate": "If all workload medians are positive but remain below multiplicative scale, close as REAL_COST_BUT_NOT_THE_BIG_COST.",
+    "no_clear_effect": "If the four-workload matrix does not show a clear positive causal signal, close as NO_MATERIAL_CAUSAL_EFFECT.",
+    "multiplicative": "Only coherent approximately >=2x improvement keeps the candidate possible and authorizes a later external baseline.",
+    "order_of_magnitude": "Only coherent approximately >=10x improvement is order-of-magnitude relevant."
+  }
+}

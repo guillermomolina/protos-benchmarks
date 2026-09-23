@@ -1,0 +1,261 @@
+--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java
++++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosObjectValue.java
+@@ -40,15 +40,32 @@
+     private static final ProtosObjectValue ROOT = new ProtosObjectValue();
+ 
+     private final Object parent;
+-    private final Map<String, Object> localSlots = new LinkedHashMap<>();
++    private final Map<String, Object> localSlots;
++    // PERF010A_CONTEXT_STORAGE_DIAGNOSTIC: non-map storage exists only for objects created by
++    // ProtosPrelude.newExecutionContext() in the benchmark-local intervention image.
++    private final Perf010aContextLocalSlots perf010aContextLocalSlots;
+     private MutationState mutationState = MutationState.OPEN;
+ 
+     private ProtosObjectValue() {
+         this.parent = null;
++        this.localSlots = new LinkedHashMap<>();
++        this.perf010aContextLocalSlots = null;
+     }
+ 
+     public ProtosObjectValue(Object parent) {
+         this.parent = Objects.requireNonNull(parent, "parent");
++        this.localSlots = new LinkedHashMap<>();
++        this.perf010aContextLocalSlots = null;
++    }
++
++    private ProtosObjectValue(Object parent, Perf010aContextLocalSlots contextLocalSlots) {
++        this.parent = Objects.requireNonNull(parent, "parent");
++        this.localSlots = null;
++        this.perf010aContextLocalSlots = Objects.requireNonNull(contextLocalSlots, "contextLocalSlots");
++    }
++
++    static ProtosObjectValue perf010aDiagnosticExecutionContext(Object parent) {
++        return new ProtosObjectValue(parent, new Perf010aContextLocalSlots());
+     }
+ 
+     public static ProtosObjectValue rootObject() {
+@@ -93,28 +110,37 @@
+ 
+     public boolean hasLocalSlot(String name) {
+         Objects.requireNonNull(name, "name");
++        if (perf010aContextLocalSlots != null) {
++            return perf010aContextLocalSlots.contains(name);
++        }
+         return localSlots.containsKey(name);
+     }
+ 
+     public Optional<Object> readLocalSlot(String name) {
+         Objects.requireNonNull(name, "name");
++        if (perf010aContextLocalSlots != null) {
++            return perf010aContextLocalSlots.read(name);
++        }
+         return localSlots.containsKey(name)
+                 ? Optional.of(localSlots.get(name))
+                 : Optional.empty();
+     }
+ 
+     public Map<String, Object> localSlotsSnapshot() {
++        if (perf010aContextLocalSlots != null) {
++            return java.util.Collections.unmodifiableMap(perf010aContextLocalSlots.snapshot());
++        }
+         return java.util.Collections.unmodifiableMap(new LinkedHashMap<>(localSlots));
+     }
+ 
+     public ProtosObjectValue withoutLocalSlot(String name) {
+         Objects.requireNonNull(name, "name");
+-        if (!localSlots.containsKey(name)) {
++        if (!hasLocalSlot(name)) {
+             throw new IllegalStateException("local slot does not exist: " + name);
+         }
+ 
+         ProtosObjectValue result = new ProtosObjectValue(rootObject());
+-        for (Map.Entry<String, Object> entry : localSlots.entrySet()) {
++        for (Map.Entry<String, Object> entry : localSlotsSnapshot().entrySet()) {
+             if (!entry.getKey().equals(name)) {
+                 result.createLocalSlot(entry.getKey(), entry.getValue());
+             }
+@@ -127,18 +153,18 @@
+             String aliasName) {
+         Objects.requireNonNull(sourceName, "sourceName");
+         Objects.requireNonNull(aliasName, "aliasName");
+-        if (!localSlots.containsKey(sourceName)) {
++        if (!hasLocalSlot(sourceName)) {
+             throw new IllegalStateException("local slot does not exist: " + sourceName);
+         }
+-        if (localSlots.containsKey(aliasName)) {
++        if (hasLocalSlot(aliasName)) {
+             throw new IllegalStateException("local slot already exists: " + aliasName);
+         }
+ 
+         ProtosObjectValue result = new ProtosObjectValue(rootObject());
+-        for (Map.Entry<String, Object> entry : localSlots.entrySet()) {
++        for (Map.Entry<String, Object> entry : localSlotsSnapshot().entrySet()) {
+             result.createLocalSlot(entry.getKey(), entry.getValue());
+         }
+-        result.createLocalSlot(aliasName, localSlots.get(sourceName));
++        result.createLocalSlot(aliasName, readLocalSlot(sourceName).orElseThrow());
+         return result;
+     }
+ 
+@@ -156,19 +182,21 @@
+         }
+ 
+         Map<String, Object> contributions = new LinkedHashMap<>();
+-        for (Map.Entry<String, Object> entry : source.localSlots.entrySet()) {
++        for (Map.Entry<String, Object> entry : source.localSlotsSnapshot().entrySet()) {
+             if (!reservedNames.contains(entry.getKey())) {
+                 contributions.put(entry.getKey(), entry.getValue());
+             }
+         }
+ 
+         for (String name : contributions.keySet()) {
+-            if (localSlots.containsKey(name)) {
++            if (hasLocalSlot(name)) {
+                 throw new IllegalStateException("composition conflict: " + name);
+             }
+         }
+ 
+-        localSlots.putAll(contributions);
++        for (Map.Entry<String, Object> entry : contributions.entrySet()) {
++            createLocalSlot(entry.getKey(), entry.getValue());
++        }
+     }
+ 
+     public Optional<ProtosSlotLookupResult> lookupSlot(String name) {
+@@ -176,9 +204,9 @@
+ 
+         ProtosObjectValue current = this;
+         while (true) {
+-            if (current.localSlots.containsKey(name)) {
+-                return Optional.of(
+-                        new ProtosSlotLookupResult(current.localSlots.get(name), current));
++            Optional<Object> local = current.readLocalSlot(name);
++            if (local.isPresent()) {
++                return Optional.of(new ProtosSlotLookupResult(local.orElseThrow(), current));
+             }
+ 
+             if (current.parent == null) {
+@@ -209,6 +237,10 @@
+         if (mutationState == MutationState.CLOSED) {
+             throw new IllegalStateException("object is closed");
+         }
++        if (perf010aContextLocalSlots != null) {
++            perf010aContextLocalSlots.create(name, value);
++            return;
++        }
+         if (localSlots.containsKey(name)) {
+             throw new IllegalStateException("local slot already exists: " + name);
+         }
+@@ -223,6 +255,10 @@
+         if (mutationState == MutationState.FROZEN) {
+             throw new IllegalStateException("object is frozen");
+         }
++        if (perf010aContextLocalSlots != null) {
++            perf010aContextLocalSlots.assign(name, value);
++            return;
++        }
+         if (!localSlots.containsKey(name)) {
+             throw new IllegalStateException("local slot does not exist: " + name);
+         }
+@@ -239,12 +275,89 @@
+         if (mutationState == MutationState.CLOSED) {
+             throw new IllegalStateException("object is closed");
+         }
++        if (perf010aContextLocalSlots != null) {
++            return perf010aContextLocalSlots.remove(name);
++        }
+         if (!localSlots.containsKey(name)) {
+             throw new IllegalStateException("local slot does not exist: " + name);
+         }
+ 
+         return localSlots.remove(name);
+     }
++
++    private static final class Perf010aContextLocalSlots {
++        private String[] names = new String[4];
++        private Object[] values = new Object[4];
++        private int size;
++
++        boolean contains(String name) {
++            return indexOf(name) >= 0;
++        }
++
++        Optional<Object> read(String name) {
++            int index = indexOf(name);
++            return index >= 0 ? Optional.of(values[index]) : Optional.empty();
++        }
++
++        void create(String name, Object value) {
++            if (indexOf(name) >= 0) {
++                throw new IllegalStateException("local slot already exists: " + name);
++            }
++            ensureCapacity(size + 1);
++            names[size] = name;
++            values[size] = value;
++            size++;
++        }
++
++        void assign(String name, Object value) {
++            int index = indexOf(name);
++            if (index < 0) {
++                throw new IllegalStateException("local slot does not exist: " + name);
++            }
++            values[index] = value;
++        }
++
++        Object remove(String name) {
++            int index = indexOf(name);
++            if (index < 0) {
++                throw new IllegalStateException("local slot does not exist: " + name);
++            }
++            Object removed = values[index];
++            int moved = size - index - 1;
++            if (moved > 0) {
++                System.arraycopy(names, index + 1, names, index, moved);
++                System.arraycopy(values, index + 1, values, index, moved);
++            }
++            size--;
++            names[size] = null;
++            values[size] = null;
++            return removed;
++        }
++
++        LinkedHashMap<String, Object> snapshot() {
++            LinkedHashMap<String, Object> result = new LinkedHashMap<>();
++            for (int index = 0; index < size; index++) {
++                result.put(names[index], values[index]);
++            }
++            return result;
++        }
++
++        private int indexOf(String name) {
++            for (int index = 0; index < size; index++) {
++                if (names[index].equals(name)) {
++                    return index;
++                }
++            }
++            return -1;
++        }
++
++        private void ensureCapacity(int required) {
++            if (required <= names.length) return;
++            int capacity = Math.max(required, names.length * 2);
++            names = java.util.Arrays.copyOf(names, capacity);
++            values = java.util.Arrays.copyOf(values, capacity);
++        }
++    }
+     /*
+      * I026-D1 / PLAT013: tooling observation is local reflection only.
+      * Subclasses inherit the export mechanically but receive no object-member
+--- a/src/main/java/com/guillermomolina/protos/runtime/ProtosPrelude.java
++++ b/src/main/java/com/guillermomolina/protos/runtime/ProtosPrelude.java
+@@ -283,7 +283,8 @@
+     }
+ 
+     public ProtosObjectValue newExecutionContext() {
+-        return new ProtosObjectValue(contextPrototype);
++        // PERF010A_CONTEXT_STORAGE_DIAGNOSTIC: benchmark-local intervention only.
++        return ProtosObjectValue.perf010aDiagnosticExecutionContext(contextPrototype);
+     }
+ 
+     public ProtosActivation newModuleActivation() {

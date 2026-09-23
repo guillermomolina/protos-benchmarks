@@ -150,7 +150,9 @@ from pathlib import Path
 import platform
 import statistics
 import subprocess
+import sys
 import tempfile
+import threading
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -174,7 +176,14 @@ ABLATIONS = ("1", "2", "3", "4", "guarded-call")
 # changing those four functions' existing, already-tested behavior for ablations 1-4. It is
 # added to ABLATIONS only so build_image()'s tag-naming assertion accepts it.
 DISCRIMINATION_ABLATION = "0"
-ABLATIONS_WITH_DISCRIMINATION = ABLATIONS + (DISCRIMINATION_ABLATION,)
+# "0-phase1" is the Phase 1 stable-identity measurement-system-admission Evidence Unit (see the
+# dedicated section near the end of this module): the same no-op image-build path as "0", but
+# built and tagged separately so its images can never collide with, or be silently confused
+# with, the historical warmup=20 no-op images "0" already builds. Kept out of ABLATIONS/
+# ABLATION_PROFILES for the same reason "0" is: it has its own standalone validate/smoke/
+# reference functions and never routes through validate()/smoke()/reference().
+STABLE_IDENTITY_PHASE1_ABLATION = "0-phase1"
+ABLATIONS_WITH_DISCRIMINATION = ABLATIONS + (DISCRIMINATION_ABLATION, STABLE_IDENTITY_PHASE1_ABLATION)
 # Ablations whose structural confirmation is source-derived (reads /opt/protos-source) rather
 # than JFR-frame-derived, because their call sites keep calling a same-named method in both
 # variants (see ablation 3's and 4's module-docstring rationale below).
@@ -859,6 +868,18 @@ def ablation_slice_label_probe(tag: str, cpu: str) -> str:
     if p.returncode != 0:
         raise RuntimeError("ablation-slice probe failed: " + (p.stderr or "")[-2000:])
     return (p.stdout or "").strip()
+
+
+def image_identity(tag: str) -> dict[str, Any]:
+    """Actual built-image identity (`docker image inspect`), not just the declared tag/revision/
+    base-image labels `build_image`/`variant_label_probe`/`ablation_slice_label_probe` already
+    retain. Mirrors the identically-named helper already used by `runner/perf001f.py`,
+    `runner/perf001g.py`, `runner/perf004a.py`, `runner/perf006d.py`, and `runner/bench.py` in
+    this repository (same `docker image inspect` mechanism, same returned shape), reused here
+    rather than reinvented. `repo_digests` is retained when present but never required: a freshly
+    built local-only image has none."""
+    payload = json.loads(output(["docker", "image", "inspect", tag]))[0]
+    return {"tag": tag, "id": payload.get("Id", ""), "repo_digests": payload.get("RepoDigests") or []}
 
 
 def _extract_method_body(source_text: str, signature: str) -> str:
@@ -2791,6 +2812,723 @@ def reference_discrimination(harness_revision: str | None, output_dir: Path | No
 
 
 # ---------------------------------------------------------------------------------------------
+# PERF010-A / #691 Phase 1 stable-identity measurement-system-admission Evidence Unit
+# (guillermomolina/protos-project-docs@67bd25de851f68d82ab571efab0453f9e34f717a,
+# docs/project/evidence/PERF010-A/PERF010-A_STABLE_IDENTITY_TIMING_HARNESS_READINESS.md, itself
+# built on the compiler-lifecycle record @6aafd29807e9e566c0ec1e74d4ff7e667a840333 that already
+# established COMPILER_LIFECYCLE_STABLE=YES / TIMING_READY=YES).
+#
+# That readiness record found that the existing public no-op discrimination entrypoint
+# (config/perf010a-0.json, discrimination-validate/-smoke/-reference above) is pinned to
+# warmup=20 and cannot execute the next required Evidence Unit - the same no-op experiment at
+# warmup=120 - without either destroying the historical warmup=20 reference contract or adding
+# bounded new harness wiring. It also found three further gaps: no first-quarter/last-quarter
+# stationarity diagnostics, no actual built-Docker-image identity retention, and no visible-
+# while-running timed-unit stdout/stderr (only silently captured pipes). This section adds
+# exactly that bounded wiring, as a new Evidence Unit (config/perf010a-0-phase1.json), while
+# leaving config/perf010a-0.json and every discrimination-* function above byte-for-byte/
+# behavior-for-behavior untouched.
+#
+# This is Phase 1 (measurement-system admission) only. It is still a no-op discrimination
+# experiment - the executed Protos runtime path cannot differ between its "baseline" and
+# "ablation" (no-op) images, exactly as above - not a causal ablation, and not the future Phase 2
+# two-product-revision comparison (CONTROL 2b3a88389da7228caed231a90b14091cf2841115 vs.
+# INTERVENTION 3e8e6b565c95eb5098c2168d241536ba13ad19e9), which remains unimplemented here. This
+# module does not classify WARMUP_120_STABILITY_HYPOTHESIS or MEASUREMENT_GATE for the data this
+# section collects: that classification is the next investigation slice's job, not this
+# implementation slice's.
+STABLE_IDENTITY_PHASE1_CONFIG = ROOT / "config/perf010a-0-phase1.json"
+STABLE_IDENTITY_PHASE1_EXPECTED_SLICE = "PERF010A_NOOP_PHASE1_STABLE_IDENTITY"
+STABLE_IDENTITY_PHASE1_EXPECTED_WARMUP = 120
+STABLE_IDENTITY_PHASE1_OUTPUT_DIR = ROOT / "results/perf010a-stable-identity-phase1"
+# Pinned sha256 of config/perf010a-0.json as of this Evidence Unit's own harness revision
+# (verify with `sha256sum config/perf010a-0.json`). `validate_stable_identity_phase1` checks the
+# live file against this constant so a silent future edit to the historical reference config
+# fails this new Evidence Unit closed rather than silently diffing against a moving target.
+HISTORICAL_DISCRIMINATION_CONFIG_SHA256 = (
+    "7e24e221ba1148e1a9eb9b757a9635257f626affb5412cc5139619b3a3414cbd"
+)
+# The only config keys config/perf010a-0-phase1.json is permitted to differ on from
+# config/perf010a-0.json: `warmup_iterations` (20 -> 120, the one methodological change this
+# Evidence Unit makes) plus new identity/phase/output metadata (`slice`, `phase`, `output`, and
+# `variant_note`, which only restates the new `slice` value in prose). No key may be added or
+# removed, and every other key's value - the four-workload matrix, toolchain, steady_iterations,
+# operation_count, block_order, the empty no-op patch, and the pinned Protos revision - must stay
+# byte-for-byte identical to the historical reference config.
+STABLE_IDENTITY_PHASE1_ALLOWED_CONFIG_DIFF_KEYS = frozenset(
+    {"slice", "phase", "output", "variant_note", "warmup_iterations"}
+)
+
+
+def validate_stable_identity_phase1() -> dict[str, Any]:
+    """Validation stage for the Phase 1 Evidence Unit: static/configuration/structural
+    preconditions only, no Docker/timing (AGENTS.work/PERFORMANCE.md's
+    `validate << smoke << reference` discipline). Proves programmatically, not just by
+    convention, that config/perf010a-0-phase1.json reproduces config/perf010a-0.json with its
+    differences limited to exactly STABLE_IDENTITY_PHASE1_ALLOWED_CONFIG_DIFF_KEYS, and that
+    config/perf010a-0.json itself still matches its pinned historical sha256 - i.e. this new
+    Evidence Unit cannot silently diverge from, or be silently invalidated by an edit to, the
+    historical reference contract it is derived from."""
+    observed_base_sha256 = sha256(DISCRIMINATION_CONFIG)
+    if observed_base_sha256 != HISTORICAL_DISCRIMINATION_CONFIG_SHA256:
+        raise RuntimeError(
+            "config/perf010a-0.json no longer matches its pinned historical sha256 "
+            f"(expected={HISTORICAL_DISCRIMINATION_CONFIG_SHA256} "
+            f"observed={observed_base_sha256}); the Phase 1 admission path must not proceed "
+            "while the historical no-op reference contract it is derived from may itself have "
+            "changed"
+        )
+
+    base_cfg = load(DISCRIMINATION_CONFIG)
+    cfg = load(STABLE_IDENTITY_PHASE1_CONFIG)
+
+    assert cfg["schema_version"] == base_cfg["schema_version"]
+    assert cfg["perf_item"] == "PERF010-A"
+    assert cfg["parent_perf_item"] == "PERF010"
+    assert cfg["slice"] == STABLE_IDENTITY_PHASE1_EXPECTED_SLICE
+    assert cfg["slice"] != base_cfg["slice"]
+    assert cfg["diagnostic_claim"] is True
+    assert cfg["measurement_discrimination_experiment"] is True
+    assert cfg["protos_repository"] == base_cfg["protos_repository"]
+    assert cfg["protos_revision"] == base_cfg["protos_revision"]
+    assert cfg["ablation_patch"] == base_cfg["ablation_patch"]
+    assert cfg["ablation_patch_targets"] == [] == base_cfg["ablation_patch_targets"]
+    assert cfg["operation_count"] == 10000 == base_cfg["operation_count"]
+    assert cfg["warmup_iterations"] == STABLE_IDENTITY_PHASE1_EXPECTED_WARMUP
+    assert base_cfg["warmup_iterations"] == 20
+    assert cfg["steady_iterations"] == 100 == base_cfg["steady_iterations"]
+    assert cfg["toolchain"] == base_cfg["toolchain"]
+    assert cfg["variants"] == ["baseline", "ablation"] == base_cfg["variants"]
+    assert cfg["controls"] == base_cfg["controls"]
+    assert tuple(cfg["block_order"]) == DISCRIMINATION_BLOCK_ORDER
+    assert tuple(base_cfg["block_order"]) == DISCRIMINATION_BLOCK_ORDER
+
+    patch_path = ROOT / cfg["ablation_patch"]
+    assert patch_path.is_file(), patch_path
+    assert patch_path.read_text(encoding="utf-8") == "", (
+        "the Phase 1 no-op patch must stay literally empty, exactly like the historical "
+        "no-op patch it reuses unmodified"
+    )
+
+    added_keys = set(cfg.keys()) - set(base_cfg.keys())
+    removed_keys = set(base_cfg.keys()) - set(cfg.keys())
+    assert added_keys == set(), added_keys
+    assert removed_keys == set(), removed_keys
+    changed_keys = {key for key in cfg if cfg[key] != base_cfg[key]}
+    unexpected_changes = changed_keys - STABLE_IDENTITY_PHASE1_ALLOWED_CONFIG_DIFF_KEYS
+    assert not unexpected_changes, sorted(unexpected_changes)
+    assert "warmup_iterations" in changed_keys
+
+    print("PERF010A_PHASE1_HISTORICAL_CONFIG_SHA256_MATCH=PASS")
+    print("PERF010A_PHASE1_CONFIG=PASS")
+    print(f"PERF010A_PHASE1_CONFIG_DIFF_KEYS={sorted(changed_keys)}")
+    print("PERF010A_PHASE1_WARMUP=" + str(cfg["warmup_iterations"]))
+    print("PERF010A_PHASE1_STEADY=" + str(cfg["steady_iterations"]))
+    print("PERF010A_PHASE1_OPERATION_COUNT=" + str(cfg["operation_count"]))
+    print("PERF010A_PHASE1_BLOCK_ORDER=" + ",".join(cfg["block_order"]))
+    print("PERF010A_PHASE1_EXPERIMENT_MATRIX_MATCHES_HISTORICAL_NOOP=PASS")
+    print("PERF010A_PHASE2_IMPLEMENTED=NO")
+    return cfg
+
+
+def _build_and_probe_stable_identity_phase1_images(
+    cfg: dict[str, Any], cpu: str
+) -> dict[str, Any]:
+    """Like `_build_and_probe_discrimination_images`, but for the Phase 1 Evidence Unit: builds
+    under the distinct STABLE_IDENTITY_PHASE1_ABLATION tag namespace so these images can never
+    collide with, or be confused with, the historical warmup=20 no-op images, and additionally
+    retains each built image's actual `docker image inspect` identity (not just its declared
+    tag/revision/base-image labels), satisfying the Phase 1 Evidence Unit's real-image-identity
+    requirement."""
+    tags = {
+        variant: build_image(cfg, variant, ablation=STABLE_IDENTITY_PHASE1_ABLATION)
+        for variant in VARIANTS
+    }
+    identities: dict[str, Any] = {}
+    for variant, tag in tags.items():
+        runtime_probe(tag, cpu)
+        java_version_probe(tag, cpu)
+        observed_variant = variant_label_probe(tag, cpu)
+        if observed_variant != variant:
+            raise RuntimeError(f"variant label mismatch: expected {variant}, got {observed_variant}")
+        observed_slice = ablation_slice_label_probe(tag, cpu)
+        expected_slice = cfg["slice"] if variant == "ablation" else "none"
+        if observed_slice != expected_slice:
+            raise RuntimeError(
+                f"ablation-slice label mismatch: expected {expected_slice}, got {observed_slice}"
+            )
+        identities[variant] = image_identity(tag)
+        print(
+            f"PHASE1 IMAGE variant={variant} tag={tag} id={identities[variant]['id']} "
+            f"repo_digests={identities[variant]['repo_digests']}",
+            flush=True,
+        )
+
+    source_hashes = {
+        variant: source_tree_identity_probe(tag, cpu) for variant, tag in tags.items()
+    }
+    mismatches = [
+        path for path in DISCRIMINATION_SOURCE_FILES
+        if source_hashes["baseline"][path] != source_hashes["ablation"][path]
+    ]
+    for path in DISCRIMINATION_SOURCE_FILES:
+        print(
+            f"PHASE1_NOOP_SOURCE_SHA256 path={path} "
+            f"baseline={source_hashes['baseline'][path]} noop={source_hashes['ablation'][path]}"
+        )
+    if mismatches:
+        print("PHASE1_NOOP_RUNTIME_PATH_EQUIVALENCE=FAIL")
+        raise RuntimeError(
+            "Phase 1 noop image's source differs from baseline's at: "
+            + ", ".join(mismatches)
+            + "; the Phase 1 experiment is INVALID and must not be used to interpret "
+            "measurement stability - no timing was run"
+        )
+    print("PHASE1_NOOP_RUNTIME_PATH_EQUIVALENCE=PASS")
+    return {"tags": tags, "image_identity": identities}
+
+
+def stationarity_diagnostics(steady_ns: list[int]) -> dict[str, Any]:
+    """First-quarter vs. last-quarter stationarity diagnostic for one 100-sample steady timed
+    unit (Phase 1 Evidence Unit requirement). With exactly 100 samples: first quarter =
+    steady[0:25], last quarter = steady[75:100]. Fails closed (raises) rather than silently
+    approximating when the sample count does not permit exactly this contract - this diagnostic
+    is defined only for the Phase 1 Evidence Unit's own steady_iterations=100 scale, not for
+    `smoke`'s deliberately much smaller SMOKE_STEADY_ITERATIONS."""
+    if len(steady_ns) != 100:
+        raise RuntimeError(
+            "stationarity diagnostics require exactly 100 steady samples, got "
+            f"{len(steady_ns)}"
+        )
+    first_quarter = steady_ns[0:25]
+    last_quarter = steady_ns[75:100]
+    first_quarter_median = statistics.median(first_quarter)
+    last_quarter_median = statistics.median(last_quarter)
+    last_quarter_vs_first_quarter_percent = (
+        100.0 * (last_quarter_median - first_quarter_median) / first_quarter_median
+    )
+    return {
+        "steady_median_ns": statistics.median(steady_ns),
+        "first_quarter_median_ns": first_quarter_median,
+        "last_quarter_median_ns": last_quarter_median,
+        "last_quarter_vs_first_quarter_percent": last_quarter_vs_first_quarter_percent,
+    }
+
+
+def _mirror_stream(stream, sink_lines: list[str], mirror_target) -> None:
+    for line in iter(stream.readline, ""):
+        sink_lines.append(line)
+        if mirror_target is not None:
+            mirror_target.write(line)
+            mirror_target.flush()
+    stream.close()
+
+
+def run_visible(command: list[str], *, mirror_stdout: bool = False) -> subprocess.CompletedProcess:
+    """Runs `command`, retaining its complete stdout/stderr text and exit code exactly like
+    `run(..., capture=True)`, but - unlike that helper, whose pipes are read only after the
+    child exits - streams stderr (and, if `mirror_stdout` is set, stdout) live to this process's
+    own stderr/stdout while the child is still running, using one reader thread per stream.
+    Conceptually equivalent to the shell idiom
+    `command > >(tee stdout_file) 2> >(tee stderr_file >&2)`, implemented directly in Python so
+    it does not depend on a bash-specific process-substitution feature. Used by the Phase 1
+    stable-identity timed-unit path so a hang or crash is visible immediately rather than only
+    after the fact (PERF010-A Phase 1 Evidence Unit visibility-plus-retention requirement)."""
+    proc = subprocess.Popen(
+        command, cwd=ROOT, text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    stdout_lines: list[str] = []
+    stderr_lines: list[str] = []
+    stdout_thread = threading.Thread(
+        target=_mirror_stream,
+        args=(proc.stdout, stdout_lines, sys.stdout if mirror_stdout else None),
+    )
+    stderr_thread = threading.Thread(
+        target=_mirror_stream, args=(proc.stderr, stderr_lines, sys.stderr)
+    )
+    stdout_thread.start()
+    stderr_thread.start()
+    returncode = proc.wait()
+    stdout_thread.join()
+    stderr_thread.join()
+    return subprocess.CompletedProcess(command, returncode, "".join(stdout_lines), "".join(stderr_lines))
+
+
+def timing_visible(
+    tag: str, cpu: str, work: Path, logs_dir: Path,
+    source_host: Path | None, source_container: str,
+    expected: str, label: str, warmup: int, steady: int,
+    *, collect_stationarity: bool = True,
+) -> dict[str, Any]:
+    """Like `timing`, but for the Phase 1 Evidence Unit: stderr is streamed live while the timed
+    unit runs (`run_visible`), complete stdout/stderr are retained to per-timed-unit log files
+    under `logs_dir` in addition to being returned in-memory, and the exit code is retained.
+    stdout is deliberately not mirrored live: `Perf010aTimingDriver` emits exactly one large JSON
+    line at the very end of each timed unit, so mirroring it live would only flood the terminal
+    with raw payload rather than add earlier visibility - the harness-level BEGIN/PASS/FAIL
+    progress markers the caller prints already provide that, matching this module's existing
+    convention (`run_matrix`/`run_discrimination_blocks`). Also independently re-checks that the
+    driver actually received and honored `warmup`/`steady` by asserting the raw warmup_ns/
+    steady_ns arrays it returns are exactly those lengths, not merely that no exception was
+    raised."""
+    command = [
+        "docker", "run", "--rm", "--network", "none",
+        "--cpuset-cpus", cpu,
+    ]
+    if source_host is not None:
+        command += ["--volume", f"{source_host.resolve()}:/work/source.protos:ro"]
+        source_container = "/work/source.protos"
+    command += ["--entrypoint", "java", tag]
+    command += [
+        "-Xss128m",
+        "--enable-native-access=ALL-UNNAMED",
+        "-cp", "/opt/perf010a/diagnostic:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/*",
+        "Perf010aTimingDriver",
+        source_container, expected, str(warmup), str(steady),
+    ]
+    print(f"PHASE1 TIMING BEGIN label={label} warmup={warmup} steady={steady}", flush=True)
+    p = run_visible(command)
+
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    stdout_path = logs_dir / f"{label}.stdout.log"
+    stderr_path = logs_dir / f"{label}.stderr.log"
+    stdout_path.write_text(p.stdout, encoding="utf-8")
+    stderr_path.write_text(p.stderr, encoding="utf-8")
+
+    if p.returncode != 0:
+        print(
+            f"PHASE1 TIMING FAIL label={label} returncode={p.returncode} "
+            f"stdout_log={stdout_path} stderr_log={stderr_path}",
+            flush=True,
+        )
+        raise RuntimeError(
+            f"timing failed {label} returncode={p.returncode}\n"
+            f"stdout(tail):\n{p.stdout[-6000:]}\nstderr(tail):\n{p.stderr[-6000:]}"
+        )
+
+    lines = [line for line in p.stdout.splitlines() if line.strip()]
+    if not lines:
+        raise RuntimeError("empty timing output: " + label)
+    payload = json.loads(lines[-1])
+    warmup_ns = [int(v) for v in payload["warmup_ns"]]
+    steady_ns = [int(v) for v in payload["steady_ns"]]
+    if len(warmup_ns) != warmup:
+        raise RuntimeError(
+            f"unexpected warmup sample count in {label}: expected={warmup} observed={len(warmup_ns)}"
+        )
+    if len(steady_ns) != steady:
+        raise RuntimeError(
+            f"unexpected steady sample count in {label}: expected={steady} observed={len(steady_ns)}"
+        )
+
+    result: dict[str, Any] = {
+        "raw": payload,
+        "steady_summary": summarize_ns(steady_ns),
+        "returncode": p.returncode,
+        "stdout_log": stdout_path.name,
+        "stderr_log": stderr_path.name,
+        "stdout_sha256": hashlib.sha256(p.stdout.encode("utf-8")).hexdigest(),
+        "stderr_sha256": hashlib.sha256(p.stderr.encode("utf-8")).hexdigest(),
+    }
+    result["stationarity"] = stationarity_diagnostics(steady_ns) if collect_stationarity else None
+    return result
+
+
+def run_stable_identity_phase1_blocks(
+    cfg: dict[str, Any], tags: dict[str, str], cpu: str, work: Path, logs_dir: Path,
+    block_order: tuple[str, ...], warmup: int, steady: int,
+    controls: list[dict[str, Any]] | None = None,
+    *, collect_stationarity: bool = True,
+) -> list[dict[str, Any]]:
+    """Phase 1 counterbalanced block matrix. Mirrors `run_discrimination_blocks`'s block/
+    workload/variant/mode structure, `_block_variant_order` counterbalancing, and
+    `control_source` canonical/control construction exactly and unmodified (the historical no-op
+    source-equivalence model and paired-control sign convention are never redefined - see
+    `classify_discrimination_block`, reused as-is by the Phase 1 reference path below), but uses
+    `timing_visible` instead of `timing` so each timed unit's stdout/stderr are retained and
+    stderr is visible live, and each timed unit additionally carries first-quarter/last-quarter
+    stationarity diagnostics. `controls` defaults to `cfg["controls"]` (the full four-workload
+    matrix); a caller may pass a subset only for a bounded validation run (see
+    `reference_stable_identity_phase1`'s `workload_ids`), never for the retained reference run
+    itself."""
+    controls = cfg["controls"] if controls is None else controls
+    blocks: list[dict[str, Any]] = []
+    for block_index, block_label in enumerate(block_order):
+        variant_order = _block_variant_order(block_label)
+        for item in controls:
+            workload = item["id"]
+            slug = workload.replace("/", "__")
+            by_variant: dict[str, Any] = {}
+            for variant in variant_order:
+                tag = tags[variant]
+                canonical_source, control_host = control_source(tag, work, item)
+                by_mode: dict[str, Any] = {}
+                for mode, source_host, source_container in (
+                    ("canonical", None, canonical_source),
+                    ("control", control_host, "/work/source.protos"),
+                ):
+                    label = f"block{block_index}-{block_label}-{slug}-{variant}-{mode}"
+                    timing_result = timing_visible(
+                        tag, cpu, work, logs_dir, source_host, source_container,
+                        item["expected"], label, warmup, steady,
+                        collect_stationarity=collect_stationarity,
+                    )
+                    stationarity_note = (
+                        f" last_vs_first_pct="
+                        f"{timing_result['stationarity']['last_quarter_vs_first_quarter_percent']:.4f}"
+                        if timing_result["stationarity"] is not None
+                        else ""
+                    )
+                    print(
+                        f"PHASE1 TIMING PASS block={block_index} order={block_label} "
+                        f"workload={workload} variant={variant} mode={mode} "
+                        f"median_ns={timing_result['steady_summary']['median_ns']}"
+                        f"{stationarity_note}",
+                        flush=True,
+                    )
+                    by_mode[mode] = timing_result
+                by_variant[variant] = by_mode
+            blocks.append({
+                "block_index": block_index,
+                "block_order": block_label,
+                "variant_sequence": list(variant_order),
+                "workload": workload,
+                "variants": by_variant,
+            })
+    return blocks
+
+
+def stable_identity_phase1_smoke() -> None:
+    """Admission/correctness gate for the Phase 1 Evidence Unit, matching this module's existing
+    smoke discipline (AGENTS.work/PERFORMANCE.md: 'validate << smoke << reference'):
+    deliberately far smaller than the Evidence Unit's own warmup=120/steady=100
+    (SMOKE_WARMUP_ITERATIONS/SMOKE_STEADY_ITERATIONS, independent of `cfg`'s reference-scale
+    values, exactly like `smoke`/`smoke_discrimination` above), so no timing collected here is
+    performance evidence and stationarity (which requires exactly 100 steady samples) is not
+    computed."""
+    cfg = validate_stable_identity_phase1()
+    harness_revision = worktree_harness_revision()
+    cpu = first_cpu()
+    build_result = _build_and_probe_stable_identity_phase1_images(cfg, cpu)
+    tags = build_result["tags"]
+
+    with tempfile.TemporaryDirectory(prefix="perf010a-phase1-smoke-") as tmp:
+        work = Path(tmp)
+        logs_dir = work / "logs"
+        blocks = run_stable_identity_phase1_blocks(
+            cfg, tags, cpu, work, logs_dir,
+            block_order=("A", "B"),
+            warmup=SMOKE_WARMUP_ITERATIONS, steady=SMOKE_STEADY_ITERATIONS,
+            collect_stationarity=False,
+        )
+
+    print("PERF010A_PHASE1_SMOKE_HARNESS_REVISION=" + harness_revision)
+    print(
+        f"PERF010A_PHASE1_SMOKE_SCALE=warmup={SMOKE_WARMUP_ITERATIONS} "
+        f"steady={SMOKE_STEADY_ITERATIONS} (Phase 1 Evidence Unit scale: "
+        f"warmup={cfg['warmup_iterations']} steady={cfg['steady_iterations']})"
+    )
+    print("PERF010A_PHASE1_SMOKE_BLOCKS=" + str(len({b['block_index'] for b in blocks})))
+    print("PERF010A_PHASE1_SMOKE_WORKLOADS=" + str(len(cfg["controls"])))
+    print("PERF010A_PHASE1_SMOKE=PASS")
+    print("PERF010A_PHASE1_SMOKE_RETAINED=NO")
+
+
+def reference_stable_identity_phase1(
+    harness_revision: str | None,
+    output_dir: Path | None,
+    *,
+    block_order_override: tuple[str, ...] | None = None,
+    workload_ids: tuple[str, ...] | None = None,
+) -> None:
+    """Phase 1 measurement-system-admission reference run: warmup=120, steady=100,
+    operation_count=10000, block_order=A,B,A,B (config/perf010a-0-phase1.json), reusing this
+    module's existing no-op source-equivalence model and paired-control sign convention
+    (`classify_discrimination_block`) unmodified. This is NOT the Phase 2 two-product-revision
+    causal comparison; it does not select a production optimization and does not classify
+    WARMUP_120_STABILITY_HYPOTHESIS or MEASUREMENT_GATE - the next investigation slice does that
+    from this Evidence Unit's raw retained data.
+
+    `block_order_override`/`workload_ids` exist only so a bounded, still full-warmup=120,
+    still-real-timed-unit validation run can exercise a small subset of the matrix (see this
+    slice's validation battery) - including from the dirty working tree that contains the
+    harness changes under validation, before they are committed. When both are omitted (the
+    default), this executes the complete config-declared matrix and is the actual, retained
+    Phase 1 Evidence Unit reference run, which keeps the full "clean exact harness" contract
+    unweakened (`resolved_harness_revision` + an explicit `git status --porcelain` check,
+    exactly like `reference_discrimination` above).
+
+    A bounded run:
+      - requires an explicit scratch `--output-dir` (never defaults to
+        STABLE_IDENTITY_PHASE1_OUTPUT_DIR, which is reserved for the retained run);
+      - rejects an explicit `--harness-revision` (only the retained run pins one);
+      - records `harness_revision` via `worktree_harness_revision()` instead (yields
+        "WORKTREE_PRECOMMIT" when the tree is dirty, exactly like this module's existing
+        non-retained `smoke`/`smoke_discrimination` gates already do for the same reason); and
+      - is written out with `evidence_status="VALIDATION_ONLY_NOT_RETAINED"` in `raw.json`, a
+        printed `PERF010A_PHASE1_EVIDENCE_STATUS` marker, and a top-of-README banner, so it can
+        never be mistaken for, or silently cited as, the retained Phase 1 Evidence Unit.
+    """
+    cfg = validate_stable_identity_phase1()
+    is_bounded_run = block_order_override is not None or workload_ids is not None
+
+    if is_bounded_run:
+        if output_dir is None:
+            raise RuntimeError(
+                "a bounded stable-identity-phase1-reference validation run "
+                "(--phase1-block-order/--phase1-workload) requires an explicit scratch "
+                "--output-dir; it must never default to STABLE_IDENTITY_PHASE1_OUTPUT_DIR, "
+                "which is reserved for the full-matrix retained Phase 1 Evidence Unit"
+            )
+        if harness_revision is not None:
+            raise RuntimeError(
+                "--harness-revision is not accepted for a bounded stable-identity-phase1-"
+                "reference validation run; only the full retained Evidence Unit run (no "
+                "--phase1-block-order/--phase1-workload) pins an exact harness revision"
+            )
+        # Validation-only run: deliberately allowed to execute from the dirty working tree that
+        # contains the harness modifications under validation (AGENTS.md's Universal repository
+        # workflow keeps an implementation slice uncommitted while builds/tests/validation are
+        # used to discover or repair defects in it). Uses worktree_harness_revision() - which
+        # records "WORKTREE_PRECOMMIT" when the tree is dirty, exactly like every other
+        # non-retained *_smoke() gate in this module already does for the same reason - never
+        # resolved_harness_revision()'s exact-clean-HEAD contract. That contract, and the
+        # explicit clean-tree check below, stay fully in force and unweakened for the full
+        # retained Evidence Unit run (the `else` branch).
+        harness_revision = worktree_harness_revision()
+    else:
+        harness_revision = resolved_harness_revision(harness_revision)
+        if output(["git", "status", "--porcelain", "--untracked-files=all"]):
+            raise RuntimeError("reference requires clean exact harness")
+
+    output_dir = output_dir if output_dir is not None else STABLE_IDENTITY_PHASE1_OUTPUT_DIR
+
+    if output_dir.exists():
+        if not output_dir.is_dir() or any(output_dir.iterdir()):
+            raise RuntimeError("output directory already contains evidence")
+        output_dir.rmdir()
+
+    controls = cfg["controls"]
+    if workload_ids is not None:
+        controls = [item for item in cfg["controls"] if item["id"] in workload_ids]
+        if len(controls) != len(workload_ids):
+            raise RuntimeError(f"unknown workload id(s) in {workload_ids}")
+
+    block_order = (
+        block_order_override if block_order_override is not None else tuple(cfg["block_order"])
+    )
+    for label in block_order:
+        _block_variant_order(label)  # raises on an unknown block label
+
+    cpu = first_cpu()
+    build_result = _build_and_probe_stable_identity_phase1_images(cfg, cpu)
+    tags = build_result["tags"]
+    image_identities = build_result["image_identity"]
+
+    output_dir.mkdir(parents=True)
+    logs_dir = output_dir / "logs"
+
+    with tempfile.TemporaryDirectory(prefix="perf010a-phase1-") as tmp:
+        work = Path(tmp)
+        blocks = run_stable_identity_phase1_blocks(
+            cfg, tags, cpu, work, logs_dir,
+            block_order=block_order,
+            warmup=cfg["warmup_iterations"], steady=cfg["steady_iterations"],
+            controls=controls,
+        )
+
+    classified = [classify_discrimination_block(entry) for entry in blocks]
+    by_workload: dict[str, list[dict[str, Any]]] = {}
+    for c in classified:
+        by_workload.setdefault(c["workload"], []).append(c)
+    per_workload_summary = {
+        workload: summarize_discrimination_workload(blocks_for_workload)
+        for workload, blocks_for_workload in by_workload.items()
+    }
+
+    stationarity_by_unit = [
+        {
+            "block_index": entry["block_index"],
+            "block_order": entry["block_order"],
+            "workload": entry["workload"],
+            "variant": variant,
+            "mode": mode,
+            **entry["variants"][variant][mode]["stationarity"],
+        }
+        for entry in blocks
+        for variant in entry["variants"]
+        for mode in entry["variants"][variant]
+    ]
+
+    is_full_matrix_run = not is_bounded_run
+    evidence_status = "RETAINED" if is_full_matrix_run else "VALIDATION_ONLY_NOT_RETAINED"
+
+    raw: dict[str, Any] = {
+        "schema_version": 1,
+        "perf_item": "PERF010-A",
+        "parent_perf_item": "PERF010",
+        "slice": cfg["slice"],
+        "phase": cfg["phase"],
+        "diagnostic_claim": True,
+        "measurement_discrimination_experiment": True,
+        "full_matrix_evidence_unit": is_full_matrix_run,
+        "evidence_status": evidence_status,
+        "harness_revision": harness_revision,
+        "protos_revision": cfg["protos_revision"],
+        "toolchain": cfg["toolchain"],
+        "built_image_identity": image_identities,
+        "host_identity": host_identity(),
+        "cpu_policy": {"mechanism": "cpuset-cpus", "cpuset": cpu},
+        "network": "none",
+        "operation_count": cfg["operation_count"],
+        "warmup_iterations": cfg["warmup_iterations"],
+        "steady_iterations": cfg["steady_iterations"],
+        "block_order": list(block_order),
+        "blocks": blocks,
+        "classified_blocks": classified,
+        "per_timed_unit_stationarity": stationarity_by_unit,
+        "per_workload_summary": per_workload_summary,
+        "warmup_120_stability_hypothesis": "PENDING_NEXT_SLICE",
+        "measurement_gate": "PENDING_NEXT_SLICE",
+    }
+    (output_dir / "raw.json").write_text(
+        json.dumps(raw, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    stationarity_rows = [
+        "block_index\tblock_order\tworkload\tvariant\tmode\tsteady_median_ns\t"
+        "first_quarter_median_ns\tlast_quarter_median_ns\tlast_quarter_vs_first_quarter_percent"
+    ]
+    for s in stationarity_by_unit:
+        stationarity_rows.append("\t".join([
+            str(s["block_index"]), s["block_order"], s["workload"], s["variant"], s["mode"],
+            str(s["steady_median_ns"]), str(s["first_quarter_median_ns"]),
+            str(s["last_quarter_median_ns"]),
+            f"{s['last_quarter_vs_first_quarter_percent']:.4f}",
+        ]))
+    (output_dir / "stationarity.tsv").write_text(
+        "\n".join(stationarity_rows) + "\n", encoding="utf-8"
+    )
+
+    summary_rows = [
+        "workload\tsamples\tnoop_paired_control_min_percent\tnoop_paired_control_max_percent\t"
+        "noop_paired_control_median_percent\tnoop_paired_control_mad_percent\t"
+        "discrimination_floor_percent\torder_effect"
+    ]
+    for workload, s in per_workload_summary.items():
+        summary_rows.append("\t".join([
+            workload, str(s["samples"]),
+            f"{s['noop_paired_control_min_percent']:.4f}",
+            f"{s['noop_paired_control_max_percent']:.4f}",
+            f"{s['noop_paired_control_median_percent']:.4f}",
+            f"{s['noop_paired_control_mad_percent']:.4f}",
+            f"{s['discrimination_floor_percent']:.4f}",
+            s["order_effect"],
+        ]))
+    (output_dir / "phase1-summary.tsv").write_text(
+        "\n".join(summary_rows) + "\n", encoding="utf-8"
+    )
+
+    readme = [
+        "# PERF010-A Phase 1 stable-identity measurement-system-admission Evidence Unit",
+        "",
+    ]
+    if not is_full_matrix_run:
+        readme += [
+            "> **VALIDATION_ONLY_NOT_RETAINED** - this is a bounded run "
+            "(`--phase1-block-order`/`--phase1-workload`) over a subset of the matrix, produced "
+            "to validate the harness itself, not the retained Phase 1 Evidence Unit. It may "
+            "have been executed from a dirty (uncommitted) working tree - see "
+            "`harness_revision` below, which reads `WORKTREE_PRECOMMIT` when that is the case. "
+            "It MUST NOT be cited as PERF010-A Phase 1 evidence. The retained Evidence Unit is "
+            "the full four-workload, full-block-order run with no overrides, executed from a "
+            "clean exact harness revision, written to `results/perf010a-stable-identity-phase1`.",
+            "",
+        ]
+    readme += [
+        "This is measurement-system admission, not a causal ablation and not the Phase 2 "
+        "two-product-revision comparison. Like the historical warmup=20 no-op discrimination "
+        "experiment it is derived from, the executed Protos runtime path cannot differ between "
+        "its 'baseline' and 'ablation' (no-op) images (see `PHASE1_NOOP_RUNTIME_PATH_EQUIVALENCE`"
+        " and `raw.json`), so any movement reported below is measurement movement, never a "
+        "Protos runtime effect.",
+        "",
+        f"- Harness revision: `{harness_revision}`",
+        f"- Protos revision (baseline and noop; single checkout, empty patch applied in-build "
+        f"for the noop image only): `{cfg['protos_revision']}`",
+        f"- Built image identity: `{json.dumps(image_identities, sort_keys=True)}`",
+        f"- Block order: `{list(block_order)}`.",
+        f"- N={cfg['operation_count']}. Warmup={cfg['warmup_iterations']}, "
+        f"steady={cfg['steady_iterations']} (warmup changed from the historical 20; steady "
+        "unchanged).",
+        f"- Full four-workload matrix: {'YES' if is_full_matrix_run else 'NO (bounded validation run)'}.",
+        f"- Evidence status: `{evidence_status}`.",
+        "",
+        "## Per-workload no-op discrimination envelope (descriptive only)",
+        "",
+        "| workload | samples | min % | max % | median % | MAD % | floor % | order effect |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for workload, s in per_workload_summary.items():
+        readme.append(
+            f"| {workload} | {s['samples']} "
+            f"| {s['noop_paired_control_min_percent']:.4f} "
+            f"| {s['noop_paired_control_max_percent']:.4f} "
+            f"| {s['noop_paired_control_median_percent']:.4f} "
+            f"| {s['noop_paired_control_mad_percent']:.4f} "
+            f"| {s['discrimination_floor_percent']:.4f} "
+            f"| {s['order_effect']} |"
+        )
+
+    readme += [
+        "",
+        "## Stationarity (first-quarter vs. last-quarter of each 100-sample steady timed unit)",
+        "",
+        "See `stationarity.tsv` for the full per-timed-unit table (raw `raw.json` remains "
+        "authoritative).",
+        "",
+        "## WARMUP_120_STABILITY_HYPOTHESIS = PENDING_NEXT_SLICE",
+        "## MEASUREMENT_GATE = PENDING_NEXT_SLICE",
+        "",
+        "This implementation slice deliberately does not classify either field above - see "
+        "AGENTS.work/PERFORMANCE.md and the readiness record this Evidence Unit implements "
+        "(guillermomolina/protos-project-docs@67bd25de851f68d82ab571efab0453f9e34f717a). The "
+        "next investigation slice classifies them from this Evidence Unit's raw retained data.",
+        "",
+        "This Evidence Unit does not select a production optimization and does not implement or "
+        "execute the separate Phase 2 two-product-revision comparison.",
+        "",
+    ]
+    (output_dir / "README.md").write_text("\n".join(readme) + "\n", encoding="utf-8")
+
+    manifest_names = ["README.md", "raw.json", "stationarity.tsv", "phase1-summary.tsv"]
+    manifest_lines = [f"{sha256(output_dir / n)}  {n}" for n in manifest_names]
+    if logs_dir.is_dir():
+        for log_path in sorted(logs_dir.iterdir()):
+            manifest_lines.append(f"{sha256(log_path)}  logs/{log_path.name}")
+    (output_dir / "SHA256SUMS").write_text("\n".join(manifest_lines) + "\n", encoding="utf-8")
+
+    print("PERF010A_PHASE1_REFERENCE=PASS")
+    print("PERF010A_PHASE1_EVIDENCE_STATUS=" + evidence_status)
+    print("PERF010A_PHASE1_FULL_MATRIX_EVIDENCE_UNIT=" + ("YES" if is_full_matrix_run else "NO"))
+    print("PERF010A_PHASE1_WARMUP=" + str(cfg["warmup_iterations"]))
+    print("PERF010A_PHASE1_STEADY=" + str(cfg["steady_iterations"]))
+    for workload, s in per_workload_summary.items():
+        print(
+            f"WORKLOAD={workload} "
+            f"NOOP_PAIRED_CONTROL_MEDIAN={s['noop_paired_control_median_percent']:.4f} "
+            f"DISCRIMINATION_FLOOR={s['discrimination_floor_percent']:.4f} "
+            f"ORDER_EFFECT={s['order_effect']}"
+        )
+    print("WARMUP_120_STABILITY_HYPOTHESIS=PENDING_NEXT_SLICE")
+    print("MEASUREMENT_GATE=PENDING_NEXT_SLICE")
+    print("PERF010A_PHASE2_IMPLEMENTED=NO")
+    print("PRODUCTION_OPTIMIZATION_SELECTED=NO")
+    print("PERF010A_PROTOS_REPOSITORY_MODIFICATION=NONE")
+
+
+# ---------------------------------------------------------------------------------------------
 # PERF010-A / #691 caller/helper source-identity diagnostic (guillermomolina/protos-project-docs
 # @29a38fd3c0fb2f10a1fb5dc4a6a4616e05abe98e,
 # docs/project/evidence/PERF010-A/PERF010-A_CALLER_HELPER_TRACE_SOURCE_IDENTITY_BLOCKER.md).
@@ -2984,6 +3722,8 @@ def main():
             "validate", "smoke", "reference",
             "discrimination-validate", "discrimination-smoke", "discrimination-reference",
             "source-identity-validate", "source-identity-smoke",
+            "stable-identity-phase1-validate", "stable-identity-phase1-smoke",
+            "stable-identity-phase1-reference",
         ),
     )
     ap.add_argument(
@@ -3000,6 +3740,20 @@ def main():
         "redundant containsKey+get), or 4 (finishPreparingComposedCall's duplicate "
         "ProtosClosureValue.nativeBody() projection); not used by the discrimination-* "
         "commands, which always use the dedicated no-op slice (config/perf010a-0.json)",
+    )
+    ap.add_argument(
+        "--phase1-block-order",
+        help="stable-identity-phase1-reference only: comma-separated override of the block "
+        "order (e.g. 'A' for a single-block bounded validation run); defaults to the full "
+        "config/perf010a-0-phase1.json block_order (A,B,A,B) and must be omitted for the "
+        "retained Phase 1 Evidence Unit run",
+    )
+    ap.add_argument(
+        "--phase1-workload",
+        action="append",
+        help="stable-identity-phase1-reference only: restrict to this workload id (repeatable, "
+        "e.g. --phase1-workload micro/slot-read); defaults to all four workloads and must be "
+        "omitted for the retained Phase 1 Evidence Unit run",
     )
     args = ap.parse_args()
 
@@ -3030,6 +3784,26 @@ def main():
 
     if args.command == "source-identity-smoke":
         smoke_source_identity()
+        return
+
+    if args.command == "stable-identity-phase1-validate":
+        validate_stable_identity_phase1()
+        return
+
+    if args.command == "stable-identity-phase1-smoke":
+        stable_identity_phase1_smoke()
+        return
+
+    if args.command == "stable-identity-phase1-reference":
+        output_dir = Path(args.output_dir) if args.output_dir else None
+        block_order_override = (
+            tuple(args.phase1_block_order.split(",")) if args.phase1_block_order else None
+        )
+        workload_ids = tuple(args.phase1_workload) if args.phase1_workload else None
+        reference_stable_identity_phase1(
+            args.harness_revision, output_dir,
+            block_order_override=block_order_override, workload_ids=workload_ids,
+        )
         return
 
     if not args.output_dir:

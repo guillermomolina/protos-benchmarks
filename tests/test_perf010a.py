@@ -138,7 +138,7 @@ class Perf010aContractTest(unittest.TestCase):
         self.assertEqual(0, completed.returncode)
         self.assertIn(
             "{validate,smoke,reference,discrimination-validate,discrimination-smoke,"
-            "discrimination-reference}",
+            "discrimination-reference,source-identity-validate,source-identity-smoke}",
             completed.stdout,
         )
 
@@ -1621,6 +1621,158 @@ class Perf010aGuardedCallTest(unittest.TestCase):
         self.assertIn("PrepareSendArguments", text)
         # Must not silently fall through to ablation 2's README text.
         self.assertNotIn("ablation-2.patch", text)
+
+
+class Perf010aSourceIdentityDiagnosticTest(unittest.TestCase):
+    """PERF010-A / #691 caller/helper source-identity diagnostic (guillermomolina/
+    protos-project-docs@29a38fd3c0fb2f10a1fb5dc4a6a4616e05abe98e). Docker-free contract tests
+    only; building the image and running the smoke/full trace is human-executed."""
+
+    def test_pinned_to_exact_guarded_call_baseline_revision(self):
+        # (1) the diagnostic configuration is pinned to the correct Protos revision - it reuses
+        # config/perf010a-guarded-call.json's own pinned identity unmodified.
+        cfg = perf010a.validate_source_identity()
+        self.assertEqual("guarded-call", perf010a.SOURCE_IDENTITY_ABLATION)
+        self.assertEqual(
+            perf010a.EXPECTED_PROTOS_REVISION_GUARDED, cfg["protos_revision"]
+        )
+        self.assertEqual("PERF010A_GUARDED_CALL", cfg["slice"])
+
+    def test_source_materialization_instrumentation_present(self):
+        # (2) source-materialization instrumentation is present, using the established
+        # Bytecode DSL lazy-source model (real Truffle instrumentation), not a reimplemented
+        # mechanism.
+        text = perf010a.SOURCE_IDENTITY_INSTRUMENT_JAVA.read_text(encoding="utf-8")
+        self.assertIn("attachLoadSourceSectionListener", text)
+        self.assertIn("SourceSectionFilter", text)
+        self.assertIn(perf010a.SOURCE_IDENTITY_TARGET_SOURCE_NAME, text)
+        self.assertIn("extends TruffleInstrument", text)
+
+    def test_normal_reference_and_smoke_paths_are_not_silently_altered(self):
+        # (3) normal PERF010-A timing/reference paths are not silently altered: the diagnostic
+        # is wired as new, additive files/commands only, and validate("guarded-call") - the
+        # config the retained baseline image identity and every historical ablation reference
+        # depend on - still passes completely unmodified.
+        cfg = perf010a.validate("guarded-call")
+        self.assertEqual(10000, cfg["operation_count"])
+        self.assertEqual(20, cfg["warmup_iterations"])
+        self.assertEqual(100, cfg["steady_iterations"])
+        dockerfile = (ROOT / "docker/protos-perf010a/Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("Perf010aTimingDriver.java", dockerfile)
+        self.assertIn("Perf010aSourceIdentityInstrument.java", dockerfile)
+        # The new diagnostic classes are compiled unconditionally (not gated behind VARIANT or
+        # ABLATION_PATCH selection), so every historical ablation image still builds exactly as
+        # before, just with three additional, inert class files present.
+        self.assertNotIn('if [ "$VARIANT" = "ablation" ]; then \\\n         javac', dockerfile)
+
+    def test_no_build_local_protos_patch_used(self):
+        # (4) "any diagnostic-only patch has the exact expected target scope" - this slice uses
+        # no build-local Protos patch at all (mechanism 1: harness-local diagnostic code using
+        # existing public Truffle instrumentation APIs), so the applicable check is that no such
+        # patch exists and no existing ablation patch was touched to introduce one.
+        for patch_name in (
+            "ablation.patch", "ablation-2.patch", "ablation-3.patch", "ablation-4.patch",
+            "guarded-call.patch",
+        ):
+            path = ROOT / "docker/protos-perf010a" / patch_name
+            self.assertTrue(path.is_file(), patch_name)
+        instrument_text = perf010a.SOURCE_IDENTITY_INSTRUMENT_JAVA.read_text(encoding="utf-8")
+        provider_text = perf010a.SOURCE_IDENTITY_PROVIDER_JAVA.read_text(encoding="utf-8")
+        self.assertNotIn("import com.guillermomolina.protos", instrument_text)
+        self.assertNotIn("import com.guillermomolina.protos", provider_text)
+
+    def test_cannot_accidentally_use_the_guarded_call_variant(self):
+        # (5) the diagnostic cannot accidentally use the guarded-call variant: the smoke driver
+        # source never references the guarded specialization, and smoke_source_identity()'s own
+        # source only ever builds the "baseline" variant for this ablation slice.
+        smoke_java_text = perf010a.SOURCE_IDENTITY_SMOKE_JAVA.read_text(encoding="utf-8")
+        self.assertNotIn("PrepareSendArguments", smoke_java_text)
+        self.assertNotIn("performGuardedOrdinaryComposedSend", smoke_java_text)
+
+        runner_source = (ROOT / "runner/perf010a.py").read_text(encoding="utf-8")
+        start = runner_source.index("def smoke_source_identity(")
+        end = runner_source.index("\ndef main(", start)
+        smoke_fn_source = runner_source[start:end]
+        self.assertIn('build_image(cfg, "baseline", ablation=SOURCE_IDENTITY_ABLATION)', smoke_fn_source)
+        self.assertNotIn('build_image(cfg, "ablation"', smoke_fn_source)
+        self.assertNotIn("VARIANTS)", smoke_fn_source)
+
+    def test_normal_compiler_thresholds_and_policy_not_modified(self):
+        # (6) normal compiler thresholds/policy are not modified: the instrument only attaches
+        # a source-section listener; it must never reference tiering/OSR/inlining/threshold
+        # engine options.
+        text = perf010a.SOURCE_IDENTITY_INSTRUMENT_JAVA.read_text(encoding="utf-8")
+        for forbidden in (
+            "CompilationThreshold", "TieredCompilation", "OSR", "Inlining", "CompileImmediately",
+            "BackgroundCompilation",
+        ):
+            self.assertNotIn(forbidden, text)
+
+    def test_target_discriminator_is_method_call_not_generic_source_presence(self):
+        # (7) the target source discriminator is method-call.protos, not a generic "some source
+        # exists" check - the smoke driver fails closed unless it observes the exact caller
+        # call-site text, not merely a non-empty observed-records list.
+        smoke_java_text = perf010a.SOURCE_IDENTITY_SMOKE_JAVA.read_text(encoding="utf-8")
+        self.assertIn(perf010a.SOURCE_IDENTITY_TARGET_TEXT, smoke_java_text)
+        self.assertIn("EXPECTED_TARGET_TEXT", smoke_java_text)
+        self.assertIn("match.isEmpty()", smoke_java_text)
+        self.assertIn("System.exit(1)", smoke_java_text)
+        instrument_text = perf010a.SOURCE_IDENTITY_INSTRUMENT_JAVA.read_text(encoding="utf-8")
+        self.assertIn(perf010a.SOURCE_IDENTITY_TARGET_SOURCE_NAME, instrument_text)
+
+    def test_services_file_registers_hand_written_provider(self):
+        services_text = perf010a.SOURCE_IDENTITY_SERVICES_FILE.read_text(
+            encoding="utf-8"
+        ).strip()
+        self.assertEqual("Perf010aSourceIdentityInstrumentProvider", services_text)
+        provider_text = perf010a.SOURCE_IDENTITY_PROVIDER_JAVA.read_text(encoding="utf-8")
+        self.assertIn(
+            "com.oracle.truffle.api.instrumentation.provider.TruffleInstrumentProvider",
+            provider_text,
+        )
+
+    def test_provider_extends_not_implements_truffle_instrument_provider(self):
+        # Regression guard: TruffleInstrumentProvider is an abstract class in the pinned
+        # Truffle version, not an interface, confirmed by decompiling the pinned truffle-api
+        # jar's class file access flags. An earlier revision of this diagnostic used
+        # `implements` and failed the actual Docker build with "interface expected here".
+        provider_text = perf010a.SOURCE_IDENTITY_PROVIDER_JAVA.read_text(encoding="utf-8")
+        self.assertIn("extends TruffleInstrumentProvider", provider_text)
+        self.assertNotIn("implements TruffleInstrumentProvider", provider_text)
+
+    def test_provider_class_carries_the_load_bearing_registration_annotation(self):
+        # Regression guard: the engine reads id/name/version metadata from the
+        # @TruffleInstrument.Registration annotation on the discovered Provider class itself,
+        # not from the instrument class create() returns. An earlier revision of this
+        # diagnostic put @Registration only on Perf010aSourceIdentityInstrument; the engine then
+        # silently ignored the Provider ("missing @Registration annotation") and every
+        # -Dpolyglot.perf010aSourceIdentity=true invocation failed with "Could not find option
+        # with name perf010aSourceIdentity".
+        provider_text = perf010a.SOURCE_IDENTITY_PROVIDER_JAVA.read_text(encoding="utf-8")
+        self.assertIn("@TruffleInstrument.Registration(", provider_text)
+        self.assertIn("Perf010aSourceIdentityInstrument.ID", provider_text)
+
+    def test_option_is_stable_not_experimental(self):
+        # Regression guard: an EXPERIMENTAL option requires the embedder to call
+        # allowExperimentalOptions(true) on the Context/Engine builder, confirmed empirically
+        # ("Option 'perf010aSourceIdentity' is experimental and must be enabled with
+        # allowExperimentalOptions(...)"). This diagnostic cannot make that call without
+        # modifying ProtosPolyglotExecutionContext.open(), a Protos-internal class it must not
+        # touch, so the option must declare OptionStability.STABLE instead.
+        instrument_text = perf010a.SOURCE_IDENTITY_INSTRUMENT_JAVA.read_text(encoding="utf-8")
+        self.assertIn("OptionStability.STABLE", instrument_text)
+        self.assertNotIn("OptionStability.EXPERIMENTAL", instrument_text)
+
+    def test_source_identity_is_top_level_command(self):
+        completed = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--help"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(0, completed.returncode)
+        self.assertIn("source-identity-validate", completed.stdout)
+        self.assertIn("source-identity-smoke", completed.stdout)
 
 
 if __name__ == "__main__":

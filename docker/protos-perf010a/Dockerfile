@@ -63,6 +63,14 @@
 # (Perf010aTimingDriver) so steady-state wall-clock timing is never perturbed by JFR recording
 # overhead (see AGENTS.work/REPRODUCIBILITY.md: "Diagnostic instrumentation ... SHOULD be kept
 # separate from timing when it materially perturbs execution.").
+#
+# Every image (baseline and every ablation variant) also carries the PERF010-A / #691
+# caller/helper source-identity diagnostic (Perf010aSourceIdentityInstrument +
+# Perf010aSourceIdentityInstrumentProvider + Perf010aSourceIdentitySmokeDriver; see that
+# instrument's own javadoc). It is a harness-local Truffle instrumentation listener, never a
+# Protos source change, and stays completely inert - no effect on any reference/smoke/timing
+# command - unless a later `java` invocation explicitly enables it via
+# `-Dpolyglot.perf010aSourceIdentity=true`.
 ARG GRAAL_BASE=ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825
 FROM ${GRAAL_BASE} AS build
 
@@ -88,6 +96,17 @@ COPY docker/protos-perf006d3/Perf006d3JfrAnalyzer.java /tmp/Perf006d3JfrAnalyzer
 COPY docker/protos-perf006d3/jfr-java /tmp/perf006d3-jfr-java
 COPY docker/protos-perf010a/Perf010aTimingDriver.java /tmp/Perf010aTimingDriver.java
 COPY docker/protos-perf010a/${ABLATION_PATCH} /tmp/ablation.patch
+
+# PERF010-A / #691 caller/helper source-identity diagnostic (see
+# docker/protos-perf010a/Perf010aSourceIdentityInstrument.java's own javadoc for the full
+# rationale). Harness-local, diagnostic-only, compiled into every image (baseline and every
+# ablation variant alike) - it is inert unless a later `java` invocation explicitly enables it
+# via `-Dpolyglot.perf010aSourceIdentity=true`, so its presence does not change
+# `perf010a-reference`/`perf010a-smoke` behavior for any historical ablation.
+COPY docker/protos-perf010a/Perf010aSourceIdentityInstrument.java /tmp/Perf010aSourceIdentityInstrument.java
+COPY docker/protos-perf010a/Perf010aSourceIdentityInstrumentProvider.java /tmp/Perf010aSourceIdentityInstrumentProvider.java
+COPY docker/protos-perf010a/Perf010aSourceIdentitySmokeDriver.java /tmp/Perf010aSourceIdentitySmokeDriver.java
+COPY docker/protos-perf010a/META-INF /tmp/perf010a-source-identity-META-INF
 
 # Maven comes from the base image's own OS package repository (ol10 AppStream), not a
 # hand-downloaded archive.apache.org tarball: investigation in the `protos` devcontainer
@@ -170,6 +189,11 @@ RUN cd /src \
     && javac -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
          -d /out/diagnostic /tmp/Perf006dRuntimeProbe.java /tmp/Perf006dPersistentDriver.java \
          /tmp/Perf010aTimingDriver.java \
+         /tmp/Perf010aSourceIdentityInstrument.java /tmp/Perf010aSourceIdentityInstrumentProvider.java \
+         /tmp/Perf010aSourceIdentitySmokeDriver.java \
+    && mkdir -p /out/diagnostic/META-INF/services \
+    && cp /tmp/perf010a-source-identity-META-INF/services/com.oracle.truffle.api.instrumentation.provider.TruffleInstrumentProvider \
+         /out/diagnostic/META-INF/services/com.oracle.truffle.api.instrumentation.provider.TruffleInstrumentProvider \
     && javac --add-modules jdk.jfr -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
          -d /out/diagnostic /tmp/Perf008SteadyStateDriver.java \
     && javac --add-modules jdk.jfr -d /out/analyzer /tmp/Perf006d3JfrAnalyzer.java \

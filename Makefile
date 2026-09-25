@@ -320,3 +320,14 @@ perf010a-post-i068-smoke:
 perf010a-post-i068-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-post-i068-reference HARNESS_REVISION=<published-PERF010A-post-I068-SHA>" >&2; exit 2; }
 	python3 runner/perf010a_post_i068_baseline.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir results/perf010a-post-i068-baseline
+
+.PHONY: perf010a-context-materialization-validate perf010a-context-materialization-smoke perf010a-context-materialization-measure
+
+perf010a-context-materialization-validate:
+	python3 runner/perf010a_context_materialization.py validate
+
+perf010a-context-materialization-smoke:
+	python3 runner/perf010a_context_materialization.py smoke
+
+perf010a-context-materialization-measure:
+	python3 runner/perf010a_context_materialization.py measure

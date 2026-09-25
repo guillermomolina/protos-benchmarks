@@ -308,3 +308,15 @@ perf004b2d-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b2d-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2d" >&2; exit 2; }
 	@test -n "$(OUT)" || { echo "usage: make perf004b2d-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2d" >&2; exit 2; }
 	python3 runner/perf004b2d.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
+
+.PHONY: perf010a-post-i068-validate perf010a-post-i068-smoke perf010a-post-i068-reference
+
+perf010a-post-i068-validate:
+	python3 runner/perf010a_post_i068_baseline.py validate
+
+perf010a-post-i068-smoke:
+	python3 runner/perf010a_post_i068_baseline.py smoke
+
+perf010a-post-i068-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-post-i068-reference HARNESS_REVISION=<published-PERF010A-post-I068-SHA>" >&2; exit 2; }
+	python3 runner/perf010a_post_i068_baseline.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir results/perf010a-post-i068-baseline

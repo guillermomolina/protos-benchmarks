@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_POST_I068_CURRENT_BASELINE_REMEASUREMENT",
+  "phase": "post-i068-current-cross-language-baseline",
+  "timing_claim": true,
+  "causal_claim": false,
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "protos_revision": "f1cee2d85858804ad3775adf43a9fab97664da2a",
+  "protos_version": "0.3.87-SNAPSHOT",
+  "historical_comparison": {
+    "evidence_path": "results/perf004-a",
+    "config_path": "config/perf004a.json",
+    "harness_revision": "60dbce7faf5510bd1bd6867a866aa7ca69c48637",
+    "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+    "protos_version": "0.2.492-SNAPSHOT",
+    "causal": false
+  },
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "comparison_runtimes": {
+    "python": {
+      "version": "3.14.7",
+      "base": "python:3.14.7-slim-bookworm"
+    },
+    "javascript": {
+      "runtime": "Node.js",
+      "version": "24.20.0",
+      "base": "node:24.20.0-bookworm-slim",
+      "stack_kb": 32768
+    }
+  },
+  "protos_driver": {
+    "dockerfile": "docker/protos-perf010a/Dockerfile",
+    "timing_driver": "Perf010aTimingDriver",
+    "runtime_probe": "Perf006dRuntimeProbe",
+    "diagnostic_dir": "/opt/perf010a/diagnostic",
+    "runtime_dir": "/opt/protos/lib/runtime",
+    "corpus_dir": "/opt/perf010a/corpus",
+    "source_root": "/opt/protos-source",
+    "expected_runtime": "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime",
+    "variant": "baseline",
+    "ablation_patch": "docker/protos-perf010a/noop.patch"
+  },
+  "measurement_contract": {
+    "persistent_forks_per_language_workload": 5,
+    "warmup_iterations_per_fork": 120,
+    "steady_samples_per_fork": 100,
+    "primary_statistic": "median",
+    "dispersion": [
+      "mad",
+      "min",
+      "max",
+      "p95"
+    ],
+    "correctness_before_timing": true,
+    "network": "none",
+    "cpu_affinity": "first CPU from current allowed cpuset",
+    "same_host_for_all_languages": true,
+    "language_order": [
+      "protos",
+      "python",
+      "javascript"
+    ],
+    "persistent_boundary": "source/module load and runtime bootstrap outside timed iterations; one process per fork",
+    "jfr": false,
+    "compiler_tracing": false,
+    "igv": false,
+    "allocation_instrumentation": false
+  },
+  "smoke": {
+    "workload": "micro/method-call",
+    "warmup_iterations": 1,
+    "steady_iterations": 2,
+    "retained": false
+  },
+  "workloads": [
+    {
+      "id": "micro/slot-read",
+      "classification": "PRIMARY_COMMON_PATH",
+      "historical_comparison_blob_shas": {
+        "python": "7a737bc73d67cbd87e458f39983224feb9c70de2",
+        "javascript": "7dca885de00a8445abfcf9ea4ac7ffedc1a47dab"
+      }
+    },
+    {
+      "id": "micro/closure-call",
+      "classification": "PRIMARY_COMMON_PATH",
+      "historical_comparison_blob_shas": {
+        "python": "0755a17b779aa8054644421926a675f3bed9df40",
+        "javascript": "dd87350050a74e9f7dd53d322f83f77f8adc8ca5"
+      }
+    },
+    {
+      "id": "micro/method-call",
+      "classification": "PRIMARY_COMMON_PATH",
+      "historical_comparison_blob_shas": {
+        "python": "e2464227ba53de20022153f8379b9077a3ddbcfa",
+        "javascript": "a436cf45550b85bf07cfd308d237a599e380f213"
+      }
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "classification": "PRIMARY_COMMON_PATH",
+      "historical_comparison_blob_shas": {
+        "python": "b8694bc895085877e7857b4dc6c0ee93f95fd001",
+        "javascript": "fcfa471eeb5d24045f125adf96c9a5235cb3a16c"
+      }
+    },
+    {
+      "id": "algorithms/factorial/recursive",
+      "classification": "SECONDARY_RECURSIVE_SCALE_SENTINEL",
+      "historical_comparison_blob_shas": {
+        "python": "ff6b2feef77288a8d1648e5c7dc0426715bd6fc5",
+        "javascript": "699ebdfa0cb93d6ce9bdae967a6cd560423e3f9f"
+      }
+    }
+  ],
+  "reference_output": "results/perf010a-post-i068-baseline"
+}

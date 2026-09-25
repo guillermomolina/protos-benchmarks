@@ -1,0 +1,123 @@
+{
+  "allocation_instrumentation": false,
+  "comparison_runtimes": {
+    "javascript": {
+      "base": "node:24.20.0-bookworm-slim",
+      "runtime": "Node.js",
+      "stack_kb": 32768,
+      "version": "24.20.0"
+    },
+    "python": {
+      "base": "python:3.14.7-slim-bookworm",
+      "version": "3.14.7"
+    }
+  },
+  "compiler_tracing": false,
+  "correctness_cases": 15,
+  "cpu_policy": {
+    "cpuset": "0",
+    "mechanism": "cpuset-cpus"
+  },
+  "generated_at_utc": "2026-09-25T03:41:53.571215+00:00",
+  "harness_revision": "d6d96f22775a743f604c1645731fa7ebf0ac7ca4",
+  "historical_comparison": {
+    "causal": false,
+    "config_path": "config/perf004a.json",
+    "evidence_path": "results/perf004-a",
+    "harness_revision": "60dbce7faf5510bd1bd6867a866aa7ca69c48637",
+    "protos_revision": "4a03efc15620b37b2e418b3df30b4a26486446ec",
+    "protos_version": "0.2.492-SNAPSHOT"
+  },
+  "host": {
+    "architecture": "x86_64",
+    "cpu_count": 16,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpuset": "0",
+    "docker_server_version": "29.8.1",
+    "kernel": "7.2.6-zen2-1-zen",
+    "platform": "linux"
+  },
+  "igv": false,
+  "images": {
+    "javascript": {
+      "id": "sha256:6f5c8ccb93e99fe0f2a0746979194ea7bfa46d8056b26b78c2381e1bbd4aef27",
+      "repo_digests": [],
+      "tag": "protos-benchmarks-perf010a-post-i068-node:f1cee2d85858"
+    },
+    "protos": {
+      "id": "sha256:6d5d22de7390146ad4f1344c0a10fb26a5e8bdc16fa6608b706825087b41a5e3",
+      "repo_digests": [],
+      "tag": "protos-benchmarks-perf010a-post-i068-protos:f1cee2d85858"
+    },
+    "python": {
+      "id": "sha256:4f0466c08acf6c78495a7bcb1d7b75435ec427861bef0919faebc78fe47259ff",
+      "repo_digests": [],
+      "tag": "protos-benchmarks-perf010a-post-i068-python:f1cee2d85858"
+    }
+  },
+  "jfr": false,
+  "measurement_policy": {
+    "allocation_instrumentation": false,
+    "compiler_tracing": false,
+    "correctness_before_timing": true,
+    "cpu_affinity": "first CPU from current allowed cpuset",
+    "dispersion": [
+      "mad",
+      "min",
+      "max",
+      "p95"
+    ],
+    "igv": false,
+    "jfr": false,
+    "language_order": [
+      "protos",
+      "python",
+      "javascript"
+    ],
+    "network": "none",
+    "persistent_boundary": "source/module load and runtime bootstrap outside timed iterations; one process per fork",
+    "persistent_forks_per_language_workload": 5,
+    "primary_statistic": "median",
+    "same_host_for_all_languages": true,
+    "steady_samples_per_fork": 100,
+    "warmup_iterations_per_fork": 120
+  },
+  "network": "none",
+  "parent_perf_item": "PERF010",
+  "perf_item": "PERF010-A",
+  "phase": "post-i068-current-cross-language-baseline",
+  "product_revision": "f1cee2d85858804ad3775adf43a9fab97664da2a",
+  "product_version": "0.3.87-SNAPSHOT",
+  "profiling": false,
+  "runtime_probes": {
+    "comparison_runtime_versions": {
+      "javascript": "v24.20.0",
+      "python": "Python 3.14.7"
+    },
+    "java_version": "openjdk version \"25.0.4.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.3.4.1+1.1 (build 25.0.4.1+1-jvmci-25.3-b22)\nOpenJDK 64-Bit Server VM GraalVM CE 25.3.4.1+1.1 (build 25.0.4.1+1-jvmci-25.3-b22, mixed mode, sharing)",
+    "protos_revision": "f1cee2d85858804ad3775adf43a9fab97664da2a",
+    "protos_runtime": "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime",
+    "protos_variant": {
+      "ablation_slice": "none",
+      "variant": "baseline"
+    },
+    "protos_version": "0.3.87-SNAPSHOT",
+    "workload_blob_identity": {
+      "algorithms/factorial/recursive": "0e6b2ef5f1e3d293e4cb934632b6d15d35ba33b5",
+      "micro/closure-call": "5ed62d6e67e2ec02195383987ca3f367c18ac947",
+      "micro/method-call": "630ed821cc9b62c71f843859fb16b963414a0f52",
+      "micro/slot-read": "c90f22ddc4bce857a62772e88cf44b38d0a5147a",
+      "runtime/monomorphic-dispatch": "9ba70de276572f11771de4d98ebbed165e8892b2"
+    }
+  },
+  "schema_version": 1,
+  "slice": "PERF010A_POST_I068_CURRENT_BASELINE_REMEASUREMENT",
+  "toolchain": {
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "graal_truffle_version": "25.3.4.1",
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "maven_version": "3.9.9",
+    "python_package": "python3"
+  }
+}

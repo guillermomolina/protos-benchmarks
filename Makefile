@@ -321,6 +321,28 @@ perf010a-post-i068-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-post-i068-reference HARNESS_REVISION=<published-PERF010A-post-I068-SHA>" >&2; exit 2; }
 	python3 runner/perf010a_post_i068_baseline.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir results/perf010a-post-i068-baseline
 
+.PHONY: perf010a-post-i072-validate perf010a-post-i072-smoke perf010a-post-i072-reference
+
+# INTERVENTION_REVISION/INTERVENTION_VERSION identify the final published I072 Phase E product
+# revision under comparison; they are run-time evidence identity supplied by the human, never
+# harness constants (see runner/perf010a_post_i072_fprime.py's require_intervention_identity).
+# The control revision is fixed in config/perf010a-post-i072-fprime.json and is not a make
+# variable.
+perf010a-post-i072-validate:
+	python3 runner/perf010a_post_i072_fprime.py validate
+
+perf010a-post-i072-smoke:
+	@test -n "$(INTERVENTION_REVISION)" || { echo "usage: make perf010a-post-i072-smoke INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version>" >&2; exit 2; }
+	@test -n "$(INTERVENTION_VERSION)" || { echo "usage: make perf010a-post-i072-smoke INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version>" >&2; exit 2; }
+	python3 runner/perf010a_post_i072_fprime.py smoke --intervention-revision "$(INTERVENTION_REVISION)" --intervention-version "$(INTERVENTION_VERSION)"
+
+perf010a-post-i072-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-post-i072-reference HARNESS_REVISION=<published-PERF010A-post-I072-SHA> INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version> OUT=results/perf010a-post-i072-fprime" >&2; exit 2; }
+	@test -n "$(INTERVENTION_REVISION)" || { echo "usage: make perf010a-post-i072-reference HARNESS_REVISION=<published-PERF010A-post-I072-SHA> INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version> OUT=results/perf010a-post-i072-fprime" >&2; exit 2; }
+	@test -n "$(INTERVENTION_VERSION)" || { echo "usage: make perf010a-post-i072-reference HARNESS_REVISION=<published-PERF010A-post-I072-SHA> INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version> OUT=results/perf010a-post-i072-fprime" >&2; exit 2; }
+	@test -n "$(OUT)" || { echo "usage: make perf010a-post-i072-reference HARNESS_REVISION=<published-PERF010A-post-I072-SHA> INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version> OUT=results/perf010a-post-i072-fprime" >&2; exit 2; }
+	python3 runner/perf010a_post_i072_fprime.py reference --harness-revision "$(HARNESS_REVISION)" --intervention-revision "$(INTERVENTION_REVISION)" --intervention-version "$(INTERVENTION_VERSION)" --output-dir "$(OUT)"
+
 .PHONY: perf010a-context-materialization-validate perf010a-context-materialization-smoke perf010a-context-materialization-measure
 
 perf010a-context-materialization-validate:

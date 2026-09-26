@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF010-A",
+  "parent_perf_item": "PERF010",
+  "slice": "PERF010A_POST_I072_FPRIME_CAUSAL_COMPARATOR",
+  "phase": "post-i072-fprime-causal-two-revision-comparator",
+  "diagnostic_claim": false,
+  "causal_two_revision_comparator": true,
+  "authorizing_record": "guillermomolina/protos#691 (PERF010-A, child of #680); PLAT040 Candidate F' (guarded stable semantic selection + exact lookup-stability Assumption + direct/inlineable call target + compact frame-argument invocation ABI + conditional guest Context/Array materialization + optional-state separation + exact generic fallback); I072 Phase E is the structural implementation of Candidate F'. This config intentionally cites no specific guillermomolina/protos-project-docs commit: PERF010-A_POST_I072_FPRIME_COMPARATOR is implemented from project information supplied directly to the harness author rather than from reading that repository.",
+  "causal_question": "What is the causal steady-state runtime effect of the complete I072 F' implementation on the established common-path workloads? I072's structural success (Phases A-E landing) does not by itself establish how much performance was recovered - this Evidence Unit is the causal-attribution owner for that question.",
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "control": {
+    "role": "control",
+    "variant": "baseline",
+    "protos_revision": "2d8f04a8a01ff8639e98e03fba9a176170d54936",
+    "protos_version": "0.3.89-SNAPSHOT",
+    "protos_revision_note": "Deliberately NOT the PLAT040 ratification revision (0c9307240796260882ddca27611c91b7ffa4ce3b, 0.3.88-SNAPSHOT). Between PLAT040 ratification and the start of I072, the product published i069 (7f033b059e2e25a1a6d1776e7eb1f960f7ab814e 'enable native guest runtime compilation', d65445aa5bb008903b1a580a0ee2acae46cf2a12 'isolate native tooling and add regression harness') and DOC009 (2d8f04a8a01ff8639e98e03fba9a176170d54936 'announce Native Image guest compilation'). i069 changed PE-visible runtime source as well as Native Image support, so comparing final I072 against the PLAT040 ratification revision would confound I072 with i069. 2d8f04a8a01ff8639e98e03fba9a176170d54936 is the exact Phase A base and is fixed as the causal control for this slice; it must not be changed without a new Evidence Unit."
+  },
+  "intervention": {
+    "role": "intervention",
+    "variant": "baseline",
+    "protos_revision": null,
+    "protos_version": null,
+    "protos_revision_note": "Deliberately unpinned in this config. The intervention is the final published I072 Phase E product revision, which is a run-time evidence identity supplied by the human executing smoke/reference (--intervention-revision/--intervention-version on runner/perf010a_post_i072_fprime.py, or INTERVENTION_REVISION/INTERVENTION_VERSION on the Makefile targets), never a harness-authoring-time constant and never discovered by this harness from GitHub or another checkout. See require_intervention_identity() in runner/perf010a_post_i072_fprime.py for the exact fail-closed contract, restated in intervention_input_contract below."
+  },
+  "intervention_input_contract": {
+    "supplied_by": "human_at_execution_time",
+    "cli_flags": ["--intervention-revision", "--intervention-version"],
+    "make_variables": ["INTERVENTION_REVISION", "INTERVENTION_VERSION"],
+    "revision_format": "exactly 40 lowercase hexadecimal characters",
+    "floating_branch_forbidden": true,
+    "must_differ_from_control_revision": true,
+    "fail_closed_when": [
+      "revision missing",
+      "revision is not exactly 40 lowercase hexadecimal characters",
+      "revision equals the pinned control revision",
+      "version missing or blank",
+      "built intervention image's org.opencontainers.image.revision label != requested revision",
+      "built intervention image's pom.xml version != requested version"
+    ]
+  },
+  "both_variants_baseline": true,
+  "patches_applied": "none",
+  "patches_applied_note": "This comparator never builds a VARIANT=ablation image and never supplies a non-empty ablation_patch for either role; docker/protos-perf010a/Dockerfile only applies a patch when VARIANT=ablation, so both the control and intervention images are ordinary, unmodified baseline builds of their own pinned protos_revision. The harness additionally reads back each built image's /opt/perf010a/ablation-slice.txt (must be exactly 'none' for both roles) before any timing runs.",
+  "historical_evidence": {
+    "perf004_b2d_paired_jfr": "results/perf004-b2d",
+    "perf008_steady_state_full_stack": "results/perf008",
+    "perf010a_ablation_1": "results/perf010a-1",
+    "perf010a_post_i068_baseline": "results/perf010a-post-i068-baseline",
+    "perf010a_phase2_comparator_discipline_reused": "results/perf010a-phase2"
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 120,
+  "steady_iterations": 100,
+  "execution_sample_period": "not_collected",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "not_collected",
+  "jfr_recording_note": "Clean causal timing only (no JFR, no compiler tracing, no source-identity instrumentation, no IGV, no allocation instrumentation) - see AGENTS.work/REPRODUCIBILITY.md's diagnostic-instrumentation/timing separation rule. Reuses the exact Phase 2 timing discipline (config/perf010a-phase2.json).",
+  "timing_recording_phase": "steady_only_no_jfr",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "primary_causal_workloads": ["micro/closure-call", "micro/method-call", "runtime/monomorphic-dispatch"],
+  "negative_coverage_workloads": ["micro/slot-read"],
+  "workload_coverage_note": "Classification differs from config/perf010a-phase2.json's 2x2 split because this slice's causal question differs: I072 F' primarily changes call/dispatch/invocation architecture (guarded stable semantic selection, direct/inlineable call target, compact frame-argument invocation ABI), so micro/closure-call, micro/method-call and runtime/monomorphic-dispatch - the three workloads whose hot loop is a call/dispatch site - are PRIMARY. micro/slot-read does not exercise a call/dispatch site and is retained as negative/broader-common-path coverage: it discriminates a real I072 call-path effect from generic whole-runtime movement. The retained full Evidence Unit still includes all four workloads unconditionally.",
+  "workload_identity_policy": "Both product revisions must execute materially identical benchmark programs. Before any timing, the harness reads back each workload's exact canonical source text (/opt/perf010a/corpus/<source>) from both the built control and intervention images and fails closed (WORKLOAD_SOURCE_IDENTITY_MISMATCH) if their SHA-256 digests differ for any workload in `controls`, rather than silently comparing a changed program across revisions. See workload_source_sha256 in the retained raw.json for the digests actually observed by the reference run.",
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "block_order": ["A", "B", "A", "B"],
+  "block_order_note": "Deterministic AB/BA counterbalanced design, 4 blocks (2 reps of each order), no randomness - reuses the exact counterbalancing discipline already accepted by config/perf010a-phase2.json. Block 'A': CONTROL runs first, INTERVENTION second. Block 'B': INTERVENTION runs first, CONTROL second. Canonical/workload-control pairing within a revision/role is preserved in both orders; only which revision/role runs first is counterbalanced.",
+  "causal_formula": "canonical_improvement = control_canonical_median_ns - intervention_canonical_median_ns; control_movement = control_workload_control_median_ns - intervention_workload_control_median_ns; paired_control_effect = canonical_improvement - control_movement. A positive paired_control_effect means INTERVENTION is faster than CONTROL once the workload-control's own measured movement between the two revisions/images has been subtracted out. Reused unchanged from config/perf010a-phase2.json's causal_formula.",
+  "not_decided_by_this_evidence_unit": [
+    "which individual I072 Phase A/B/C/D/E contributes what fraction of any observed effect",
+    "whether one specific Java field/class/mechanism (e.g. continueAt) is the dominant cause",
+    "whether PLAT040 was architecturally wrong",
+    "whether another optimization is automatically authorized",
+    "any whole-language performance claim ('Protos is Nx slower as a language') from these microbenchmarks",
+    "PERF010A_DOMINANT_CAUSE / ATTRIBUTABLE_FRACTION for the original large PERF010-A gap",
+    "selection of a production optimization"
+  ],
+  "scale_classification_note": "This Evidence Unit's reference run is allowed to classify the SCALE of the total I072 F' effect (LARGE_MULTI_X | MATERIAL_PERCENT_SCALE | SMALL_PERCENT_SCALE | NEAR_ZERO | REGRESSION | INCONCLUSIVE) from its own retained paired_control_effect data, per AGENTS.work/PERFORMANCE.md's correctness-before-timing and measurement-class rules. Matching config/perf010a-phase2.json's own discipline for its analogous unclassified fields, runner/perf010a_post_i072_fprime.py's reference command prints the raw computed per-workload statistics but deliberately leaves I072_FPRIME_CAUSAL_EFFECT/I072_FPRIME_BIG_COST/PERF010A_DOMINANT_CAUSE/ATTRIBUTABLE_FRACTION/NEXT_CAUSAL_BOUNDARY as NOT_CLASSIFIED/NOT_ESTABLISHED placeholders in raw.json and README.md: the scale classification requires human judgment against the retained data (a crisp threshold such as exactly 5x is not to be forced if the data does not support one) and is not mechanically computed by this harness.",
+  "output": "results/perf010a-post-i072-fprime"
+}

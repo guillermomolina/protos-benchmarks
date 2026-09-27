@@ -353,3 +353,20 @@ perf010a-context-materialization-smoke:
 
 perf010a-context-materialization-measure:
 	python3 runner/perf010a_context_materialization.py measure
+
+.PHONY: perf014-validate perf014-smoke perf014-reference
+
+# PERF014 / guillermomolina/protos#725 direct Closure-call final causal timing comparator. Unlike
+# perf010a-post-i072-*, both control and intervention Protos revisions are already published and
+# are pinned constants in config/perf014-direct-closure-call.json and
+# runner/perf014_direct_closure_call.py, so no INTERVENTION_REVISION/INTERVENTION_VERSION make
+# variables are needed here.
+perf014-validate:
+	python3 runner/perf014_direct_closure_call.py validate
+
+perf014-smoke:
+	python3 runner/perf014_direct_closure_call.py smoke
+
+perf014-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf014-reference HARNESS_REVISION=<published-PERF014-harness-SHA>" >&2; exit 2; }
+	python3 runner/perf014_direct_closure_call.py reference --harness-revision "$(HARNESS_REVISION)"

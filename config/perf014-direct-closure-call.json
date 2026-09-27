@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "perf_item": "PERF014",
+  "parent_perf_item": "PERF010-B",
+  "slice": "PERF014_DIRECT_CLOSURE_CALL_CONTROLLED_TIMING",
+  "phase": "direct-closure-call-final-causal-timing",
+  "diagnostic_claim": false,
+  "causal_two_revision_comparator": true,
+  "authorizing_record": "guillermomolina/protos#725 (PERF014, direct Closure-call stabilization: a definition-keyed fastDirect second tier - ProtosClosureValue.definition() -> CanonicalClosure -> entered Context -> Context-owned RootCallTarget - added on top of the first-tier receiver-identity-keyed mechanism, preserving dynamic Closure semantic instance identity and executing the D013 `call` authoritative selection on every hit). The product's own structural validation (DIRECT_CLOSURE_STABLE_SELECTION, DIRECT_CLOSURE_CONTEXT_OWNED_TARGET, DIRECT_CLOSURE_DIRECT_CALL_NODE, DEFINITION_KEYED_SECOND_TIER, CALL_SHADOWING_PRESERVED, GENERIC_FALLBACK_PRESERVED, OBSERVABLE_PROTOS_SEMANTIC_CHANGE=NO, FINAL_REQUIRED_VALIDATION=PASS) is already complete and is not re-validated by this Evidence Unit - see runner/perf014_direct_closure_call.py's module docstring. This config intentionally cites no specific guillermomolina/protos-project-docs commit: it is implemented from project information supplied directly to the harness author rather than from reading that repository.",
+  "causal_question": "How much does the final PERF014 direct Closure-call implementation reduce the steady-state cost of a guest Closure call, once the workload-control's own measured movement between the two product revisions has been subtracted out? PERF014's structural validation passing does not by itself establish how much of the guest-call cost was actually recovered - this Evidence Unit is the causal-attribution owner for that question. The predeclared PERF014 prediction is that the closure-call-minus-workload-control guest-call increment falls by a clearly multiplicative factor once the intervention is in place; this harness retains the numbers needed to evaluate that prediction (see guest_call_increment_formula) but deliberately does not itself decide whether \"clearly multiplicative\" is satisfied - see timing_classification_note.",
+  "protos_repository": "https://github.com/guillermomolina/protos.git",
+  "control": {
+    "role": "control",
+    "variant": "baseline",
+    "protos_revision": "0af8960363a557dad1b87968cf8a632e4716ee8a",
+    "protos_version": "0.3.102-SNAPSHOT",
+    "protos_revision_note": "PERF013 B2, the exact baseline this Evidence Unit compares the final PERF014 product against. Built as an ordinary VARIANT=baseline image (no patch is applied to either PERF014 image - see both_variants_baseline/patches_applied below)."
+  },
+  "intervention": {
+    "role": "intervention",
+    "variant": "baseline",
+    "protos_revision": "bcf9eda164d840b0a0b4201753fe5289347afa8a",
+    "protos_version": "0.3.105-SNAPSHOT",
+    "protos_revision_note": "The final published PERF014 product revision (guillermomolina/protos#725). Built as an ordinary VARIANT=baseline image from its own checkout; the Protos revision is the only intended difference in code between the two images. See intervening_unrelated_revision below - the intervention is not related to the control by PERF014 commits alone, which is why workload_identity_policy's read-back check is required rather than assumed from lineage."
+  },
+  "intervening_unrelated_revision": {
+    "protos_revision": "eab6a367c16dea0136e1aabb13a7da681c4839b0",
+    "protos_version": "0.3.104-SNAPSHOT",
+    "note": "BUG010, an intervening commit in the intervention's ancestry between the control and the final PERF014 product that does NOT belong to PERF014. BUG010 touches only Test Tool/reporting surfaces and metadata (CHANGELOG.md, pom.xml, protos/tools/test/LogicalCaseRunner.protos, protos/tools/test/Main.protos, Test Tool Java tests); it does not modify ProtosBytecodeRootNode or any benchmark workload source. Recorded here for lineage honesty only: control and intervention are therefore NOT described as a direct PERF014-only parent/child pair. This note does NOT relax or replace the exact revision/version identity checks in validate()/smoke()/reference(), nor the workload_identity_policy read-back check below - both still run unconditionally."
+  },
+  "both_variants_baseline": true,
+  "patches_applied": "none",
+  "patches_applied_note": "This comparator never builds a VARIANT=ablation image and never supplies a non-empty ablation_patch for either role; docker/protos-perf010a/Dockerfile only applies a patch when VARIANT=ablation, so both the control and intervention images are ordinary, unmodified baseline builds of their own pinned protos_revision. The harness additionally reads back each built image's /opt/perf010a/ablation-slice.txt (must be exactly 'none' for both roles) before any timing runs.",
+  "historical_evidence": {
+    "perf010a_post_i072_fprime_comparator_discipline_reused": "results/perf010a-post-i072-fprime",
+    "perf014_first_tier_context_only_not_used_by_this_comparator": "cc76159a1bc9e2e1d46363f1c9047aa1034474df (0.3.103-SNAPSHOT) - the first PERF014 implementation, keyed only by exact receiver identity; superseded by the definition-keyed second tier under comparison here and not itself a role in this Evidence Unit",
+    "perf013_b1_gate_diagnostic_not_formal_timing": "results/perf013-b1-gate",
+    "perf013_b2_gate_diagnostic_not_formal_timing": "results/perf013-b2-gate",
+    "perf013_b2_timing_b1_to_b2_unrelated_causal_question": "results/perf013-b2-timing",
+    "perf010b_step0_compiler_gate_diagnostic_not_formal_timing": "results/perf010b-step0"
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 120,
+  "steady_iterations": 100,
+  "execution_sample_period": "not_collected",
+  "stack_depth_limit": 32,
+  "jfr_recording_phase": "not_collected",
+  "jfr_recording_note": "Clean causal timing only - no JFR, no TraceCompilation/compiler tracing, no IGV, no allocation profiling, no diagnosticSampling, no Test Tool diagnostics, no source-identity instrumentation - see AGENTS.work/REPRODUCIBILITY.md's diagnostic-instrumentation/timing separation rule. Reuses the exact steady-state-only timing discipline already accepted by config/perf010a-post-i072-fprime.json and config/perf010a-phase2.json.",
+  "timing_recording_phase": "steady_only_no_jfr",
+  "cpu_affinity": "one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "primary_causal_workloads": ["micro/closure-call"],
+  "negative_coverage_workloads": ["micro/slot-read", "micro/method-call", "runtime/monomorphic-dispatch"],
+  "workload_coverage_note": "PERF014 changes only the direct Closure-call path (ProtosClosureValue invocation), so micro/closure-call is the sole PRIMARY causal workload for this Evidence Unit's causal_question. micro/slot-read, micro/method-call and runtime/monomorphic-dispatch do not exercise a Closure call site and are retained as broader negative coverage - they discriminate a real closure-call-specific effect from generic whole-runtime movement between the two product revisions. The retained full Evidence Unit still includes all four workloads unconditionally. The closure-call result MUST NOT be generalized to method-call/monomorphic-dispatch/slot-read or to any whole-language performance claim.",
+  "workload_identity_policy": "Both product revisions must execute materially identical benchmark programs. Before any timing, the harness reads back each workload's exact canonical source text (/opt/perf010a/corpus/<source>) from both the built control and intervention images and fails closed (WORKLOAD_SOURCE_IDENTITY_MISMATCH) if their SHA-256 digests differ for any workload in `controls`, rather than silently comparing a changed program across revisions. This check is especially load-bearing for this Evidence Unit because, per intervening_unrelated_revision above, the intervention is not related to the control by PERF014 commits alone - control and intervention are two real published product revisions, not a minimal single-commit diff. See workload_source_sha256 in the retained raw.json for the digests actually observed by the reference run.",
+  "toolchain": {
+    "graalvm_release": "25.3.4.1",
+    "jdk_version": "25.0.4.1",
+    "graal_truffle_version": "25.3.4.1",
+    "maven_version": "3.9.9",
+    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+    "python_package": "python3"
+  },
+  "block_order": ["A", "B", "A", "B"],
+  "block_order_note": "Deterministic AB/BA counterbalanced design, 4 blocks (2 reps of each order), no randomness - reuses the exact counterbalancing discipline already accepted by config/perf010a-post-i072-fprime.json and config/perf010a-phase2.json. Block 'A': CONTROL runs first, INTERVENTION second. Block 'B': INTERVENTION runs first, CONTROL second. Canonical/workload-control pairing within a revision/role is preserved in both orders; only which revision/role runs first is counterbalanced.",
+  "causal_formula": "canonical_improvement = control_canonical_median_ns - intervention_canonical_median_ns; control_movement = control_workload_control_median_ns - intervention_workload_control_median_ns; paired_control_effect = canonical_improvement - control_movement. A positive paired_control_effect means INTERVENTION is faster than CONTROL once the workload-control's own measured movement between the two revisions/images has been subtracted out. Reused unchanged from config/perf010a-post-i072-fprime.json's causal_formula.",
+  "guest_call_increment_formula": "PERF014-specific, micro/closure-call only, additional to and never a replacement for causal_formula's paired_control_effect. Per block: CONTROL_GUEST_CALL_INCREMENT = control_canonical_median_ns - control_workload_control_median_ns; INTERVENTION_GUEST_CALL_INCREMENT = intervention_canonical_median_ns - intervention_workload_control_median_ns; GUEST_CALL_INCREMENT_REDUCTION = CONTROL_GUEST_CALL_INCREMENT - INTERVENTION_GUEST_CALL_INCREMENT. GUEST_CALL_INCREMENT_RATIO = CONTROL_GUEST_CALL_INCREMENT / INTERVENTION_GUEST_CALL_INCREMENT only when both increments are strictly positive, else NOT_APPLICABLE. The retained Evidence Unit reports this both per block (so ratio/reduction stability can be inspected across the 4 blocks rather than trusted from a single aggregate quotient) and as an aggregate (median of the 4 per-block increments, with the ratio taken from the two aggregate medians).",
+  "not_decided_by_this_evidence_unit": [
+    "whether the guest-call increment reduction is \"clearly multiplicative\" (PERF014_CLEARLY_MULTIPLICATIVE)",
+    "PERF014_TIMING_CLASSIFICATION",
+    "whether PERF015 is authorized (PERF015_AUTHORIZED)",
+    "any whole-language performance claim (\"Protos is Nx faster/slower\") from these microbenchmarks",
+    "generalizing the closure-call result to slot-read/method-call/monomorphic-dispatch",
+    "selection or scoping of any further production optimization"
+  ],
+  "timing_classification_note": "This Evidence Unit deliberately does not classify PERF014_TIMING_CLASSIFICATION, PERF014_CLEARLY_MULTIPLICATIVE, or PERF015_AUTHORIZED from its own retained data: `reference` prints and retains the raw computed per-workload paired_control_effect statistics and the guest_call_increment_summary (median/MAD/min/max, per-block series, order effect) but leaves those three fields as explicit NOT_CLASSIFIED/NOT_CLASSIFIED/NO placeholders in raw.json and README.md. No threshold (e.g. exactly 2x, 5x, 10x) is hardcoded anywhere in this harness for that decision. The classification is a later interpretation step performed by a human or a subsequent investigation slice reading this Evidence Unit's raw retained data, not part of this harness - matching config/perf010a-post-i072-fprime.json's identical scale_classification_note discipline for its own analogous unclassified fields.",
+  "output": "results/perf014-direct-closure-call"
+}

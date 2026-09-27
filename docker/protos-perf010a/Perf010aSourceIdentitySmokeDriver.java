@@ -62,7 +62,7 @@ public final class Perf010aSourceIdentitySmokeDriver {
     private Perf010aSourceIdentitySmokeDriver() {}
 
     private static final int ITERATIONS = 2;
-    private static final String EXPECTED_TARGET_TEXT = "sink = receiver.identity(42)";
+    private static final String DEFAULT_EXPECTED_TARGET_TEXT = "sink = receiver.identity(42)";
 
     private static final ProtosProcessStandardStreamBinding.ReadableBackend EOF_STDIN =
             (maxBytes, completion) -> {
@@ -102,21 +102,25 @@ public final class Perf010aSourceIdentitySmokeDriver {
             };
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
+        if (args.length < 2 || args.length > 3) {
             System.err.println(
-                    "usage: Perf010aSourceIdentitySmokeDriver <source> <expected-integer>");
+                    "usage: Perf010aSourceIdentitySmokeDriver <source> <expected-integer> [expected-target-text]");
             System.exit(2);
         }
 
         Path sourcePath = Path.of(args[0]).toAbsolutePath().normalize();
         BigInteger expected = new BigInteger(args[1]);
+        String expectedTargetText =
+                args.length == 3 ? args[2] : DEFAULT_EXPECTED_TARGET_TEXT;
         if (!Files.isRegularFile(sourcePath)) {
             throw new IllegalArgumentException("benchmark source does not exist: " + sourcePath);
         }
-        if (!sourcePath.getFileName().toString().equals(Perf010aSourceIdentityInstrument.TARGET_SOURCE_NAME)) {
+        String sourceName = sourcePath.getFileName().toString();
+        String targetSourceName = Perf010aSourceIdentityInstrument.targetSourceName();
+        if (!sourceName.equals(targetSourceName)) {
             throw new IllegalArgumentException(
-                    "this smoke is scoped to " + Perf010aSourceIdentityInstrument.TARGET_SOURCE_NAME
-                            + " only, got: " + sourcePath.getFileName());
+                    "source identity target mismatch: configured=" + targetSourceName
+                            + " actual=" + sourceName);
         }
 
         String homeText = System.getenv("PROTOS_HOME");
@@ -176,7 +180,7 @@ public final class Perf010aSourceIdentitySmokeDriver {
             }
         }
 
-        System.out.println("PERF010A_SOURCE_IDENTITY_SMOKE_WORKLOAD=micro/method-call");
+        System.out.println("PERF010A_SOURCE_IDENTITY_SMOKE_SOURCE=" + sourceName);
         System.out.println("PERF010A_SOURCE_IDENTITY_SMOKE_ITERATIONS=" + ITERATIONS);
         System.out.println("PERF010A_SOURCE_IDENTITY_SMOKE_WORKLOAD_RESULT=PASS");
 
@@ -185,10 +189,23 @@ public final class Perf010aSourceIdentitySmokeDriver {
         System.out.println("PERF010A_SOURCE_IDENTITY_OBSERVED_RECORDS=" + records.size());
 
         Optional<Perf010aSourceIdentityInstrument.SourceRecord> match =
-                records.stream().filter(r -> EXPECTED_TARGET_TEXT.equals(r.text())).findFirst();
+                records.stream().filter(r -> expectedTargetText.equals(r.text())).findFirst();
 
         if (match.isEmpty()) {
-            System.out.println("METHOD_CALL_SOURCE_IDENTITY_VISIBLE=NO");
+            for (Perf010aSourceIdentityInstrument.SourceRecord r : records) {
+                System.out.println(
+                        "SOURCE_RECORD="
+                                + r.line() + ":"
+                                + r.columnOneBased() + " ["
+                                + r.startOffset() + ","
+                                + r.endOffset() + ") "
+                                + r.rootNodeClassName() + " :: "
+                                + r.text().replace("\\n", "\\n"));
+            }
+            System.out.println("TARGET_SOURCE_IDENTITY_VISIBLE=NO");
+            if (Perf010aSourceIdentityInstrument.DEFAULT_TARGET_SOURCE_NAME.equals(sourceName)) {
+                System.out.println("METHOD_CALL_SOURCE_IDENTITY_VISIBLE=NO");
+            }
             System.out.flush();
             System.exit(1);
             return;
@@ -204,7 +221,10 @@ public final class Perf010aSourceIdentitySmokeDriver {
         System.out.println("PERF010A_SOURCE_IDENTITY_MATCH_TEXT=" + record.text());
         System.out.println(
                 "PERF010A_SOURCE_IDENTITY_MATCH_ROOT_NODE_CLASS=" + record.rootNodeClassName());
-        System.out.println("METHOD_CALL_SOURCE_IDENTITY_VISIBLE=YES");
+        System.out.println("TARGET_SOURCE_IDENTITY_VISIBLE=YES");
+        if (Perf010aSourceIdentityInstrument.DEFAULT_TARGET_SOURCE_NAME.equals(sourceName)) {
+            System.out.println("METHOD_CALL_SOURCE_IDENTITY_VISIBLE=YES");
+        }
     }
 
     private static ProtosActivation freshModuleActivation(

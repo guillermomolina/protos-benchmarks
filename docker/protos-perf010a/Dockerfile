@@ -232,3 +232,5 @@ LABEL org.protos-benchmarks.perf010a.ablation-slice="${ABLATION_SLICE}"
 ENV PROTOS_HOME=/opt/protos
 ENV PERF010A_VARIANT="${VARIANT}"
 WORKDIR /opt/protos-source
+
+ENV MAVEN_OPTS="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow"

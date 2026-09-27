@@ -57,12 +57,10 @@ import org.graalvm.options.OptionStability;
  * registered instrument when something explicitly enables it.
  *
  * <p>Scope is deliberately narrow: the attached listener's {@link SourceSectionFilter} matches
- * only sources literally named {@code method-call.protos} (the PERF010-A
- * {@code micro/method-call} workload's own Source name, set by
- * {@code Source.newBuilder(..., sourcePath.getFileName().toString())} in every PERF010-A
- * driver), so this diagnostic cannot make unrelated Standard Library/module roots
- * source-visible while leaving the target caller un-correlated, and cannot silently widen into a
- * general "materialize everything" mechanism.
+ * exactly one selected Source name. The default remains {@code method-call.protos}; a bounded
+ * diagnostic may select another single workload Source through
+ * {@link #TARGET_SOURCE_NAME_PROPERTY}. This cannot silently widen into a general
+ * "materialize everything" mechanism.
  *
  * <p>Enabled only via the standard GraalVM polyglot option convention for a single boolean
  * instrument option named after its own id (matching, e.g., {@code --cpusampler}): passing
@@ -89,17 +87,22 @@ public final class Perf010aSourceIdentityInstrument extends TruffleInstrument {
     public static final String ID = "perf010aSourceIdentity";
 
     /**
-     * The exact PERF010-A {@code micro/method-call} workload Source name; see class javadoc for
-     * why this diagnostic is deliberately scoped to only this one Source.
+     * Default source preserves the original PERF010-A method-call diagnostic. A bounded
+     * diagnostic may select another single Source through {@link #TARGET_SOURCE_NAME_PROPERTY}.
      */
-    public static final String TARGET_SOURCE_NAME = "method-call.protos";
+    public static final String DEFAULT_TARGET_SOURCE_NAME = "method-call.protos";
+    public static final String TARGET_SOURCE_NAME_PROPERTY = "perf010a.sourceIdentity.targetSource";
+
+    public static String targetSourceName() {
+        return System.getProperty(TARGET_SOURCE_NAME_PROPERTY, DEFAULT_TARGET_SOURCE_NAME);
+    }
 
     private static final OptionKey<Boolean> ENABLED = new OptionKey<>(false);
 
     private static final List<SourceRecord> OBSERVED =
             Collections.synchronizedList(new ArrayList<>());
 
-    /** One materialized source section observed for {@link #TARGET_SOURCE_NAME}. */
+    /** One materialized source section observed for the selected target Source. */
     public record SourceRecord(
             String sourceName,
             int startOffset,
@@ -144,8 +147,7 @@ public final class Perf010aSourceIdentityInstrument extends TruffleInstrument {
                                 .help(
                                         "PERF010-A / #691 diagnostic: force Bytecode DSL source-section "
                                                 + "materialization for the "
-                                                + TARGET_SOURCE_NAME
-                                                + " caller/helper roots by attaching a Truffle "
+                                                + "selected caller/helper Source roots by attaching a Truffle "
                                                 + "instrumentation listener scoped to that one Source. "
                                                 + "Diagnostic-only; never used by PERF010-A reference or "
                                                 + "smoke timing evidence.")
@@ -157,7 +159,7 @@ public final class Perf010aSourceIdentityInstrument extends TruffleInstrument {
         Instrumenter instrumenter = env.getInstrumenter();
         SourceSectionFilter filter =
                 SourceSectionFilter.newBuilder()
-                        .sourceIs(source -> source != null && TARGET_SOURCE_NAME.equals(source.getName()))
+                        .sourceIs(source -> source != null && targetSourceName().equals(source.getName()))
                         .build();
         instrumenter.attachLoadSourceSectionListener(
                 filter,

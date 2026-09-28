@@ -221,6 +221,76 @@ def validate_config_payload(cfg: dict[str, Any]) -> dict[str, Any]:
     return cfg
 
 
+def validate_dockerfile_contract(docker_text: str) -> None:
+    required_markers = {
+        "canonical GraalVM base": "ARG GRAAL_BASE=" + EXPECTED_CONTAINER_IMAGE,
+        "OL10 Maven package": (
+            "microdnf install -y git gzip tar findutils ca-certificates python3 unzip maven"
+        ),
+        "JAVA_HOME-first PATH": 'ENV PATH="${JAVA_HOME}/bin:${PATH}"',
+        "JAVA_HOME Java executable": 'test -x "$JAVA_HOME/bin/java"',
+        "JAVA_HOME Javac executable": 'test -x "$JAVA_HOME/bin/javac"',
+        "bare Java selection": 'test "$(command -v java)" = "$JAVA_HOME/bin/java"',
+        "bare Javac selection": 'test "$(command -v javac)" = "$JAVA_HOME/bin/javac"',
+        "Java version assertion": (
+            'grep -Fq "java.version = ${EXPECTED_JDK_VERSION}"'
+        ),
+        "Java vendor assertion": (
+            'grep -Fq "java.vm.vendor = GraalVM Community"'
+        ),
+        "Javac feature derivation": (
+            'JAVAC_FEATURE="${EXPECTED_JDK_VERSION%%.*}"'
+        ),
+        "Javac version assertion": (
+            'grep -Eq "^javac ${JAVAC_FEATURE}([.]|$)"'
+        ),
+        "Maven version assertion": (
+            'grep -Fq "Apache Maven ${EXPECTED_MAVEN_VERSION} "'
+        ),
+        "Maven Java version assertion": (
+            'grep -Fq "Java version: ${EXPECTED_JDK_VERSION}"'
+        ),
+        "Maven vendor assertion": (
+            'grep -Fq "vendor: GraalVM Community"'
+        ),
+        "Maven JAVA_HOME runtime assertion": (
+            'grep -Fq "runtime: ${JAVA_HOME}"'
+        ),
+        "explicit GraalVM Javac compilation": (
+            '"$JAVA_HOME/bin/javac" -cp'
+        ),
+        "build Java command identity": (
+            "printf 'JAVA_COMMAND=%s\\n' \"$(command -v java)\""
+        ),
+        "build Javac command identity": (
+            "printf 'JAVAC_COMMAND=%s\\n' \"$(command -v javac)\""
+        ),
+        "portable distribution build": "python3 dist/build_portable.py",
+        "source toolchain gate": "DIST006D_SOURCE_TOOLCHAIN_CONTRACT=PASS",
+        "benchmark corpus": "/opt/dist006d/corpus",
+        "runtime classpath": "$BUNDLE/lib/runtime/*",
+        "reference-only evidence label": (
+            'LABEL org.protos-benchmarks.dist006d.retained-evidence="reference-only"'
+        ),
+    }
+    for label, marker in required_markers.items():
+        if marker not in docker_text:
+            raise RuntimeError(
+                f"Dockerfile structural contract missing {label}: {marker}"
+            )
+
+    for forbidden in (
+        "ubuntu",
+        "eclipse-temurin",
+        "archive.apache.org",
+        "apply_toolchain_overlay",
+    ):
+        if forbidden.lower() in docker_text.lower():
+            raise RuntimeError(
+                "forbidden DIST006-D Docker authority: " + forbidden
+            )
+
+
 def validate() -> dict[str, Any]:
     cfg = validate_config_payload(load())
     for path in (CONFIG, DOCKERFILE, DRIVER_JAVA, RUNTIME_PROBE_JAVA, MAKEFILE):
@@ -228,20 +298,7 @@ def validate() -> dict[str, Any]:
             raise RuntimeError(f"missing DIST006-D harness file: {path}")
 
     docker_text = DOCKERFILE.read_text(encoding="utf-8")
-    for marker in (
-        "ARG GRAAL_BASE=" + EXPECTED_CONTAINER_IMAGE,
-        "microdnf install -y git gzip tar findutils ca-certificates python3 unzip maven",
-        "python3 dist/build_portable.py",
-        "DIST006D_SOURCE_TOOLCHAIN_CONTRACT=PASS",
-        "/opt/dist006d/corpus",
-        "$BUNDLE/lib/runtime/*",
-        'LABEL org.protos-benchmarks.dist006d.retained-evidence="reference-only"',
-    ):
-        if marker not in docker_text:
-            raise RuntimeError("Dockerfile structural contract missing: " + marker)
-    for forbidden in ("ubuntu", "eclipse-temurin", "archive.apache.org", "apply_toolchain_overlay"):
-        if forbidden.lower() in docker_text.lower():
-            raise RuntimeError("forbidden DIST006-D Docker authority: " + forbidden)
+    validate_dockerfile_contract(docker_text)
 
     driver_text = DRIVER_JAVA.read_text(encoding="utf-8")
     if "import jdk.jfr" in driver_text:
@@ -258,6 +315,7 @@ def validate() -> dict[str, Any]:
     print("DIST006D_D1_TOOLCHAIN_CONTRACT=PASS")
     print("DIST006D_D1_WORKLOAD_SET=PASS")
     print("DIST006D_D1_DOCKER_STRUCTURE=PASS")
+    print("DIST006D_D2_BUILD_TOOLCHAIN_SELECTION=PASS")
     print("DIST006D_D1_EXACT_SHA_POLICY=PASS")
     print("DIST006D_D1_HISTORICAL_UPSTREAM003_MUTATION=NO")
     print("DIST006D_D1_SMOKE_RETAINED_PERFORMANCE_EVIDENCE=NO")
@@ -441,10 +499,42 @@ def build_and_probe(cfg: dict[str, Any], protos_revision: str, cpu: str) -> dict
         )
 
     build_identity = image_text(tag, cpu, "/opt/dist006d/identity/build-identity.txt")
+
+    identity_fields: dict[str, str] = {}
+    for line in build_identity.splitlines():
+        key, separator, value = line.partition("=")
+        if separator and key in {"JAVA_HOME", "JAVA_COMMAND", "JAVAC_COMMAND"}:
+            identity_fields[key] = value
+
+    java_home = identity_fields.get("JAVA_HOME", "")
+    if not java_home:
+        raise RuntimeError("build-stage JAVA_HOME identity missing")
+    if identity_fields.get("JAVA_COMMAND") != java_home + "/bin/java":
+        raise RuntimeError("build-stage java does not resolve through JAVA_HOME")
+    if identity_fields.get("JAVAC_COMMAND") != java_home + "/bin/javac":
+        raise RuntimeError("build-stage javac does not resolve through JAVA_HOME")
+
+    if f"java.version = {EXPECTED_JDK_VERSION}" not in build_identity:
+        raise RuntimeError("build-stage Java version mismatch")
+    if "java.vm.vendor = GraalVM Community" not in build_identity:
+        raise RuntimeError("build-stage Java vendor mismatch")
+
+    expected_javac_feature = EXPECTED_JDK_VERSION.split(".", 1)[0]
+    if re.search(
+        rf"(?m)^javac {re.escape(expected_javac_feature)}(?:[.]|$)",
+        build_identity,
+    ) is None:
+        raise RuntimeError("build-stage Javac version mismatch")
+
     if f"Apache Maven {EXPECTED_MAVEN_VERSION}" not in build_identity:
         raise RuntimeError("Maven identity mismatch")
-    if "GraalVM Community" not in build_identity:
-        raise RuntimeError("GraalVM Community build identity missing")
+    if f"Java version: {EXPECTED_JDK_VERSION}" not in build_identity:
+        raise RuntimeError("Maven Java version mismatch")
+    if "vendor: GraalVM Community" not in build_identity:
+        raise RuntimeError("Maven Java vendor mismatch")
+    if f"runtime: {java_home}" not in build_identity:
+        raise RuntimeError("Maven runtime does not match build-stage JAVA_HOME")
+
     runtime_components = image_json(tag, cpu, "/opt/dist006d/identity/runtime-components.json")
     if EXPECTED_ENGINE_VERSION not in json.dumps(runtime_components, sort_keys=True):
         raise RuntimeError("bundled Graal/Truffle component identity mismatch")

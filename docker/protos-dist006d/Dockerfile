@@ -23,14 +23,27 @@ ARG EXPECTED_GRAALVM_RELEASE=25.4.4.1.1
 ARG EXPECTED_JDK_VERSION=25.0.4.1.1
 ARG EXPECTED_MAVEN_VERSION=3.9.9
 
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
 COPY docker/protos-dist006d/Dist006dRuntimeProbe.java /tmp/Dist006dRuntimeProbe.java
 COPY docker/protos-dist006d/Dist006dDriver.java /tmp/Dist006dDriver.java
 
 RUN microdnf install -y git gzip tar findutils ca-certificates python3 unzip maven \
     && microdnf clean all \
-    && mvn -version \
-    && mvn -version | grep -q "Apache Maven ${EXPECTED_MAVEN_VERSION} " \
-    && mvn -version | grep -q "GraalVM Community"
+    && test -x "$JAVA_HOME/bin/java" \
+    && test -x "$JAVA_HOME/bin/javac" \
+    && test "$(command -v java)" = "$JAVA_HOME/bin/java" \
+    && test "$(command -v javac)" = "$JAVA_HOME/bin/javac" \
+    && JAVA_PROPERTIES="$(java -XshowSettings:properties -version 2>&1)" \
+    && printf '%s\n' "$JAVA_PROPERTIES" | grep -Fq "java.version = ${EXPECTED_JDK_VERSION}" \
+    && printf '%s\n' "$JAVA_PROPERTIES" | grep -Fq "java.vm.vendor = GraalVM Community" \
+    && JAVAC_FEATURE="${EXPECTED_JDK_VERSION%%.*}" \
+    && javac -version 2>&1 | grep -Eq "^javac ${JAVAC_FEATURE}([.]|$)" \
+    && MAVEN_IDENTITY="$(mvn -version 2>&1)" \
+    && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "Apache Maven ${EXPECTED_MAVEN_VERSION} " \
+    && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "Java version: ${EXPECTED_JDK_VERSION}" \
+    && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "vendor: GraalVM Community" \
+    && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "runtime: ${JAVA_HOME}"
 
 RUN PROTOS_REVISION="$PROTOS_REVISION" python3 - <<'PY'
 import os
@@ -100,11 +113,20 @@ RUN cd /src \
     && rm -rf /out/source/target \
     && cp -a /src/protos/benchmarks/. /out/corpus/ \
     && cp /src/toolchain.json /out/dist006d/identity/toolchain.json \
-    && javac -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
+    && "$JAVA_HOME/bin/javac" -cp "$BUNDLE/lib/protos.jar:$BUNDLE/lib/runtime/*" \
          -d /out/dist006d/driver \
          /tmp/Dist006dRuntimeProbe.java \
          /tmp/Dist006dDriver.java \
-    && (java -version; mvn -version; uname -m) > /out/dist006d/identity/build-identity.txt 2>&1 \
+    && { \
+         printf 'JAVA_HOME=%s\n' "$JAVA_HOME"; \
+         printf 'JAVA_COMMAND=%s\n' "$(command -v java)"; \
+         printf 'JAVAC_COMMAND=%s\n' "$(command -v javac)"; \
+         java -version; \
+         java -XshowSettings:properties -version; \
+         javac -version; \
+         mvn -version; \
+         uname -m; \
+       } > /out/dist006d/identity/build-identity.txt 2>&1 \
     && python3 - "$BUNDLE" <<'PY'
 import json
 import sys

@@ -107,6 +107,38 @@ class Dist006dContractTest(unittest.TestCase):
             )
         )
 
+    def test_build_stage_toolchain_selection_fails_closed(self):
+        docker_text = (ROOT / "docker/protos-dist006d/Dockerfile").read_text(
+            encoding="utf-8"
+        )
+        required_markers = (
+            'ENV PATH="${JAVA_HOME}/bin:${PATH}"',
+            'test "$(command -v java)" = "$JAVA_HOME/bin/java"',
+            'test "$(command -v javac)" = "$JAVA_HOME/bin/javac"',
+            'grep -Fq "java.version = ${EXPECTED_JDK_VERSION}"',
+            'grep -Fq "java.vm.vendor = GraalVM Community"',
+            'JAVAC_FEATURE="${EXPECTED_JDK_VERSION%%.*}"',
+            'grep -Eq "^javac ${JAVAC_FEATURE}([.]|$)"',
+            'grep -Fq "Apache Maven ${EXPECTED_MAVEN_VERSION} "',
+            'grep -Fq "Java version: ${EXPECTED_JDK_VERSION}"',
+            'grep -Fq "vendor: GraalVM Community"',
+            'grep -Fq "runtime: ${JAVA_HOME}"',
+            '"$JAVA_HOME/bin/javac" -cp',
+            "printf 'JAVA_COMMAND=%s\\n' \"$(command -v java)\"",
+            "printf 'JAVAC_COMMAND=%s\\n' \"$(command -v javac)\"",
+        )
+
+        dist006d.validate_dockerfile_contract(docker_text)
+
+        for marker in required_markers:
+            with self.subTest(marker=marker):
+                mutated = docker_text.replace(marker, "DIST006D_D2_MARKER_REMOVED", 1)
+                self.assertNotEqual(docker_text, mutated)
+                with self.assertRaisesRegex(
+                    RuntimeError, "Dockerfile structural contract missing"
+                ):
+                    dist006d.validate_dockerfile_contract(mutated)
+
     def test_incomplete_workload_set_fails_closed(self):
         self.assert_config_rejected(lambda cfg: cfg["workloads"].pop())
 

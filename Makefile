@@ -370,3 +370,19 @@ perf014-smoke:
 perf014-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf014-reference HARNESS_REVISION=<published-PERF014-harness-SHA>" >&2; exit 2; }
 	python3 runner/perf014_direct_closure_call.py reference --harness-revision "$(HARNESS_REVISION)"
+
+.PHONY: upstream003-validate upstream003-smoke upstream003-reference upstream003-diagnostic
+
+upstream003-validate:
+	python3 runner/upstream003_platform_comparison.py validate
+
+upstream003-smoke:
+	python3 runner/upstream003_platform_comparison.py smoke
+
+upstream003-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make upstream003-reference HARNESS_REVISION=<published-UPSTREAM003-B-harness-SHA> [OUT=<scratch-or-retained-output>]" >&2; exit 2; }
+	python3 runner/upstream003_platform_comparison.py reference --harness-revision "$(HARNESS_REVISION)" $(if $(OUT),--output-dir "$(OUT)",)
+
+upstream003-diagnostic:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make upstream003-diagnostic HARNESS_REVISION=<published-UPSTREAM003-B-harness-SHA> [OUT=<diagnostic-output>]" >&2; exit 2; }
+	python3 runner/upstream003_platform_comparison.py diagnostic --harness-revision "$(HARNESS_REVISION)" $(if $(OUT),--output-dir "$(OUT)",)

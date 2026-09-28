@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "upstream_item": "UPSTREAM003",
+  "issue": "guillermomolina/protos#732",
+  "slice": "UPSTREAM003-B",
+  "phase": "platform-comparison-harness",
+  "diagnostic_claim": false,
+  "causal_question": "What changes when the upstream GraalVM/Graal/Truffle platform changes from 25.3.4.1 to 25.4.4.1.1, with the Protos product, workload sources, machine, CPU policy, warmup and measurement protocol unchanged?",
+  "protos": {
+    "repository": "https://github.com/guillermomolina/protos.git",
+    "revision": "44690b1fc8c9aed023600c6d5731f969c4507e27",
+    "version": "0.3.106-SNAPSHOT"
+  },
+  "platforms": {
+    "platform_a": {
+      "role": "platform_a",
+      "label": "25.3",
+      "graalvm_release": "25.3.4.1",
+      "graal_truffle_version": "25.3.4.1",
+      "jdk_version": "25.0.4.1",
+      "maven_version": "3.9.9",
+      "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825",
+      "build_toolchain_overlay": false
+    },
+    "platform_b": {
+      "role": "platform_b",
+      "label": "25.4",
+      "graalvm_release": "25.4.4.1.1",
+      "graal_truffle_version": "25.4.4.1.1",
+      "jdk_version": "25.0.4.1",
+      "maven_version": "3.9.9",
+      "container_image": "ghcr.io/graalvm/graalvm-community:25i4-ol10",
+      "build_toolchain_overlay": true
+    }
+  },
+  "overlay": {
+    "role": "platform_b",
+    "kind": "harness_owned_build_only_toolchain_overlay",
+    "script": "docker/protos-upstream003/apply_toolchain_overlay.py",
+    "authorized_paths": [
+      "pom.xml",
+      "toolchain.json",
+      "dist/build_portable.py"
+    ],
+    "semantic_source_paths": [
+      "src",
+      "protos"
+    ],
+    "source_git_revision_same": true,
+    "executable_language_source_same": true,
+    "source_tree_byte_identical_claim": false
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 120,
+  "steady_iterations": 100,
+  "cpu_affinity": "same one-physical-core representative from current allowed cpuset",
+  "network": "none",
+  "timing_recording_phase": "steady_only_no_diagnostic_instrumentation",
+  "clean_timing_exclusions": [
+    "JFR",
+    "TraceCompilation",
+    "TraceCompilationDetails",
+    "TraceCompilationCallTree",
+    "IGV",
+    "allocation profiling",
+    "source instrumentation",
+    "Test Tool diagnostics"
+  ],
+  "controls": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "workload_roles": {
+    "micro/slot-read": "broad/control compiler movement",
+    "micro/closure-call": "HIGH relevance to GR-79418",
+    "micro/method-call": "HIGH guest-call relevance",
+    "runtime/monomorphic-dispatch": "HIGH selected-send/direct-call relevance"
+  },
+  "block_order": [
+    "A",
+    "B",
+    "A",
+    "B"
+  ],
+  "block_role_order": {
+    "A": [
+      "platform_a",
+      "platform_b"
+    ],
+    "B": [
+      "platform_b",
+      "platform_a"
+    ]
+  },
+  "timing_comparison": {
+    "signed_delta_definition": "platform_b_median_ns - platform_a_median_ns",
+    "signed_relative_delta_definition": "100 * signed_delta_ns / platform_a_median_ns",
+    "paired_control_definition": "(platform_b_canonical - platform_a_canonical) - (platform_b_workload_control - platform_a_workload_control)",
+    "automatic_adoption_classification": false,
+    "whole_language_aggregation": false
+  },
+  "diagnostic": {
+    "separate_from_timing": true,
+    "workloads": [
+      "micro/closure-call",
+      "micro/method-call",
+      "runtime/monomorphic-dispatch"
+    ],
+    "warmup_iterations": 20,
+    "steady_iterations": 20,
+    "trace_compilation": true,
+    "trace_compilation_details": true,
+    "trace_compilation_call_tree": true,
+    "compilation_failure_action": "Print",
+    "availability_policy": "Retain observable trace fields; explicitly report UNAVAILABLE_FROM_TRACE for fields the emitted trace does not expose. Absence of a textual marker is never promoted to proof that the corresponding compiler structure is absent."
+  },
+  "timing_output": "results/upstream003-platform-comparison/timing",
+  "diagnostic_output": "results/upstream003-platform-comparison/diagnostic",
+  "historical_evidence_used_as_side_a": false
+}

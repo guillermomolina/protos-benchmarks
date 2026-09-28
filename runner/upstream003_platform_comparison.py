@@ -86,7 +86,7 @@ TRACE_SIZE_RE = re.compile(
     re.IGNORECASE,
 )
 TRACE_RECURSION_DEPTH_RE = re.compile(r"\bRecursion\s+Depth\s+([0-9]+)", re.IGNORECASE)
-TRACE_DEPTH_RE = re.compile(r"\bDepth\s+([0-9]+)", re.IGNORECASE)
+TRACE_DEPTH_RE = re.compile(r"(?:^|\|)\s*Depth\s+([0-9]+)", re.IGNORECASE | re.MULTILINE)
 TRACE_INLINING_STATE_RE = re.compile(
     r"^\s*\[engine\]\s+(Inlined|Expanded|Cutoff|Indirect|Removed|BailedOut)\b",
     re.IGNORECASE | re.MULTILINE,

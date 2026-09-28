@@ -96,6 +96,14 @@ class Upstream003ContractTest(unittest.TestCase):
             parsed["direct_vs_indirect_call_survival"]["status"],
         )
         self.assertEqual("OBSERVED_IN_TRACE", parsed["recursion_inlining_depth"]["status"])
+        self.assertEqual(
+            [0, 0, 0, 0, 0],
+            parsed["recursion_inlining_depth"]["recursion_depth_values"],
+        )
+        self.assertEqual(
+            [0, 1, 1, 2, 1],
+            parsed["recursion_inlining_depth"]["depth_values"],
+        )
 
     def test_config_has_four_independent_workload_probes(self):
         cfg = json.loads(

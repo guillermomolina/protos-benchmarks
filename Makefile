@@ -386,3 +386,17 @@ upstream003-reference:
 upstream003-diagnostic:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make upstream003-diagnostic HARNESS_REVISION=<published-UPSTREAM003-B-harness-SHA> [OUT=<diagnostic-output>]" >&2; exit 2; }
 	python3 runner/upstream003_platform_comparison.py diagnostic --harness-revision "$(HARNESS_REVISION)" $(if $(OUT),--output-dir "$(OUT)",)
+
+.PHONY: dist006d-validate dist006d-smoke dist006d-reference
+
+dist006d-validate:
+	python3 runner/dist006d_baseline.py validate
+
+dist006d-smoke:
+	@test -n "$(PROTOS_REVISION)" || { echo "usage: make dist006d-smoke PROTOS_REVISION=<exact-40-lowercase-hex-Protos-SHA>" >&2; exit 2; }
+	python3 runner/dist006d_baseline.py smoke --protos-revision "$(PROTOS_REVISION)"
+
+dist006d-reference:
+	@test -n "$(PROTOS_REVISION)" || { echo "usage: make dist006d-reference PROTOS_REVISION=<exact-40-lowercase-hex-Protos-SHA> HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA> [OUT=results/dist006d-baseline]" >&2; exit 2; }
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make dist006d-reference PROTOS_REVISION=<exact-40-lowercase-hex-Protos-SHA> HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA> [OUT=results/dist006d-baseline]" >&2; exit 2; }
+	python3 runner/dist006d_baseline.py reference --protos-revision "$(PROTOS_REVISION)" --harness-revision "$(HARNESS_REVISION)" $(if $(OUT),--output-dir "$(OUT)",)

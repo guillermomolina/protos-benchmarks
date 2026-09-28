@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "dist_item": "DIST006",
+  "issue": "guillermomolina/protos#733",
+  "slice": "DIST006-D1",
+  "phase": "post-adoption-baseline-harness",
+  "diagnostic_claim": false,
+  "single_platform_baseline": true,
+  "retained_performance_evidence_produced_by_smoke": false,
+  "protos": {
+    "repository": "https://github.com/guillermomolina/protos.git",
+    "revision": null,
+    "revision_input_contract": {
+      "supplied_by": "human_at_execution_time",
+      "cli_flag": "--protos-revision",
+      "make_variable": "PROTOS_REVISION",
+      "revision_format": "exactly 40 lowercase hexadecimal characters",
+      "floating_branch_forbidden": true,
+      "hard_coded_head_forbidden": true
+    }
+  },
+  "toolchain": {
+    "schema": "protos-toolchain-v1",
+    "java": {
+      "bytecode_release": 21
+    },
+    "graalvm": {
+      "distribution": "graalvm-community",
+      "release": "25.4.4.1.1",
+      "jdk_feature": 25,
+      "jdk_version": "25.0.4.1.1",
+      "container_channel": "25i4",
+      "container_image": "ghcr.io/graalvm/graalvm-community:25i4-25.0.4.1.1-ol10@sha256:a7b4810d7c755e9627feaa1459eb5a93338643b16d745d4f3fc86db71e5da7f5"
+    },
+    "graal_components": {
+      "version": "25.4.4.1.1"
+    },
+    "maven": {
+      "version": "3.9.9"
+    },
+    "policy": {
+      "primary_runtime_alignment": "development-ci-distribution",
+      "upgrade_mode": "explicit-validated-change",
+      "floating_primary_runtime": false
+    },
+    "jvmci": "25.4-b23",
+    "expected_runtime": "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 120,
+  "steady_iterations": 100,
+  "smoke": {
+    "warmup_iterations": 0,
+    "steady_iterations": 0,
+    "retained_performance_evidence": false,
+    "timing_evidence": false,
+    "reference_evidence": false
+  },
+  "cpu_affinity": "same one physical-core representative from current allowed cpuset",
+  "network": "none",
+  "timing_recording_phase": "steady_only_no_diagnostic_instrumentation",
+  "clean_timing_exclusions": [
+    "JFR",
+    "TraceCompilation",
+    "TraceCompilationDetails",
+    "TraceInlining",
+    "IGV",
+    "allocation profiling",
+    "source instrumentation",
+    "Test Tool diagnostics"
+  ],
+  "workloads": [
+    {
+      "id": "micro/slot-read",
+      "role": "broad/control compiler movement",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "role": "closure-call baseline",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "role": "guest method-call baseline",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "role": "selected-send/direct-call baseline",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "reference": {
+    "output": "results/dist006d-baseline",
+    "requires_exact_protos_revision": true,
+    "requires_exact_clean_published_harness_revision": true,
+    "retained_performance_evidence": true,
+    "comparison_kind": "single-platform-post-adoption-baseline",
+    "paired_platform_formula": false
+  },
+  "historical_boundary": [
+    "config/runtimes.json",
+    "config/protos.json",
+    "docker/protos/Dockerfile",
+    "config/upstream003-platform-comparison.json",
+    "docker/protos-upstream003/**",
+    "results/upstream003-platform-comparison/**",
+    "existing PERF001/PERF003/PERF006/PERF008/PERF010/PERF014 historical authority"
+  ]
+}

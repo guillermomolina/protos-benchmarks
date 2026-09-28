@@ -37,6 +37,11 @@ class Upstream003ContractTest(unittest.TestCase):
         self.assertEqual("0.3.106-SNAPSHOT", cfg["protos"]["version"])
         self.assertFalse(cfg["timing_comparison"]["automatic_adoption_classification"])
         self.assertFalse(cfg["historical_evidence_used_as_side_a"])
+        self.assertTrue(cfg["diagnostic"]["allow_experimental_options"])
+        self.assertIn(
+            "-Dpolyglot.engine.AllowExperimentalOptions=true",
+            MODULE_PATH.read_text(encoding="utf-8"),
+        )
 
     def test_signed_delta(self):
         self.assertEqual(

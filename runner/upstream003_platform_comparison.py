@@ -448,6 +448,7 @@ def validate() -> dict[str, Any]:
     assert diagnostic["workloads"] == [
         "micro/closure-call", "micro/method-call", "runtime/monomorphic-dispatch"
     ]
+    assert diagnostic["allow_experimental_options"] is True
     assert diagnostic["trace_compilation"] is True
     assert diagnostic["trace_compilation_details"] is True
     assert diagnostic["trace_compilation_call_tree"] is True
@@ -1159,6 +1160,7 @@ def diagnostic_unit(
         "docker", "run", "--rm", "--network", "none", "--cpuset-cpus", cpu,
         "--entrypoint", "java", tag,
         "-Xss128m",
+        "-Dpolyglot.engine.AllowExperimentalOptions=true",
         "-Dpolyglot.engine.TraceCompilation=true",
         "-Dpolyglot.engine.TraceCompilationDetails=true",
         "-Dpolyglot.engine.TraceCompilationCallTree=true",

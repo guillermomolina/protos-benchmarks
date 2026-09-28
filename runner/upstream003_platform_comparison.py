@@ -77,11 +77,19 @@ TRACE_INDIRECT_CALL_RE = re.compile(r"\bIndirectCallNode\b")
 TRACE_INLINE_RE = re.compile(r"\binlin(?:e|ed|ing)\b", re.IGNORECASE)
 TRACE_CUTOFF_RE = re.compile(r"\bcut\s*off\b|\bcutoff\b", re.IGNORECASE)
 TRACE_FREQUENCY_RE = re.compile(
-    r"\b(?:frequency|freq)\s*[=:]\s*([0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)",
+    r"\b(?:frequency|freq)\s*(?:[=:]\s*)?([0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)",
     re.IGNORECASE,
 )
 TRACE_SIZE_RE = re.compile(
-    r"\b(?:graph|ir|ast)\s+(?:size|nodes?)\s*[=:]\s*([0-9]+)", re.IGNORECASE
+    r"\b(?:graph\s+(?:size|nodes?)|ir\s+nodes?|ast\s+(?:size|nodes?))\s*"
+    r"(?:[=:]\s*)?([0-9]+)",
+    re.IGNORECASE,
+)
+TRACE_RECURSION_DEPTH_RE = re.compile(r"\bRecursion\s+Depth\s+([0-9]+)", re.IGNORECASE)
+TRACE_DEPTH_RE = re.compile(r"\bDepth\s+([0-9]+)", re.IGNORECASE)
+TRACE_INLINING_STATE_RE = re.compile(
+    r"^\s*\[engine\]\s+(Inlined|Expanded|Cutoff|Indirect|Removed|BailedOut)\b",
+    re.IGNORECASE | re.MULTILINE,
 )
 
 
@@ -292,27 +300,45 @@ def parse_overlay_diff_paths(text: str) -> tuple[str, ...]:
 def trace_summary(text: str, workload_source: str) -> dict[str, Any]:
     frequencies = [float(v) for v in TRACE_FREQUENCY_RE.findall(text)]
     sizes = [int(v) for v in TRACE_SIZE_RE.findall(text)]
+    recursion_depths = [int(v) for v in TRACE_RECURSION_DEPTH_RE.findall(text)]
+    depths = [int(v) for v in TRACE_DEPTH_RE.findall(text)]
     inline_lines = [line for line in text.splitlines() if TRACE_INLINE_RE.search(line)]
     cutoff_lines = [line for line in text.splitlines() if TRACE_CUTOFF_RE.search(line)]
     source_lines = [
         line for line in text.splitlines()
         if Path(workload_source).name in line or "ProtosBytecodeRoot" in line
     ]
+    state_names = [value.lower() for value in TRACE_INLINING_STATE_RE.findall(text)]
+    state_counts = {
+        state: state_names.count(state.lower())
+        for state in ("Inlined", "Expanded", "Cutoff", "Indirect", "Removed", "BailedOut")
+    }
+    direct_state_markers = sum(
+        state_counts[state]
+        for state in ("Inlined", "Expanded", "Cutoff", "Removed", "BailedOut")
+    )
+    indirect_state_markers = state_counts["Indirect"]
+    literal_direct = len(TRACE_DIRECT_CALL_RE.findall(text))
+    literal_indirect = len(TRACE_INDIRECT_CALL_RE.findall(text))
+    call_state_observed = direct_state_markers > 0 or indirect_state_markers > 0
+    literal_call_kind_observed = literal_direct > 0 or literal_indirect > 0
+
     return {
         "successful_compilations": len(TRACE_DONE_RE.findall(text)),
         "failed_compilation_markers": len(TRACE_FAILED_RE.findall(text)),
         "bailout_markers": len(TRACE_BAILOUT_RE.findall(text)),
         "invalidation_markers": len(TRACE_INVALIDATED_RE.findall(text)),
         "too_deep_inlining_markers": len(TRACE_TOO_DEEP_RE.findall(text)),
-        "direct_call_node_markers": len(TRACE_DIRECT_CALL_RE.findall(text)),
-        "indirect_call_node_markers": len(TRACE_INDIRECT_CALL_RE.findall(text)),
+        "direct_call_node_markers": literal_direct,
+        "indirect_call_node_markers": literal_indirect,
         "guest_call_frequency": {
             "status": "OBSERVED_IN_TRACE" if frequencies else "UNAVAILABLE_FROM_TRACE",
             "values": frequencies,
         },
         "inlining_decisions": {
-            "status": "OBSERVED_IN_TRACE" if inline_lines else "UNAVAILABLE_FROM_TRACE",
+            "status": "OBSERVED_IN_TRACE" if inline_lines or call_state_observed else "UNAVAILABLE_FROM_TRACE",
             "matching_lines": inline_lines,
+            "state_counts": state_counts,
         },
         "cutoff_decisions": {
             "status": "OBSERVED_IN_TRACE" if cutoff_lines else "UNAVAILABLE_FROM_TRACE",
@@ -329,18 +355,23 @@ def trace_summary(text: str, workload_source: str) -> dict[str, Any]:
         "direct_vs_indirect_call_survival": {
             "status": (
                 "OBSERVED_IN_TRACE"
-                if TRACE_DIRECT_CALL_RE.search(text) or TRACE_INDIRECT_CALL_RE.search(text)
+                if call_state_observed or literal_call_kind_observed
                 else "UNAVAILABLE_FROM_TRACE"
             ),
-            "direct_markers": len(TRACE_DIRECT_CALL_RE.findall(text)),
-            "indirect_markers": len(TRACE_INDIRECT_CALL_RE.findall(text)),
+            "direct_call_tree_state_markers": direct_state_markers,
+            "indirect_call_tree_state_markers": indirect_state_markers,
+            "literal_direct_call_node_markers": literal_direct,
+            "literal_indirect_call_node_markers": literal_indirect,
+            "state_counts": state_counts,
         },
         "recursion_inlining_depth": {
-            "status": "UNAVAILABLE_FROM_TRACE",
-            "note": (
-                "No depth value is inferred unless the emitted trace exposes a stable numeric "
-                "depth field. Raw trace remains authoritative."
+            "status": (
+                "OBSERVED_IN_TRACE"
+                if recursion_depths or depths
+                else "UNAVAILABLE_FROM_TRACE"
             ),
+            "recursion_depth_values": recursion_depths,
+            "depth_values": depths,
         },
     }
 
@@ -357,8 +388,14 @@ def helper_self_tests() -> None:
     assert parse_overlay_diff_paths(diff) == EXPECTED_AUTHORIZED_OVERLAY_PATHS
 
     trace = (
-        "[engine] opt done root=method-call.protos frequency=2.5 graph size=123\n"
-        "DirectCallNode inlined\nIndirectCallNode cutoff\nToo deep inlining\n"
+        "[engine] opt done root=method-call.protos |IR 123/456|\n"
+        "[engine] inline start method-call.protos |Recursion Depth 0 |IR Nodes 2704 "
+        "|Frequency 1.00 |Depth 0\n"
+        "[engine] Inlined identity |Recursion Depth 0 |IR Nodes 175 |Frequency 2.50 |Depth 1\n"
+        "[engine] Expanded helper |Recursion Depth 0 |IR Nodes 97 |Frequency 1.25 |Depth 1\n"
+        "[engine] Cutoff cold |Recursion Depth 0 |IR Nodes 0 |Frequency 0.01 |Depth 2\n"
+        "[engine] Indirect dynamic |Recursion Depth 0 |IR Nodes 0 |Frequency 0.10 |Depth 1\n"
+        "Too deep inlining\n"
         "opt failed CompilationFailure Bailout invalidated ProtosBytecodeRootNode\n"
     )
     parsed = trace_summary(trace, "micro/method-call.protos")
@@ -366,10 +403,16 @@ def helper_self_tests() -> None:
     assert parsed["failed_compilation_markers"] >= 1
     assert parsed["bailout_markers"] >= 1
     assert parsed["too_deep_inlining_markers"] >= 1
-    assert parsed["guest_call_frequency"]["values"] == [2.5]
-    assert parsed["graph_ir_size"]["values"] == [123]
-    assert parsed["direct_call_node_markers"] == 1
-    assert parsed["indirect_call_node_markers"] == 1
+    assert 2.5 in parsed["guest_call_frequency"]["values"]
+    assert 2704 in parsed["graph_ir_size"]["values"]
+    assert parsed["inlining_decisions"]["state_counts"]["Inlined"] == 1
+    assert parsed["inlining_decisions"]["state_counts"]["Expanded"] == 1
+    assert parsed["inlining_decisions"]["state_counts"]["Cutoff"] == 1
+    assert parsed["inlining_decisions"]["state_counts"]["Indirect"] == 1
+    assert parsed["direct_vs_indirect_call_survival"]["direct_call_tree_state_markers"] == 3
+    assert parsed["direct_vs_indirect_call_survival"]["indirect_call_tree_state_markers"] == 1
+    assert parsed["recursion_inlining_depth"]["recursion_depth_values"]
+    assert parsed["recursion_inlining_depth"]["depth_values"]
 
 
 def validate() -> dict[str, Any]:
@@ -427,7 +470,7 @@ def validate() -> dict[str, Any]:
     assert cfg["network"] == "none"
     assert cfg["timing_recording_phase"] == "steady_only_no_diagnostic_instrumentation"
     exclusions = set(cfg["clean_timing_exclusions"])
-    for item in ("JFR", "TraceCompilation", "TraceCompilationDetails", "TraceCompilationCallTree", "IGV"):
+    for item in ("JFR", "TraceCompilation", "TraceCompilationDetails", "TraceInlining", "IGV"):
         assert item in exclusions
 
     b2d = load(B2D_CONFIG)
@@ -451,7 +494,7 @@ def validate() -> dict[str, Any]:
     assert diagnostic["allow_experimental_options"] is True
     assert diagnostic["trace_compilation"] is True
     assert diagnostic["trace_compilation_details"] is True
-    assert diagnostic["trace_compilation_call_tree"] is True
+    assert diagnostic["trace_inlining"] is True
 
     for path in (
         CONFIG, B2D_CONFIG, DOCKERFILE, OVERLAY_SCRIPT, RUNTIME_PROBE_JAVA,
@@ -1163,7 +1206,7 @@ def diagnostic_unit(
         "-Dpolyglot.engine.AllowExperimentalOptions=true",
         "-Dpolyglot.engine.TraceCompilation=true",
         "-Dpolyglot.engine.TraceCompilationDetails=true",
-        "-Dpolyglot.engine.TraceCompilationCallTree=true",
+        "-Dpolyglot.engine.TraceInlining=true",
         "-Dpolyglot.engine.CompilationFailureAction=Print",
         "--enable-native-access=ALL-UNNAMED",
         "-cp", classpath,

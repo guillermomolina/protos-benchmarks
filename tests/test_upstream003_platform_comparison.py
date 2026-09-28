@@ -38,10 +38,11 @@ class Upstream003ContractTest(unittest.TestCase):
         self.assertFalse(cfg["timing_comparison"]["automatic_adoption_classification"])
         self.assertFalse(cfg["historical_evidence_used_as_side_a"])
         self.assertTrue(cfg["diagnostic"]["allow_experimental_options"])
-        self.assertIn(
-            "-Dpolyglot.engine.AllowExperimentalOptions=true",
-            MODULE_PATH.read_text(encoding="utf-8"),
-        )
+        self.assertTrue(cfg["diagnostic"]["trace_inlining"])
+        module_text = MODULE_PATH.read_text(encoding="utf-8")
+        self.assertIn("-Dpolyglot.engine.AllowExperimentalOptions=true", module_text)
+        self.assertIn("-Dpolyglot.engine.TraceInlining=true", module_text)
+        self.assertNotIn("-Dpolyglot.engine.TraceCompilationCallTree=true", module_text)
 
     def test_signed_delta(self):
         self.assertEqual(
@@ -68,6 +69,33 @@ class Upstream003ContractTest(unittest.TestCase):
             "UNAVAILABLE_FROM_TRACE",
             parsed["direct_vs_indirect_call_survival"]["status"],
         )
+
+    def test_trace_parser_accepts_trace_inlining_format(self):
+        trace = (
+            "[engine] inline start root |Recursion Depth 0 |IR Nodes 2704 "
+            "|Frequency 1.00 |Depth 0\n"
+            "[engine] Inlined callee |Recursion Depth 0 |IR Nodes 175 "
+            "|Frequency 2.50 |Depth 1\n"
+            "[engine] Expanded helper |Recursion Depth 0 |IR Nodes 97 "
+            "|Frequency 1.25 |Depth 1\n"
+            "[engine] Cutoff cold |Recursion Depth 0 |IR Nodes 0 "
+            "|Frequency 0.01 |Depth 2\n"
+            "[engine] Indirect dynamic |Recursion Depth 0 |IR Nodes 0 "
+            "|Frequency 0.10 |Depth 1\n"
+        )
+        parsed = upstream003.trace_summary(trace, "micro/closure-call.protos")
+        self.assertEqual("OBSERVED_IN_TRACE", parsed["guest_call_frequency"]["status"])
+        self.assertIn(2.5, parsed["guest_call_frequency"]["values"])
+        self.assertIn(2704, parsed["graph_ir_size"]["values"])
+        self.assertEqual(1, parsed["inlining_decisions"]["state_counts"]["Inlined"])
+        self.assertEqual(1, parsed["inlining_decisions"]["state_counts"]["Expanded"])
+        self.assertEqual(1, parsed["inlining_decisions"]["state_counts"]["Cutoff"])
+        self.assertEqual(1, parsed["inlining_decisions"]["state_counts"]["Indirect"])
+        self.assertEqual(
+            "OBSERVED_IN_TRACE",
+            parsed["direct_vs_indirect_call_survival"]["status"],
+        )
+        self.assertEqual("OBSERVED_IN_TRACE", parsed["recursion_inlining_depth"]["status"])
 
     def test_config_has_four_independent_workload_probes(self):
         cfg = json.loads(

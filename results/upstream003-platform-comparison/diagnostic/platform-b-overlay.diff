@@ -1,0 +1,52 @@
+diff --git a/dist/build_portable.py b/dist/build_portable.py
+index 847767c..04f42a6 100644
+--- a/dist/build_portable.py
++++ b/dist/build_portable.py
+@@ -32,9 +32,9 @@ from release_identity import build_source_metadata
+ DIST_FORMAT = "protos-portable-posix-jvm-v1"
+ SUPPORTED_JAVA_FEATURE = "25"
+ SUPPORTED_JAVA_VERSION = "25.0.4.1"
+-SUPPORTED_GRAALVM_RELEASE = "25.3.4.1"
++SUPPORTED_GRAALVM_RELEASE = "25.4.4.1.1"
+ SUPPORTED_VENDOR_TOKEN = "GraalVM"
+-EXPECTED_TRUFFLE_VERSION = "25.3.4.1"
++EXPECTED_TRUFFLE_VERSION = "25.4.4.1.1"
+ EXPECTED_OPTIMIZING_RUNTIME = "HotSpotTruffleRuntime"
+ 
+ 
+diff --git a/pom.xml b/pom.xml
+index 4875f39..99dbab9 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -23,7 +23,7 @@
+     <properties>
+         <maven.compiler.release>21</maven.compiler.release>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+-        <graalvm.version>25.3.4.1</graalvm.version>
++        <graalvm.version>25.4.4.1.1</graalvm.version>
+         <lsp4j.version>1.0.0</lsp4j.version>
+     </properties>
+ 
+diff --git a/toolchain.json b/toolchain.json
+index 35fc86c..d2529d8 100644
+--- a/toolchain.json
++++ b/toolchain.json
+@@ -5,14 +5,14 @@
+   },
+   "graalvm": {
+     "distribution": "graalvm-community",
+-    "release": "25.3.4.1",
++    "release": "25.4.4.1.1",
+     "jdk_feature": 25,
+     "jdk_version": "25.0.4.1",
+-    "container_channel": "25i3",
+-    "container_image": "ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10-20260825"
++    "container_channel": "25i4",
++    "container_image": "ghcr.io/graalvm/graalvm-community:25i4-ol10"
+   },
+   "graal_components": {
+-    "version": "25.3.4.1"
++    "version": "25.4.4.1.1"
+   },
+   "maven": {
+     "version": "3.9.9"

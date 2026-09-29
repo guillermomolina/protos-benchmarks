@@ -43,6 +43,22 @@ class Dist006dContractTest(unittest.TestCase):
         cfg = dist006d.validate()
         self.assertEqual("DIST006-D1", cfg["slice"])
         self.assertIsNone(cfg["protos"]["revision"])
+        self.assertEqual(
+            "protos-toolchain-v2",
+            cfg["toolchain"]["schema"],
+        )
+        self.assertEqual(
+            "3.9.9",
+            cfg["toolchain"]["maven"]["minimum_version"],
+        )
+        self.assertEqual(
+            3,
+            cfg["toolchain"]["maven"]["supported_major"],
+        )
+        self.assertNotIn(
+            "version",
+            cfg["toolchain"]["maven"],
+        )
         self.assertEqual(10000, cfg["operation_count"])
         self.assertEqual(120, cfg["warmup_iterations"])
         self.assertEqual(100, cfg["steady_iterations"])
@@ -95,10 +111,69 @@ class Dist006dContractTest(unittest.TestCase):
             )
         )
 
-    def test_wrong_maven_version_fails_closed(self):
+    def test_wrong_maven_minimum_fails_closed(self):
         self.assert_config_rejected(
-            lambda cfg: cfg["toolchain"]["maven"].__setitem__("version", "3.9.8")
+            lambda cfg: cfg["toolchain"]["maven"].__setitem__(
+                "minimum_version",
+                "3.9.8",
+            )
         )
+
+    def test_wrong_maven_supported_major_fails_closed(self):
+        self.assert_config_rejected(
+            lambda cfg: cfg["toolchain"]["maven"].__setitem__(
+                "supported_major",
+                4,
+            )
+        )
+
+    def test_maven_identity_parser_tolerates_preamble_and_ansi(self):
+        identity = (
+            "WARNING: distribution message\n"
+            "\x1b[0mApache Maven 3.9.10 (Vendor build)\x1b[0m\n"
+            "Maven home: /usr/share/maven\n"
+            "Java version: 25.0.4.1.1\n"
+        )
+
+        self.assertEqual(
+            "3.9.10",
+            dist006d.extract_maven_runtime_version(identity),
+        )
+
+        with self.assertRaises(RuntimeError):
+            dist006d.extract_maven_runtime_version(
+                "WARNING only\nJava version: 25.0.4.1.1\n"
+            )
+
+        with self.assertRaises(RuntimeError):
+            dist006d.extract_maven_runtime_version(
+                "Apache Maven 3.9.9-RC1\n"
+            )
+
+    def test_actual_maven_runtime_uses_compatibility_range(self):
+        for value in (
+            "3.9.9",
+            "3.9.10",
+            "3.10.0",
+            "3.99.1",
+        ):
+            with self.subTest(value=value):
+                self.assertEqual(
+                    value,
+                    dist006d.validate_maven_runtime_version(value),
+                )
+
+        for value in (
+            "3.9.8",
+            "4.0.0",
+            "3.9.9-RC1",
+            "3.9",
+            "latest",
+            "03.9.9",
+        ):
+            with self.subTest(value=value):
+                with self.assertRaises(RuntimeError):
+                    dist006d.validate_maven_runtime_version(value)
 
     def test_floating_runtime_fails_closed(self):
         self.assert_config_rejected(
@@ -108,10 +183,16 @@ class Dist006dContractTest(unittest.TestCase):
         )
 
     def test_build_stage_toolchain_selection_fails_closed(self):
-        docker_text = (ROOT / "docker/protos-dist006d/Dockerfile").read_text(
-            encoding="utf-8"
-        )
+        docker_text = (
+            ROOT / "docker/protos-dist006d/Dockerfile"
+        ).read_text(encoding="utf-8")
+
         required_markers = (
+            "ARG MAVEN_MINIMUM_VERSION=3.9.9",
+            "ARG MAVEN_SUPPORTED_MAJOR=3",
+            "--enablerepo=ol10_codeready_builder",
+            "    maven \\",
+            "    maven-unbound \\",
             'ENV PATH="${JAVA_HOME}/bin:${PATH}"',
             'test "$(command -v java)" = "$JAVA_HOME/bin/java"',
             'test "$(command -v javac)" = "$JAVA_HOME/bin/javac"',
@@ -119,25 +200,64 @@ class Dist006dContractTest(unittest.TestCase):
             'grep -Fq "java.vm.vendor = GraalVM Community"',
             'JAVAC_FEATURE="${EXPECTED_JDK_VERSION%%.*}"',
             'grep -Eq "^javac ${JAVAC_FEATURE}([.]|$)"',
-            'grep -Fq "Apache Maven ${EXPECTED_MAVEN_VERSION} "',
+            "if actual < minimum:",
+            "if actual[0] != supported_major:",
             'grep -Fq "Java version: ${EXPECTED_JDK_VERSION}"',
             'grep -Fq "vendor: GraalVM Community"',
             'grep -Fq "runtime: ${JAVA_HOME}"',
+            '&& test -z "$(rpm -qa \'java-*-openjdk*\')"',
+            "printf 'MAVEN_UNBOUND_RPM=%s\\n'",
+            "printf 'REDUNDANT_OPENJDK_RPM=NO\\n'",
+            '"schema": "protos-toolchain-v2"',
+            '"minimum_version": "3.9.9"',
+            '"supported_major": 3',
             '"$JAVA_HOME/bin/javac" -cp',
-            "printf 'JAVA_COMMAND=%s\\n' \"$(command -v java)\"",
-            "printf 'JAVAC_COMMAND=%s\\n' \"$(command -v javac)\"",
+            (
+                "printf 'JAVA_COMMAND=%s\\n' "
+                '"$(command -v java)"'
+            ),
+            (
+                "printf 'JAVAC_COMMAND=%s\\n' "
+                '"$(command -v javac)"'
+            ),
         )
 
         dist006d.validate_dockerfile_contract(docker_text)
 
+        self.assertEqual(
+            1,
+            docker_text.count(
+                "--enablerepo=ol10_codeready_builder"
+            ),
+        )
+
+        self.assertNotIn(
+            "EXPECTED_MAVEN_VERSION",
+            docker_text,
+        )
+
         for marker in required_markers:
             with self.subTest(marker=marker):
-                mutated = docker_text.replace(marker, "DIST006D_D2_MARKER_REMOVED", 1)
-                self.assertNotEqual(docker_text, mutated)
+                mutated = docker_text.replace(
+                    marker,
+                    "DIST008_B2_MARKER_REMOVED",
+                    1,
+                )
+
+                self.assertNotEqual(
+                    docker_text,
+                    mutated,
+                )
+
                 with self.assertRaisesRegex(
-                    RuntimeError, "Dockerfile structural contract missing"
+                    RuntimeError,
+                    "Dockerfile structural contract"
+                    "|Maven provisioning"
+                    "|CodeReady Builder",
                 ):
-                    dist006d.validate_dockerfile_contract(mutated)
+                    dist006d.validate_dockerfile_contract(
+                        mutated
+                    )
 
     def test_incomplete_workload_set_fails_closed(self):
         self.assert_config_rejected(lambda cfg: cfg["workloads"].pop())

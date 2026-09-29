@@ -23,7 +23,7 @@ from runner.toolchain import read_toolchain, validate_toolchain_payload
 
 def valid_payload() -> dict:
     return {
-        "schema": "protos-toolchain-v1",
+        "schema": "protos-toolchain-v2",
         "java": {
             "bytecode_release": 21,
         },
@@ -41,7 +41,8 @@ def valid_payload() -> dict:
             "version": "25.3.4.1",
         },
         "maven": {
-            "version": "3.9.9",
+            "minimum_version": "3.9.9",
+            "supported_major": 3,
         },
         "policy": {
             "floating_primary_runtime": False,
@@ -53,23 +54,49 @@ class ToolchainTest(unittest.TestCase):
     def test_valid_payload_resolves_canonical_identity(self) -> None:
         observed = validate_toolchain_payload(valid_payload())
 
-        self.assertEqual("protos-toolchain-v1", observed["schema"])
+        self.assertEqual(
+            "protos-toolchain-v2",
+            observed["schema"],
+        )
         self.assertEqual(21, observed["bytecode_release"])
-        self.assertEqual("3.9.9", observed["maven_version"])
-        self.assertEqual("25.3.4.1", observed["graalvm_release"])
+        self.assertEqual(
+            "3.9.9",
+            observed["maven_minimum_version"],
+        )
+        self.assertEqual(
+            3,
+            observed["maven_supported_major"],
+        )
+        self.assertNotIn("maven_version", observed)
+        self.assertEqual(
+            "25.3.4.1",
+            observed["graalvm_release"],
+        )
         self.assertEqual(25, observed["jdk_feature"])
-        self.assertEqual("25.0.4.1", observed["jdk_version"])
-        self.assertEqual("25.3.4.1", observed["graal_components_version"])
-        self.assertEqual("25i3", observed["container_channel"])
+        self.assertEqual(
+            "25.0.4.1",
+            observed["jdk_version"],
+        )
+        self.assertEqual(
+            "25.3.4.1",
+            observed["graal_components_version"],
+        )
+        self.assertEqual(
+            "25i3",
+            observed["container_channel"],
+        )
         self.assertEqual(
             "ghcr.io/graalvm/graalvm-community:"
             "25i3-25.0.4.1-ol10-20260825",
             observed["container_image"],
         )
 
-    def test_read_toolchain_reads_measured_source_contract(self) -> None:
+    def test_read_toolchain_reads_measured_source_contract(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory)
+
             (source / "toolchain.json").write_text(
                 json.dumps(valid_payload()),
                 encoding="utf-8",
@@ -77,8 +104,22 @@ class ToolchainTest(unittest.TestCase):
 
             observed = read_toolchain(source)
 
-        self.assertEqual("25.3.4.1", observed["graalvm_release"])
-        self.assertEqual("25.0.4.1", observed["jdk_version"])
+        self.assertEqual(
+            "25.3.4.1",
+            observed["graalvm_release"],
+        )
+        self.assertEqual(
+            "25.0.4.1",
+            observed["jdk_version"],
+        )
+        self.assertEqual(
+            "3.9.9",
+            observed["maven_minimum_version"],
+        )
+        self.assertEqual(
+            3,
+            observed["maven_supported_major"],
+        )
 
     def test_floating_runtime_is_rejected(self) -> None:
         payload = valid_payload()
@@ -87,8 +128,57 @@ class ToolchainTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             validate_toolchain_payload(payload)
 
+    def test_malformed_maven_minimum_is_rejected(self) -> None:
+        for value in (
+            "latest",
+            "3.9",
+            "3.9.9-RC1",
+            "03.9.9",
+        ):
+            payload = valid_payload()
+            payload["maven"]["minimum_version"] = value
 
-    def test_invalid_toolchain_contracts_are_rejected(self) -> None:
+            with self.subTest(value=value):
+                with self.assertRaises(RuntimeError):
+                    validate_toolchain_payload(payload)
+
+    def test_maven_minimum_major_mismatch_is_rejected(
+        self,
+    ) -> None:
+        payload = valid_payload()
+        payload["maven"]["minimum_version"] = "4.0.0"
+
+        with self.assertRaises(RuntimeError):
+            validate_toolchain_payload(payload)
+
+    def test_unsupported_maven_major_is_rejected(self) -> None:
+        payload = valid_payload()
+        payload["maven"]["minimum_version"] = "4.0.0"
+        payload["maven"]["supported_major"] = 4
+
+        with self.assertRaises(RuntimeError):
+            validate_toolchain_payload(payload)
+
+    def test_legacy_v1_exact_maven_contract_is_rejected(
+        self,
+    ) -> None:
+        payload = valid_payload()
+        payload["schema"] = "protos-toolchain-v1"
+        payload["maven"] = {"version": "3.9.9"}
+
+        with self.assertRaises(RuntimeError):
+            validate_toolchain_payload(payload)
+
+    def test_exact_maven_field_is_rejected_in_v2(self) -> None:
+        payload = valid_payload()
+        payload["maven"]["version"] = "3.9.9"
+
+        with self.assertRaises(RuntimeError):
+            validate_toolchain_payload(payload)
+
+    def test_invalid_toolchain_contracts_are_rejected(
+        self,
+    ) -> None:
         cases = []
 
         payload = valid_payload()
@@ -98,10 +188,6 @@ class ToolchainTest(unittest.TestCase):
         payload = valid_payload()
         payload["java"]["bytecode_release"] = 20
         cases.append(("bytecode release", payload))
-
-        payload = valid_payload()
-        payload["maven"]["version"] = "latest"
-        cases.append(("Maven version", payload))
 
         payload = valid_payload()
         payload["graalvm"]["jdk_version"] = ""

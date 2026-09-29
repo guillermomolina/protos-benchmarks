@@ -21,16 +21,25 @@ ARG PROTOS_REPOSITORY=https://github.com/guillermomolina/protos.git
 ARG PROTOS_REVISION
 ARG EXPECTED_GRAALVM_RELEASE=25.4.4.1.1
 ARG EXPECTED_JDK_VERSION=25.0.4.1.1
-ARG EXPECTED_MAVEN_VERSION=3.9.9
+ARG MAVEN_MINIMUM_VERSION=3.9.9
+ARG MAVEN_SUPPORTED_MAJOR=3
 
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 COPY docker/protos-dist006d/Dist006dRuntimeProbe.java /tmp/Dist006dRuntimeProbe.java
 COPY docker/protos-dist006d/Dist006dDriver.java /tmp/Dist006dDriver.java
 
-RUN microdnf install -y git gzip tar findutils ca-certificates python3 unzip maven \
+RUN microdnf install -y git gzip tar findutils ca-certificates python3 unzip \
+    && microdnf clean all
+
+RUN microdnf install -y \
+    --enablerepo=ol10_codeready_builder \
+    maven \
+    maven-unbound \
     && microdnf clean all \
-    && test -x "$JAVA_HOME/bin/java" \
+    && test -z "$(rpm -qa 'java-*-openjdk*')"
+
+RUN test -x "$JAVA_HOME/bin/java" \
     && test -x "$JAVA_HOME/bin/javac" \
     && test "$(command -v java)" = "$JAVA_HOME/bin/java" \
     && test "$(command -v javac)" = "$JAVA_HOME/bin/javac" \
@@ -40,10 +49,92 @@ RUN microdnf install -y git gzip tar findutils ca-certificates python3 unzip mav
     && JAVAC_FEATURE="${EXPECTED_JDK_VERSION%%.*}" \
     && javac -version 2>&1 | grep -Eq "^javac ${JAVAC_FEATURE}([.]|$)" \
     && MAVEN_IDENTITY="$(mvn -version 2>&1)" \
-    && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "Apache Maven ${EXPECTED_MAVEN_VERSION} " \
     && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "Java version: ${EXPECTED_JDK_VERSION}" \
     && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "vendor: GraalVM Community" \
-    && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "runtime: ${JAVA_HOME}"
+    && printf '%s\n' "$MAVEN_IDENTITY" | grep -Fq "runtime: ${JAVA_HOME}" \
+    && python3 - "$MAVEN_MINIMUM_VERSION" "$MAVEN_SUPPORTED_MAJOR" <<'PY_MAVEN'
+import re
+import subprocess
+import sys
+
+stable = re.compile(
+    r"(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)"
+)
+
+minimum_text = sys.argv[1]
+supported_major = int(sys.argv[2])
+
+minimum_match = stable.fullmatch(minimum_text)
+
+if minimum_match is None:
+    raise SystemExit(
+        "invalid Maven minimum_version contract"
+    )
+
+minimum = tuple(
+    int(part)
+    for part in minimum_match.groups()
+)
+
+if minimum[0] != supported_major:
+    raise SystemExit(
+        "Maven minimum_version major does not "
+        "match supported_major"
+    )
+
+identity = subprocess.run(
+    ["mvn", "-version"],
+    text=True,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    check=True,
+).stdout
+
+clean_identity = re.sub(
+    r"\x1b\[[0-?]*[ -/]*[@-~]",
+    "",
+    identity,
+)
+
+match = re.search(
+    r"Apache Maven ([^\s]+)",
+    clean_identity,
+)
+
+if match is None:
+    raise SystemExit(
+        "cannot parse Maven runtime identity"
+    )
+
+actual_text = match.group(1)
+actual_match = stable.fullmatch(actual_text)
+
+if actual_match is None:
+    raise SystemExit(
+        "Maven runtime is not a stable x.y.z release: "
+        + actual_text
+    )
+
+actual = tuple(
+    int(part)
+    for part in actual_match.groups()
+)
+
+if actual[0] != supported_major:
+    raise SystemExit(
+        f"unsupported Maven major: expected "
+        f"{supported_major}, observed {actual[0]}"
+    )
+
+if actual < minimum:
+    raise SystemExit(
+        f"Maven runtime below minimum: "
+        f"expected >= {minimum_text}, "
+        f"observed {actual_text}"
+    )
+
+print("DIST006D_MAVEN_COMPATIBILITY=PASS")
+PY_MAVEN
 
 RUN PROTOS_REVISION="$PROTOS_REVISION" python3 - <<'PY'
 import os
@@ -68,7 +159,7 @@ import json
 from pathlib import Path
 
 expected = {
-    "schema": "protos-toolchain-v1",
+    "schema": "protos-toolchain-v2",
     "java": {"bytecode_release": 21},
     "graalvm": {
         "distribution": "graalvm-community",
@@ -82,7 +173,10 @@ expected = {
         ),
     },
     "graal_components": {"version": "25.4.4.1.1"},
-    "maven": {"version": "3.9.9"},
+    "maven": {
+        "minimum_version": "3.9.9",
+        "supported_major": 3,
+    },
     "policy": {
         "primary_runtime_alignment": "development-ci-distribution",
         "upgrade_mode": "explicit-validated-change",
@@ -121,6 +215,8 @@ RUN cd /src \
          printf 'JAVA_HOME=%s\n' "$JAVA_HOME"; \
          printf 'JAVA_COMMAND=%s\n' "$(command -v java)"; \
          printf 'JAVAC_COMMAND=%s\n' "$(command -v javac)"; \
+         printf 'MAVEN_UNBOUND_RPM=%s\n' "$(rpm -q maven-unbound)"; \
+         test -z "$(rpm -qa 'java-*-openjdk*')" && printf 'REDUNDANT_OPENJDK_RPM=NO\n'; \
          java -version; \
          java -XshowSettings:properties -version; \
          javac -version; \

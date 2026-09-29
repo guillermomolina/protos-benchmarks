@@ -41,7 +41,8 @@ EXPECTED_RUNTIME = "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
 EXPECTED_ENGINE_VERSION = "25.4.4.1.1"
 EXPECTED_JDK_VERSION = "25.0.4.1.1"
 EXPECTED_JVMCI = "25.4-b23"
-EXPECTED_MAVEN_VERSION = "3.9.9"
+MAVEN_MINIMUM_VERSION = "3.9.9"
+MAVEN_SUPPORTED_MAJOR = 3
 EXPECTED_CONTAINER_IMAGE = (
     "ghcr.io/graalvm/graalvm-community:25i4-25.0.4.1.1-ol10@"
     "sha256:a7b4810d7c755e9627feaa1459eb5a93338643b16d745d4f3fc86db71e5da7f5"
@@ -59,7 +60,7 @@ EXPECTED_WORKLOAD_ROLES = {
     "runtime/monomorphic-dispatch": "selected-send/direct-call baseline",
 }
 CANONICAL_TOOLCHAIN_JSON: dict[str, Any] = {
-    "schema": "protos-toolchain-v1",
+    "schema": "protos-toolchain-v2",
     "java": {"bytecode_release": 21},
     "graalvm": {
         "distribution": "graalvm-community",
@@ -70,7 +71,10 @@ CANONICAL_TOOLCHAIN_JSON: dict[str, Any] = {
         "container_image": EXPECTED_CONTAINER_IMAGE,
     },
     "graal_components": {"version": EXPECTED_ENGINE_VERSION},
-    "maven": {"version": EXPECTED_MAVEN_VERSION},
+    "maven": {
+        "minimum_version": MAVEN_MINIMUM_VERSION,
+        "supported_major": MAVEN_SUPPORTED_MAJOR,
+    },
     "policy": {
         "primary_runtime_alignment": "development-ci-distribution",
         "upgrade_mode": "explicit-validated-change",
@@ -117,6 +121,73 @@ def sha256(path: Path) -> str:
 def require_exact_sha(value: str | None, label: str) -> str:
     if value is None or re.fullmatch(r"[0-9a-f]{40}", value) is None:
         raise RuntimeError(f"{label} must be exactly 40 lowercase hexadecimal characters")
+    return value
+
+
+STABLE_MAVEN_VERSION_RE = re.compile(
+    r"(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)"
+)
+
+
+def parse_stable_maven_version(
+    value: str,
+) -> tuple[int, int, int]:
+    match = STABLE_MAVEN_VERSION_RE.fullmatch(value)
+
+    if match is None:
+        raise RuntimeError(
+            f"Maven version is not a stable x.y.z coordinate: {value!r}"
+        )
+
+    return tuple(int(part) for part in match.groups())
+
+
+ANSI_ESCAPE_RE = re.compile(
+    r"\x1b\[[0-?]*[ -/]*[@-~]"
+)
+
+
+def extract_maven_runtime_version(identity: str) -> str:
+    clean_identity = ANSI_ESCAPE_RE.sub("", identity)
+
+    match = re.search(
+        r"Apache Maven ([^\s]+)",
+        clean_identity,
+    )
+
+    if match is None:
+        raise RuntimeError("Maven identity missing")
+
+    return validate_maven_runtime_version(
+        match.group(1)
+    )
+
+
+def validate_maven_runtime_version(value: str) -> str:
+    actual = parse_stable_maven_version(value)
+    minimum = parse_stable_maven_version(
+        MAVEN_MINIMUM_VERSION
+    )
+
+    if actual[0] != MAVEN_SUPPORTED_MAJOR:
+        raise RuntimeError(
+            "unsupported Maven major: "
+            f"expected {MAVEN_SUPPORTED_MAJOR}, "
+            f"observed {actual[0]}"
+        )
+
+    if minimum[0] != MAVEN_SUPPORTED_MAJOR:
+        raise RuntimeError(
+            "invalid internal Maven minimum/supported-major contract"
+        )
+
+    if actual < minimum:
+        raise RuntimeError(
+            "Maven version below minimum: "
+            f"expected >= {MAVEN_MINIMUM_VERSION}, "
+            f"observed {value}"
+        )
+
     return value
 
 
@@ -223,15 +294,40 @@ def validate_config_payload(cfg: dict[str, Any]) -> dict[str, Any]:
 
 def validate_dockerfile_contract(docker_text: str) -> None:
     required_markers = {
-        "canonical GraalVM base": "ARG GRAAL_BASE=" + EXPECTED_CONTAINER_IMAGE,
-        "OL10 Maven package": (
-            "microdnf install -y git gzip tar findutils ca-certificates python3 unzip maven"
+        "canonical GraalVM base": (
+            "ARG GRAAL_BASE=" + EXPECTED_CONTAINER_IMAGE
         ),
-        "JAVA_HOME-first PATH": 'ENV PATH="${JAVA_HOME}/bin:${PATH}"',
-        "JAVA_HOME Java executable": 'test -x "$JAVA_HOME/bin/java"',
-        "JAVA_HOME Javac executable": 'test -x "$JAVA_HOME/bin/javac"',
-        "bare Java selection": 'test "$(command -v java)" = "$JAVA_HOME/bin/java"',
-        "bare Javac selection": 'test "$(command -v javac)" = "$JAVA_HOME/bin/javac"',
+        "ordinary OL10 packages": (
+            "microdnf install -y git gzip tar findutils "
+            "ca-certificates python3 unzip"
+        ),
+        "Maven minimum build arg": (
+            "ARG MAVEN_MINIMUM_VERSION="
+            + MAVEN_MINIMUM_VERSION
+        ),
+        "Maven supported-major build arg": (
+            "ARG MAVEN_SUPPORTED_MAJOR="
+            + str(MAVEN_SUPPORTED_MAJOR)
+        ),
+        "CodeReady Builder Maven repository": (
+            "--enablerepo=ol10_codeready_builder"
+        ),
+        "maven-unbound package": "maven-unbound",
+        "JAVA_HOME-first PATH": (
+            'ENV PATH="${JAVA_HOME}/bin:${PATH}"'
+        ),
+        "JAVA_HOME Java executable": (
+            'test -x "$JAVA_HOME/bin/java"'
+        ),
+        "JAVA_HOME Javac executable": (
+            'test -x "$JAVA_HOME/bin/javac"'
+        ),
+        "bare Java selection": (
+            'test "$(command -v java)" = "$JAVA_HOME/bin/java"'
+        ),
+        "bare Javac selection": (
+            'test "$(command -v javac)" = "$JAVA_HOME/bin/javac"'
+        ),
         "Java version assertion": (
             'grep -Fq "java.version = ${EXPECTED_JDK_VERSION}"'
         ),
@@ -244,8 +340,11 @@ def validate_dockerfile_contract(docker_text: str) -> None:
         "Javac version assertion": (
             'grep -Eq "^javac ${JAVAC_FEATURE}([.]|$)"'
         ),
-        "Maven version assertion": (
-            'grep -Fq "Apache Maven ${EXPECTED_MAVEN_VERSION} "'
+        "range minimum assertion": (
+            "if actual < minimum:"
+        ),
+        "range major assertion": (
+            "if actual[0] != supported_major:"
         ),
         "Maven Java version assertion": (
             'grep -Fq "Java version: ${EXPECTED_JDK_VERSION}"'
@@ -256,28 +355,119 @@ def validate_dockerfile_contract(docker_text: str) -> None:
         "Maven JAVA_HOME runtime assertion": (
             'grep -Fq "runtime: ${JAVA_HOME}"'
         ),
+        "redundant OpenJDK rejection": (
+            '&& test -z "$(rpm -qa \'java-*-openjdk*\')"'
+        ),
+        "maven-unbound identity evidence": (
+            "MAVEN_UNBOUND_RPM=%s"
+        ),
+        "redundant OpenJDK identity evidence": (
+            "REDUNDANT_OPENJDK_RPM=NO"
+        ),
         "explicit GraalVM Javac compilation": (
             '"$JAVA_HOME/bin/javac" -cp'
         ),
         "build Java command identity": (
-            "printf 'JAVA_COMMAND=%s\\n' \"$(command -v java)\""
+            "printf 'JAVA_COMMAND=%s\\n' "
+            '"$(command -v java)"'
         ),
         "build Javac command identity": (
-            "printf 'JAVAC_COMMAND=%s\\n' \"$(command -v javac)\""
+            "printf 'JAVAC_COMMAND=%s\\n' "
+            '"$(command -v javac)"'
         ),
-        "portable distribution build": "python3 dist/build_portable.py",
-        "source toolchain gate": "DIST006D_SOURCE_TOOLCHAIN_CONTRACT=PASS",
+        "portable distribution build": (
+            "python3 dist/build_portable.py"
+        ),
+        "source toolchain gate": (
+            "DIST006D_SOURCE_TOOLCHAIN_CONTRACT=PASS"
+        ),
+        "source current schema": (
+            '"schema": "protos-toolchain-v2"'
+        ),
+        "source Maven minimum": (
+            '"minimum_version": "3.9.9"'
+        ),
+        "source Maven supported major": (
+            '"supported_major": 3'
+        ),
         "benchmark corpus": "/opt/dist006d/corpus",
         "runtime classpath": "$BUNDLE/lib/runtime/*",
         "reference-only evidence label": (
-            'LABEL org.protos-benchmarks.dist006d.retained-evidence="reference-only"'
+            'LABEL org.protos-benchmarks.dist006d.'
+            'retained-evidence="reference-only"'
         ),
     }
+
     for label, marker in required_markers.items():
         if marker not in docker_text:
             raise RuntimeError(
-                f"Dockerfile structural contract missing {label}: {marker}"
+                "Dockerfile structural contract missing "
+                f"{label}: {marker}"
             )
+
+    if (
+        docker_text.count(
+            "--enablerepo=ol10_codeready_builder"
+        )
+        != 1
+    ):
+        raise RuntimeError(
+            "CodeReady Builder must be scoped to exactly "
+            "one Maven transaction"
+        )
+
+    repo_position = docker_text.index(
+        "--enablerepo=ol10_codeready_builder"
+    )
+
+    transaction_start = docker_text.rfind(
+        "RUN microdnf install -y",
+        0,
+        repo_position,
+    )
+
+    transaction_end = docker_text.find(
+        "microdnf clean all",
+        repo_position,
+    )
+
+    if transaction_start < 0 or transaction_end < 0:
+        raise RuntimeError(
+            "cannot identify scoped Maven provisioning transaction"
+        )
+
+    maven_transaction = docker_text[
+        transaction_start:transaction_end
+    ]
+
+    for marker in (
+        "--enablerepo=ol10_codeready_builder",
+        "\n    maven \\",
+        "\n    maven-unbound \\",
+    ):
+        if marker not in maven_transaction:
+            raise RuntimeError(
+                "incomplete scoped Maven provisioning "
+                "transaction: "
+                + marker
+            )
+
+    ordinary_position = docker_text.index(
+        "microdnf install -y git gzip tar findutils "
+        "ca-certificates python3 unzip"
+    )
+
+    if ordinary_position >= transaction_start:
+        raise RuntimeError(
+            "ordinary OS packages must be provisioned "
+            "separately from Maven"
+        )
+
+    if "EXPECTED_MAVEN_VERSION" in docker_text:
+        raise RuntimeError(
+            "exact Maven patch assertion is forbidden "
+            "by DIST008-B2"
+        )
 
     for forbidden in (
         "ubuntu",
@@ -287,7 +477,8 @@ def validate_dockerfile_contract(docker_text: str) -> None:
     ):
         if forbidden.lower() in docker_text.lower():
             raise RuntimeError(
-                "forbidden DIST006-D Docker authority: " + forbidden
+                "forbidden DIST006-D Docker authority: "
+                + forbidden
             )
 
 
@@ -441,7 +632,9 @@ def build_image(cfg: dict[str, Any], protos_revision: str) -> tuple[str, dict[st
             "--build-arg",
             "EXPECTED_JDK_VERSION=" + EXPECTED_JDK_VERSION,
             "--build-arg",
-            "EXPECTED_MAVEN_VERSION=" + EXPECTED_MAVEN_VERSION,
+            "MAVEN_MINIMUM_VERSION=" + MAVEN_MINIMUM_VERSION,
+            "--build-arg",
+            "MAVEN_SUPPORTED_MAJOR=" + str(MAVEN_SUPPORTED_MAJOR),
             "--label",
             "org.opencontainers.image.revision=" + revision,
             "-t",
@@ -526,14 +719,30 @@ def build_and_probe(cfg: dict[str, Any], protos_revision: str, cpu: str) -> dict
     ) is None:
         raise RuntimeError("build-stage Javac version mismatch")
 
-    if f"Apache Maven {EXPECTED_MAVEN_VERSION}" not in build_identity:
-        raise RuntimeError("Maven identity mismatch")
+    extract_maven_runtime_version(
+        build_identity
+    )
+
+    if "MAVEN_UNBOUND_RPM=maven-unbound-" not in build_identity:
+        raise RuntimeError(
+            "maven-unbound provisioning identity missing"
+        )
+
+    if "REDUNDANT_OPENJDK_RPM=NO" not in build_identity:
+        raise RuntimeError(
+            "redundant OpenJDK RPM rejection evidence missing"
+        )
+
     if f"Java version: {EXPECTED_JDK_VERSION}" not in build_identity:
         raise RuntimeError("Maven Java version mismatch")
+
     if "vendor: GraalVM Community" not in build_identity:
         raise RuntimeError("Maven Java vendor mismatch")
+
     if f"runtime: {java_home}" not in build_identity:
-        raise RuntimeError("Maven runtime does not match build-stage JAVA_HOME")
+        raise RuntimeError(
+            "Maven runtime does not match build-stage JAVA_HOME"
+        )
 
     runtime_components = image_json(tag, cpu, "/opt/dist006d/identity/runtime-components.json")
     if EXPECTED_ENGINE_VERSION not in json.dumps(runtime_components, sort_keys=True):

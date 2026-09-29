@@ -24,7 +24,7 @@ import shutil
 import subprocess
 from typing import Any
 
-from runner.toolchain import read_toolchain
+from runner.toolchain import read_historical_toolchain_v1
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,7 +96,7 @@ def materialized_source_identity(
     return {
         "protos_repository": repository,
         "protos_revision": revision,
-        "toolchain": read_toolchain(source),
+        "toolchain": read_historical_toolchain_v1(source),
     }
 
 
@@ -202,7 +202,7 @@ def build_inventory(source: Path, config: dict[str, Any]) -> dict[str, Any]:
     inventory = {
         "protos_repository": config["protos_repository"],
         "protos_revision": config["protos_revision"],
-        "toolchain": read_toolchain(source),
+        "toolchain": read_historical_toolchain_v1(source),
         "makefile": makefile,
         "test_tool": {
             "phase_names": phase_names,

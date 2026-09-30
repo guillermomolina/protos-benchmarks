@@ -415,3 +415,19 @@ perf016-post-step3-smoke:
 perf016-post-step3-reference:
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf016-post-step3-reference HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA>" >&2; exit 2; }
 	python3 runner/perf016_post_step3.py reference --harness-revision "$(HARNESS_REVISION)"
+
+.PHONY: perf010a-hot-root-validate perf010a-hot-root-smoke perf010a-hot-root-diagnostic
+
+# PERF010-A / guillermomolina/protos#691 current-25.4 hot-root lifecycle and compiled-shape
+# discriminator harness. The exact Protos revision and version are pinned in
+# config/perf010a-hot-root-lifecycle.json, so the only run-time input is the exact published harness
+# SHA of the retained diagnostic run. This is not PERF020: no control/intervention pair, no timing.
+perf010a-hot-root-validate:
+	python3 runner/perf010a_hot_root.py validate
+
+perf010a-hot-root-smoke:
+	python3 runner/perf010a_hot_root.py smoke
+
+perf010a-hot-root-diagnostic:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-hot-root-diagnostic HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA>" >&2; exit 2; }
+	python3 runner/perf010a_hot_root.py diagnostic --harness-revision "$(HARNESS_REVISION)"

@@ -191,14 +191,41 @@ def validate_maven_runtime_version(value: str) -> str:
     return value
 
 
-def validate_toolchain_contract(payload: dict[str, Any]) -> dict[str, Any]:
-    if payload != CANONICAL_TOOLCHAIN_JSON:
+def _validate_expected_subset(
+    expected: Any,
+    observed: Any,
+    path: str = "toolchain",
+) -> None:
+    """Require the DIST006-D-owned contract while allowing additive metadata."""
+    if isinstance(expected, dict):
+        if not isinstance(observed, dict):
+            raise RuntimeError(
+                f"canonical DIST006-D toolchain mismatch at {path}: "
+                f"expected object, observed={observed!r}"
+            )
+        for key, expected_value in expected.items():
+            child_path = f"{path}.{key}"
+            if key not in observed:
+                raise RuntimeError(
+                    f"canonical DIST006-D toolchain mismatch at {child_path}: "
+                    "required field is missing"
+                )
+            _validate_expected_subset(
+                expected_value,
+                observed[key],
+                child_path,
+            )
+        return
+
+    if observed != expected:
         raise RuntimeError(
-            "canonical DIST006-D toolchain mismatch: expected="
-            + json.dumps(CANONICAL_TOOLCHAIN_JSON, sort_keys=True)
-            + " observed="
-            + json.dumps(payload, sort_keys=True)
+            f"canonical DIST006-D toolchain mismatch at {path}: "
+            f"expected={expected!r} observed={observed!r}"
         )
+
+
+def validate_toolchain_contract(payload: dict[str, Any]) -> dict[str, Any]:
+    _validate_expected_subset(CANONICAL_TOOLCHAIN_JSON, payload)
     return payload
 
 
@@ -390,6 +417,9 @@ def validate_dockerfile_contract(docker_text: str) -> None:
         "source Maven supported major": (
             '"supported_major": 3'
         ),
+        "source additive metadata tolerance": (
+            "require_expected_subset(expected, actual)"
+        ),
         "benchmark corpus": "/opt/dist006d/corpus",
         "runtime classpath": "$BUNDLE/lib/runtime/*",
         "reference-only evidence label": (
@@ -404,6 +434,12 @@ def validate_dockerfile_contract(docker_text: str) -> None:
                 "Dockerfile structural contract missing "
                 f"{label}: {marker}"
             )
+
+    if "if actual != expected:" in docker_text:
+        raise RuntimeError(
+            "source toolchain gate must validate its owned subset "
+            "instead of rejecting additive metadata"
+        )
 
     if (
         docker_text.count(

@@ -1,0 +1,547 @@
+{
+  "schema_version": 1,
+  "work_item": "PERF010-A",
+  "issue": "guillermomolina/protos#691",
+  "parent_work_item": "PERF010",
+  "parent_issue": "guillermomolina/protos#680",
+  "slice": "CURRENT_25_4_HOT_ROOT_LIFECYCLE_AND_COMPILED_SHAPE_HARNESS",
+  "type": "IMPLEMENTATION",
+  "phase": "current-25-4-hot-root-lifecycle-compiled-shape-discriminator-harness",
+  "evidence_kind": "compiler_lifecycle_and_compiled_shape_diagnostic",
+  "timing_evidence": false,
+  "authority": {
+    "durable_project_record": {
+      "repository": "guillermomolina/protos-project-docs",
+      "path": "docs/project/evidence/PERF010-A/PERF010-A_CURRENT_25_4_HOT_ROOT_LIFECYCLE_COMPILED_SHAPE_DISCRIMINATOR.md",
+      "revision": "52c508001c5f8fa60b475d5cd53f074b5436c259",
+      "index_revision": "243cefe273f41b5d53f2819afd27e962756a2963"
+    },
+    "supplied_input_not_re_derived_by_harness": true
+  },
+  "protos": {
+    "repository": "https://github.com/guillermomolina/protos.git",
+    "revision": "b72778ca446b602f33af5027a0ed28ab788b39ce",
+    "version": "0.3.119-SNAPSHOT",
+    "floating_branch_forbidden": true,
+    "product_patch": false
+  },
+  "toolchain": {
+    "schema": "protos-toolchain-v2",
+    "java": {
+      "bytecode_release": 21
+    },
+    "graalvm": {
+      "distribution": "graalvm-community",
+      "release": "25.4.4.1.1",
+      "jdk_feature": 25,
+      "jdk_version": "25.0.4.1.1",
+      "container_channel": "25i4",
+      "container_image": "ghcr.io/graalvm/graalvm-community:25i4-25.0.4.1.1-ol10@sha256:a7b4810d7c755e9627feaa1459eb5a93338643b16d745d4f3fc86db71e5da7f5"
+    },
+    "graal_components": {
+      "version": "25.4.4.1.1"
+    },
+    "maven": {
+      "minimum_version": "3.9.9",
+      "supported_major": 3
+    },
+    "policy": {
+      "primary_runtime_alignment": "development-ci-distribution",
+      "upgrade_mode": "explicit-validated-change",
+      "floating_primary_runtime": false
+    },
+    "jvmci": "25.4-b23",
+    "expected_runtime": "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
+  },
+  "reused_infrastructure": {
+    "runner": "runner/dist006d_baseline.py",
+    "config": "config/dist006d-baseline.json",
+    "dockerfile": "docker/protos-dist006d/Dockerfile",
+    "driver": "docker/protos-dist006d/Dist006dDriver.java",
+    "runtime_probe": "docker/protos-dist006d/Dist006dRuntimeProbe.java",
+    "source_identity_mechanism": {
+      "files": {
+        "docker/protos-perf010a/Perf010aSourceIdentityInstrument.java": "1a7b6c69d36810d1ce3f62dd9a554e2fc5191b3e566d2fc8c338514c5d300d36",
+        "docker/protos-perf010a/Perf010aSourceIdentityInstrumentProvider.java": "1791602b150c8da62b64d19f8a347a9b6ed5c685079615172b0caf28c5254056",
+        "docker/protos-perf010a/Perf010aSourceIdentitySmokeDriver.java": "11f24b4d8667b549201ea278ab42d5379d8516f9cce25d703b9173ac95155046"
+      },
+      "reused_unchanged": true,
+      "stale_25_3_docker_contract_reused": false
+    }
+  },
+  "image": {
+    "overlay_dockerfile": "docker/protos-perf010a-hot-root/Dockerfile",
+    "overlay_tag_prefix": "protos-benchmarks-perf010a-hot-root",
+    "diagnostic_classpath": "/opt/perf010a-hot-root/diagnostic:/opt/protos/lib/protos.jar:/opt/protos/lib/runtime/*",
+    "corpus_dir": "/opt/dist006d/corpus",
+    "harness_sources_hash_file": "/opt/perf010a-hot-root/identity/harness-sources.sha256"
+  },
+  "workloads": [
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "target_text": "sink = identity(42)",
+      "control_text": "sink = 42",
+      "roles": [
+        {
+          "id": "repeat",
+          "logical_role": "repeat root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "contains",
+          "anchor_text": "(count > 0).ifTrue()"
+        },
+        {
+          "id": "control_block",
+          "logical_role": "control root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "equals",
+          "anchor_text": "operation()"
+        },
+        {
+          "id": "callback",
+          "logical_role": "callback/operation root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "equals",
+          "anchor_text_by_variant": {
+            "canonical": "sink = identity(42)",
+            "workload_control": "sink = 42"
+          }
+        },
+        {
+          "id": "closure_call",
+          "logical_role": "closure-call root",
+          "variants": [
+            "canonical"
+          ],
+          "match": "equals",
+          "anchor_text": "value"
+        }
+      ]
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "target_text": "sink = receiver.identity(42)",
+      "control_text": "sink = 42",
+      "roles": [
+        {
+          "id": "repeat",
+          "logical_role": "repeat root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "contains",
+          "anchor_text": "(count > 0).ifTrue()"
+        },
+        {
+          "id": "control_block",
+          "logical_role": "control root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "equals",
+          "anchor_text": "operation()"
+        },
+        {
+          "id": "callback",
+          "logical_role": "callback/operation root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "equals",
+          "anchor_text_by_variant": {
+            "canonical": "sink = receiver.identity(42)",
+            "workload_control": "sink = 42"
+          }
+        },
+        {
+          "id": "method_call",
+          "logical_role": "method-call root",
+          "variants": [
+            "canonical"
+          ],
+          "match": "equals",
+          "anchor_text": "value"
+        }
+      ]
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "target_text": "sink = receiver.run()",
+      "control_text": "sink = 42",
+      "roles": [
+        {
+          "id": "repeat",
+          "logical_role": "repeat root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "contains",
+          "anchor_text": "(count > 0).ifTrue()"
+        },
+        {
+          "id": "control_block",
+          "logical_role": "control root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "equals",
+          "anchor_text": "operation()"
+        },
+        {
+          "id": "callback",
+          "logical_role": "callback/operation root",
+          "variants": [
+            "canonical",
+            "workload_control"
+          ],
+          "match": "equals",
+          "anchor_text_by_variant": {
+            "canonical": "sink = receiver.run()",
+            "workload_control": "sink = 42"
+          }
+        },
+        {
+          "id": "monomorphic_dispatch",
+          "logical_role": "monomorphic-dispatch root",
+          "variants": [
+            "canonical"
+          ],
+          "match": "equals",
+          "anchor_text": "42"
+        }
+      ]
+    }
+  ],
+  "variants": [
+    "canonical",
+    "workload_control"
+  ],
+  "shared_driver": {
+    "text": "repeat: (count, operation) => {",
+    "role_ids": [
+      "repeat",
+      "control_block",
+      "callback"
+    ],
+    "note": "The common repeat/control driver is exercised by every unit; its workload_control variants isolate it from the workload-specific operation."
+  },
+  "root_kind_markers": {
+    "semantic": "ProtosSemanticBytecodeRootNode",
+    "helper": "ProtosBytecodeRootNode"
+  },
+  "diagnostic": {
+    "operation_count": 10000,
+    "warmup_iterations": 120,
+    "steady_iterations": 100,
+    "smoke": {
+      "warmup_iterations": 2,
+      "steady_iterations": 2,
+      "units": [
+        "micro/closure-call#canonical"
+      ],
+      "retained_evidence": false,
+      "timing_evidence": false
+    },
+    "tier_model": {
+      "first_tier": 1,
+      "final_tier": 2
+    },
+    "required_phase_sequence": [
+      "startup",
+      "warmup",
+      "steady",
+      "closing",
+      "end"
+    ],
+    "unit_timeout_seconds": {
+      "lifecycle": 1800,
+      "graph": 3600
+    },
+    "jvm_args": [
+      "-Xss128m",
+      "--enable-native-access=ALL-UNNAMED"
+    ],
+    "network": "none",
+    "cpu_affinity": "same one physical-core representative from current allowed cpuset",
+    "container_user": "host-uid-gid",
+    "no_tuning_option_is_set": true,
+    "run_kinds": {
+      "lifecycle": {
+        "purpose": "compiler lifecycle, inlining decisions, post-PE performance warnings and root source identity, without graph dumping so that dump-induced compilation slowdown cannot perturb the lifecycle evidence",
+        "options": [
+          {
+            "name": "polyglot.engine.TraceCompilation",
+            "value": "true",
+            "purpose": "successful compilation events and tier identity"
+          },
+          {
+            "name": "polyglot.engine.TraceCompilationDetails",
+            "value": "true",
+            "purpose": "queued/start/dequeued/deoptimization lifecycle events"
+          },
+          {
+            "name": "polyglot.engine.CompilationFailureAction",
+            "value": "Print",
+            "purpose": "failure and bailout reason with stack"
+          },
+          {
+            "name": "polyglot.engine.TraceAssumptions",
+            "value": "true",
+            "purpose": "assumption invalidation"
+          },
+          {
+            "name": "polyglot.engine.TraceCompilationPolymorphism",
+            "value": "true",
+            "purpose": "polymorphic and generic nodes after each successful compilation"
+          },
+          {
+            "name": "polyglot.engine.TraceInlining",
+            "value": "true",
+            "purpose": "guest-call inlining decisions using the current 25.4 engine alias"
+          },
+          {
+            "name": "polyglot.engine.TraceInliningDetails",
+            "value": "true",
+            "purpose": "inlining exploration detail"
+          },
+          {
+            "name": "polyglot.engine.TracePerformanceWarnings",
+            "value": "all",
+            "purpose": "calls that survive partial evaluation, with attributed stack"
+          },
+          {
+            "name": "polyglot.engine.NodeSourcePositions",
+            "value": "true",
+            "purpose": "node source positions for stack attribution"
+          },
+          {
+            "name": "polyglot.perf010aHotRootIdentity",
+            "value": "true",
+            "purpose": "root-aware source identity instrument (forces source materialization for the target Source only)"
+          }
+        ]
+      },
+      "graph": {
+        "purpose": "graph dumps for the compiled-shape views, captured into an isolated per-unit directory; the same lifecycle options stay on so every dump correlates to its compilation by CompId",
+        "extends": "lifecycle",
+        "options": [
+          {
+            "name": "jdk.graal.Dump",
+            "value": "Truffle:2",
+            "purpose": "established repository graph dump family"
+          },
+          {
+            "name": "jdk.graal.DumpPath",
+            "value": "/diag-out/graal_dumps",
+            "purpose": "per-unit isolated dump directory"
+          },
+          {
+            "name": "jdk.graal.PrintGraph",
+            "value": "File",
+            "purpose": "BGV files"
+          },
+          {
+            "name": "jdk.graal.ShowDumpFiles",
+            "value": "true",
+            "purpose": "print each dump file creation into the ordered raw log"
+          }
+        ]
+      }
+    },
+    "identity_output_container_path": "/diag-out/root-identity.json",
+    "dump_container_path": "/diag-out/graal_dumps",
+    "optional_channels": {
+      "expansion": {
+        "enabled": false,
+        "note": "compiler.TraceMethodExpansion / TraceNodeExpansion / MethodExpansionStatistics / NodeExpansionStatistics printed no parseable rows in the retained 24.x PERF003-A run; they stay off until an admission smoke shows their 25.4 output."
+      }
+    },
+    "engine_builder_allow_experimental_options": true
+  },
+  "lifecycle": {
+    "replacement_reason_patterns": [
+      "(?i)node\\s+replac",
+      "(?i)replaced\\b.*\\bgeneric",
+      "(?i)specializ",
+      "(?i)rewrit"
+    ],
+    "stable_final_optimized_state_requires": [
+      "successful compilation at the final tier",
+      "no later failure, invalidation, recompilation attempt or replacement",
+      "no unresolved queued or started task",
+      "no parse anomaly for the compilable",
+      "process completion proven by the driver phase markers and exit status"
+    ]
+  },
+  "shape": {
+    "facts_schema": "perf010a-shape-facts-v1",
+    "views": {
+      "pe": {
+        "description": "after partial evaluation / Truffle tier",
+        "graph_name_patterns": [
+          "After PE Tier",
+          "After TruffleTier"
+        ]
+      },
+      "late": {
+        "description": "late enough to tell whether escape analysis removed candidate allocations",
+        "graph_name_patterns": [
+          "After phase PartialEscape"
+        ]
+      }
+    },
+    "min_count_for_yes": 1,
+    "no_requires": [
+      "view complete",
+      "node source positions present"
+    ],
+    "families": [
+      {
+        "id": "activation_creation",
+        "description": "activation creation / ProtosActivation",
+        "markers": [
+          "ProtosActivation"
+        ]
+      },
+      {
+        "id": "execution_context_materialization",
+        "description": "execution-context creation/materialization",
+        "markers": [
+          "ExecutionContext",
+          "newExecutionContext"
+        ]
+      },
+      {
+        "id": "argument_transport",
+        "description": "argument-array/list transport",
+        "markers": [
+          "Object[]",
+          "List.copyOf",
+          "ArrayList",
+          "Arrays.copyOf",
+          "ProtosArrayValue",
+          "indexedSnapshot"
+        ]
+      },
+      {
+        "id": "return_home_control_state",
+        "description": "return-home/control-state carriers",
+        "markers": [
+          "ReturnHome",
+          "returnHome",
+          "ControlFlowException",
+          "NonLocalReturn"
+        ]
+      },
+      {
+        "id": "captured_environment",
+        "description": "captured lexical/environment machinery",
+        "markers": [
+          "LexicalBinding",
+          "LexicalAuthority",
+          "capturedContext"
+        ]
+      },
+      {
+        "id": "semantic_wrapper_to_helper",
+        "description": "semantic-wrapper -> helper transition",
+        "markers": [
+          "InvokeSemanticHelper",
+          "ProtosSemanticBytecodeRootNode"
+        ]
+      },
+      {
+        "id": "generic_selection_classification",
+        "description": "generic selection/classification",
+        "markers": [
+          "Selection",
+          "Classif"
+        ]
+      },
+      {
+        "id": "context_local_plan_cache",
+        "description": "Context-local plan/cache lookup",
+        "markers": [
+          "ContextLocal",
+          "ExecutionPlan",
+          "PlanCache"
+        ]
+      },
+      {
+        "id": "host_map_optional_string",
+        "description": "host Map/ConcurrentMap/Optional/String classification machinery",
+        "markers": [
+          "HashMap",
+          "ConcurrentHashMap",
+          "Map.get",
+          "Map.put",
+          "Map.containsKey",
+          "Optional.",
+          "String.equals",
+          "String.hashCode"
+        ]
+      },
+      {
+        "id": "bytecode_continuation",
+        "description": "continueAt / Bytecode continuation/interpreter machinery",
+        "markers": [
+          "continueAt",
+          "CachedBytecodeNode"
+        ]
+      }
+    ],
+    "other_family": {
+      "id": "other_current_head_machinery",
+      "description": "other current-HEAD machinery exposed by the graph"
+    }
+  },
+  "causal_classes": {
+    "A": "COMPILATION_FAILURE",
+    "B": "COMPILATION_LIFECYCLE_INSTABILITY",
+    "C": "COMPILED_BUT_EXPENSIVE_SURVIVING_MACHINERY",
+    "D": "MATURE_COMPILED_FORM_WITH_RESIDUAL_SEMANTIC_COST"
+  },
+  "retention": {
+    "output": "results/perf010a-hot-root-lifecycle",
+    "dump_root_default": ".work/perf010a-hot-root",
+    "raw_logs": "retained verbatim, byte for byte",
+    "raw_graph_dumps": "bulky local artifact; size and SHA-256 manifest retained, files not committed",
+    "requires_exact_clean_published_harness_revision": true
+  },
+  "boundaries": {
+    "product_patch": false,
+    "product_repository_mutation": false,
+    "semantic_change": false,
+    "perf020_implemented": false,
+    "authoritative_discriminator_executed": false,
+    "timing_evidence": false,
+    "normal_vs_compilation_false_required": false,
+    "causal_class_in_harness": "NOT_CLASSIFIED",
+    "product_intervention_selected": false,
+    "control_revision": "NOT_YET_SELECTABLE",
+    "control_version": "NOT_YET_SELECTABLE",
+    "perf011_reactivate_after_this_slice": false,
+    "perf010_b_reopened": false,
+    "perf010_b_step4_authorized": false,
+    "historical_evidence_mutation": false
+  }
+}

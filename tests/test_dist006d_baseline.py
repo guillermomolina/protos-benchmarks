@@ -87,6 +87,45 @@ class Dist006dContractTest(unittest.TestCase):
                     dist006d.require_exact_sha(value, "Protos revision")
         self.assertEqual("a" * 40, dist006d.require_exact_sha("a" * 40, "Protos revision"))
 
+    def test_additive_toolchain_metadata_is_allowed(self):
+        payload = copy.deepcopy(
+            dist006d.CANONICAL_TOOLCHAIN_JSON
+        )
+        payload["ci"] = {
+            "image": "ghcr.io/guillermomolina/protos-ci@sha256:example"
+        }
+        payload["graalvm"]["provenance"] = {
+            "source": "additional-metadata"
+        }
+
+        self.assertIs(
+            payload,
+            dist006d.validate_toolchain_contract(payload),
+        )
+
+    def test_required_toolchain_fields_still_fail_closed(self):
+        payload = copy.deepcopy(
+            dist006d.CANONICAL_TOOLCHAIN_JSON
+        )
+        del payload["graalvm"]["release"]
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "toolchain[.]graalvm[.]release",
+        ):
+            dist006d.validate_toolchain_contract(payload)
+
+        payload = copy.deepcopy(
+            dist006d.CANONICAL_TOOLCHAIN_JSON
+        )
+        payload["graalvm"]["release"] = "25.4-wrong"
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "toolchain[.]graalvm[.]release",
+        ):
+            dist006d.validate_toolchain_contract(payload)
+
     def test_wrong_graalvm_release_fails_closed(self):
         self.assert_config_rejected(
             lambda cfg: cfg["toolchain"]["graalvm"].__setitem__("release", "25.3.4.1")

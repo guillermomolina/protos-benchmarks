@@ -183,14 +183,36 @@ expected = {
         "floating_primary_runtime": False,
     },
 }
+def require_expected_subset(expected_value, observed_value, path="toolchain"):
+    if isinstance(expected_value, dict):
+        if not isinstance(observed_value, dict):
+            raise RuntimeError(
+                f"DIST006-D toolchain mismatch at {path}: "
+                f"expected object, observed={observed_value!r}"
+            )
+        for key, child_expected in expected_value.items():
+            child_path = f"{path}.{key}"
+            if key not in observed_value:
+                raise RuntimeError(
+                    f"DIST006-D toolchain mismatch at {child_path}: "
+                    "required field is missing"
+                )
+            require_expected_subset(
+                child_expected,
+                observed_value[key],
+                child_path,
+            )
+        return
+
+    if observed_value != expected_value:
+        raise RuntimeError(
+            f"DIST006-D toolchain mismatch at {path}: "
+            f"expected={expected_value!r} observed={observed_value!r}"
+        )
+
+
 actual = json.loads(Path("toolchain.json").read_text(encoding="utf-8"))
-if actual != expected:
-    raise SystemExit(
-        "DIST006-D toolchain mismatch\nexpected="
-        + json.dumps(expected, sort_keys=True)
-        + "\nactual="
-        + json.dumps(actual, sort_keys=True)
-    )
+require_expected_subset(expected, actual)
 print("DIST006D_SOURCE_TOOLCHAIN_CONTRACT=PASS")
 PY
 

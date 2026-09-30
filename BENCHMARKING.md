@@ -881,3 +881,116 @@ future OS-image bump that changes the packaged Maven version is caught rather
 than silently drifting. This applies to the PERF010-A image only; other
 retained-evidence Dockerfiles keep their existing pinned-tarball install
 mechanism unless a later PERF item explicitly re-audits and migrates them.
+
+## PERF016 post-Step-3 controlled timing comparator
+
+`PERF016` (`guillermomolina/protos#727`, child of `PERF010-B` /
+`guillermomolina/protos#722`) owns the controlled timing checkpoint that follows
+two product changes: PERF015 (guarded represented selection for canonical
+`true`/`false` on the existing Boolean control behaviors) and the PERF016
+semantic Integer-family guarded represented selection (the common driver sends
+`count > 0` and `count - 1`). Both are already structurally validated in the
+product repository and are not under test here. This comparator measures their
+**combined** effect on the retained common benchmark driver and on the four
+common canonical workloads.
+
+### Endpoints and toolchain
+
+```text
+CONTROL       2e3f56fae3a500d3e4193e3345d8a82c35e4590e  0.3.117-SNAPSHOT  pre-PERF015
+INTERVENTION  696b0f9797ebc8ced80009fb583027513852f55c  0.3.119-SNAPSHOT  post-PERF016
+```
+
+Both endpoints are ordinary unpatched `baseline` products on the canonical
+post-adoption 25.4 toolchain: GraalVM/Graal/Truffle `25.4.4.1.1`, JDK
+`25.0.4.1.1`, JVMCI `25.4-b23`, runtime
+`com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime`, container
+`ghcr.io/graalvm/graalvm-community:25i4-25.0.4.1.1-ol10@sha256:a7b4810d7c755e9627feaa1459eb5a93338643b16d745d4f3fc86db71e5da7f5`.
+Exactly two product commits separate them — PERF015 (`453f2b00…`) and PERF016
+(`696b0f97…`) — and no unrelated product commit. That lineage is supplied input
+recorded in `config/perf016-post-step3.json`; the harness cannot re-derive it.
+Per built image it does verify the revision label, the `pom.xml` version, the
+toolchain/runtime identity (both images must prove the same, including JVMCI)
+and, for every workload, that the canonical and generated workload-control
+sources are byte-identical between the two images.
+
+The image, runtime probe and driver are the DIST006-D ones
+(`docker/protos-dist006d/`, reached through `runner/dist006d_baseline.py`),
+reused unchanged. PERF014 contributes measurement discipline only: its 25.3.4.1
+toolchain, product revisions and retained evidence are untouched. The retained
+`results/dist006d-baseline/` was measured at another revision and is **not** the
+control measurement; both endpoints are built and measured in the same run.
+
+### Design
+
+- Workloads: `micro/slot-read`, `micro/closure-call`, `micro/method-call` and
+  `runtime/monomorphic-dispatch`, each expected `42`. Each is timed as a
+  canonical variant and a workload-control variant that replaces the
+  workload-specific operation with `sink = 42` and keeps the common driver.
+- 10,000 operations; 120 warmup and 100 steady iterations per timed unit,
+  recorded separately in a fresh JVM per unit; one CPU pinned with
+  `--cpuset-cpus`; `--network none`; 64 timed units. No JFR, compiler tracing,
+  IGV, allocation profiling, source instrumentation or Test Tool diagnostics.
+- Deterministic A,B,A,B counterbalancing: block A times CONTROL first, block B
+  INTERVENTION first; within a role the canonical and workload-control variants
+  are adjacent. Block identity is retained in the raw evidence.
+
+### Retained views
+
+Every effect is CONTROL minus INTERVENTION, so a positive value means the
+INTERVENTION is faster. Each is retained per block and aggregated per workload
+(median, MAD, min, max); the four workload-controls are never merged.
+
+- `control_variant_effect` (`SHARED_DRIVER_TIMING_EFFECT`) — **primary for the
+  common driver**: `control_workload_control_median_ns -
+  intervention_workload_control_median_ns`, and that as a percentage of CONTROL.
+  PERF015/PERF016 optimize work in the shared driver itself, so this movement is
+  a measured effect, not noise to subtract away.
+- `canonical_effect` (`COMMON_WORKLOAD_TIMING_EFFECTS`): the same difference for
+  each canonical workload. A microbenchmark result, not a whole-language claim.
+- `paired_control_effect` — **secondary discriminator**, the established PERF014
+  residual: `canonical_effect - control_variant_effect`. A near-zero value is not
+  evidence that Step 3 had no effect; if Step 3 improves the shared driver
+  equally in both variants the subtraction removes that common improvement.
+
+Order effects reuse the PERF014 range-separation method (DETECTED when the A-order
+and B-order block ranges do not overlap) independently for each view. Every
+100-sample steady unit also retains a first-quarter versus last-quarter
+stationarity diagnostic. Neither is thresholded and no block is discarded.
+
+### Correctness before timing
+
+Before any timing, `reference` reads every workload's canonical source bytes from
+both images and fails closed (`WORKLOAD_SOURCE_IDENTITY_MISMATCH`) on any
+SHA-256 difference, then requires the correct result `42` for every role,
+workload and variant. The driver additionally checks every warmup and steady
+iteration. Reference evidence also requires the exact clean published harness
+SHA, is written only once complete, and is re-verified so that every derived
+number is reproducible from the retained raw samples.
+
+### No automatic classification
+
+The harness collects and summarizes objective measurements only.
+`STEP_3_TIMING_CLASS` and `STEP3_NEXT_ROUTING` are emitted as `NOT_CLASSIFIED`,
+no numeric threshold exists anywhere in the harness, and `validate` rejects any
+attempt to add one. Classification is a later interpretation of the retained raw
+evidence, routed through `PERF010-B` / `guillermomolina/protos#722`.
+
+### Commands and evidence status
+
+```sh
+make perf016-post-step3-validate
+make perf016-post-step3-smoke
+make perf016-post-step3-reference HARNESS_REVISION=<published-harness-SHA>
+```
+
+`validate` is static (no Docker, no timing) and self-tests the fail-closed
+contract, the sign conventions and the analysis with synthetic data. `smoke`
+builds and probes both exact products and runs the correctness matrix plus a
+tiny-scale pass of the reference code path (warmup 1, steady 2); it prints and
+retains no timing. `reference` alone writes retained evidence to
+`results/perf016-post-step3/`: `raw.json` (authoritative), `summary.tsv`,
+`blocks.tsv`, `stationarity.tsv`, `README.md`, `SHA256SUMS` and per-unit `logs/`.
+
+This publication is harness capability only. The retained reference run is a
+separate later slice executed from the exact published harness SHA.

@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "work_item": "PERF016",
+  "issue": "guillermomolina/protos#727",
+  "parent_work_item": "PERF010-B",
+  "parent_issue": "guillermomolina/protos#722",
+  "slice": "POST_STEP3_CONTROLLED_TIMING",
+  "phase": "post-step3-25-4-controlled-timing-harness",
+  "diagnostic_claim": false,
+  "two_revision_comparator": true,
+  "authorizing_record": "guillermomolina/protos#727 (PERF016, child of PERF010-B / guillermomolina/protos#722). PERF015 (guarded represented selection for canonical Boolean true/false) and the PERF016 semantic Integer-family guarded represented selection are already structurally validated in the product repository and are not under test here; this Evidence Unit owns their combined post-Step-3 controlled timing checkpoint. The identities and lineage below are supplied task input: this repository does not inspect guillermomolina/protos or guillermomolina/protos-project-docs to derive them and does not reinterpret PERF015/PERF016 product semantics.",
+  "causal_question": "What is the combined steady-state timing effect of PERF015 + PERF016 on (a) the retained common benchmark driver, observed through each workload's workload-control variant, and (b) each common canonical workload, when the exact pre-PERF015 product (CONTROL) and the exact post-PERF016 product (INTERVENTION) are built as ordinary unpatched baselines on the canonical post-adoption GraalVM 25.4.4.1.1 toolchain and timed as canonical/workload-control pairs in a counterbalanced A,B,A,B block design on one pinned CPU? This Evidence Unit collects and summarizes objective measurements only; it does not classify Step 3 (STEP_3_TIMING_CLASS) or route the result (STEP3_NEXT_ROUTING).",
+  "protos": {
+    "repository": "https://github.com/guillermomolina/protos.git"
+  },
+  "control": {
+    "role": "control",
+    "variant": "baseline",
+    "revision": "2e3f56fae3a500d3e4193e3345d8a82c35e4590e",
+    "version": "0.3.117-SNAPSHOT",
+    "note": "The pre-PERF015 product endpoint."
+  },
+  "intervention": {
+    "role": "intervention",
+    "variant": "baseline",
+    "revision": "696b0f9797ebc8ced80009fb583027513852f55c",
+    "version": "0.3.119-SNAPSHOT",
+    "note": "The post-PERF016 product endpoint."
+  },
+  "product_lineage": {
+    "commit_count_between_endpoints": 2,
+    "commits_between_endpoints": [
+      {
+        "revision": "453f2b00ae2bd0af1cd2761474549e85ff1cb8b6",
+        "subject": "PERF015: admit canonical Boolean to guarded structured selection"
+      },
+      {
+        "revision": "696b0f9797ebc8ced80009fb583027513852f55c",
+        "subject": "PERF016: admit semantic Integer family to guarded represented selection"
+      }
+    ],
+    "unrelated_product_commit_between_endpoints": false,
+    "verification": "externally-verified-supplied-task-input-not-re-derived-by-harness",
+    "targeted_product_operations": {
+      "perf015": "guarded represented selection for canonical true/false on the existing canonical Boolean control behaviors ifTrue, ifFalse, ifTrueIfFalse, and, or",
+      "perf016": "guarded represented selection for the semantic Integer family; the common driver sends explicitly targeted are count > 0 and count - 1; authoritative D013 selection/provenance is cached by Integer family, selector, entered Context, Prelude and selection Assumption rather than by Integer receiver identity; no arithmetic or comparison primitive is added at the send site"
+    },
+    "lineage_note": "The harness builds each endpoint from its exact 40-hex revision at depth 1 and therefore cannot re-derive commit ancestry. It does verify, per built image, the exact revision label, the exact pom version, the byte-identity of every measured workload source and the canonical toolchain identity."
+  },
+  "both_variants_baseline": true,
+  "patches_applied": "none",
+  "patches_applied_note": "Both roles are ordinary baseline products built by the unchanged DIST006-D Dockerfile from their own exact revision. No ablation patch, diagnostic patch, toolchain overlay or product-source edit is applied to either image.",
+  "toolchain": {
+    "schema": "protos-toolchain-v2",
+    "java": {
+      "bytecode_release": 21
+    },
+    "graalvm": {
+      "distribution": "graalvm-community",
+      "release": "25.4.4.1.1",
+      "jdk_feature": 25,
+      "jdk_version": "25.0.4.1.1",
+      "container_channel": "25i4",
+      "container_image": "ghcr.io/graalvm/graalvm-community:25i4-25.0.4.1.1-ol10@sha256:a7b4810d7c755e9627feaa1459eb5a93338643b16d745d4f3fc86db71e5da7f5"
+    },
+    "graal_components": {
+      "version": "25.4.4.1.1"
+    },
+    "maven": {
+      "minimum_version": "3.9.9",
+      "supported_major": 3
+    },
+    "policy": {
+      "primary_runtime_alignment": "development-ci-distribution",
+      "upgrade_mode": "explicit-validated-change",
+      "floating_primary_runtime": false
+    },
+    "jvmci": "25.4-b23",
+    "expected_runtime": "com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime"
+  },
+  "toolchain_note": "This block is the canonical post-adoption DIST006-D toolchain contract, reused unchanged and required to equal config/dist006d-baseline.json's toolchain block. The historical PERF014 25.3.4.1 toolchain is not used and no 25.3-versus-25.4 comparison is made here (that question belongs to UPSTREAM003/DIST006).",
+  "reused_infrastructure": {
+    "owner": "DIST006-D",
+    "runner": "runner/dist006d_baseline.py",
+    "config": "config/dist006d-baseline.json",
+    "dockerfile": "docker/protos-dist006d/Dockerfile",
+    "driver": "docker/protos-dist006d/Dist006dDriver.java",
+    "runtime_probe": "docker/protos-dist006d/Dist006dRuntimeProbe.java",
+    "modified_by_this_comparator": false,
+    "image_tag_pattern": "protos-benchmarks-dist006d:<first-12-hex-of-protos-revision>",
+    "retained_dist006d_baseline_is_not_the_control_measurement": true
+  },
+  "operation_count": 10000,
+  "warmup_iterations": 120,
+  "steady_iterations": 100,
+  "measurement_classes": {
+    "startup": "not measured; container and JVM start are outside every timed region",
+    "warmup": "120 iterations per timed unit, retained separately and never merged into steady-state results",
+    "steady_state": "100 iterations per timed unit, recorded after the warmup iterations in the same JVM"
+  },
+  "cpu_affinity": {
+    "mechanism": "cpuset-cpus",
+    "cpus": 1,
+    "selection": "first CPU of the current allowed cpuset (one representative physical CPU), identical for every timed unit of both roles"
+  },
+  "network": "none",
+  "timing_recording_phase": "warmup_and_steady_recorded_separately_no_diagnostic_instrumentation",
+  "clean_timing_exclusions": [
+    "JFR",
+    "TraceCompilation",
+    "TraceCompilationDetails",
+    "TraceInlining",
+    "IGV",
+    "allocation profiling",
+    "source instrumentation",
+    "Test Tool diagnostics"
+  ],
+  "workloads": [
+    {
+      "id": "micro/slot-read",
+      "source": "micro/slot-read.protos",
+      "expected": "42",
+      "replace": "sink = holder.value",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/closure-call",
+      "source": "micro/closure-call.protos",
+      "expected": "42",
+      "replace": "sink = identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "micro/method-call",
+      "source": "micro/method-call.protos",
+      "expected": "42",
+      "replace": "sink = receiver.identity(42)",
+      "with": "sink = 42"
+    },
+    {
+      "id": "runtime/monomorphic-dispatch",
+      "source": "runtime/monomorphic-dispatch.protos",
+      "expected": "42",
+      "replace": "sink = receiver.run()",
+      "with": "sink = 42"
+    }
+  ],
+  "workload_control_policy": "The established PERF010 four-workload canonical/workload-control matrix is reused unchanged. Each workload-control variant replaces exactly one workload-specific operation with `sink = 42` and retains the common benchmark driver. Because PERF015/PERF016 optimize work in that shared driver, the workload-control movement between the two revisions is a measured effect to report, not environmental noise to subtract away and discard. The four workload-controls originate from four different workload sources and are therefore preserved individually; their samples are never merged.",
+  "workload_identity_policy": "Before any timing, the harness reads the exact canonical source bytes of every workload from BOTH built images and fails closed (WORKLOAD_SOURCE_IDENTITY_MISMATCH) unless the SHA-256 of the canonical source, and of the generated workload-control source, is identical between the two images. Source identity is never inferred from Git history.",
+  "block_order": ["A", "B", "A", "B"],
+  "block_order_note": "Deterministic counterbalanced design, four blocks, no randomness. Block A: CONTROL runs first, INTERVENTION second. Block B: INTERVENTION runs first, CONTROL second. Within each role the canonical variant and its workload-control variant are timed adjacently. Block identity is retained in the raw evidence.",
+  "measurement_views": {
+    "control_variant_effect": {
+      "evidence_input": "SHARED_DRIVER_TIMING_EFFECT",
+      "weight": "PRIMARY_FOR_COMMON_DRIVER",
+      "positive_means": "INTERVENTION_FASTER",
+      "formula": "control_variant_effect_ns = control_workload_control_median_ns - intervention_workload_control_median_ns; control_variant_effect_percent = 100 * control_variant_effect_ns / control_workload_control_median_ns",
+      "note": "Direct revision effect on the retained common driver, reported per workload, per block and as an aggregate over the four blocks."
+    },
+    "canonical_effect": {
+      "evidence_input": "COMMON_WORKLOAD_TIMING_EFFECTS",
+      "weight": "COMMON_WORKLOAD_EFFECTS",
+      "positive_means": "INTERVENTION_FASTER",
+      "formula": "canonical_effect_ns = control_canonical_median_ns - intervention_canonical_median_ns; canonical_effect_percent = 100 * canonical_effect_ns / control_canonical_median_ns",
+      "note": "Direct revision effect on each canonical workload. A microbenchmark result, never a whole-language claim."
+    },
+    "paired_control_effect": {
+      "evidence_input": "SECONDARY_PAIRED_CONTROL_DISCRIMINATOR",
+      "weight": "SECONDARY",
+      "positive_means": "INTERVENTION_FASTER",
+      "formula": "canonical_improvement_ns = canonical_effect_ns; control_movement_ns = control_variant_effect_ns; paired_control_effect_ns = canonical_improvement_ns - control_movement_ns; paired_control_effect_percent = 100 * paired_control_effect_ns / control_canonical_median_ns",
+      "note": "The established PERF014 paired-control residual. A positive value means the canonical workload improved beyond the movement already explained by its common driver/workload-control variant. A near-zero value is NOT evidence that Step 3 had no effect: when Step 3 improves the shared driver equally in the canonical and workload-control variants, the subtraction intentionally removes that common improvement."
+    }
+  },
+  "order_effect_method": "The established PERF014 bounded range-separation method, applied independently to the per-block percentage series of each measurement view: the A-order block values and the B-order block values are compared; DETECTED if the two ranges do not overlap, NOT_DETECTED if they overlap, INCONCLUSIVE if either order has fewer than two blocks. No statistical model is introduced.",
+  "stationarity": {
+    "method": "first-quarter (steady samples 0-24) versus last-quarter (steady samples 75-99) median of every 100-sample steady timed unit",
+    "formula": "last_quarter_vs_first_quarter_percent = 100 * (last_quarter_median_ns - first_quarter_median_ns) / first_quarter_median_ns",
+    "policy": "Reported only. Noisy blocks are never silently discarded and no pass/fail threshold is derived from MAD or stationarity."
+  },
+  "classification": {
+    "step_3_timing_class": "NOT_CLASSIFIED",
+    "step3_next_routing": "NOT_CLASSIFIED",
+    "numeric_classification_thresholds_defined": false,
+    "later_interpretation_vocabulary": [
+      "MATERIAL_LARGE_FACTOR_IMPROVEMENT",
+      "MATERIAL_PARTIAL_IMPROVEMENT",
+      "ESSENTIALLY_UNCHANGED"
+    ],
+    "note": "The harness collects and summarizes objective measurements; classification is a later interpretation step performed against the retained raw evidence and routed through PERF010-B / guillermomolina/protos#722. No percentage or factor threshold for those classes is defined anywhere in this harness."
+  },
+  "smoke": {
+    "warmup_iterations": 1,
+    "steady_iterations": 2,
+    "block_order": ["A", "B"],
+    "correctness_gate": true,
+    "retained_performance_evidence": false,
+    "timing_evidence": false,
+    "reference_evidence": false,
+    "note": "Admission and correctness gate over both exact products. Its tiny-scale timing pass exercises the reference code path and its timings are neither printed nor retained."
+  },
+  "reference": {
+    "output": "results/perf016-post-step3",
+    "requires_exact_clean_published_harness_revision": true,
+    "retained_performance_evidence": true,
+    "bounded_runs_supported": false,
+    "raw_json_authoritative": true,
+    "derived_views_reproducible_from_raw": true,
+    "retained_artifacts": [
+      "raw.json",
+      "summary.tsv",
+      "blocks.tsv",
+      "stationarity.tsv",
+      "README.md",
+      "SHA256SUMS",
+      "logs/"
+    ]
+  },
+  "historical_boundary": [
+    "results/perf014-direct-closure-call/**",
+    "results/dist006d-baseline/**",
+    "results/upstream003-platform-comparison/**",
+    "config/perf014-direct-closure-call.json",
+    "runner/perf014_direct_closure_call.py",
+    "config/dist006d-baseline.json",
+    "runner/dist006d_baseline.py",
+    "docker/protos-dist006d/**"
+  ]
+}

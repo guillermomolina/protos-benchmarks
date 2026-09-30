@@ -400,3 +400,18 @@ dist006d-reference:
 	@test -n "$(PROTOS_REVISION)" || { echo "usage: make dist006d-reference PROTOS_REVISION=<exact-40-lowercase-hex-Protos-SHA> HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA> [OUT=results/dist006d-baseline]" >&2; exit 2; }
 	@test -n "$(HARNESS_REVISION)" || { echo "usage: make dist006d-reference PROTOS_REVISION=<exact-40-lowercase-hex-Protos-SHA> HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA> [OUT=results/dist006d-baseline]" >&2; exit 2; }
 	python3 runner/dist006d_baseline.py reference --protos-revision "$(PROTOS_REVISION)" --harness-revision "$(HARNESS_REVISION)" $(if $(OUT),--output-dir "$(OUT)",)
+
+.PHONY: perf016-post-step3-validate perf016-post-step3-smoke perf016-post-step3-reference
+
+# PERF016 / guillermomolina/protos#727 post-Step-3 controlled timing comparator. Both Protos
+# revisions and the retained-evidence namespace are pinned in config/perf016-post-step3.json, so
+# the only run-time input is the exact published harness SHA of the retained reference run.
+perf016-post-step3-validate:
+	python3 runner/perf016_post_step3.py validate
+
+perf016-post-step3-smoke:
+	python3 runner/perf016_post_step3.py smoke
+
+perf016-post-step3-reference:
+	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf016-post-step3-reference HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA>" >&2; exit 2; }
+	python3 runner/perf016_post_step3.py reference --harness-revision "$(HARNESS_REVISION)"

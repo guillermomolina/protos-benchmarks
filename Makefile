@@ -19,9 +19,12 @@ WORKLOAD ?= all
 LANGUAGE ?= protos
 PROTOS_REPO ?= .work/protos-ab/0.3.128
 
-.PHONY: truffle-compile truffle-correctness truffle-jvm-smoke truffle-jvm-benchmark truffle-jvm-ab truffle-native-setup truffle-native-smoke truffle-native-benchmark truffle-clean
+.PHONY: truffle-compile truffle-correctness truffle-jvm-smoke truffle-jvm-benchmark truffle-jvm-ab truffle-native-setup truffle-native-smoke truffle-native-benchmark truffle-clean truffle-prepare
 
 include docker/Makefile
+
+truffle-prepare:
+	$(MAKE) -C $(TRUFFLE_DIR) prepare
 
 truffle-compile:
 	$(MAKE) -C $(TRUFFLE_DIR) compile

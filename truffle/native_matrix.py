@@ -15,27 +15,17 @@ import sys
 import time
 from pathlib import Path
 
+from workload_catalog import (
+    cases_for_selection,
+    expected_result,
+)
+
 ROOT = Path(__file__).resolve().parent.parent
 TRUFFLE = ROOT / "truffle"
 WORK = ROOT / ".work" / "truffle-native"
 GENERATED = WORK / "generated"
 MANIFEST = WORK / "runtime-manifest.json"
 CACHE = ROOT / "results" / "local" / "truffle-cache"
-
-CASES = (
-    ("protos", "fibonacci", TRUFFLE / "workloads/fibonacci/fibonacci.protos"),
-    ("js", "fibonacci", TRUFFLE / "workloads/fibonacci/fibonacci.mjs"),
-    ("python", "fibonacci", TRUFFLE / "workloads/fibonacci/fibonacci.py"),
-    ("protos", "factorial", TRUFFLE / "workloads/factorial/factorial.protos"),
-    ("js", "factorial", TRUFFLE / "workloads/factorial/factorial.mjs"),
-    ("python", "factorial", TRUFFLE / "workloads/factorial/factorial.py"),
-)
-
-EXPECTED = {
-    "fibonacci": "6765",
-    "factorial": "2432902008176640000",
-}
-
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
@@ -193,7 +183,7 @@ def execute(
         if line.strip()
     ]
 
-    expected = EXPECTED[workload]
+    expected = expected_result(workload)
     if not lines or lines[-1] != expected:
         raise RuntimeError(
             f"{language}/{workload}: expected {expected}, "
@@ -338,7 +328,7 @@ def run_case(
         "cold_process_ns": cold,
         "sustained_calls": calls,
         "sustained_batch_ns": sustained,
-        "result": EXPECTED[workload],
+        "result": expected_result(workload),
     }
 
     CACHE.mkdir(parents=True, exist_ok=True)
@@ -365,25 +355,16 @@ def main() -> None:
     ):
         raise SystemExit(
             "usage: native_matrix.py "
-            "<smoke|benchmark> [all|fibonacci|factorial]"
+            "<smoke|benchmark> [all|<workload>]"
         )
 
     profile = sys.argv[1]
     selected = sys.argv[2] if len(sys.argv) == 3 else "all"
 
-    if selected not in {"all", "fibonacci", "factorial"}:
-        raise SystemExit(
-            "workload must be all, fibonacci or factorial"
-        )
-
-    cases = (
-        CASES
-        if selected == "all"
-        else tuple(
-            case for case in CASES
-            if case[1] == selected
-        )
-    )
+    try:
+        cases = cases_for_selection(selected)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
     if profile == "smoke":
         calls, batches = 2, 1

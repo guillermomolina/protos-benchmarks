@@ -16,20 +16,15 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from workload_catalog import (
+    cases_for_selection,
+    expected_result,
+)
+
 ROOT = Path(__file__).resolve().parent.parent
 TRUFFLE = ROOT / "truffle"
 CACHE = ROOT / "results" / "local" / "truffle-cache"
 MAIN_CLASS = "com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner"
-
-CASES = (
-    ("protos", "fibonacci", TRUFFLE / "workloads/fibonacci/fibonacci.protos"),
-    ("js", "fibonacci", TRUFFLE / "workloads/fibonacci/fibonacci.mjs"),
-    ("python", "fibonacci", TRUFFLE / "workloads/fibonacci/fibonacci.py"),
-    ("protos", "factorial", TRUFFLE / "workloads/factorial/factorial.protos"),
-    ("js", "factorial", TRUFFLE / "workloads/factorial/factorial.mjs"),
-    ("python", "factorial", TRUFFLE / "workloads/factorial/factorial.py"),
-)
-
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -244,7 +239,7 @@ def cache_key(data: dict[str, object]) -> str:
 
 
 
-def summarize_output(output: str) -> None:
+def summarize_output(output: str) -> str | None:
     setup_ns: int | None = None
     cold: list[int] = []
     warmup: list[int] = []
@@ -280,7 +275,7 @@ def summarize_output(output: str) -> None:
 
     if setup_ns is None or not cold or not steady or result_value is None:
         print(output, end="")
-        return
+        return None
 
     def ms(ns: float) -> float:
         return ns / 1_000_000.0
@@ -295,6 +290,19 @@ def summarize_output(output: str) -> None:
     print(f"steady_min_ms={ms(min(steady)):.3f}")
     print(f"steady_max_ms={ms(max(steady)):.3f}")
     print(f"result={result_value}")
+    return result_value
+
+
+def require_expected(
+    workload: str,
+    actual: str | None,
+) -> None:
+    expected = expected_result(workload)
+
+    if actual != expected:
+        raise RuntimeError(
+            f"{workload}: expected {expected}, got {actual!r}"
+        )
 
 
 def run_case(
@@ -327,7 +335,8 @@ def run_case(
     if cache_file.is_file():
         cached = json.loads(cache_file.read_text(encoding="utf-8"))
         print("cache=hit")
-        summarize_output(cached["output"])
+        actual = summarize_output(cached["output"])
+        require_expected(workload, actual)
         return
 
     print("cache=miss")
@@ -379,7 +388,8 @@ def run_case(
         encoding="utf-8",
     )
 
-    summarize_output(result.stdout)
+    actual = summarize_output(result.stdout)
+    require_expected(workload, actual)
 
 
 def compile_runner() -> None:
@@ -397,25 +407,16 @@ def main() -> None:
     ):
         raise SystemExit(
             "usage: jvm_matrix.py "
-            "<smoke|benchmark> [all|fibonacci|factorial]"
+            "<smoke|benchmark> [all|<workload>]"
         )
 
     mode = sys.argv[1]
     selected = sys.argv[2] if len(sys.argv) == 3 else "all"
 
-    if selected not in {"all", "fibonacci", "factorial"}:
-        raise SystemExit(
-            "workload must be all, fibonacci or factorial"
-        )
-
-    cases = (
-        CASES
-        if selected == "all"
-        else tuple(
-            case for case in CASES
-            if case[1] == selected
-        )
-    )
+    try:
+        cases = cases_for_selection(selected)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
     if mode == "smoke":
         warmup, steady = 2, 3
@@ -435,7 +436,7 @@ def main() -> None:
                 steady,
             ),
         )
-        for case in CASES
+        for case in cases
     ]
 
     needs_measurement = any(

@@ -14,6 +14,11 @@ import sys
 from pathlib import Path
 
 import jvm_protos_ab as ab
+from workload_catalog import (
+    expected_result,
+    select_workloads,
+    source_for,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 TRUFFLE = ROOT / "truffle"
@@ -28,22 +33,6 @@ PROTOS_MAIN = (
     "com.guillermomolina.protos.benchmarks.truffle."
     "ProtosJvmVariantRunner"
 )
-
-WORKLOADS = {
-    "fibonacci": {
-        "protos": TRUFFLE / "workloads/fibonacci/fibonacci.protos",
-        "js": TRUFFLE / "workloads/fibonacci/fibonacci.mjs",
-        "python": TRUFFLE / "workloads/fibonacci/fibonacci.py",
-        "expected": "6765",
-    },
-    "factorial": {
-        "protos": TRUFFLE / "workloads/factorial/factorial.protos",
-        "js": TRUFFLE / "workloads/factorial/factorial.mjs",
-        "python": TRUFFLE / "workloads/factorial/factorial.py",
-        "expected": "2432902008176640000",
-    },
-}
-
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -149,7 +138,7 @@ def command_for(
     workload: str,
 ) -> tuple[list[str], dict[str, object]]:
     cpu, siblings = ab.choose_cpu()
-    source = WORKLOADS[workload][language]
+    source = source_for(workload, language)
 
     base_identity: dict[str, object] = {
         "schema": 1,
@@ -240,10 +229,15 @@ def main() -> None:
     if language not in {"protos", "js", "python"}:
         raise SystemExit("language must be protos, js or python")
 
-    if workload not in WORKLOADS:
+    if workload == "all":
         raise SystemExit(
-            "workload must be fibonacci or factorial"
+            "diagnostics require one selected workload"
         )
+
+    try:
+        select_workloads(workload)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
     command, identity = command_for(language, workload)
     identity["diagnostic"] = diagnostic
@@ -317,7 +311,7 @@ def main() -> None:
             f"{diagnostic} diagnostic failed"
         )
 
-    expected = str(WORKLOADS[workload]["expected"])
+    expected = expected_result(workload)
 
     observed = None
     for line in result.stdout.splitlines():

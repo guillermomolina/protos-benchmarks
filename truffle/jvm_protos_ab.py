@@ -16,6 +16,11 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from workload_catalog import (
+    expected_result,
+    protos_workloads_for_selection,
+)
+
 ROOT = Path(__file__).resolve().parent.parent
 TRUFFLE = ROOT / "truffle"
 CACHE = ROOT / "results" / "local" / "truffle-cache"
@@ -25,17 +30,6 @@ MAIN_CLASS = (
     "com.guillermomolina.protos.benchmarks.truffle."
     "ProtosJvmVariantRunner"
 )
-
-WORKLOADS = (
-    ("fibonacci", TRUFFLE / "workloads/fibonacci/fibonacci.protos"),
-    ("factorial", TRUFFLE / "workloads/factorial/factorial.protos"),
-)
-
-EXPECTED = {
-    "fibonacci": "6765",
-    "factorial": "2432902008176640000",
-}
-
 
 def capture(*command: str, cwd: Path | None = None) -> str:
     result = subprocess.run(
@@ -217,10 +211,48 @@ def cache_key(value: dict[str, object]) -> str:
 
 def prepare_variant(item: dict[str, object]) -> str:
     repo = item["repo"]
-    revision = item["revision"]
+    revision = str(item["revision"])
+
+    runner_class = (
+        TRUFFLE
+        / "target/classes/com/guillermomolina/protos/benchmarks"
+        / "truffle/ProtosJvmVariantRunner.class"
+    )
+
+    repo_class = (
+        repo
+        / "target/classes/com/guillermomolina/protos/execution"
+        / "ProtosStandaloneHostedSession.class"
+    )
+
+    cp_dir = WORK / "classpath"
+    cp_file = cp_dir / f"{revision}.txt"
+
+    if (
+        runner_class.is_file()
+        and repo_class.is_file()
+        and cp_file.is_file()
+        and cp_file.read_text(encoding="utf-8").strip()
+    ):
+        print(
+            f"prepare={item['version']} "
+            f"revision={revision} action=reuse",
+            flush=True,
+        )
+
+        return os.pathsep.join(
+            [
+                str(TRUFFLE / "target" / "classes"),
+                str(repo / "target" / "classes"),
+                cp_file.read_text(
+                    encoding="utf-8"
+                ).strip(),
+            ]
+        )
 
     print(
-        f"prepare={item['version']} revision={revision}",
+        f"prepare={item['version']} "
+        f"revision={revision} action=build",
         flush=True,
     )
 
@@ -237,9 +269,10 @@ def prepare_variant(item: dict[str, object]) -> str:
         check=True,
     )
 
-    cp_dir = WORK / "classpath"
-    cp_dir.mkdir(parents=True, exist_ok=True)
-    cp_file = cp_dir / f"{revision}.txt"
+    cp_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     subprocess.run(
         [
@@ -254,7 +287,14 @@ def prepare_variant(item: dict[str, object]) -> str:
         check=True,
     )
 
-    dependency_cp = cp_file.read_text(encoding="utf-8").strip()
+    dependency_cp = cp_file.read_text(
+        encoding="utf-8"
+    ).strip()
+
+    if not dependency_cp:
+        raise RuntimeError(
+            f"empty dependency classpath: {cp_file}"
+        )
 
     return os.pathsep.join(
         [
@@ -375,7 +415,7 @@ def execute_case(
 
     observation = parse_output(result.stdout)
 
-    expected = EXPECTED[workload]
+    expected = expected_result(workload)
 
     if observation["result"] != expected:
         raise RuntimeError(
@@ -396,19 +436,10 @@ def main() -> None:
 
     selected = os.environ.get("WORKLOAD", "all")
 
-    if selected not in {"all", "fibonacci", "factorial"}:
-        raise SystemExit(
-            "WORKLOAD must be all, fibonacci or factorial"
-        )
-
-    workloads = (
-        WORKLOADS
-        if selected == "all"
-        else tuple(
-            item for item in WORKLOADS
-            if item[0] == selected
-        )
-    )
+    try:
+        workloads = protos_workloads_for_selection(selected)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
     warmup = 5
     steady = 10

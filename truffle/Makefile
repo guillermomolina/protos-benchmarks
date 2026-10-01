@@ -2,7 +2,7 @@
 # ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina.
 # See LICENSE.TXT at the repository root.
 
-.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare
+.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results
 
 MAIN_CLASS := com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner
 
@@ -52,6 +52,18 @@ native-smoke:
 
 native-benchmark:
 	python3 native_matrix.py benchmark $(WORKLOAD)
+
+
+retain-results:
+	python3 retain_results.py retain \
+		--work-item "$(WORK_ITEM)" \
+		--producer-revision "$(PRODUCER_REVISION)" \
+		--workloads "$(RETAIN_WORKLOADS)" \
+		--expect "$(EXPECTED_RETAINED)"
+
+verify-retained-results:
+	python3 retain_results.py verify \
+		--work-item "$(WORK_ITEM)"
 
 clean:
 	mvn -q clean

@@ -19,7 +19,7 @@ WORKLOAD ?= all
 LANGUAGE ?= protos
 PROTOS_REPO ?= .work/protos-ab/0.3.128
 
-.PHONY: truffle-compile truffle-correctness truffle-jvm-smoke truffle-jvm-benchmark truffle-jvm-ab truffle-native-setup truffle-native-smoke truffle-native-benchmark truffle-clean truffle-prepare
+.PHONY: truffle-compile truffle-correctness truffle-jvm-smoke truffle-jvm-benchmark truffle-jvm-ab truffle-native-setup truffle-native-smoke truffle-native-benchmark truffle-clean truffle-prepare truffle-retain-results truffle-verify-retained-results
 
 include docker/Makefile
 
@@ -63,6 +63,18 @@ truffle-native-smoke:
 
 truffle-native-benchmark:
 	$(MAKE) -C $(TRUFFLE_DIR) native-benchmark
+
+
+truffle-retain-results:
+	$(MAKE) -C $(TRUFFLE_DIR) retain-results \
+		WORK_ITEM="$(WORK_ITEM)" \
+		PRODUCER_REVISION="$(PRODUCER_REVISION)" \
+		RETAIN_WORKLOADS="$(RETAIN_WORKLOADS)" \
+		EXPECTED_RETAINED="$(EXPECTED_RETAINED)"
+
+truffle-verify-retained-results:
+	$(MAKE) -C $(TRUFFLE_DIR) verify-retained-results \
+		WORK_ITEM="$(WORK_ITEM)"
 
 truffle-clean:
 	$(MAKE) -C $(TRUFFLE_DIR) clean

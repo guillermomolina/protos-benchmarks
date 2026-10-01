@@ -13,9 +13,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-import jvm_protos_ab as ab
+import jvm_matrix as matrix
 from workload_catalog import (
     expected_result,
+    jvm_sample_calls,
     select_workloads,
     source_for,
 )
@@ -29,11 +30,6 @@ COMMON_MAIN = (
     "com.guillermomolina.protos.benchmarks.truffle."
     "TruffleJvmRunner"
 )
-PROTOS_MAIN = (
-    "com.guillermomolina.protos.benchmarks.truffle."
-    "ProtosJvmVariantRunner"
-)
-
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
 
@@ -94,131 +90,75 @@ def common_classpath() -> str:
     )
 
 
-def protos_classpath(
-    item: dict[str, object],
-) -> str:
-    revision = str(item["revision"])
-
-    runner_class = (
-        TRUFFLE
-        / "target/classes/com/guillermomolina/protos/benchmarks"
-        / "truffle/ProtosJvmVariantRunner.class"
-    )
-
-    repo_class = (
-        item["repo"]
-        / "target/classes/com/guillermomolina/protos/execution"
-        / "ProtosStandaloneHostedSession.class"
-    )
-
-    cp_file = (
-        ROOT
-        / ".work/protos-ab/classpath"
-        / f"{revision}.txt"
-    )
-
-    if (
-        not runner_class.is_file()
-        or not repo_class.is_file()
-        or not cp_file.is_file()
-    ):
-        return ab.prepare_variant(item)
-
-    return os.pathsep.join(
-        [
-            str(TRUFFLE / "target" / "classes"),
-            str(item["repo"] / "target" / "classes"),
-            cp_file.read_text(encoding="utf-8").strip(),
-        ]
-    )
-
-
 def command_for(
     language: str,
     workload: str,
 ) -> tuple[list[str], dict[str, object]]:
-    cpu, siblings = ab.choose_cpu()
+    cpu, siblings = matrix.choose_cpu()
     source = source_for(workload, language)
+    sample_calls = jvm_sample_calls(workload)
+
+    warmup = 5
+    steady = 10
+
+    classpath = common_classpath()
 
     base_identity: dict[str, object] = {
-        "schema": 1,
-        "definition": "jvm-diagnostic-v1",
+        "schema": 2,
+        "definition": "jvm-diagnostic-v2",
+        "mode": "jvm",
         "language": language,
         "workload": workload,
         "source_sha256": sha256_file(source),
-        "java_version": ab.capture("java", "-version"),
+        "harness_revision": matrix.benchmark_revision(),
+        "harness_dirty": matrix.benchmark_dirty(),
+        "diagnostic_sha256": sha256_file(Path(__file__)),
+        "runner_sha256": sha256_file(
+            TRUFFLE
+            / "src/main/java/com/guillermomolina/protos"
+            / "benchmarks/truffle/TruffleJvmRunner.java"
+        ),
+        "catalog_sha256": sha256_file(
+            TRUFFLE / "workloads" / "catalog.json"
+        ),
+        "pom_sha256": sha256_file(TRUFFLE / "pom.xml"),
+        "java_version": matrix.command_version(
+            "java",
+            "-version",
+        ),
         "cpu": cpu,
         "cpu_siblings": siblings,
+        "warmup_iterations": warmup,
+        "steady_iterations": steady,
+        "sample_calls": sample_calls,
     }
 
     if language == "protos":
-        repo_arg = os.environ.get(
-            "PROTOS_REPO",
-            ".work/protos-ab/0.3.128",
-        )
+        base_identity["protos"] = matrix.protos_identity()
 
-        item = ab.variant(repo_arg)
-        classpath = protos_classpath(item)
-
-        base_identity.update(
-            {
-                "protos_revision": item["revision"],
-                "protos_version": item["version"],
-                "protos_core_sha256": item["core_sha256"],
-            }
-        )
-
-        command = [
-            "taskset",
-            "-c",
-            str(cpu),
-            "java",
-            "-cp",
-            classpath,
-            PROTOS_MAIN,
-            str(item["core"]),
-            str(source),
-            "5",
-            "10",
-        ]
-
-    else:
-        classpath = common_classpath()
-
-        base_identity.update(
-            {
-                "pom_sha256": sha256_file(TRUFFLE / "pom.xml"),
-                "runner_sha256": sha256_file(
-                    TRUFFLE
-                    / "src/main/java/com/guillermomolina/protos"
-                    / "benchmarks/truffle/TruffleJvmRunner.java"
-                ),
-            }
-        )
-
-        command = [
-            "taskset",
-            "-c",
-            str(cpu),
-            "java",
-            "-cp",
-            classpath,
-            COMMON_MAIN,
-            "measure",
-            language,
-            str(source),
-            "5",
-            "10",
-        ]
+    command = [
+        "taskset",
+        "-c",
+        str(cpu),
+        "java",
+        "-cp",
+        classpath,
+        COMMON_MAIN,
+        "measure",
+        language,
+        str(source),
+        str(warmup),
+        str(steady),
+        str(sample_calls),
+    ]
 
     return command, base_identity
-
 
 def main() -> None:
     if len(sys.argv) != 4:
         raise SystemExit(
             "usage: jvm_diagnostic.py <jfr|igv> "
-            "<protos|js|python> <fibonacci|factorial>"
+            "<protos|js|python> <workload>"
         )
 
     diagnostic, language, workload = sys.argv[1:]

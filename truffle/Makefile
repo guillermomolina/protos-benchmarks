@@ -8,7 +8,6 @@ MAIN_CLASS := com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner
 
 WORKLOAD ?= all
 LANGUAGE ?= protos
-PROTOS_REPO ?= .work/protos-ab/0.3.128
 
 prepare:
 	python3 prepare.py
@@ -33,10 +32,10 @@ jvm-ab:
 
 
 jvm-jfr:
-	PROTOS_REPO=$(PROTOS_REPO) python3 jvm_diagnostic.py jfr $(LANGUAGE) $(WORKLOAD)
+	python3 jvm_diagnostic.py jfr $(LANGUAGE) $(WORKLOAD)
 
 jvm-igv:
-	PROTOS_REPO=$(PROTOS_REPO) python3 jvm_diagnostic.py igv $(LANGUAGE) $(WORKLOAD)
+	python3 jvm_diagnostic.py igv $(LANGUAGE) $(WORKLOAD)
 
 native-jfr:
 	@printf '%s\n' 'mode=native diagnostic=jfr status=N/A reason=pinned-native-runtime-not-built-and-validated-with-jfr-support'

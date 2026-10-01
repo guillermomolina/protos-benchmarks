@@ -24,7 +24,17 @@ from workload_catalog import (
 ROOT = Path(__file__).resolve().parent.parent
 TRUFFLE = ROOT / "truffle"
 CACHE = ROOT / "results" / "local" / "truffle-cache"
+PREPARE_STATE = ROOT / ".work" / "truffle-prepare"
+AB_ROOT = ROOT / ".work" / "protos-ab"
+PROTOS_WORKSPACE = Path("/workspaces/protos")
+
 MAIN_CLASS = "com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner"
+
+REFERENCE_WARMUP = 30
+REFERENCE_STEADY = 10
+STABILITY_WINDOW = 5
+STABILITY_MEDIAN_DRIFT_PCT = 15.0
+STABILITY_MAD_PCT = 20.0
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -108,14 +118,49 @@ def command_version(*command: str) -> str:
     return result.stdout.strip()
 
 
-def git_value(*args: str) -> str:
+def git_capture(
+    repo: Path,
+    *args: str,
+) -> str:
     result = subprocess.run(
-        ["git", "-C", "/workspaces/protos", *args],
+        ["git", "-C", str(repo), *args],
         check=True,
         text=True,
         stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
     )
     return result.stdout.strip()
+
+
+def benchmark_revision() -> str:
+    return git_capture(ROOT, "rev-parse", "HEAD")
+
+
+def benchmark_dirty() -> bool:
+    return bool(
+        git_capture(
+            ROOT,
+            "status",
+            "--porcelain",
+            "--untracked-files=all",
+        )
+    )
+
+
+def require_clean_reference_harness() -> None:
+    changed = git_capture(
+        ROOT,
+        "status",
+        "--porcelain",
+        "--untracked-files=all",
+    )
+
+    if changed:
+        raise RuntimeError(
+            "reference measurement requires a clean "
+            "published benchmark harness revision:\n"
+            + changed
+        )
 
 
 def protos_maven_version() -> str:
@@ -173,7 +218,7 @@ def protos_maven_version() -> str:
     )
 
 
-def protos_identity() -> dict[str, str]:
+def protos_identity() -> dict[str, object]:
     version = protos_maven_version()
 
     jar = (
@@ -184,15 +229,99 @@ def protos_identity() -> dict[str, str]:
     )
 
     if not jar.is_file():
-        raise RuntimeError(f"Protos JVM artifact not found: {jar}")
+        raise RuntimeError(
+            f"Protos JVM artifact not found: {jar}; "
+            "run make truffle-prepare"
+        )
+
+    stamp = PREPARE_STATE / f"jvm-{version}.json"
+
+    if not stamp.is_file():
+        raise RuntimeError(
+            f"prepared JVM identity missing: {stamp}; "
+            "run make truffle-prepare"
+        )
+
+    state = json.loads(
+        stamp.read_text(encoding="utf-8")
+    )
+
+    artifact_revision = state.get("revision")
+    artifact_version = state.get("version")
+    prepared_jar_sha = state.get("jar_sha256")
+    actual_jar_sha = sha256_file(jar)
+
+    if (
+        not isinstance(artifact_revision, str)
+        or len(artifact_revision) != 40
+    ):
+        raise RuntimeError(
+            "prepared JVM artifact revision is invalid"
+        )
+
+    if artifact_version != version:
+        raise RuntimeError(
+            "prepared JVM artifact version mismatch: "
+            f"{artifact_version} != {version}"
+        )
+
+    if prepared_jar_sha != actual_jar_sha:
+        raise RuntimeError(
+            "prepared JVM artifact hash mismatch"
+        )
+
+    artifact_checkout = (
+        AB_ROOT
+        / version.removesuffix("-SNAPSHOT")
+    )
+
+    checkout_revision = git_capture(
+        artifact_checkout,
+        "rev-parse",
+        "HEAD",
+    )
+
+    if checkout_revision != artifact_revision:
+        raise RuntimeError(
+            "prepared checkout revision mismatch: "
+            f"{checkout_revision} != {artifact_revision}"
+        )
+
+    artifact_core_sha = sha256_tree(
+        artifact_checkout
+        / "protos"
+        / "lib"
+        / "core"
+    )
+
+    workspace_core_sha = sha256_tree(
+        PROTOS_WORKSPACE
+        / "protos"
+        / "lib"
+        / "core"
+    )
+
+    if workspace_core_sha != artifact_core_sha:
+        raise RuntimeError(
+            "workspace Core differs from prepared "
+            "JVM artifact Core"
+        )
 
     return {
-        "version": version,
-        "revision": git_value("rev-parse", "HEAD"),
-        "jar_sha256": sha256_file(jar),
-        "core_sha256": sha256_tree(
-            Path("/workspaces/protos/protos/lib/core")
-        ),
+        "artifact": {
+            "version": version,
+            "revision": artifact_revision,
+            "jar_sha256": actual_jar_sha,
+        },
+        "core": {
+            "workspace_revision": git_capture(
+                PROTOS_WORKSPACE,
+                "rev-parse",
+                "HEAD",
+            ),
+            "artifact_revision": artifact_revision,
+            "sha256": workspace_core_sha,
+        },
     }
 
 
@@ -202,19 +331,29 @@ def identity(
     source: Path,
     cpu: int,
     siblings: list[int],
+    profile: str,
     warmup: int,
     steady: int,
 ) -> dict[str, object]:
     data: dict[str, object] = {
-        "schema": 1,
+        "schema": 2,
+        "measurement_definition":
+            "jvm-cross-truffle-v2",
         "mode": "jvm",
+        "profile": profile,
         "language": language,
         "workload": workload,
         "source_sha256": sha256_file(source),
+        "harness_revision": benchmark_revision(),
+        "harness_dirty": benchmark_dirty(),
+        "matrix_sha256": sha256_file(Path(__file__)),
         "runner_sha256": sha256_file(
             TRUFFLE
             / "src/main/java/com/guillermomolina/protos/benchmarks"
             / "truffle/TruffleJvmRunner.java"
+        ),
+        "catalog_sha256": sha256_file(
+            TRUFFLE / "workloads" / "catalog.json"
         ),
         "pom_sha256": sha256_file(TRUFFLE / "pom.xml"),
         "warmup_iterations": warmup,
@@ -226,6 +365,15 @@ def identity(
         "kernel": platform.release(),
         "java_version": command_version("java", "-version"),
     }
+
+    if profile == "benchmark":
+        data["steady_state_admission"] = {
+            "window": STABILITY_WINDOW,
+            "median_drift_pct_max":
+                STABILITY_MEDIAN_DRIFT_PCT,
+            "mad_pct_max":
+                STABILITY_MAD_PCT,
+        }
 
     if language == "protos":
         data["protos"] = protos_identity()
@@ -239,7 +387,9 @@ def cache_key(data: dict[str, object]) -> str:
 
 
 
-def summarize_output(output: str) -> str | None:
+def parse_output(
+    output: str,
+) -> dict[str, object] | None:
     setup_ns: int | None = None
     cold: list[int] = []
     warmup: list[int] = []
@@ -253,10 +403,13 @@ def summarize_output(output: str) -> str | None:
 
     for line in output.splitlines():
         if line.startswith("setup_ns="):
-            setup_ns = int(line.split("=", 1)[1])
+            setup_ns = int(
+                line.split("=", 1)[1]
+            )
             continue
 
         match = sample_pattern.match(line)
+
         if match:
             phase = match.group(1)
             elapsed = int(match.group(2))
@@ -273,24 +426,204 @@ def summarize_output(output: str) -> str | None:
         if line.startswith("result="):
             result_value = line.split("=", 1)[1]
 
-    if setup_ns is None or not cold or not steady or result_value is None:
+    if (
+        setup_ns is None
+        or not cold
+        or not steady
+        or result_value is None
+    ):
         print(output, end="")
         return None
+
+    return {
+        "setup_ns": setup_ns,
+        "cold_ns": cold[0],
+        "warmup_ns": warmup,
+        "steady_ns": steady,
+        "result": result_value,
+    }
+
+
+def median_absolute_deviation(
+    values: list[int],
+) -> float:
+    median = float(statistics.median(values))
+
+    return float(
+        statistics.median(
+            [
+                abs(value - median)
+                for value in values
+            ]
+        )
+    )
+
+
+def stability_window(
+    samples: list[int],
+) -> dict[str, object]:
+    required = STABILITY_WINDOW * 2
+
+    if len(samples) < required:
+        return {
+            "status": "NOT_STABLE",
+            "reason": "insufficient-samples",
+            "required_samples": required,
+            "actual_samples": len(samples),
+        }
+
+    previous = samples[
+        -required:-STABILITY_WINDOW
+    ]
+    latest = samples[
+        -STABILITY_WINDOW:
+    ]
+
+    previous_p50 = float(
+        statistics.median(previous)
+    )
+    latest_p50 = float(
+        statistics.median(latest)
+    )
+
+    drift_pct = (
+        abs(latest_p50 - previous_p50)
+        / previous_p50
+        * 100.0
+    )
+
+    previous_mad_pct = (
+        median_absolute_deviation(previous)
+        / previous_p50
+        * 100.0
+    )
+
+    latest_mad_pct = (
+        median_absolute_deviation(latest)
+        / latest_p50
+        * 100.0
+    )
+
+    stable = (
+        drift_pct <= STABILITY_MEDIAN_DRIFT_PCT
+        and previous_mad_pct <= STABILITY_MAD_PCT
+        and latest_mad_pct <= STABILITY_MAD_PCT
+    )
+
+    return {
+        "status": "PASS" if stable else "NOT_STABLE",
+        "previous_p50_ns": previous_p50,
+        "latest_p50_ns": latest_p50,
+        "median_drift_pct": drift_pct,
+        "previous_mad_pct": previous_mad_pct,
+        "latest_mad_pct": latest_mad_pct,
+    }
+
+
+def reference_admission(
+    warmup: list[int],
+    steady: list[int],
+) -> dict[str, object]:
+    warmup_check = stability_window(warmup)
+    steady_check = stability_window(steady)
+
+    admitted = (
+        warmup_check["status"] == "PASS"
+        and steady_check["status"] == "PASS"
+    )
+
+    return {
+        "status":
+            "PASS" if admitted else "NOT_STABLE",
+        "warmup": warmup_check,
+        "steady": steady_check,
+    }
+
+
+def summarize_output(
+    output: str,
+    profile: str,
+) -> tuple[str | None, dict[str, object] | None]:
+    parsed = parse_output(output)
+
+    if parsed is None:
+        return None, None
+
+    setup_ns = int(parsed["setup_ns"])
+    cold_ns = int(parsed["cold_ns"])
+
+    warmup = [
+        int(value)
+        for value in parsed["warmup_ns"]
+    ]
+
+    steady = [
+        int(value)
+        for value in parsed["steady_ns"]
+    ]
+
+    result_value = str(parsed["result"])
 
     def ms(ns: float) -> float:
         return ns / 1_000_000.0
 
     print(f"setup_ms={ms(setup_ns):.3f}")
-    print(f"cold_ms={ms(cold[0]):.3f}")
+    print(f"cold_ms={ms(cold_ns):.3f}")
 
     if warmup:
-        print(f"warmup_last_ms={ms(warmup[-1]):.3f}")
+        print(
+            f"warmup_last_ms={ms(warmup[-1]):.3f}"
+        )
 
-    print(f"steady_p50_ms={ms(statistics.median(steady)):.3f}")
-    print(f"steady_min_ms={ms(min(steady)):.3f}")
-    print(f"steady_max_ms={ms(max(steady)):.3f}")
+    print(
+        "steady_p50_ms="
+        f"{ms(statistics.median(steady)):.3f}"
+    )
+    print(
+        f"steady_min_ms={ms(min(steady)):.3f}"
+    )
+    print(
+        f"steady_max_ms={ms(max(steady)):.3f}"
+    )
     print(f"result={result_value}")
-    return result_value
+
+    if profile != "benchmark":
+        print("reference_admission=N/A")
+        return result_value, None
+
+    admission = reference_admission(
+        warmup,
+        steady,
+    )
+
+    for name in ("warmup", "steady"):
+        check = admission[name]
+
+        print(
+            f"{name}_stability="
+            f"{check['status']}"
+        )
+
+        if "median_drift_pct" in check:
+            print(
+                f"{name}_median_drift_pct="
+                f"{float(check['median_drift_pct']):.2f}"
+            )
+            print(
+                f"{name}_previous_mad_pct="
+                f"{float(check['previous_mad_pct']):.2f}"
+            )
+            print(
+                f"{name}_latest_mad_pct="
+                f"{float(check['latest_mad_pct']):.2f}"
+            )
+
+    print(
+        "reference_admission="
+        f"{admission['status']}"
+    )
+
+    return result_value, admission
 
 
 def require_expected(
@@ -311,6 +644,7 @@ def run_case(
     source: Path,
     cpu: int,
     siblings: list[int],
+    profile: str,
     warmup: int,
     steady: int,
 ) -> None:
@@ -320,6 +654,7 @@ def run_case(
         source,
         cpu,
         siblings,
+        profile,
         warmup,
         steady,
     )
@@ -333,10 +668,32 @@ def run_case(
     print(f"cpu_siblings={','.join(map(str, siblings))}")
 
     if cache_file.is_file():
-        cached = json.loads(cache_file.read_text(encoding="utf-8"))
+        cached = json.loads(
+            cache_file.read_text(encoding="utf-8")
+        )
+
         print("cache=hit")
-        actual = summarize_output(cached["output"])
+
+        actual, admission = summarize_output(
+            cached["output"],
+            profile,
+        )
+
         require_expected(workload, actual)
+
+        if (
+            profile == "benchmark"
+            and (
+                admission is None
+                or admission["status"] != "PASS"
+            )
+        ):
+            raise RuntimeError(
+                f"{language}/{workload}: "
+                "cached reference is not "
+                "steady-state admitted"
+            )
+
         return
 
     print("cache=miss")
@@ -373,12 +730,33 @@ def run_case(
             f"benchmark failed for {language}/{workload}"
         )
 
+    actual, admission = summarize_output(
+        result.stdout,
+        profile,
+    )
+
+    require_expected(workload, actual)
+
+    if (
+        profile == "benchmark"
+        and (
+            admission is None
+            or admission["status"] != "PASS"
+        )
+    ):
+        raise RuntimeError(
+            f"{language}/{workload}: "
+            "reference_admission=NOT_STABLE; "
+            "measurement not accepted into cache"
+        )
+
     CACHE.mkdir(parents=True, exist_ok=True)
 
     cache_file.write_text(
         json.dumps(
             {
                 "identity": ident,
+                "admission": admission,
                 "output": result.stdout,
             },
             indent=2,
@@ -387,9 +765,6 @@ def run_case(
         + "\n",
         encoding="utf-8",
     )
-
-    actual = summarize_output(result.stdout)
-    require_expected(workload, actual)
 
 
 def compile_runner() -> None:
@@ -421,7 +796,8 @@ def main() -> None:
     if mode == "smoke":
         warmup, steady = 2, 3
     else:
-        warmup, steady = 5, 10
+        warmup = REFERENCE_WARMUP
+        steady = REFERENCE_STEADY
 
     cpu, siblings = choose_cpu()
 
@@ -432,6 +808,7 @@ def main() -> None:
                 *case,
                 cpu,
                 siblings,
+                mode,
                 warmup,
                 steady,
             ),
@@ -445,6 +822,9 @@ def main() -> None:
     )
 
     if needs_measurement:
+        if mode == "benchmark":
+            require_clean_reference_harness()
+
         compile_runner()
 
     print("mode=jvm-matrix")
@@ -457,6 +837,7 @@ def main() -> None:
             *case,
             cpu,
             siblings,
+            mode,
             warmup,
             steady,
         )

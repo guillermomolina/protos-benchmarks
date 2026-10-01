@@ -36,6 +36,8 @@ REFERENCE_STEADY = 10
 STABILITY_WINDOW = 5
 STABILITY_MEDIAN_DRIFT_PCT = 15.0
 STABILITY_MAD_PCT = 20.0
+STABILITY_MAX_INTERNAL_GAP_PCT = 20.0
+STABILITY_MIN_GAP_CLUSTER_SIZE = 3
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -374,6 +376,10 @@ def identity(
                 STABILITY_MEDIAN_DRIFT_PCT,
             "mad_pct_max":
                 STABILITY_MAD_PCT,
+            "max_internal_gap_pct":
+                STABILITY_MAX_INTERNAL_GAP_PCT,
+            "min_gap_cluster_size":
+                STABILITY_MIN_GAP_CLUSTER_SIZE,
         }
 
     if language == "protos":
@@ -491,6 +497,73 @@ def median_absolute_deviation(
     )
 
 
+def internal_gap_check(
+    samples: list[int],
+) -> dict[str, object]:
+    ordered = sorted(samples)
+    count = len(ordered)
+
+    candidates = []
+
+    for index in range(count - 1):
+        left_count = index + 1
+        right_count = count - left_count
+
+        if (
+            left_count < STABILITY_MIN_GAP_CLUSTER_SIZE
+            or right_count < STABILITY_MIN_GAP_CLUSTER_SIZE
+        ):
+            continue
+
+        low = ordered[index]
+        high = ordered[index + 1]
+        gap = high - low
+
+        candidates.append(
+            (
+                gap,
+                low,
+                high,
+                left_count,
+                right_count,
+            )
+        )
+
+    if not candidates:
+        return {
+            "status": "NOT_STABLE",
+            "reason": "insufficient-gap-cluster-samples",
+        }
+
+    gap, low, high, left_count, right_count = max(
+        candidates
+    )
+
+    median = float(statistics.median(ordered))
+
+    gap_pct = (
+        float(gap)
+        / median
+        * 100.0
+    )
+
+    stable = (
+        gap_pct
+        <= STABILITY_MAX_INTERNAL_GAP_PCT
+    )
+
+    return {
+        "status":
+            "PASS" if stable else "NOT_STABLE",
+        "largest_internal_gap_ns": gap,
+        "largest_internal_gap_pct": gap_pct,
+        "gap_low_ns": low,
+        "gap_high_ns": high,
+        "gap_left_count": left_count,
+        "gap_right_count": right_count,
+    }
+
+
 def stability_window(
     samples: list[int],
 ) -> dict[str, object]:
@@ -536,10 +609,15 @@ def stability_window(
         * 100.0
     )
 
+    shape = internal_gap_check(
+        samples[-required:]
+    )
+
     stable = (
         drift_pct <= STABILITY_MEDIAN_DRIFT_PCT
         and previous_mad_pct <= STABILITY_MAD_PCT
         and latest_mad_pct <= STABILITY_MAD_PCT
+        and shape["status"] == "PASS"
     )
 
     return {
@@ -549,6 +627,7 @@ def stability_window(
         "median_drift_pct": drift_pct,
         "previous_mad_pct": previous_mad_pct,
         "latest_mad_pct": latest_mad_pct,
+        "shape": shape,
     }
 
 
@@ -649,6 +728,24 @@ def summarize_output(
                 f"{name}_latest_mad_pct="
                 f"{float(check['latest_mad_pct']):.2f}"
             )
+
+            shape = check.get("shape", {})
+
+            print(
+                f"{name}_shape="
+                f"{shape.get('status')}"
+            )
+
+            if "largest_internal_gap_pct" in shape:
+                print(
+                    f"{name}_largest_internal_gap_pct="
+                    f"{float(shape['largest_internal_gap_pct']):.2f}"
+                )
+                print(
+                    f"{name}_gap_split="
+                    f"{shape['gap_left_count']}:"
+                    f"{shape['gap_right_count']}"
+                )
 
     print(
         "reference_admission="

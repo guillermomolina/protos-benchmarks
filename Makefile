@@ -13,421 +13,53 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-.PHONY: validate test build smoke correctness all inventory igv-analyzer-build igv-analyzer-smoke perf003a-diagnostic perf003a-structural perf003a-structural-resume perf003a-structural-compact perf003a-structural-finalize perf003a-a4a-smoke perf003a-a4a perf003a-a4b-smoke perf003a-a4b perf003a-a4c-smoke perf003a-a4c perf003a-a4d-smoke perf003a-a4d perf003a-a4e-smoke perf003a-a4e perf003a-a4f-smoke perf003a-a4f perf003a-a4g-smoke perf003a-a4g perf003a-a4h-smoke perf003a-a4h perf003a-a4i perf001f-validate perf001f-topology perf001f-build perf001f-correctness perf001f-prepare perf001f-persistent-smoke perf001f-h2-prepare
-.PHONY: perf001f-reference-smoke perf001f-reference
-.PHONY: perf001g-validate perf001g-run
+TRUFFLE_DIR := truffle
 
-validate:
-	./scripts/validate.sh
+WORKLOAD ?= all
+LANGUAGE ?= protos
+PROTOS_REPO ?= .work/protos-ab/0.3.128
 
-test:
-	python3 -m unittest discover -s tests -v
+.PHONY: truffle-compile truffle-correctness truffle-jvm-smoke truffle-jvm-benchmark truffle-jvm-ab truffle-native-setup truffle-native-smoke truffle-native-benchmark truffle-clean
 
-build:
-	python3 runner/bench.py build
+include docker/Makefile
 
-smoke:
-	python3 runner/bench.py smoke
+truffle-compile:
+	$(MAKE) -C $(TRUFFLE_DIR) compile
 
-correctness:
-	python3 runner/bench.py correctness
+truffle-correctness:
+	$(MAKE) -C $(TRUFFLE_DIR) correctness
 
-all:
-	python3 runner/bench.py all
+truffle-jvm-smoke:
+	$(MAKE) -C $(TRUFFLE_DIR) jvm-smoke
 
-inventory:
-	python3 runner/bench.py inventory
+truffle-jvm-benchmark:
+	$(MAKE) -C $(TRUFFLE_DIR) jvm-benchmark
 
-igv-analyzer-build:
-	./scripts/igv_analyzer.sh build
 
-igv-analyzer-smoke:
-	@if [ -n "$(BGV)" ]; then \
-		./scripts/igv_analyzer.sh smoke "$(BGV)"; \
-	else \
-		./scripts/igv_analyzer.sh smoke; \
-	fi
+truffle-jvm-ab:
+	$(MAKE) -C $(TRUFFLE_DIR) jvm-ab
 
-perf003a-diagnostic:
-	./scripts/perf003a_diagnostic.sh .work/perf003-a
 
-perf003a-structural:
-	./scripts/perf003a_structural.sh .work/perf003-a-structural
+truffle-jvm-jfr:
+	$(MAKE) -C $(TRUFFLE_DIR) jvm-jfr LANGUAGE=$(LANGUAGE) WORKLOAD=$(WORKLOAD) PROTOS_REPO=$(PROTOS_REPO)
 
-perf003a-structural-resume:
-	@test -n "$(WORK)" || { echo "usage: make perf003a-structural-resume WORK=<existing-run-dir>" >&2; exit 2; }
-	./scripts/perf003a_structural_resume.sh "$(WORK)"
+truffle-jvm-igv:
+	$(MAKE) -C $(TRUFFLE_DIR) jvm-igv LANGUAGE=$(LANGUAGE) WORKLOAD=$(WORKLOAD) PROTOS_REPO=$(PROTOS_REPO)
 
-perf003a-structural-compact:
-	@test -n "$(WORK)" || { echo "usage: make perf003a-structural-compact WORK=<existing-run-dir>" >&2; exit 2; }
-	./scripts/perf003a_structural_compact.sh "$(WORK)"
+truffle-native-jfr:
+	$(MAKE) -C $(TRUFFLE_DIR) native-jfr
 
-perf003a-structural-finalize:
-	@test -n "$(WORK)" || { echo "WORK is required" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "OUT is required" >&2; exit 2; }
-	@test -n "$(CAPTURE_HARNESS_REVISION)" || { echo "CAPTURE_HARNESS_REVISION is required" >&2; exit 2; }
-	@test -n "$(COMPACT_EXTRACTOR_REVISION)" || { echo "COMPACT_EXTRACTOR_REVISION is required" >&2; exit 2; }
-	@test -n "$(FINALIZATION_BASE)" || { echo "FINALIZATION_BASE is required" >&2; exit 2; }
-	python3 scripts/perf003a_structural_finalize_compact.py --config config/perf003a-structural.json --run-dir "$(WORK)" --output-dir "$(OUT)" --capture-harness-revision "$(CAPTURE_HARNESS_REVISION)" --compact-extractor-revision "$(COMPACT_EXTRACTOR_REVISION)" --finalization-base "$(FINALIZATION_BASE)"
+truffle-native-igv:
+	$(MAKE) -C $(TRUFFLE_DIR) native-igv
 
-perf003a-a4a-smoke:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4a-smoke OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4a_boundary_experiment.sh --smoke "$(OUT)"
+truffle-native-setup:
+	$(MAKE) -C $(TRUFFLE_DIR) native-setup
 
-perf003a-a4a:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4a OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4a_boundary_experiment.sh --run "$(OUT)"
+truffle-native-smoke:
+	$(MAKE) -C $(TRUFFLE_DIR) native-smoke
 
-perf003a-a4b-smoke:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4b-smoke OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4b_invoke_entry_experiment.sh --smoke "$(OUT)"
+truffle-native-benchmark:
+	$(MAKE) -C $(TRUFFLE_DIR) native-benchmark
 
-perf003a-a4b:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4b OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4b_invoke_entry_experiment.sh --run "$(OUT)"
-
-perf003a-a4c-smoke:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4c-smoke OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4c_immediate_method_experiment.sh --smoke "$(OUT)"
-
-perf003a-a4c:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4c OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4c_immediate_method_experiment.sh --run "$(OUT)"
-
-perf003a-a4d-smoke:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4d-smoke OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4d_immediate_activation_experiment.sh --smoke "$(OUT)"
-
-perf003a-a4d:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4d OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4d_immediate_activation_experiment.sh --run "$(OUT)"
-
-perf003a-a4e-smoke:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4e-smoke OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4e_prepared_dynamic_control_experiment.sh --smoke "$(OUT)"
-
-perf003a-a4e:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4e OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4e_prepared_dynamic_control_experiment.sh --run "$(OUT)"
-
-perf003a-a4f-smoke:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4f-smoke OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4f_prepared_replay_activation_experiment.sh --smoke "$(OUT)"
-
-perf003a-a4f:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4f OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4f_prepared_replay_activation_experiment.sh --run "$(OUT)"
-
-perf003a-a4g-smoke:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4g-smoke OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4g_preparation_smoke.sh "$(OUT)"
-
-perf003a-a4g:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4g OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4g_experiment.sh "$(OUT)"
-
-perf003a-a4h-smoke:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4h-smoke OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4h_sync_task_split_smoke.sh "$(OUT)"
-
-perf003a-a4h:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4h OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4h_experiment.sh "$(OUT)"
-
-perf003a-a4i:
-	@test -n "$(OUT)" || { echo "usage: make perf003a-a4i OUT=<output-dir>" >&2; exit 2; }
-	./scripts/perf003a_a4i_experiment.sh "$(OUT)"
-
-perf001f-validate:
-	python3 runner/perf001f.py validate
-
-perf001f-topology:
-	python3 runner/perf001f.py topology
-
-perf001f-build:
-	python3 runner/perf001f.py build
-
-perf001f-correctness:
-	python3 runner/perf001f.py correctness
-
-perf001f-prepare:
-	python3 runner/perf001f.py prepare
-
-perf001f-persistent-smoke:
-	python3 runner/perf001f.py persistent-smoke
-
-perf001f-h2-prepare:
-	python3 runner/perf001f.py h2-prepare
-
-perf001f-reference-smoke:
-	python3 runner/perf001f_reference.py --smoke
-
-perf001f-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf001f-reference HARNESS_REVISION=<published-H3-SHA>" >&2; exit 2; }
-	python3 runner/perf001f_reference.py --run --harness-revision "$(HARNESS_REVISION)" --output-dir results/perf001-f
-
-perf001g-validate:
-	python3 runner/perf001g.py validate
-
-perf001g-run:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf001g-run HARNESS_REVISION=<published-G1-SHA> OUT=<output-dir>" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf001g-run HARNESS_REVISION=<published-G1-SHA> OUT=<output-dir>" >&2; exit 2; }
-	python3 runner/perf001g.py run --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf006d-validate perf006d-smoke
-
-perf006d-validate:
-	python3 runner/perf006d.py validate
-
-perf006d-smoke:
-	python3 runner/perf006d.py smoke
-
-.PHONY: perf006d-timing-smoke perf006d-reference
-
-perf006d-timing-smoke:
-	python3 runner/perf006d.py timing-smoke
-
-perf006d-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf006d-reference HARNESS_REVISION=<published-D2A-SHA> OUT=results/perf006-d2" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf006d-reference HARNESS_REVISION=<published-D2A-SHA> OUT=results/perf006-d2" >&2; exit 2; }
-	python3 runner/perf006d.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf006d3-validate perf006d3-smoke perf006d3-reference
-
-perf006d3-validate:
-	python3 runner/perf006d3.py validate
-
-perf006d3-smoke:
-	python3 runner/perf006d3.py smoke
-
-perf006d3-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf006d3-reference HARNESS_REVISION=<published-D3A-SHA> OUT=results/perf006-d3" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf006d3-reference HARNESS_REVISION=<published-D3A-SHA> OUT=results/perf006-d3" >&2; exit 2; }
-	python3 runner/perf006d3.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf008-validate perf008-smoke perf008-reference
-
-perf008-validate:
-	python3 runner/perf008.py validate
-
-perf008-smoke:
-	python3 runner/perf008.py smoke
-
-perf008-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf008-reference HARNESS_REVISION=<published-PERF008-SHA> OUT=results/perf008" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf008-reference HARNESS_REVISION=<published-PERF008-SHA> OUT=results/perf008" >&2; exit 2; }
-	python3 runner/perf008.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf010a-validate perf010a-smoke perf010a-reference
-
-# ABLATION selects which PERF010-A causal ablation slice runs: 1 (semantic/helper Bytecode
-# dispatch, config/perf010a.json), 2 (ProtosActivation.lookup, config/perf010a-2.json), or 3
-# (ProtosObjectValue.readLocalSlot's redundant containsKey+get, config/perf010a-3.json).
-# Defaults to 1 so these targets' existing behavior (and PERF010A_ABLATION_1's already-
-# retained results/perf010a-1 evidence) is unchanged when ABLATION is not passed explicitly.
-ABLATION ?= 1
-
-perf010a-validate:
-	python3 runner/perf010a.py validate --ablation $(ABLATION)
-
-perf010a-smoke:
-	python3 runner/perf010a.py smoke --ablation $(ABLATION)
-
-perf010a-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-reference HARNESS_REVISION=<published-PERF010A-SHA> OUT=results/perf010a-1 [ABLATION=1|2|3]" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf010a-reference HARNESS_REVISION=<published-PERF010A-SHA> OUT=results/perf010a-1 [ABLATION=1|2|3]" >&2; exit 2; }
-	python3 runner/perf010a.py reference --ablation $(ABLATION) --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-.PHONY: perf004a-validate perf004a-smoke perf004a-reference
-
-perf004a-validate:
-	python3 runner/perf004a.py validate
-
-perf004a-smoke:
-	python3 runner/perf004a.py smoke
-
-perf004a-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004a-reference HARNESS_REVISION=<published-A2-SHA>" >&2; exit 2; }
-	python3 runner/perf004a.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir results/perf004-a
-
-.PHONY: perf004b1-validate perf004b1-reference
-
-perf004b1-validate:
-	python3 runner/perf004b.py validate
-
-perf004b1-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b1-reference HARNESS_REVISION=<published-B1-SHA> OUT=results/perf004-b1" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf004b1-reference HARNESS_REVISION=<published-B1-SHA> OUT=results/perf004-b1" >&2; exit 2; }
-	python3 runner/perf004b.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf004b2a-validate perf004b2a-reference
-
-perf004b2a-validate:
-	python3 runner/perf004b2.py validate
-
-perf004b2a-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b2a-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2a" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf004b2a-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2a" >&2; exit 2; }
-	python3 runner/perf004b2.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf004b2b-validate perf004b2b-reference
-
-perf004b2b-validate:
-	python3 runner/perf004b2b.py validate
-
-perf004b2b-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b2b-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2b" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf004b2b-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2b" >&2; exit 2; }
-	python3 runner/perf004b2b.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf004b2c-validate perf004b2c-reference
-
-perf004b2c-validate:
-	python3 runner/perf004b2c.py validate
-
-perf004b2c-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b2c-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2c" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf004b2c-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2c" >&2; exit 2; }
-	python3 runner/perf004b2c.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf004b2c-validate perf004b2c-reference
-
-perf004b2c-validate:
-	python3 runner/perf004b2c.py validate
-
-perf004b2c-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b2c-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2c" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf004b2c-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2c" >&2; exit 2; }
-	python3 runner/perf004b2c.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf004b2d-validate perf004b2d-reference
-
-perf004b2d-validate:
-	python3 runner/perf004b2d.py validate
-
-perf004b2d-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf004b2d-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2d" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf004b2d-reference HARNESS_REVISION=<published-SHA> OUT=results/perf004-b2d" >&2; exit 2; }
-	python3 runner/perf004b2d.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir "$(OUT)"
-
-.PHONY: perf010a-post-i068-validate perf010a-post-i068-smoke perf010a-post-i068-reference
-
-perf010a-post-i068-validate:
-	python3 runner/perf010a_post_i068_baseline.py validate
-
-perf010a-post-i068-smoke:
-	python3 runner/perf010a_post_i068_baseline.py smoke
-
-perf010a-post-i068-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-post-i068-reference HARNESS_REVISION=<published-PERF010A-post-I068-SHA>" >&2; exit 2; }
-	python3 runner/perf010a_post_i068_baseline.py reference --harness-revision "$(HARNESS_REVISION)" --output-dir results/perf010a-post-i068-baseline
-
-.PHONY: perf010a-post-i072-validate perf010a-post-i072-smoke perf010a-post-i072-reference
-
-# INTERVENTION_REVISION/INTERVENTION_VERSION identify the final published I072 Phase E product
-# revision under comparison; they are run-time evidence identity supplied by the human, never
-# harness constants (see runner/perf010a_post_i072_fprime.py's require_intervention_identity).
-# The control revision is fixed in config/perf010a-post-i072-fprime.json and is not a make
-# variable.
-perf010a-post-i072-validate:
-	python3 runner/perf010a_post_i072_fprime.py validate
-
-perf010a-post-i072-smoke:
-	@test -n "$(INTERVENTION_REVISION)" || { echo "usage: make perf010a-post-i072-smoke INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version>" >&2; exit 2; }
-	@test -n "$(INTERVENTION_VERSION)" || { echo "usage: make perf010a-post-i072-smoke INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version>" >&2; exit 2; }
-	python3 runner/perf010a_post_i072_fprime.py smoke --intervention-revision "$(INTERVENTION_REVISION)" --intervention-version "$(INTERVENTION_VERSION)"
-
-perf010a-post-i072-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-post-i072-reference HARNESS_REVISION=<published-PERF010A-post-I072-SHA> INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version> OUT=results/perf010a-post-i072-fprime" >&2; exit 2; }
-	@test -n "$(INTERVENTION_REVISION)" || { echo "usage: make perf010a-post-i072-reference HARNESS_REVISION=<published-PERF010A-post-I072-SHA> INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version> OUT=results/perf010a-post-i072-fprime" >&2; exit 2; }
-	@test -n "$(INTERVENTION_VERSION)" || { echo "usage: make perf010a-post-i072-reference HARNESS_REVISION=<published-PERF010A-post-I072-SHA> INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version> OUT=results/perf010a-post-i072-fprime" >&2; exit 2; }
-	@test -n "$(OUT)" || { echo "usage: make perf010a-post-i072-reference HARNESS_REVISION=<published-PERF010A-post-I072-SHA> INTERVENTION_REVISION=<exact-40-hex-I072-final-SHA> INTERVENTION_VERSION=<exact-I072-final-version> OUT=results/perf010a-post-i072-fprime" >&2; exit 2; }
-	python3 runner/perf010a_post_i072_fprime.py reference --harness-revision "$(HARNESS_REVISION)" --intervention-revision "$(INTERVENTION_REVISION)" --intervention-version "$(INTERVENTION_VERSION)" --output-dir "$(OUT)"
-
-.PHONY: perf010a-context-materialization-validate perf010a-context-materialization-smoke perf010a-context-materialization-measure
-
-perf010a-context-materialization-validate:
-	python3 runner/perf010a_context_materialization.py validate
-
-perf010a-context-materialization-smoke:
-	python3 runner/perf010a_context_materialization.py smoke
-
-perf010a-context-materialization-measure:
-	python3 runner/perf010a_context_materialization.py measure
-
-.PHONY: perf014-validate perf014-smoke perf014-reference
-
-# PERF014 / guillermomolina/protos#725 direct Closure-call final causal timing comparator. Unlike
-# perf010a-post-i072-*, both control and intervention Protos revisions are already published and
-# are pinned constants in config/perf014-direct-closure-call.json and
-# runner/perf014_direct_closure_call.py, so no INTERVENTION_REVISION/INTERVENTION_VERSION make
-# variables are needed here.
-perf014-validate:
-	python3 runner/perf014_direct_closure_call.py validate
-
-perf014-smoke:
-	python3 runner/perf014_direct_closure_call.py smoke
-
-perf014-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf014-reference HARNESS_REVISION=<published-PERF014-harness-SHA>" >&2; exit 2; }
-	python3 runner/perf014_direct_closure_call.py reference --harness-revision "$(HARNESS_REVISION)"
-
-.PHONY: upstream003-validate upstream003-smoke upstream003-reference upstream003-diagnostic
-
-upstream003-validate:
-	python3 runner/upstream003_platform_comparison.py validate
-
-upstream003-smoke:
-	python3 runner/upstream003_platform_comparison.py smoke
-
-upstream003-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make upstream003-reference HARNESS_REVISION=<published-UPSTREAM003-B-harness-SHA> [OUT=<scratch-or-retained-output>]" >&2; exit 2; }
-	python3 runner/upstream003_platform_comparison.py reference --harness-revision "$(HARNESS_REVISION)" $(if $(OUT),--output-dir "$(OUT)",)
-
-upstream003-diagnostic:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make upstream003-diagnostic HARNESS_REVISION=<published-UPSTREAM003-B-harness-SHA> [OUT=<diagnostic-output>]" >&2; exit 2; }
-	python3 runner/upstream003_platform_comparison.py diagnostic --harness-revision "$(HARNESS_REVISION)" $(if $(OUT),--output-dir "$(OUT)",)
-
-.PHONY: dist006d-validate dist006d-smoke dist006d-reference
-
-dist006d-validate:
-	python3 runner/dist006d_baseline.py validate
-
-dist006d-smoke:
-	@test -n "$(PROTOS_REVISION)" || { echo "usage: make dist006d-smoke PROTOS_REVISION=<exact-40-lowercase-hex-Protos-SHA>" >&2; exit 2; }
-	python3 runner/dist006d_baseline.py smoke --protos-revision "$(PROTOS_REVISION)"
-
-dist006d-reference:
-	@test -n "$(PROTOS_REVISION)" || { echo "usage: make dist006d-reference PROTOS_REVISION=<exact-40-lowercase-hex-Protos-SHA> HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA> [OUT=results/dist006d-baseline]" >&2; exit 2; }
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make dist006d-reference PROTOS_REVISION=<exact-40-lowercase-hex-Protos-SHA> HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA> [OUT=results/dist006d-baseline]" >&2; exit 2; }
-	python3 runner/dist006d_baseline.py reference --protos-revision "$(PROTOS_REVISION)" --harness-revision "$(HARNESS_REVISION)" $(if $(OUT),--output-dir "$(OUT)",)
-
-.PHONY: perf016-post-step3-validate perf016-post-step3-smoke perf016-post-step3-reference
-
-# PERF016 / guillermomolina/protos#727 post-Step-3 controlled timing comparator. Both Protos
-# revisions and the retained-evidence namespace are pinned in config/perf016-post-step3.json, so
-# the only run-time input is the exact published harness SHA of the retained reference run.
-perf016-post-step3-validate:
-	python3 runner/perf016_post_step3.py validate
-
-perf016-post-step3-smoke:
-	python3 runner/perf016_post_step3.py smoke
-
-perf016-post-step3-reference:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf016-post-step3-reference HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA>" >&2; exit 2; }
-	python3 runner/perf016_post_step3.py reference --harness-revision "$(HARNESS_REVISION)"
-
-.PHONY: perf010a-hot-root-validate perf010a-hot-root-smoke perf010a-hot-root-diagnostic
-
-# PERF010-A / guillermomolina/protos#691 current-25.4 hot-root lifecycle and compiled-shape
-# discriminator harness. The exact Protos revision and version are pinned in
-# config/perf010a-hot-root-lifecycle.json, so the only run-time input is the exact published harness
-# SHA of the retained diagnostic run. This is not PERF020: no control/intervention pair, no timing.
-perf010a-hot-root-validate:
-	python3 runner/perf010a_hot_root.py validate
-
-perf010a-hot-root-smoke:
-	python3 runner/perf010a_hot_root.py smoke
-
-perf010a-hot-root-diagnostic:
-	@test -n "$(HARNESS_REVISION)" || { echo "usage: make perf010a-hot-root-diagnostic HARNESS_REVISION=<published-exact-40-lowercase-hex-harness-SHA>" >&2; exit 2; }
-	python3 runner/perf010a_hot_root.py diagnostic --harness-revision "$(HARNESS_REVISION)"
+truffle-clean:
+	$(MAKE) -C $(TRUFFLE_DIR) clean

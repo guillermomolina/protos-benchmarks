@@ -1,0 +1,27 @@
+{
+  "name": "Protos Benchmarks Development",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/protos-benchmarks,type=bind,consistency=cached",
+  "workspaceFolder": "/workspaces/protos-benchmarks",
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "anthropic.claude-code"
+      ]
+    }
+  },
+  "runArgs": [
+    "--userns=host"
+  ],
+  "initializeCommand": "mkdir -p \"${localEnv:HOME}/.claude\"",
+  "mounts": [
+    "source=${localWorkspaceFolder}/../protos,target=/workspaces/protos,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached"
+  ]
+}

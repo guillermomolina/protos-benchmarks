@@ -33,7 +33,8 @@ public final class TruffleJvmRunner {
             throw new IllegalArgumentException(
                     "usage: TruffleJvmRunner correctness <protos|js|python> <source>\n"
                     + "   or: TruffleJvmRunner measure <protos|js|python> <source> "
-                    + "<warmup-iterations> <steady-iterations>");
+                    + "<warmup-iterations> <steady-iterations> "
+                    + "[sample-calls]");
         }
 
         String command = args[0];
@@ -49,20 +50,28 @@ public final class TruffleJvmRunner {
                 System.out.println(runCorrectness(language, sourcePath));
             }
             case "measure" -> {
-                if (args.length != 5) {
+                if (args.length != 5 && args.length != 6) {
                     throw new IllegalArgumentException(
                             "measure requires <language> <source> "
-                            + "<warmup-iterations> <steady-iterations>");
+                            + "<warmup-iterations> <steady-iterations> "
+                            + "[sample-calls]");
                 }
 
-                int warmupIterations = positiveInt(args[3], "warmup-iterations");
-                int steadyIterations = positiveInt(args[4], "steady-iterations");
+                int warmupIterations =
+                        positiveInt(args[3], "warmup-iterations");
+                int steadyIterations =
+                        positiveInt(args[4], "steady-iterations");
+                int sampleCalls =
+                        args.length == 6
+                                ? positiveInt(args[5], "sample-calls")
+                                : 1;
 
                 runMeasurement(
                         language,
                         sourcePath,
                         warmupIterations,
-                        steadyIterations);
+                        steadyIterations,
+                        sampleCalls);
             }
             default -> throw new IllegalArgumentException(
                     "unsupported command: " + command);
@@ -93,13 +102,15 @@ public final class TruffleJvmRunner {
             String language,
             Path sourcePath,
             int warmupIterations,
-            int steadyIterations) throws Exception {
+            int steadyIterations,
+            int sampleCalls) throws Exception {
 
         System.out.println("mode=jvm");
         System.out.println("language=" + language);
         System.out.println("source=" + sourcePath);
         System.out.println("warmup_iterations=" + warmupIterations);
         System.out.println("steady_iterations=" + steadyIterations);
+        System.out.println("sample_calls=" + sampleCalls);
 
         if ("protos".equals(language)) {
             long setupStart = System.nanoTime();
@@ -116,7 +127,8 @@ public final class TruffleJvmRunner {
                 measureInvocations(
                         invocation,
                         warmupIterations,
-                        steadyIterations);
+                        steadyIterations,
+                        sampleCalls);
             }
             return;
         }
@@ -138,14 +150,16 @@ public final class TruffleJvmRunner {
             measureInvocations(
                     invocation,
                     warmupIterations,
-                    steadyIterations);
+                    steadyIterations,
+                    sampleCalls);
         }
     }
 
     private static void measureInvocations(
             Invocation invocation,
             int warmupIterations,
-            int steadyIterations) throws Exception {
+            int steadyIterations,
+            int sampleCalls) throws Exception {
 
         long start = System.nanoTime();
         String expected = invocation.invoke();
@@ -155,23 +169,41 @@ public final class TruffleJvmRunner {
 
         for (int i = 1; i <= warmupIterations; i++) {
             start = System.nanoTime();
-            String result = invocation.invoke();
-            elapsed = System.nanoTime() - start;
 
-            requireSameResult(expected, result);
+            invokeRepeated(
+                    invocation,
+                    expected,
+                    sampleCalls);
+
+            elapsed = System.nanoTime() - start;
             printSample("warmup", i, elapsed);
         }
 
         for (int i = 1; i <= steadyIterations; i++) {
             start = System.nanoTime();
-            String result = invocation.invoke();
-            elapsed = System.nanoTime() - start;
 
-            requireSameResult(expected, result);
+            invokeRepeated(
+                    invocation,
+                    expected,
+                    sampleCalls);
+
+            elapsed = System.nanoTime() - start;
             printSample("steady", i, elapsed);
         }
 
         System.out.println("result=" + expected);
+    }
+
+    private static void invokeRepeated(
+            Invocation invocation,
+            String expected,
+            int count) throws Exception {
+
+        for (int i = 0; i < count; i++) {
+            requireSameResult(
+                    expected,
+                    invocation.invoke());
+        }
     }
 
     private static void printSample(

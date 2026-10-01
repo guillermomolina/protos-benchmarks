@@ -45,6 +45,10 @@ def catalog() -> dict[str, dict[str, object]]:
 
         name = entry.get("id")
         expected = entry.get("expected")
+        sample_calls = entry.get(
+            "jvm_sample_calls",
+            1,
+        )
         sources = entry.get("sources")
 
         if not isinstance(name, str) or not name:
@@ -56,6 +60,15 @@ def catalog() -> dict[str, dict[str, object]]:
         if not isinstance(expected, str) or not expected:
             raise RuntimeError(
                 f"{name}: expected result must be a non-empty string"
+            )
+
+        if (
+            not isinstance(sample_calls, int)
+            or isinstance(sample_calls, bool)
+            or sample_calls <= 0
+        ):
+            raise RuntimeError(
+                f"{name}: jvm_sample_calls must be a positive integer"
             )
 
         if not isinstance(sources, dict):
@@ -89,6 +102,7 @@ def catalog() -> dict[str, dict[str, object]]:
 
         result[name] = {
             "expected": expected,
+            "jvm_sample_calls": sample_calls,
             "sources": resolved,
         }
 
@@ -128,6 +142,17 @@ def source_for(workload: str, language: str) -> Path:
         raise ValueError(f"unknown workload: {workload}")
 
     return item["sources"][language]
+
+
+def jvm_sample_calls(
+    workload: str,
+) -> int:
+    item = catalog().get(workload)
+
+    if item is None:
+        raise ValueError(f"unknown workload: {workload}")
+
+    return int(item["jvm_sample_calls"])
 
 
 def expected_result(workload: str) -> str:

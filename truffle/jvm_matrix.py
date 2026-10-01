@@ -19,6 +19,7 @@ from pathlib import Path
 from workload_catalog import (
     cases_for_selection,
     expected_result,
+    jvm_sample_calls,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -361,6 +362,7 @@ def identity(
         "pom_sha256": sha256_file(TRUFFLE / "pom.xml"),
         "warmup_iterations": warmup,
         "steady_iterations": steady,
+        "sample_calls": jvm_sample_calls(workload),
         "cpu": cpu,
         "cpu_siblings": siblings,
         "cpu_model": cpu_model(),
@@ -429,6 +431,7 @@ def parse_output(
     output: str,
 ) -> dict[str, object] | None:
     setup_ns: int | None = None
+    sample_calls = 1
     cold: list[int] = []
     warmup: list[int] = []
     steady: list[int] = []
@@ -442,6 +445,12 @@ def parse_output(
     for line in output.splitlines():
         if line.startswith("setup_ns="):
             setup_ns = int(
+                line.split("=", 1)[1]
+            )
+            continue
+
+        if line.startswith("sample_calls="):
+            sample_calls = int(
                 line.split("=", 1)[1]
             )
             continue
@@ -475,6 +484,7 @@ def parse_output(
 
     return {
         "setup_ns": setup_ns,
+        "sample_calls": sample_calls,
         "cold_ns": cold[0],
         "warmup_ns": warmup,
         "steady_ns": steady,
@@ -661,6 +671,7 @@ def summarize_output(
         return None, None
 
     setup_ns = int(parsed["setup_ns"])
+    sample_calls = int(parsed["sample_calls"])
     cold_ns = int(parsed["cold_ns"])
 
     warmup = [
@@ -686,9 +697,18 @@ def summarize_output(
             f"warmup_last_ms={ms(warmup[-1]):.3f}"
         )
 
+    steady_p50 = float(
+        statistics.median(steady)
+    )
+
     print(
         "steady_p50_ms="
-        f"{ms(statistics.median(steady)):.3f}"
+        f"{ms(steady_p50):.3f}"
+    )
+    print(f"sample_calls={sample_calls}")
+    print(
+        "steady_amortized_p50_ms="
+        f"{ms(steady_p50 / sample_calls):.6f}"
     )
     print(
         f"steady_min_ms={ms(min(steady)):.3f}"
@@ -793,8 +813,11 @@ def run_case(
 
     print()
     print(f"=== {language} {workload} ===")
+    sample_calls = jvm_sample_calls(workload)
+
     print(f"cpu={cpu}")
     print(f"cpu_siblings={','.join(map(str, siblings))}")
+    print(f"sample_calls={sample_calls}")
 
     if cache_file.is_file():
         cached = json.loads(
@@ -841,7 +864,8 @@ def run_case(
         f"-Dexec.mainClass={MAIN_CLASS}",
         (
             "-Dexec.args="
-            f"measure {language} {relative_source} {warmup} {steady}"
+            f"measure {language} {relative_source} "
+            f"{warmup} {steady} {sample_calls}"
         ),
     ]
 

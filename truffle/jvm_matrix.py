@@ -24,13 +24,14 @@ from workload_catalog import (
 ROOT = Path(__file__).resolve().parent.parent
 TRUFFLE = ROOT / "truffle"
 CACHE = ROOT / "results" / "local" / "truffle-cache"
+REJECTED = ROOT / "results" / "local" / "truffle-rejected"
 PREPARE_STATE = ROOT / ".work" / "truffle-prepare"
 AB_ROOT = ROOT / ".work" / "protos-ab"
 PROTOS_WORKSPACE = Path("/workspaces/protos")
 
 MAIN_CLASS = "com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner"
 
-REFERENCE_WARMUP = 30
+REFERENCE_WARMUP = 60
 REFERENCE_STEADY = 10
 STABILITY_WINDOW = 5
 STABILITY_MEDIAN_DRIFT_PCT = 15.0
@@ -385,6 +386,37 @@ def cache_key(data: dict[str, object]) -> str:
     raw = json.dumps(data, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(raw).hexdigest()
 
+
+def write_rejected_observation(
+    key: str,
+    identity_data: dict[str, object],
+    admission: dict[str, object] | None,
+    output: str,
+) -> Path:
+    REJECTED.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    path = REJECTED / f"{key}.json"
+
+    path.write_text(
+        json.dumps(
+            {
+                "identity": identity_data,
+                "admission": admission,
+                "evidence_status":
+                    "REJECTED_NOT_STABLE",
+                "output": output,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    return path
 
 
 def parse_output(
@@ -744,10 +776,23 @@ def run_case(
             or admission["status"] != "PASS"
         )
     ):
+        rejected = write_rejected_observation(
+            key,
+            ident,
+            admission,
+            result.stdout,
+        )
+
+        print(
+            "rejected_raw="
+            + str(rejected.relative_to(ROOT))
+        )
+
         raise RuntimeError(
             f"{language}/{workload}: "
             "reference_admission=NOT_STABLE; "
-            "measurement not accepted into cache"
+            "measurement retained as rejected local raw "
+            "and not accepted into timing cache"
         )
 
     CACHE.mkdir(parents=True, exist_ok=True)

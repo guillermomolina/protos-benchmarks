@@ -1,0 +1,84 @@
+{
+  "admission": {
+    "scope": "steady-only",
+    "status": "PASS",
+    "steady": {
+      "latest_mad_pct": 0.8176159988108213,
+      "latest_p50_ns": 52150276.0,
+      "median_drift_pct": 0.38046247901076163,
+      "previous_mad_pct": 0.12282842496556697,
+      "previous_p50_ns": 52349446.0,
+      "shape": {
+        "gap_high_ns": 52615007,
+        "gap_left_count": 7,
+        "gap_low_ns": 52382308,
+        "gap_right_count": 3,
+        "largest_internal_gap_ns": 232699,
+        "largest_internal_gap_pct": 0.44478407293832617,
+        "status": "PASS"
+      },
+      "status": "PASS"
+    },
+    "warmup": {
+      "latest_mad_pct": 0.9622221837002691,
+      "latest_p50_ns": 52783755.0,
+      "median_drift_pct": 0.4392276677714323,
+      "previous_mad_pct": 0.9581426176672783,
+      "previous_p50_ns": 52552928.0,
+      "shape": {
+        "gap_high_ns": 53522655,
+        "gap_left_count": 6,
+        "gap_low_ns": 52783755,
+        "gap_right_count": 4,
+        "largest_internal_gap_ns": 738900,
+        "largest_internal_gap_pct": 1.4029300694801639,
+        "status": "PASS"
+      },
+      "status": "PASS"
+    }
+  },
+  "identity": {
+    "ab_sha256": "04fb697148f63b13c980bc3a5e320e1e667ab207c95a4b84826d1df36a57b7ae",
+    "architecture": "x86_64",
+    "catalog_sha256": "23509226db6b9c15b41d7bb75a10fb8fbdac5f7553439c4fee5f9cf128cebe7c",
+    "cpu": 0,
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8362 CPU @ 2.80GHz",
+    "cpu_siblings": [
+      0
+    ],
+    "experiment": "PERF025",
+    "graalvm_version": "25.4.4.1.1",
+    "harness_dirty": false,
+    "harness_revision": "6d48bf8f41ef5890e5678cd0b5c6c75694f61339",
+    "java_version": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)",
+    "kernel": "7.2.7-arch1-1",
+    "language": "protos",
+    "matrix_sha256": "54826133f73a97589b31c9d594b659e19c56ada8aa5c674f20f3a074b3a361ea",
+    "measurement_definition": "jvm-protos-session-ab-v3",
+    "mode": "jvm",
+    "profile": "benchmark",
+    "protos_core_sha256": "cc5c6f797f45c64b54d5a5e087efbe43f3879b31b30722e9afe58da22c13fcca",
+    "protos_dependency_classpath_sha256": "fce40a309e44e6438b2eaf5f6932a3d49acc809260f46a22a2f6e15f670fad37",
+    "protos_revision": "f3c44554ddfb9004c43dbde5197b9805990f8a4a",
+    "protos_version": "0.3.129-SNAPSHOT",
+    "role": "PRE_A",
+    "run_mode": "dynamic",
+    "runner_classes_sha256": "e898206d68760dc532d4833e248fe6bfb8130c6f4baa9c7f2ba793c62d73a664",
+    "runner_sha256": "de35161a16baa629baafac3a45c630d54d37b8127b6cece87385dedf9897a2bd",
+    "sample_calls": 10000,
+    "schema": 2,
+    "source_sha256": "9b611aa15067adacd900b6acfff975e64caa72af738fc4d9d97c7e8efd8b6bdf",
+    "steady_iterations": 10,
+    "steady_state_admission": {
+      "mad_pct_max": 20.0,
+      "max_internal_gap_pct": 20.0,
+      "median_drift_pct_max": 15.0,
+      "min_gap_cluster_size": 3,
+      "scope": "steady-only",
+      "window": 5
+    },
+    "warmup_iterations": 50,
+    "workload": "primitive-method-call"
+  },
+  "output": "WARNING: A restricted method in java.lang.System has been called\nWARNING: java.lang.System::load has been called by com.oracle.truffle.polyglot.JDKSupport in an unnamed module (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-api/25.4.4.1.1/truffle-api-25.4.4.1.1.jar)\nWARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module\nWARNING: Restricted methods will be blocked in a future release unless native access is enabled\n\nWARNING: A terminally deprecated method in sun.misc.Unsafe has been called\nWARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-runtime/25.4.4.1.1/truffle-runtime-25.4.4.1.1.jar)\nWARNING: Please consider reporting this to the maintainers of class com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime\nWARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release\nmode=jvm\nlanguage=protos\nrun_mode=dynamic\nsource=/workspaces/protos-benchmarks/truffle/workloads/primitive-method-call/primitive-method-call.protos\nwarmup_iterations=50\nsteady_iterations=10\nsample_calls=10000\nsetup_ns=1341719792\nsample phase=cold iteration=1 elapsed_ns=25300711\nsample phase=warmup iteration=1 elapsed_ns=1526750787\nsample phase=warmup iteration=2 elapsed_ns=424083694\nsample phase=warmup iteration=3 elapsed_ns=354285519\nsample phase=warmup iteration=4 elapsed_ns=323237069\nsample phase=warmup iteration=5 elapsed_ns=267748390\nsample phase=warmup iteration=6 elapsed_ns=227206180\nsample phase=warmup iteration=7 elapsed_ns=201849698\nsample phase=warmup iteration=8 elapsed_ns=190291124\nsample phase=warmup iteration=9 elapsed_ns=193730757\nsample phase=warmup iteration=10 elapsed_ns=173642244\nsample phase=warmup iteration=11 elapsed_ns=167511026\nsample phase=warmup iteration=12 elapsed_ns=177264226\nsample phase=warmup iteration=13 elapsed_ns=93226562\nsample phase=warmup iteration=14 elapsed_ns=89717707\nsample phase=warmup iteration=15 elapsed_ns=102123302\nsample phase=warmup iteration=16 elapsed_ns=88786508\nsample phase=warmup iteration=17 elapsed_ns=89329222\nsample phase=warmup iteration=18 elapsed_ns=90569398\nsample phase=warmup iteration=19 elapsed_ns=99131729\nsample phase=warmup iteration=20 elapsed_ns=92422072\nsample phase=warmup iteration=21 elapsed_ns=91620123\nsample phase=warmup iteration=22 elapsed_ns=89529292\nsample phase=warmup iteration=23 elapsed_ns=91777262\nsample phase=warmup iteration=24 elapsed_ns=105233183\nsample phase=warmup iteration=25 elapsed_ns=93255257\nsample phase=warmup iteration=26 elapsed_ns=88175686\nsample phase=warmup iteration=27 elapsed_ns=101004325\nsample phase=warmup iteration=28 elapsed_ns=89543097\nsample phase=warmup iteration=29 elapsed_ns=91126908\nsample phase=warmup iteration=30 elapsed_ns=93430915\nsample phase=warmup iteration=31 elapsed_ns=87547995\nsample phase=warmup iteration=32 elapsed_ns=87161634\nsample phase=warmup iteration=33 elapsed_ns=88307141\nsample phase=warmup iteration=34 elapsed_ns=69370855\nsample phase=warmup iteration=35 elapsed_ns=52812681\nsample phase=warmup iteration=36 elapsed_ns=53379910\nsample phase=warmup iteration=37 elapsed_ns=60483239\nsample phase=warmup iteration=38 elapsed_ns=52096077\nsample phase=warmup iteration=39 elapsed_ns=51755331\nsample phase=warmup iteration=40 elapsed_ns=52593359\nsample phase=warmup iteration=41 elapsed_ns=52301266\nsample phase=warmup iteration=42 elapsed_ns=52552928\nsample phase=warmup iteration=43 elapsed_ns=52049396\nsample phase=warmup iteration=44 elapsed_ns=60644272\nsample phase=warmup iteration=45 elapsed_ns=53522655\nsample phase=warmup iteration=46 elapsed_ns=53576867\nsample phase=warmup iteration=47 elapsed_ns=62845384\nsample phase=warmup iteration=48 elapsed_ns=52521471\nsample phase=warmup iteration=49 elapsed_ns=52783755\nsample phase=warmup iteration=50 elapsed_ns=52275858\nsample phase=steady iteration=1 elapsed_ns=51969472\nsample phase=steady iteration=2 elapsed_ns=52349446\nsample phase=steady iteration=3 elapsed_ns=52285146\nsample phase=steady iteration=4 elapsed_ns=52382308\nsample phase=steady iteration=5 elapsed_ns=59299894\nsample phase=steady iteration=6 elapsed_ns=62582474\nsample phase=steady iteration=7 elapsed_ns=52615007\nsample phase=steady iteration=8 elapsed_ns=52007134\nsample phase=steady iteration=9 elapsed_ns=52150276\nsample phase=steady iteration=10 elapsed_ns=51723887\nresult=1\n"
+}

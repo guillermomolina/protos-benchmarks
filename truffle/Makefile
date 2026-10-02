@@ -2,7 +2,7 @@
 # ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina.
 # See LICENSE.TXT at the repository root.
 
-.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference perf024-rebaseline-validate perf024-rebaseline-prepare perf024-rebaseline-smoke perf024-rebaseline-reference
+.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference perf024-rebaseline-validate perf024-rebaseline-prepare perf024-rebaseline-smoke perf024-rebaseline-reference perf025-e3-validate perf025-e3-prepare perf025-e3-smoke perf025-e3-reference
 
 MAIN_CLASS := com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner
 
@@ -59,6 +59,21 @@ perf024-rebaseline-smoke:
 
 perf024-rebaseline-reference:
 	python3 perf024_rebaseline.py benchmark
+
+# PERF025-E3: PRE_E2/prepared vs E2/prepared (exact parent) on the three
+# primitive embedding workloads, isolating the E2 carrier transport delta.
+# perf025-e3-reference requires a clean published harness.
+perf025-e3-validate:
+	python3 perf025_e3.py validate
+
+perf025-e3-prepare:
+	python3 perf025_e3.py prepare
+
+perf025-e3-smoke:
+	python3 perf025_e3.py smoke
+
+perf025-e3-reference:
+	python3 perf025_e3.py benchmark
 
 
 jvm-jfr:

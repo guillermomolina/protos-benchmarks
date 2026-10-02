@@ -33,6 +33,7 @@ RESULTS = ROOT / "results"
 AB_V2_DEFINITION = "jvm-protos-session-ab-v2"
 AB_V3_DEFINITION = "jvm-protos-session-ab-v3"
 CURRENT_V3_DEFINITION = "jvm-cross-truffle-current-v3"
+CARRIER_E2_DEFINITION = "jvm-protos-carrier-e2-ab-v1"
 
 # PERF023 keeps its original unfiltered selection and class distribution.
 # PERF025 selects only accepted ab-v3 reference observations produced by the
@@ -57,6 +58,13 @@ RETENTION_PROFILES = {
     "perf024-rebaseline": {
         "expected_classes": {
             "jvm-cross-truffle-current-v3-reference": 9,
+        },
+    },
+    # PERF025-E3: accepted carrier-e2-ab-v1 prepared reference observations
+    # only, PRE_E2/E2 x 3 workloads, from the exact clean producer revision.
+    "perf025-e3": {
+        "expected_classes": {
+            "jvm-carrier-e2-ab-v1-reference": 6,
         },
     },
 }
@@ -146,6 +154,16 @@ def classify(
 
     if measurement == "jvm-protos-session-ab-v1":
         return "jvm-ab-reference"
+
+    if measurement == CARRIER_E2_DEFINITION:
+        profile = identity.get("profile")
+
+        if profile == "benchmark":
+            return "jvm-carrier-e2-ab-v1-reference"
+
+        raise RuntimeError(
+            f"{measurement} profile is not retainable: {profile}"
+        )
 
     if measurement == CURRENT_V3_DEFINITION:
         profile = identity.get("profile")
@@ -370,6 +388,7 @@ def validate_cache_entry(
     if identity.get("measurement_definition") in {
         AB_V2_DEFINITION,
         AB_V3_DEFINITION,
+        CARRIER_E2_DEFINITION,
     }:
         for key in (
             "harness_revision",
@@ -468,6 +487,99 @@ def perf024_rebaseline_selected(
         )
 
     return True
+
+
+def perf025_e3_selected(
+    path: Path,
+    producer_revision: str,
+) -> bool:
+    import perf025_e3
+
+    payload = json.loads(
+        path.read_text(encoding="utf-8")
+    )
+    identity = payload.get("identity")
+
+    if (
+        not isinstance(identity, dict)
+        or identity.get("measurement_definition")
+        != CARRIER_E2_DEFINITION
+        or identity.get("profile") != "benchmark"
+        or identity.get("harness_revision") != producer_revision
+        or identity.get("harness_dirty") is not False
+    ):
+        return False
+
+    admission = payload.get("admission")
+
+    if (
+        not isinstance(admission, dict)
+        or admission.get("status") != "PASS"
+        or payload.get("correctness") != "PASS"
+    ):
+        raise RuntimeError(
+            f"{path}: cached carrier-e2 reference is not "
+            "correct and admitted"
+        )
+
+    revisions = {revision for _, revision, _ in perf025_e3.POINTS}
+
+    if (
+        identity.get("run_mode") != perf025_e3.RUN_MODE
+        or identity.get("protos_revision") not in revisions
+        or identity.get("workload") not in perf025_e3.WORKLOADS
+    ):
+        raise RuntimeError(
+            f"{path}: carrier-e2 reference outside the E3 matrix"
+        )
+
+    return True
+
+
+def require_perf025_e3_matrix(
+    entries: list[dict[str, object]],
+    producer_revision: str,
+) -> None:
+    import perf025_e3
+
+    expected = {
+        (role, perf025_e3.RUN_MODE, workload)
+        for role, _, _ in perf025_e3.POINTS
+        for workload in perf025_e3.WORKLOADS
+    }
+    actual = [
+        (
+            entry.get("role"),
+            entry.get("run_mode"),
+            entry.get("workload"),
+        )
+        for entry in entries
+    ]
+
+    if sorted(actual) != sorted(expected):
+        raise RuntimeError(
+            "PERF025-E3 retained matrix mismatch: "
+            f"{sorted(actual)}"
+        )
+
+    revisions = {
+        role: (revision, version)
+        for role, revision, version in perf025_e3.POINTS
+    }
+
+    for entry in entries:
+        if entry.get("harness_revision") != producer_revision:
+            raise RuntimeError(
+                "PERF025-E3 entry harness revision mismatch"
+            )
+
+        if (
+            entry.get("protos_revision"),
+            entry.get("protos_version"),
+        ) != revisions[str(entry.get("role"))]:
+            raise RuntimeError(
+                "PERF025-E3 entry Protos identity mismatch"
+            )
 
 
 def require_perf024_rebaseline_matrix(
@@ -715,6 +827,12 @@ def verify_retained(
             producer_revision,
         )
 
+    if manifest.get("retention_profile") == "perf025-e3":
+        require_perf025_e3_matrix(
+            entries,
+            producer_revision,
+        )
+
     observed_counts = Counter(
         str(entry["measurement_class"])
         for entry in entries
@@ -847,6 +965,15 @@ def retain(
         ):
             continue
 
+        if (
+            profile == "perf025-e3"
+            and not perf025_e3_selected(
+                path,
+                producer_revision,
+            )
+        ):
+            continue
+
         entry = validate_cache_entry(
             path,
             producer_revision,
@@ -888,6 +1015,12 @@ def retain(
 
     if profile == "perf024-rebaseline":
         require_perf024_rebaseline_matrix(
+            entries,
+            producer_revision,
+        )
+
+    if profile == "perf025-e3":
+        require_perf025_e3_matrix(
             entries,
             producer_revision,
         )

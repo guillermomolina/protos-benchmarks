@@ -1124,3 +1124,55 @@ and
 uses `retain-results RETENTION_PROFILE=perf024-rebaseline
 WORK_ITEM=PERF024-REBASELINE EXPECTED_RETAINED=9` into
 `results/perf024-rebaseline/`.
+
+## PERF025-E3 carrier transport A/B
+
+Owner: `guillermomolina/protos#758`. Purpose: isolate the PERF025-E2 guest
+carrier transport delta (per-call `Object[1]`/`Throwable[1]`/`boolean[1]`
+holders, queued lambda and `synchronized`/`wait`/`notifyAll` replaced by one
+typed `CarrierCall<T>` request completed with `LockSupport.park`/`unpark`;
+dedicated carrier, 16 MiB guest stack, `LinkedBlockingQueue`, serialization
+and multi-caller safety unchanged).
+
+Measurement definition `jvm-protos-carrier-e2-ab-v1`. Both points run the
+unchanged `ProtosPreparedVariantRunner` (`prepareTopLevel("run")` once,
+outside timing; `PreparedTopLevel.invoke()` timed; no reflection, no dynamic
+`invokeTopLevel`) on GraalVM 25.4.4.1.1:
+
+| Role   | Protos revision                            | Version          | Run mode |
+|--------|--------------------------------------------|------------------|----------|
+| PRE_E2 | `c1eb2c2e1a811d70fcf09f5526217c1aaf14d141` | 0.3.144-SNAPSHOT | prepared |
+| E2     | `ff618f0dd8ef680f7884c9145552f77912f040a2` | 0.3.145-SNAPSHOT | prepared |
+
+PRE_E2 is E2's exact parent, so the unrelated BUG014 commit is present in
+both comparison ancestry points. PERF025-D3 FINAL
+(`19d7426a5b8f`) is deliberately not the baseline because it would mix BUG014
+into the E2 causal delta.
+
+Workloads (3): `primitive-return-literal`, `primitive-closure-call`,
+`primitive-method-call`. Reference policy is the final PERF025-D3 policy
+unchanged: `sample_calls=10000`, warmup 50, steady 10, steady-only admission
+with the unchanged `jvm_matrix` thresholds (window 5, median drift 15%, MAD
+20%, max internal gap 20%, min gap cluster 3), single pinned CPU, no retry.
+Expected reference observations: 2 x 3 = 6.
+
+Interpretation, per workload only:
+`E2_DELTA = (E2 steady_amortized_p50 / PRE_E2 steady_amortized_p50 - 1) * 100`;
+negative means E2 took less time.
+
+Commands (`make -C truffle ...`): `perf025-e3-validate` (static contract,
+identity, historical D3/PERF023/PERF024 evidence and profile drift),
+`perf025-e3-prepare` (exact checkouts `.work/protos-ab/perf025-e3-pre-e2` and
+`.work/protos-ab/perf025-e3-e2`, prepared runner compiled per exact classpath
+under `.work/perf025-e3/prepared-runner/` and `javap`-checked), `perf025-e3-smoke`
+(6 cases, warmup 2/steady 3 at 100 calls, no cache,
+`timing_interpretation=NONE-smoke`) and `perf025-e3-reference` (clean
+published harness required). Retention uses `retain-results
+RETENTION_PROFILE=perf025-e3 WORK_ITEM=PERF025-E3 EXPECTED_RETAINED=6` into
+`results/perf025-e3/` and selects only `jvm-carrier-e2-ab-v1-reference`
+observations with the exact clean producer revision, `correctness=PASS`,
+admission PASS, `run_mode=prepared`, one of the two pinned revisions and one
+of the three workloads.
+
+PERF025-E3A publishes harness capability only and contains no reference
+result; the single reference and its retention are PERF025-E3B.

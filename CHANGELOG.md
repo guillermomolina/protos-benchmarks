@@ -6,6 +6,8 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Fixed
 
+- Fixed the PERF024 cross-Truffle re-baseline factorial peer sizing: the `jvm-cross-truffle-current-v2` reference at `272a7974` was not admitted because factorial JS/Python samples were still only ~6-8 ms (JS factorial NOT_STABLE). The new `jvm-cross-truffle-current-v3` supersedes v2 and changes only factorial peer `sample_calls` (JS 20,000, Python 25,000); the `perf024-rebaseline` retention profile now selects v3 observations (9). Thresholds, iteration counts, single-CPU policy and the no-retry rule are unchanged.
+
 - Fixed the PERF024 cross-Truffle re-baseline sample sizing: `jvm-cross-truffle-current-v1` used Protos-sized `sample_calls` for every language, so GraalJS/GraalPy samples lasted ~1 ms and its reference at `ca34b345` was not admitted (5/9 NOT_STABLE). The new `jvm-cross-truffle-current-v2` declares fixed `sample_calls` per workload and language (~50 ms per sample), smoke uses those same `sample_calls` and fails if any steady sample is shorter than 20 ms, and the `perf024-rebaseline` retention profile now selects v2 observations. Thresholds, iteration counts, single-CPU policy and the no-retry rule are unchanged.
 
 - Fixed PERF003-A4e conclusion policy so the residual dynamic-control hypothesis is evaluated against the published A4a `invokePrepared` reference (`40`, `48153:150001:150000`) rather than merely against the original control.

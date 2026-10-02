@@ -47,9 +47,14 @@ RESULTS = ROOT / "results"
 # v1 sized every language's sample with Protos' per-call cost, so the
 # peers' samples were ~1 ms and dominated by ms-scale background compiler
 # stalls on the single pinned CPU (v1 reference at ca34b345: 5/9 NOT_STABLE).
-# v2 declares sample_calls per (workload, language) for ~50 ms samples.
-MEASUREMENT_DEFINITION = "jvm-cross-truffle-current-v2"
-SUPERSEDED_DEFINITION = "jvm-cross-truffle-current-v1"
+# v2 declared sample_calls per (workload, language), but its reference at
+# 272a7974 showed factorial JS/Python still at ~6-8 ms/sample (JS factorial
+# NOT_STABLE). v3 raises only the factorial peer sample_calls.
+MEASUREMENT_DEFINITION = "jvm-cross-truffle-current-v3"
+SUPERSEDED_DEFINITIONS = (
+    "jvm-cross-truffle-current-v1",
+    "jvm-cross-truffle-current-v2",
+)
 HISTORICAL_DEFINITION = "jvm-cross-truffle-v2"
 EXPERIMENT = "PERF024"
 WORK_ITEM = "PERF024-REBASELINE"
@@ -116,8 +121,8 @@ SAMPLE_CALLS = {
     ("fibonacci", "js"): 500,
     ("fibonacci", "python"): 500,
     ("factorial", "protos"): 20,
-    ("factorial", "js"): 3_000,
-    ("factorial", "python"): 3_000,
+    ("factorial", "js"): 20_000,
+    ("factorial", "python"): 25_000,
 }
 
 # Smoke gate: every steady smoke sample of every language must last at least
@@ -182,7 +187,7 @@ def check_contract() -> None:
 
     if MEASUREMENT_DEFINITION in {
         HISTORICAL_DEFINITION,
-        SUPERSEDED_DEFINITION,
+        *SUPERSEDED_DEFINITIONS,
         perf025_ab.MEASUREMENT_DEFINITION,
         "jvm-protos-session-ab-v1",
         "jvm-protos-session-ab-v2",
@@ -224,8 +229,8 @@ def check_contract() -> None:
             ("fibonacci", "js"): 500,
             ("fibonacci", "python"): 500,
             ("factorial", "protos"): 20,
-            ("factorial", "js"): 3_000,
-            ("factorial", "python"): 3_000,
+            ("factorial", "js"): 20_000,
+            ("factorial", "python"): 25_000,
         }
         or MIN_SMOKE_SAMPLE_NS != 20_000_000
     ):
@@ -448,7 +453,7 @@ def check_retention_profile() -> None:
         "expected_classes"
     ]
 
-    if classes != {"jvm-cross-truffle-current-v2-reference": 9}:
+    if classes != {"jvm-cross-truffle-current-v3-reference": 9}:
         raise RuntimeError(f"retention profile count: {classes}")
 
     if retain_results.RETENTION_PROFILES["perf025"]["expected_classes"] != {

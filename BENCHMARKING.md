@@ -1059,14 +1059,24 @@ pinned GraalJS/GraalPy JVM peers after PERF025-C1c/PLAT042 B-prime,
 PERF025-C2B and PERF026 removed the helper/callback root topology. Historical
 endpoint `f0791896c3c0` (`0.3.128-SNAPSHOT`) is context only and is not rerun.
 
-Measurement definition `jvm-cross-truffle-current-v2` (the historical
-`jvm-cross-truffle-v2` meaning and its evidence are unchanged). It supersedes
-`jvm-cross-truffle-current-v1`, whose single reference at harness `ca34b345`
-was not admitted (5/9 NOT_STABLE): v1 sized every language's sample with
-Protos' per-call cost, so JS/Python samples lasted ~1 ms and were dominated by
-millisecond-scale background-compilation stalls on the single pinned CPU (a
-non-retained diagnostic showed GC was not the cause). v1 rejected raw stays
-local and is not evidence.
+Measurement definition `jvm-cross-truffle-current-v3` (the historical
+`jvm-cross-truffle-v2` meaning and its evidence are unchanged). It supersedes:
+
+- `jvm-cross-truffle-current-v1` (reference at harness `ca34b345`, not
+  admitted, 5/9 NOT_STABLE): peer samples were generally undersized because
+  every language used Protos' per-call `sample_calls`, so JS/Python samples
+  lasted ~1 ms and were dominated by millisecond-scale background-compilation
+  stalls on the single pinned CPU (a non-retained diagnostic showed GC was not
+  the cause).
+- `jvm-cross-truffle-current-v2` (reference at harness `272a7974`, not
+  admitted): per-language sizing corrected most cases, but factorial JS/Python
+  samples were still only ~6-8 ms and JS factorial was NOT_STABLE.
+
+v3 raises only the factorial peer `sample_calls` (JS 3,000 -> 20,000, Python
+3,000 -> 25,000) to bring those samples into the intended tens-of-milliseconds
+range. Thresholds, warmup/steady counts, CPU policy and the no-retry policy
+are unchanged. v1/v2 rejected raw stays local and is not evidence; v2 ratios
+are not reported.
 
 - CURRENT Protos `19d7426a5b8f0e3b93d36f56aee33377a4ee9985`
   (`0.3.143-SNAPSHOT`), exact managed checkout
@@ -1086,7 +1096,7 @@ workload and language so each steady sample lasts roughly 50 ms:
 | --- | --- | --- | --- | --- | --- |
 | EMBEDDING_FLOOR | `primitive-return-literal` | 10,000 | 500,000 | 500,000 | ns per reusable prepared invocation |
 | GUEST_DOMINATED_CURRENT_STATE | `fibonacci` | 10 | 500 | 500 | ns per complete top-level `run()` |
-| GUEST_DOMINATED_CURRENT_STATE | `factorial` | 20 | 3,000 | 3,000 | ns per complete top-level `run()` |
+| GUEST_DOMINATED_CURRENT_STATE | `factorial` | 20 | 20,000 | 25,000 | ns per complete top-level `run()` |
 
 Ratios compare the per-call amortized p50, so different `sample_calls` per
 language do not change the evidence unit.

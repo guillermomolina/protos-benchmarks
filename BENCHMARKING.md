@@ -1059,8 +1059,14 @@ pinned GraalJS/GraalPy JVM peers after PERF025-C1c/PLAT042 B-prime,
 PERF025-C2B and PERF026 removed the helper/callback root topology. Historical
 endpoint `f0791896c3c0` (`0.3.128-SNAPSHOT`) is context only and is not rerun.
 
-Measurement definition `jvm-cross-truffle-current-v1` (new; the historical
-`jvm-cross-truffle-v2` meaning and its evidence are unchanged):
+Measurement definition `jvm-cross-truffle-current-v2` (the historical
+`jvm-cross-truffle-v2` meaning and its evidence are unchanged). It supersedes
+`jvm-cross-truffle-current-v1`, whose single reference at harness `ca34b345`
+was not admitted (5/9 NOT_STABLE): v1 sized every language's sample with
+Protos' per-call cost, so JS/Python samples lasted ~1 ms and were dominated by
+millisecond-scale background-compilation stalls on the single pinned CPU (a
+non-retained diagnostic showed GC was not the cause). v1 rejected raw stays
+local and is not evidence.
 
 - CURRENT Protos `19d7426a5b8f0e3b93d36f56aee33377a4ee9985`
   (`0.3.143-SNAPSHOT`), exact managed checkout
@@ -1073,12 +1079,17 @@ Measurement definition `jvm-cross-truffle-current-v1` (new; the historical
   longer run inside `mvn exec:java`.
 
 Workloads and policy (50 warmup + 10 steady samples, steady-only admission
-with the unchanged `jvm_matrix` thresholds):
+with the unchanged `jvm_matrix` thresholds). `sample_calls` is fixed per
+workload and language so each steady sample lasts roughly 50 ms:
 
-| Class | Workload | sample_calls | Evidence unit |
-| --- | --- | --- | --- |
-| EMBEDDING_FLOOR | `primitive-return-literal` | 10,000 | ns per reusable prepared invocation |
-| GUEST_DOMINATED_CURRENT_STATE | `fibonacci`, `factorial` | 10 | ns per complete top-level `run()` |
+| Class | Workload | Protos | JS | Python | Evidence unit |
+| --- | --- | --- | --- | --- | --- |
+| EMBEDDING_FLOOR | `primitive-return-literal` | 10,000 | 500,000 | 500,000 | ns per reusable prepared invocation |
+| GUEST_DOMINATED_CURRENT_STATE | `fibonacci` | 10 | 500 | 500 | ns per complete top-level `run()` |
+| GUEST_DOMINATED_CURRENT_STATE | `factorial` | 20 | 3,000 | 3,000 | ns per complete top-level `run()` |
+
+Ratios compare the per-call amortized p50, so different `sample_calls` per
+language do not change the evidence unit.
 
 The historical loop workloads `integer-loop` and `method-call` are
 intentionally excluded: they use the standard Closure selector `while`, which
@@ -1096,7 +1107,9 @@ reference, and is never re-measured for the same identity.
 
 Commands (`make -C truffle ...`): `perf024-rebaseline-validate` (static),
 `perf024-rebaseline-prepare`, `perf024-rebaseline-smoke` (9 cases, warmup
-1/steady 2, sample_calls 10/1, `timing_interpretation=NONE-smoke`) and
+1/steady 2 at the reference `sample_calls`, `timing_interpretation=NONE-smoke`,
+and a sample-size gate that fails if any steady sample is shorter than 20 ms)
+and
 `perf024-rebaseline-reference` (clean published harness required). Retention
 uses `retain-results RETENTION_PROFILE=perf024-rebaseline
 WORK_ITEM=PERF024-REBASELINE EXPECTED_RETAINED=9` into

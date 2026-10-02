@@ -6,6 +6,8 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Fixed
 
+- Fixed the PERF024 cross-Truffle re-baseline sample sizing: `jvm-cross-truffle-current-v1` used Protos-sized `sample_calls` for every language, so GraalJS/GraalPy samples lasted ~1 ms and its reference at `ca34b345` was not admitted (5/9 NOT_STABLE). The new `jvm-cross-truffle-current-v2` declares fixed `sample_calls` per workload and language (~50 ms per sample), smoke uses those same `sample_calls` and fails if any steady sample is shorter than 20 ms, and the `perf024-rebaseline` retention profile now selects v2 observations. Thresholds, iteration counts, single-CPU policy and the no-retry rule are unchanged.
+
 - Fixed PERF003-A4e conclusion policy so the residual dynamic-control hypothesis is evaluated against the published A4a `invokePrepared` reference (`40`, `48153:150001:150000`) rather than merely against the original control.
 - Fixed PERF003-A4c conclusion serialization so `conclusion.txt` contains real newline-delimited records instead of literal `\n` text; add a deterministic serialization fixture.
 - Fixed PERF003-A4c TraceCompilation graph-shape parsing so `Node count`, `Graph Size`, and `Limit` are extracted with real whitespace/digit regex classes instead of doubly escaped literals; add a deterministic fixture for the known `50681:150026:150000` diagnostic shape.

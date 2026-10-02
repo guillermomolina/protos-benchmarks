@@ -44,7 +44,12 @@ HARNESS_CLASSPATH_FILE = WORK / "harness-classpath.txt"
 STAMP = ROOT / ".work" / "truffle-prepare" / "perf024-rebaseline.json"
 RESULTS = ROOT / "results"
 
-MEASUREMENT_DEFINITION = "jvm-cross-truffle-current-v1"
+# v1 sized every language's sample with Protos' per-call cost, so the
+# peers' samples were ~1 ms and dominated by ms-scale background compiler
+# stalls on the single pinned CPU (v1 reference at ca34b345: 5/9 NOT_STABLE).
+# v2 declares sample_calls per (workload, language) for ~50 ms samples.
+MEASUREMENT_DEFINITION = "jvm-cross-truffle-current-v2"
+SUPERSEDED_DEFINITION = "jvm-cross-truffle-current-v1"
 HISTORICAL_DEFINITION = "jvm-cross-truffle-v2"
 EXPERIMENT = "PERF024"
 WORK_ITEM = "PERF024-REBASELINE"
@@ -94,15 +99,31 @@ QUESTION = {
         "relationship is observed among Protos, GraalJS and GraalPy?",
 }
 
-# measurement class -> (warmup, steady, sample_calls)
-REFERENCE_POLICY = {
-    EMBEDDING_FLOOR: (50, 10, 10_000),
-    GUEST_DOMINATED: (50, 10, 10),
+# measurement class -> (warmup, steady)
+REFERENCE_ITERATIONS = {
+    EMBEDDING_FLOOR: (50, 10),
+    GUEST_DOMINATED: (50, 10),
 }
-SMOKE_POLICY = {
-    EMBEDDING_FLOOR: (1, 2, 10),
-    GUEST_DOMINATED: (1, 2, 1),
+SMOKE_ITERATIONS = (1, 2)
+
+# (workload, language) -> sample_calls, fixed and declared; identical for
+# smoke and reference. Sized for roughly 50 ms per steady sample.
+SAMPLE_CALLS = {
+    ("primitive-return-literal", "protos"): 10_000,
+    ("primitive-return-literal", "js"): 500_000,
+    ("primitive-return-literal", "python"): 500_000,
+    ("fibonacci", "protos"): 10,
+    ("fibonacci", "js"): 500,
+    ("fibonacci", "python"): 500,
+    ("factorial", "protos"): 20,
+    ("factorial", "js"): 3_000,
+    ("factorial", "python"): 3_000,
 }
+
+# Smoke gate: every steady smoke sample of every language must last at least
+# this long, so a sample size that cannot amortize ms-scale stalls fails in
+# smoke instead of in the reference.
+MIN_SMOKE_SAMPLE_NS = 20_000_000
 REFERENCE_ADMISSION_SCOPE = "steady-only"
 
 EXPECTED_OBSERVATIONS = len(WORKLOADS) * len(LANGUAGES)
@@ -128,9 +149,17 @@ def capture(*command: str, cwd: Path | None = None) -> str:
 # --------------------------------------------------------------------------
 
 
-def policy(profile: str, workload: str) -> tuple[int, int, int]:
-    table = REFERENCE_POLICY if profile == "benchmark" else SMOKE_POLICY
-    return table[WORKLOADS[workload]]
+def policy(
+    profile: str,
+    workload: str,
+    language: str,
+) -> tuple[int, int, int]:
+    if profile == "benchmark":
+        warmup, steady = REFERENCE_ITERATIONS[WORKLOADS[workload]]
+    else:
+        warmup, steady = SMOKE_ITERATIONS
+
+    return warmup, steady, SAMPLE_CALLS[(workload, language)]
 
 
 def check_contract() -> None:
@@ -153,6 +182,7 @@ def check_contract() -> None:
 
     if MEASUREMENT_DEFINITION in {
         HISTORICAL_DEFINITION,
+        SUPERSEDED_DEFINITION,
         perf025_ab.MEASUREMENT_DEFINITION,
         "jvm-protos-session-ab-v1",
         "jvm-protos-session-ab-v2",
@@ -180,24 +210,40 @@ def check_contract() -> None:
         print(f"workload={workload} expected={expected_result(workload)} "
               f"class={WORKLOADS[workload]}")
 
-    if REFERENCE_POLICY != {
-        EMBEDDING_FLOOR: (50, 10, 10_000),
-        GUEST_DOMINATED: (50, 10, 10),
-    } or SMOKE_POLICY != {
-        EMBEDDING_FLOOR: (1, 2, 10),
-        GUEST_DOMINATED: (1, 2, 1),
-    }:
+    if (
+        REFERENCE_ITERATIONS != {
+            EMBEDDING_FLOOR: (50, 10),
+            GUEST_DOMINATED: (50, 10),
+        }
+        or SMOKE_ITERATIONS != (1, 2)
+        or SAMPLE_CALLS != {
+            ("primitive-return-literal", "protos"): 10_000,
+            ("primitive-return-literal", "js"): 500_000,
+            ("primitive-return-literal", "python"): 500_000,
+            ("fibonacci", "protos"): 10,
+            ("fibonacci", "js"): 500,
+            ("fibonacci", "python"): 500,
+            ("factorial", "protos"): 20,
+            ("factorial", "js"): 3_000,
+            ("factorial", "python"): 3_000,
+        }
+        or MIN_SMOKE_SAMPLE_NS != 20_000_000
+    ):
         raise RuntimeError("sample policy mismatch")
 
     for profile in ("smoke", "benchmark"):
         for workload in WORKLOADS:
-            warmup, steady, calls = policy(profile, workload)
-            print(f"policy profile={profile} workload={workload} "
-                  f"warmup={warmup} steady={steady} sample_calls={calls}")
+            for language in LANGUAGES:
+                warmup, steady, calls = policy(profile, workload, language)
+                print(f"policy profile={profile} workload={workload} "
+                      f"language={language} warmup={warmup} "
+                      f"steady={steady} sample_calls={calls}")
+
+    print(f"smoke_min_steady_sample_ms={MIN_SMOKE_SAMPLE_NS / 1e6:.0f}")
 
     minimum = jvm_matrix.STABILITY_WINDOW * 2
 
-    for warmup, steady, _ in REFERENCE_POLICY.values():
+    for warmup, steady in REFERENCE_ITERATIONS.values():
         if warmup < minimum or steady < minimum:
             raise RuntimeError("reference counts below stability window")
 
@@ -274,10 +320,13 @@ def check_no_retry_or_profiling() -> None:
     for workload in WORKLOADS:
         for language in LANGUAGES:
             for profile in ("smoke", "benchmark"):
-                counts = [str(value) for value in policy(profile, workload)]
+                counts = [
+                    str(value)
+                    for value in policy(profile, workload, language)
+                ]
                 command = command_for(
                     language, item, "HCP", workload, 0,
-                    *policy(profile, workload),
+                    *policy(profile, workload, language),
                 )
                 source = str(source_for(workload, language))
 
@@ -399,7 +448,7 @@ def check_retention_profile() -> None:
         "expected_classes"
     ]
 
-    if classes != {"jvm-cross-truffle-current-v1-reference": 9}:
+    if classes != {"jvm-cross-truffle-current-v2-reference": 9}:
         raise RuntimeError(f"retention profile count: {classes}")
 
     if retain_results.RETENTION_PROFILES["perf025"]["expected_classes"] != {
@@ -428,7 +477,7 @@ def check_identity_contract() -> None:
         for language in LANGUAGES:
             data = identity(
                 language, item, workload, 0, [0], "benchmark",
-                *policy("benchmark", workload), toolchain,
+                *policy("benchmark", workload, language), toolchain,
             )
 
             for key in (
@@ -451,7 +500,7 @@ def check_identity_contract() -> None:
                     if key not in data:
                         raise RuntimeError(f"protos identity missing {key}")
 
-            if data["sample_calls"] != policy("benchmark", workload)[2]:
+            if data["sample_calls"] != SAMPLE_CALLS[(workload, language)]:
                 raise RuntimeError("identity sample_calls mismatch")
 
             keys.add(jvm_matrix.cache_key(data))
@@ -889,13 +938,13 @@ def report(accepted: dict[tuple[str, str], float]) -> None:
 
             print()
             print(f"workload={workload}")
-            print(f"sample_calls={REFERENCE_POLICY[kind][2]}")
 
             for language in LANGUAGES:
                 value = accepted.get((language, workload))
                 shown = "NOT_ADMITTED" if value is None else f"{value:.1f}"
                 print(f"{labels[language]:<24}"
-                      f"steady_amortized_p50_ns={shown}")
+                      f"steady_amortized_p50_ns={shown} "
+                      f"sample_calls={SAMPLE_CALLS[(workload, language)]}")
 
             print(f"PROTOS_VS_JS_RATIO={ratio(accepted, workload, 'js')}")
             print("PROTOS_VS_PYTHON_RATIO="
@@ -950,7 +999,7 @@ def stage_measure(profile: str) -> None:
 
     for workload in WORKLOADS:
         for language in LANGUAGES:
-            counts = policy(profile, workload)
+            counts = policy(profile, workload, language)
             ident = identity(
                 language, item, workload, cpu, siblings, profile,
                 *counts, toolchain,
@@ -977,6 +1026,7 @@ def stage_measure(profile: str) -> None:
 
     accepted: dict[tuple[str, str], float] = {}
     not_stable: list[str] = []
+    too_short: list[str] = []
     passed = 0
 
     for language, workload, (warmup, steady, sample_calls), ident in cases:
@@ -1017,6 +1067,12 @@ def stage_measure(profile: str) -> None:
         print(f"correctness=PASS result={parsed['result']}")
 
         if profile != "benchmark":
+            shortest = min(int(value) for value in parsed["steady_ns"])
+            print(f"smoke_min_steady_sample_ms={shortest / 1e6:.3f}")
+
+            if shortest < MIN_SMOKE_SAMPLE_NS:
+                too_short.append(f"{label}={shortest / 1e6:.3f}ms")
+
             continue
 
         if admission is None or admission["status"] != "PASS":
@@ -1054,6 +1110,14 @@ def stage_measure(profile: str) -> None:
 
     if profile != "benchmark":
         print("timing_interpretation=NONE-smoke")
+
+        if too_short:
+            raise RuntimeError(
+                "smoke sample-size gate failed (steady sample < "
+                f"{MIN_SMOKE_SAMPLE_NS / 1e6:.0f} ms): " + ", ".join(too_short)
+            )
+
+        print("smoke_sample_size_gate=PASS")
         print("perf024_rebaseline_smoke=PASS")
         return
 

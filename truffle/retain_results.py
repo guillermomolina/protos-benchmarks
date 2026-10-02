@@ -32,7 +32,7 @@ RESULTS = ROOT / "results"
 
 AB_V2_DEFINITION = "jvm-protos-session-ab-v2"
 AB_V3_DEFINITION = "jvm-protos-session-ab-v3"
-CURRENT_V1_DEFINITION = "jvm-cross-truffle-current-v1"
+CURRENT_V2_DEFINITION = "jvm-cross-truffle-current-v2"
 
 # PERF023 keeps its original unfiltered selection and class distribution.
 # PERF025 selects only accepted ab-v3 reference observations produced by the
@@ -52,11 +52,11 @@ RETENTION_PROFILES = {
             "jvm-ab-v3-reference": 12,
         },
     },
-    # PERF024 re-baseline: accepted current-v1 reference observations only,
+    # PERF024 re-baseline: accepted current-v2 reference observations only,
     # 3 workloads x 3 languages, from the exact clean producer revision.
     "perf024-rebaseline": {
         "expected_classes": {
-            "jvm-cross-truffle-current-v1-reference": 9,
+            "jvm-cross-truffle-current-v2-reference": 9,
         },
     },
 }
@@ -147,11 +147,11 @@ def classify(
     if measurement == "jvm-protos-session-ab-v1":
         return "jvm-ab-reference"
 
-    if measurement == CURRENT_V1_DEFINITION:
+    if measurement == CURRENT_V2_DEFINITION:
         profile = identity.get("profile")
 
         if profile == "benchmark":
-            return "jvm-cross-truffle-current-v1-reference"
+            return "jvm-cross-truffle-current-v2-reference"
 
         raise RuntimeError(
             f"{measurement} profile is not retainable: {profile}"
@@ -381,7 +381,7 @@ def validate_cache_entry(
         ):
             entry[key] = identity.get(key)
 
-    if identity.get("measurement_definition") == CURRENT_V1_DEFINITION:
+    if identity.get("measurement_definition") == CURRENT_V2_DEFINITION:
         for key in (
             "harness_revision",
             "run_mode",
@@ -450,7 +450,7 @@ def perf024_rebaseline_selected(
     if (
         not isinstance(identity, dict)
         or identity.get("measurement_definition")
-        != CURRENT_V1_DEFINITION
+        != CURRENT_V2_DEFINITION
         or identity.get("profile") != "benchmark"
         or identity.get("harness_revision") != producer_revision
         or identity.get("harness_dirty") is not False
@@ -464,7 +464,7 @@ def perf024_rebaseline_selected(
         or admission.get("status") != "PASS"
     ):
         raise RuntimeError(
-            f"{path}: cached current-v1 reference is not admitted"
+            f"{path}: cached current-v2 reference is not admitted"
         )
 
     return True
@@ -505,7 +505,7 @@ def require_perf024_rebaseline_matrix(
             entry.get("run_mode") != experiment.RUN_MODE
             or entry.get("measurement_class") != kind
             or entry.get("sample_calls")
-            != experiment.REFERENCE_POLICY[kind][2]
+            != experiment.SAMPLE_CALLS[(workload, entry.get("language"))]
         ):
             raise RuntimeError(
                 f"PERF024 entry policy mismatch: {entry}"

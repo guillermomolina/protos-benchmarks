@@ -38,7 +38,7 @@ PREPARED_CLASSES = AB_ROOT / "prepared-runner"
 STATE = ROOT / ".work" / "truffle-prepare"
 RESULTS = ROOT / "results"
 
-MEASUREMENT_DEFINITION = "jvm-protos-session-ab-v2"
+MEASUREMENT_DEFINITION = "jvm-protos-session-ab-v3"
 EXPERIMENT = "PERF025"
 GRAALVM_VERSION = "25.4.4.1.1"
 RETAINED_DESTINATION = "perf025-d3"
@@ -116,6 +116,7 @@ SMOKE_STEADY = 3
 REFERENCE_SAMPLE_CALLS = 10_000
 REFERENCE_WARMUP = 50
 REFERENCE_STEADY = 10
+REFERENCE_ADMISSION_SCOPE = "steady-only"
 
 EXPECTED_OBSERVATIONS = len(POINTS) * len(WORKLOADS)
 
@@ -533,6 +534,7 @@ def identity(
 
     if profile == "benchmark":
         data["steady_state_admission"] = {
+            "scope": REFERENCE_ADMISSION_SCOPE,
             "window": jvm_matrix.STABILITY_WINDOW,
             "median_drift_pct_max": jvm_matrix.STABILITY_MEDIAN_DRIFT_PCT,
             "mad_pct_max": jvm_matrix.STABILITY_MAD_PCT,
@@ -632,20 +634,21 @@ def check_contract() -> None:
 
     print(f"expected_reference_observations={EXPECTED_OBSERVATIONS}")
 
-    stable = jvm_matrix.reference_admission(
-        [1000] * REFERENCE_WARMUP,
-        [1000] * REFERENCE_STEADY,
+    stable = jvm_matrix.stability_window(
+        [1000] * REFERENCE_STEADY
     )
-    bimodal = jvm_matrix.reference_admission(
-        [1000] * REFERENCE_WARMUP,
+    bimodal = jvm_matrix.stability_window(
         [1000] * jvm_matrix.STABILITY_WINDOW
-        + [2000] * jvm_matrix.STABILITY_WINDOW,
+        + [2000] * jvm_matrix.STABILITY_WINDOW
     )
 
     if stable["status"] != "PASS" or bimodal["status"] != "NOT_STABLE":
-        raise RuntimeError("reused stability admission self-test failed")
+        raise RuntimeError("reused steady stability self-test failed")
 
-    print("stability_admission=jvm_matrix.reference_admission self_test=PASS")
+    print(
+        "stability_admission=jvm_matrix.stability_window "
+        f"scope={REFERENCE_ADMISSION_SCOPE} self_test=PASS"
+    )
 
 
 def check_identity_contract() -> None:
@@ -945,6 +948,9 @@ def stage_measure(profile: str) -> None:
     print(f"cpu_siblings={','.join(map(str, siblings))}")
     print(f"sample_calls={sample_calls}")
 
+    if profile == "benchmark":
+        print(f"reference_admission_scope={REFERENCE_ADMISSION_SCOPE}")
+
     accepted: dict[tuple[str, str], float] = {}
     not_stable: list[str] = []
     passed = 0
@@ -997,7 +1003,15 @@ def stage_measure(profile: str) -> None:
                 steady,
                 sample_calls,
             )
-            _, admission = jvm_matrix.summarize_output(output, profile)
+            _, admission = jvm_matrix.summarize_output(
+                output,
+                profile,
+                admission_scope=(
+                    REFERENCE_ADMISSION_SCOPE
+                    if profile == "benchmark"
+                    else "warmup-and-steady"
+                ),
+            )
             passed += 1
 
             if profile != "benchmark":

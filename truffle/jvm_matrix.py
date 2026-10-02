@@ -664,6 +664,7 @@ def reference_admission(
 def summarize_output(
     output: str,
     profile: str,
+    admission_scope: str = "warmup-and-steady",
 ) -> tuple[str | None, dict[str, object] | None]:
     parsed = parse_output(output)
 
@@ -722,10 +723,25 @@ def summarize_output(
         print("reference_admission=N/A")
         return result_value, None
 
-    admission = reference_admission(
-        warmup,
-        steady,
-    )
+    if admission_scope == "warmup-and-steady":
+        admission = reference_admission(
+            warmup,
+            steady,
+        )
+        admission["scope"] = admission_scope
+    elif admission_scope == "steady-only":
+        warmup_check = stability_window(warmup)
+        steady_check = stability_window(steady)
+        admission = {
+            "status": steady_check["status"],
+            "scope": admission_scope,
+            "warmup": warmup_check,
+            "steady": steady_check,
+        }
+    else:
+        raise RuntimeError(
+            f"unknown reference admission scope: {admission_scope}"
+        )
 
     for name in ("warmup", "steady"):
         check = admission[name]

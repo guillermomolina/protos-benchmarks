@@ -31,9 +31,10 @@ CACHE = ROOT / "results" / "local" / "truffle-cache"
 RESULTS = ROOT / "results"
 
 AB_V2_DEFINITION = "jvm-protos-session-ab-v2"
+AB_V3_DEFINITION = "jvm-protos-session-ab-v3"
 
 # PERF023 keeps its original unfiltered selection and class distribution.
-# PERF025 selects only accepted ab-v2 reference observations produced by the
+# PERF025 selects only accepted ab-v3 reference observations produced by the
 # exact clean producer revision.
 RETENTION_PROFILES = {
     "perf023": {
@@ -47,7 +48,7 @@ RETENTION_PROFILES = {
     },
     "perf025": {
         "expected_classes": {
-            "jvm-ab-v2-reference": 12,
+            "jvm-ab-v3-reference": 12,
         },
     },
 }
@@ -138,14 +139,19 @@ def classify(
     if measurement == "jvm-protos-session-ab-v1":
         return "jvm-ab-reference"
 
-    if measurement == AB_V2_DEFINITION:
+    if measurement in {AB_V2_DEFINITION, AB_V3_DEFINITION}:
         profile = identity.get("profile")
 
         if profile == "benchmark":
-            return "jvm-ab-v2-reference"
+            version = (
+                "v3"
+                if measurement == AB_V3_DEFINITION
+                else "v2"
+            )
+            return f"jvm-ab-{version}-reference"
 
         raise RuntimeError(
-            f"ab-v2 profile is not retainable: {profile}"
+            f"{measurement} profile is not retainable: {profile}"
         )
 
     mode = identity.get("mode")
@@ -343,10 +349,10 @@ def validate_cache_entry(
             "protos_version"
         )
 
-    if (
-        identity.get("measurement_definition")
-        == AB_V2_DEFINITION
-    ):
+    if identity.get("measurement_definition") in {
+        AB_V2_DEFINITION,
+        AB_V3_DEFINITION,
+    }:
         for key in (
             "harness_revision",
             "role",
@@ -372,7 +378,7 @@ def perf025_selected(
     if (
         not isinstance(identity, dict)
         or identity.get("measurement_definition")
-        != AB_V2_DEFINITION
+        != AB_V3_DEFINITION
         or identity.get("profile") != "benchmark"
     ):
         return False
@@ -391,7 +397,7 @@ def perf025_selected(
         or admission.get("status") != "PASS"
     ):
         raise RuntimeError(
-            f"{path}: cached ab-v2 reference is not admitted"
+            f"{path}: cached ab-v3 reference is not admitted"
         )
 
     return True

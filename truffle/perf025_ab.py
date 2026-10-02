@@ -105,17 +105,29 @@ WORKLOADS = (
     "primitive-method-call",
 )
 
-SAMPLE_CALLS = 100
+CATALOG_SAMPLE_CALLS = 100
+
+# Smoke remains a cheap wiring/correctness gate. Reference uses much larger
+# batches so sparse scheduler/JIT stalls do not dominate a tiny timing sample.
+SMOKE_SAMPLE_CALLS = CATALOG_SAMPLE_CALLS
 SMOKE_WARMUP = 2
 SMOKE_STEADY = 3
+
+REFERENCE_SAMPLE_CALLS = 10_000
+REFERENCE_WARMUP = 10
+REFERENCE_STEADY = 10
+
 EXPECTED_OBSERVATIONS = len(POINTS) * len(WORKLOADS)
 
-# name, baseline role, candidate role. FINAL is contextual only and is
-# reported without a delta so it cannot be read as attributing A or B.
+# name, baseline role, candidate role.
+# The first three retain the PERF025 A/B acceptance evidence. The final entry
+# is the primary accumulated result and deliberately does not attribute the
+# improvement to any individual PERF025 slice.
 DELTAS = (
     ("A_DELTA", "PRE_A", "A"),
     ("B_DELTA", "A", "B"),
     ("COMBINED_PRE_A_TO_POST_B_DELTA", "PRE_A", "B"),
+    ("TOTAL_ACCUMULATED_DELTA", "PRE_A", "FINAL"),
 )
 
 SIGN_CONVENTION = (
@@ -468,6 +480,7 @@ def identity(
     profile: str,
     warmup: int,
     steady: int,
+    sample_calls: int,
     toolchain: dict[str, str],
 ) -> dict[str, object]:
     source = source_for(workload, "protos")
@@ -506,7 +519,7 @@ def identity(
         "kernel": platform.release(),
         "warmup_iterations": warmup,
         "steady_iterations": steady,
-        "sample_calls": jvm_sample_calls(workload),
+        "sample_calls": sample_calls,
     }
 
     if item["run_mode"] == "prepared":
@@ -585,23 +598,33 @@ def check_contract() -> None:
         if workload not in catalog():
             raise RuntimeError(f"{workload}: not in workload catalog")
 
-        if jvm_sample_calls(workload) != SAMPLE_CALLS:
-            raise RuntimeError(f"{workload}: sample_calls != {SAMPLE_CALLS}")
+        if jvm_sample_calls(workload) != CATALOG_SAMPLE_CALLS:
+            raise RuntimeError(
+                f"{workload}: catalog sample_calls != "
+                f"{CATALOG_SAMPLE_CALLS}"
+            )
 
         expected_result(workload)
 
     print("selected_workloads=" + ",".join(WORKLOADS))
-    print(f"sample_calls={SAMPLE_CALLS}")
+    print(f"catalog_sample_calls={CATALOG_SAMPLE_CALLS}")
+    print(f"smoke_sample_calls={SMOKE_SAMPLE_CALLS}")
+    print(f"reference_sample_calls={REFERENCE_SAMPLE_CALLS}")
+
+    minimum_admission_samples = jvm_matrix.STABILITY_WINDOW * 2
 
     if (
-        jvm_matrix.REFERENCE_WARMUP,
-        jvm_matrix.REFERENCE_STEADY,
-    ) != (60, 10):
-        raise RuntimeError("reference warmup/steady policy changed")
+        REFERENCE_WARMUP < minimum_admission_samples
+        or REFERENCE_STEADY < minimum_admission_samples
+    ):
+        raise RuntimeError(
+            "PERF025 reference sample counts are too small for "
+            "the reused stability window"
+        )
 
     print(
-        f"reference_warmup={jvm_matrix.REFERENCE_WARMUP} "
-        f"reference_steady={jvm_matrix.REFERENCE_STEADY}"
+        f"reference_warmup={REFERENCE_WARMUP} "
+        f"reference_steady={REFERENCE_STEADY}"
     )
 
     if EXPECTED_OBSERVATIONS != 12:
@@ -609,10 +632,14 @@ def check_contract() -> None:
 
     print(f"expected_reference_observations={EXPECTED_OBSERVATIONS}")
 
-    stable = jvm_matrix.reference_admission([1000] * 60, [1000] * 10)
+    stable = jvm_matrix.reference_admission(
+        [1000] * REFERENCE_WARMUP,
+        [1000] * REFERENCE_STEADY,
+    )
     bimodal = jvm_matrix.reference_admission(
-        [1000] * 60,
-        [1000] * 5 + [2000] * 5,
+        [1000] * REFERENCE_WARMUP,
+        [1000] * jvm_matrix.STABILITY_WINDOW
+        + [2000] * jvm_matrix.STABILITY_WINDOW,
     )
 
     if stable["status"] != "PASS" or bimodal["status"] != "NOT_STABLE":
@@ -642,7 +669,15 @@ def check_identity_contract() -> None:
     }
     identities = {
         mode: identity(
-            item, WORKLOADS[0], 0, [0], "benchmark", 60, 10, toolchain
+            item,
+            WORKLOADS[0],
+            0,
+            [0],
+            "benchmark",
+            REFERENCE_WARMUP,
+            REFERENCE_STEADY,
+            REFERENCE_SAMPLE_CALLS,
+            toolchain,
         )
         for mode, item in items.items()
     }
@@ -799,6 +834,7 @@ def execute(
     cpu: int,
     warmup: int,
     steady: int,
+    sample_calls: int,
 ) -> str:
     main_class = (
         PREPARED_CLASS if item["run_mode"] == "prepared" else DYNAMIC_CLASS
@@ -817,7 +853,7 @@ def execute(
             str(source_for(workload, "protos")),
             str(warmup),
             str(steady),
-            str(jvm_sample_calls(workload)),
+            str(sample_calls),
         ],
         cwd=ROOT,
         text=True,
@@ -840,6 +876,7 @@ def require_output_contract(
     output: str,
     warmup: int,
     steady: int,
+    sample_calls: int,
 ) -> dict[str, object]:
     parsed = jvm_matrix.parse_output(output)
     label = f"{item['role']}/{item['run_mode']}/{workload}"
@@ -858,7 +895,7 @@ def require_output_contract(
         raise RuntimeError(f"{label}: prepare_ns marker inconsistent")
 
     if (
-        parsed["sample_calls"] != SAMPLE_CALLS
+        parsed["sample_calls"] != sample_calls
         or len(parsed["warmup_ns"]) != warmup
         or len(parsed["steady_ns"]) != steady
     ):
@@ -881,10 +918,12 @@ def stage_measure(profile: str) -> None:
         if not re.fullmatch(r"[0-9a-f]{40}", revision):
             raise RuntimeError("harness revision is not a full SHA")
 
-        warmup = jvm_matrix.REFERENCE_WARMUP
-        steady = jvm_matrix.REFERENCE_STEADY
+        warmup = REFERENCE_WARMUP
+        steady = REFERENCE_STEADY
+        sample_calls = REFERENCE_SAMPLE_CALLS
     else:
         warmup, steady = SMOKE_WARMUP, SMOKE_STEADY
+        sample_calls = SMOKE_SAMPLE_CALLS
 
     check_contract()
     compile_harness()
@@ -904,6 +943,7 @@ def stage_measure(profile: str) -> None:
     print(f"mode=jvm-protos-ab experiment={EXPERIMENT} profile={profile}")
     print(f"cpu={cpu}")
     print(f"cpu_siblings={','.join(map(str, siblings))}")
+    print(f"sample_calls={sample_calls}")
 
     accepted: dict[tuple[str, str], float] = {}
     not_stable: list[str] = []
@@ -912,7 +952,14 @@ def stage_measure(profile: str) -> None:
     for item in items:
         for workload in WORKLOADS:
             ident = identity(
-                item, workload, cpu, siblings, profile, warmup, steady,
+                item,
+                workload,
+                cpu,
+                siblings,
+                profile,
+                warmup,
+                steady,
+                sample_calls,
                 toolchain,
             )
             key = jvm_matrix.cache_key(ident)
@@ -933,10 +980,22 @@ def stage_measure(profile: str) -> None:
                 else:
                     print("cache=not-used-smoke")
 
-                output = execute(item, workload, cpu, warmup, steady)
+                output = execute(
+                    item,
+                    workload,
+                    cpu,
+                    warmup,
+                    steady,
+                    sample_calls,
+                )
 
             parsed = require_output_contract(
-                item, workload, output, warmup, steady
+                item,
+                workload,
+                output,
+                warmup,
+                steady,
+                sample_calls,
             )
             _, admission = jvm_matrix.summarize_output(output, profile)
             passed += 1
@@ -1013,7 +1072,10 @@ def stage_measure(profile: str) -> None:
                     f"{baseline}/{EXPECTED_MODES[baseline]})"
                 )
 
-        print("  FINAL_CURRENT_STATE=contextual-only-not-attributive")
+        print(
+            "  FINAL_CURRENT_STATE="
+            "primary-accumulated-comparison-without-slice-attribution"
+        )
 
     if not_stable:
         raise RuntimeError(

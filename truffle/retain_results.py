@@ -32,6 +32,7 @@ RESULTS = ROOT / "results"
 
 AB_V2_DEFINITION = "jvm-protos-session-ab-v2"
 AB_V3_DEFINITION = "jvm-protos-session-ab-v3"
+CURRENT_V1_DEFINITION = "jvm-cross-truffle-current-v1"
 
 # PERF023 keeps its original unfiltered selection and class distribution.
 # PERF025 selects only accepted ab-v3 reference observations produced by the
@@ -49,6 +50,13 @@ RETENTION_PROFILES = {
     "perf025": {
         "expected_classes": {
             "jvm-ab-v3-reference": 12,
+        },
+    },
+    # PERF024 re-baseline: accepted current-v1 reference observations only,
+    # 3 workloads x 3 languages, from the exact clean producer revision.
+    "perf024-rebaseline": {
+        "expected_classes": {
+            "jvm-cross-truffle-current-v1-reference": 9,
         },
     },
 }
@@ -138,6 +146,16 @@ def classify(
 
     if measurement == "jvm-protos-session-ab-v1":
         return "jvm-ab-reference"
+
+    if measurement == CURRENT_V1_DEFINITION:
+        profile = identity.get("profile")
+
+        if profile == "benchmark":
+            return "jvm-cross-truffle-current-v1-reference"
+
+        raise RuntimeError(
+            f"{measurement} profile is not retainable: {profile}"
+        )
 
     if measurement in {AB_V2_DEFINITION, AB_V3_DEFINITION}:
         profile = identity.get("profile")
@@ -363,6 +381,23 @@ def validate_cache_entry(
         ):
             entry[key] = identity.get(key)
 
+    if identity.get("measurement_definition") == CURRENT_V1_DEFINITION:
+        for key in (
+            "harness_revision",
+            "run_mode",
+            "measurement_class",
+            "sample_calls",
+        ):
+            entry[key] = identity.get(key)
+
+        if language == "protos":
+            for key in (
+                "protos_revision",
+                "protos_version",
+                "protos_core_sha256",
+            ):
+                entry[key] = identity.get(key)
+
     return entry
 
 
@@ -401,6 +436,91 @@ def perf025_selected(
         )
 
     return True
+
+
+def perf024_rebaseline_selected(
+    path: Path,
+    producer_revision: str,
+) -> bool:
+    payload = json.loads(
+        path.read_text(encoding="utf-8")
+    )
+    identity = payload.get("identity")
+
+    if (
+        not isinstance(identity, dict)
+        or identity.get("measurement_definition")
+        != CURRENT_V1_DEFINITION
+        or identity.get("profile") != "benchmark"
+        or identity.get("harness_revision") != producer_revision
+        or identity.get("harness_dirty") is not False
+    ):
+        return False
+
+    admission = payload.get("admission")
+
+    if (
+        not isinstance(admission, dict)
+        or admission.get("status") != "PASS"
+    ):
+        raise RuntimeError(
+            f"{path}: cached current-v1 reference is not admitted"
+        )
+
+    return True
+
+
+def require_perf024_rebaseline_matrix(
+    entries: list[dict[str, object]],
+    producer_revision: str,
+) -> None:
+    import perf024_rebaseline as experiment
+
+    expected = {
+        (language, workload)
+        for workload in experiment.WORKLOADS
+        for language in experiment.LANGUAGES
+    }
+    actual = [
+        (entry.get("language"), entry.get("workload"))
+        for entry in entries
+    ]
+
+    if sorted(actual) != sorted(expected):
+        raise RuntimeError(
+            "PERF024 re-baseline retained matrix mismatch: "
+            f"{sorted(actual)}"
+        )
+
+    for entry in entries:
+        workload = str(entry.get("workload"))
+        kind = experiment.WORKLOADS[workload]
+
+        if entry.get("harness_revision") != producer_revision:
+            raise RuntimeError(
+                "PERF024 entry harness revision mismatch"
+            )
+
+        if (
+            entry.get("run_mode") != experiment.RUN_MODE
+            or entry.get("measurement_class") != kind
+            or entry.get("sample_calls")
+            != experiment.REFERENCE_POLICY[kind][2]
+        ):
+            raise RuntimeError(
+                f"PERF024 entry policy mismatch: {entry}"
+            )
+
+        if entry.get("language") == "protos" and (
+            entry.get("protos_revision"),
+            entry.get("protos_version"),
+        ) != (
+            experiment.CURRENT_REVISION,
+            experiment.CURRENT_VERSION,
+        ):
+            raise RuntimeError(
+                "PERF024 entry Protos identity mismatch"
+            )
 
 
 def require_perf025_matrix(
@@ -589,6 +709,12 @@ def verify_retained(
             producer_revision,
         )
 
+    if manifest.get("retention_profile") == "perf024-rebaseline":
+        require_perf024_rebaseline_matrix(
+            entries,
+            producer_revision,
+        )
+
     observed_counts = Counter(
         str(entry["measurement_class"])
         for entry in entries
@@ -712,6 +838,15 @@ def retain(
         ):
             continue
 
+        if (
+            profile == "perf024-rebaseline"
+            and not perf024_rebaseline_selected(
+                path,
+                producer_revision,
+            )
+        ):
+            continue
+
         entry = validate_cache_entry(
             path,
             producer_revision,
@@ -747,6 +882,12 @@ def retain(
 
     if profile == "perf025":
         require_perf025_matrix(
+            entries,
+            producer_revision,
+        )
+
+    if profile == "perf024-rebaseline":
+        require_perf024_rebaseline_matrix(
             entries,
             producer_revision,
         )

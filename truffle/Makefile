@@ -2,7 +2,7 @@
 # ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina.
 # See LICENSE.TXT at the repository root.
 
-.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference
+.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference perf024-rebaseline-validate perf024-rebaseline-prepare perf024-rebaseline-smoke perf024-rebaseline-reference
 
 MAIN_CLASS := com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner
 
@@ -44,6 +44,21 @@ perf025-d2-smoke:
 
 perf025-reference:
 	python3 jvm_protos_ab.py perf025 benchmark
+
+# PERF024 post-PERF025/PERF026 cross-Truffle re-baseline: CURRENT Protos
+# (prepared) vs GraalJS/GraalPy (prepared executable Value) on four existing
+# workloads. perf024-rebaseline-reference requires a clean harness.
+perf024-rebaseline-validate:
+	python3 perf024_rebaseline.py validate
+
+perf024-rebaseline-prepare:
+	python3 perf024_rebaseline.py prepare
+
+perf024-rebaseline-smoke:
+	python3 perf024_rebaseline.py smoke
+
+perf024-rebaseline-reference:
+	python3 perf024_rebaseline.py benchmark
 
 
 jvm-jfr:

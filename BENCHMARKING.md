@@ -1051,3 +1051,53 @@ interpretation), and `perf025-reference` (clean harness required).
 Retention of the 12 accepted reference observations uses
 `retain-results RETENTION_PROFILE=perf025 WORK_ITEM=PERF025-D3`
 into `results/perf025-d3/`; the default `perf023` profile is unchanged.
+
+## PERF024 current cross-Truffle re-baseline
+
+Owner: `guillermomolina/protos#756`. Re-baselines current Protos against the
+pinned GraalJS/GraalPy JVM peers after PERF025-C1c/PLAT042 B-prime,
+PERF025-C2B and PERF026 removed the helper/callback root topology. Historical
+endpoint `f0791896c3c0` (`0.3.128-SNAPSHOT`) is context only and is not rerun.
+
+Measurement definition `jvm-cross-truffle-current-v1` (new; the historical
+`jvm-cross-truffle-v2` meaning and its evidence are unchanged):
+
+- CURRENT Protos `19d7426a5b8f0e3b93d36f56aee33377a4ee9985`
+  (`0.3.143-SNAPSHOT`), exact managed checkout
+  `.work/protos-ab/perf024-current`, `ProtosPreparedVariantRunner`:
+  `session.prepareTopLevel("run")` before timing, `prepared.invoke()` timed.
+- GraalJS / GraalPy: `TruffleJvmRunner` prepared executable `truffleRun`
+  `Value`, `run.execute()` timed.
+- All three run as plain `taskset -c <cpu> java -cp ... <main>` processes on
+  GraalVM 25.4.4.1.1 / JDK 25.0.4.1.1 with no JVM options; the peers no
+  longer run inside `mvn exec:java`.
+
+Workloads and policy (50 warmup + 10 steady samples, steady-only admission
+with the unchanged `jvm_matrix` thresholds):
+
+| Class | Workload | sample_calls | Evidence unit |
+| --- | --- | --- | --- |
+| EMBEDDING_FLOOR | `primitive-return-literal` | 10,000 | ns per reusable prepared invocation |
+| GUEST_DOMINATED_CURRENT_STATE | `fibonacci`, `factorial` | 10 | ns per complete top-level `run()` |
+
+The historical loop workloads `integer-loop` and `method-call` are
+intentionally excluded: they use the standard Closure selector `while`, which
+D180 renamed to `whileTrue` without a compatibility alias, so they fail on
+CURRENT before timing. Historical workload sources are not rewritten.
+
+The embedding floor includes the Protos dedicated guest carrier; it is part
+of the current embedding architecture. Results are per-workload
+`PROTOS_VS_JS_RATIO` / `PROTOS_VS_PYTHON_RATIO` (Protos time / peer time);
+there is no aggregate score, the floor is never subtracted from other
+workloads, `fibonacci`/`factorial` are algorithm-equivalent workloads, not
+mechanism-isolating, and no whole-language ranking is implied. A NOT_STABLE
+observation is kept as rejected local raw, excluded from ratios, fails the
+reference, and is never re-measured for the same identity.
+
+Commands (`make -C truffle ...`): `perf024-rebaseline-validate` (static),
+`perf024-rebaseline-prepare`, `perf024-rebaseline-smoke` (9 cases, warmup
+1/steady 2, sample_calls 10/1, `timing_interpretation=NONE-smoke`) and
+`perf024-rebaseline-reference` (clean published harness required). Retention
+uses `retain-results RETENTION_PROFILE=perf024-rebaseline
+WORK_ITEM=PERF024-REBASELINE EXPECTED_RETAINED=9` into
+`results/perf024-rebaseline/`.

@@ -70,7 +70,8 @@ truffle-retain-results:
 		WORK_ITEM="$(WORK_ITEM)" \
 		PRODUCER_REVISION="$(PRODUCER_REVISION)" \
 		RETAIN_WORKLOADS="$(RETAIN_WORKLOADS)" \
-		EXPECTED_RETAINED="$(EXPECTED_RETAINED)"
+		EXPECTED_RETAINED="$(EXPECTED_RETAINED)" \
+		RETENTION_PROFILE="$(or $(RETENTION_PROFILE),perf023)"
 
 truffle-verify-retained-results:
 	$(MAKE) -C $(TRUFFLE_DIR) verify-retained-results \

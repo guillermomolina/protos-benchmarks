@@ -30,6 +30,28 @@ ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "results" / "local" / "truffle-cache"
 RESULTS = ROOT / "results"
 
+AB_V2_DEFINITION = "jvm-protos-session-ab-v2"
+
+# PERF023 keeps its original unfiltered selection and class distribution.
+# PERF025 selects only accepted ab-v2 reference observations produced by the
+# exact clean producer revision.
+RETENTION_PROFILES = {
+    "perf023": {
+        "expected_classes": {
+            "jvm-ab-reference": 4,
+            "jvm-reference": 6,
+            "jvm-smoke": 6,
+            "native-reference": 6,
+            "native-smoke": 6,
+        },
+    },
+    "perf025": {
+        "expected_classes": {
+            "jvm-ab-v2-reference": 12,
+        },
+    },
+}
+
 
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -115,6 +137,16 @@ def classify(
 
     if measurement == "jvm-protos-session-ab-v1":
         return "jvm-ab-reference"
+
+    if measurement == AB_V2_DEFINITION:
+        profile = identity.get("profile")
+
+        if profile == "benchmark":
+            return "jvm-ab-v2-reference"
+
+        raise RuntimeError(
+            f"ab-v2 profile is not retainable: {profile}"
+        )
 
     mode = identity.get("mode")
 
@@ -311,7 +343,105 @@ def validate_cache_entry(
             "protos_version"
         )
 
+    if (
+        identity.get("measurement_definition")
+        == AB_V2_DEFINITION
+    ):
+        for key in (
+            "harness_revision",
+            "role",
+            "run_mode",
+            "protos_revision",
+            "protos_version",
+            "protos_core_sha256",
+        ):
+            entry[key] = identity.get(key)
+
     return entry
+
+
+def perf025_selected(
+    path: Path,
+    producer_revision: str,
+) -> bool:
+    payload = json.loads(
+        path.read_text(encoding="utf-8")
+    )
+    identity = payload.get("identity")
+
+    if (
+        not isinstance(identity, dict)
+        or identity.get("measurement_definition")
+        != AB_V2_DEFINITION
+        or identity.get("profile") != "benchmark"
+    ):
+        return False
+
+    if (
+        identity.get("harness_revision")
+        != producer_revision
+        or identity.get("harness_dirty") is not False
+    ):
+        return False
+
+    admission = payload.get("admission")
+
+    if (
+        not isinstance(admission, dict)
+        or admission.get("status") != "PASS"
+    ):
+        raise RuntimeError(
+            f"{path}: cached ab-v2 reference is not admitted"
+        )
+
+    return True
+
+
+def require_perf025_matrix(
+    entries: list[dict[str, object]],
+    producer_revision: str,
+) -> None:
+    import perf025_ab
+
+    expected = {
+        (role, mode, workload)
+        for role, _, _, mode in perf025_ab.POINTS
+        for workload in perf025_ab.WORKLOADS
+    }
+
+    actual = [
+        (
+            entry.get("role"),
+            entry.get("run_mode"),
+            entry.get("workload"),
+        )
+        for entry in entries
+    ]
+
+    if sorted(actual) != sorted(expected):
+        raise RuntimeError(
+            "PERF025 retained matrix mismatch: "
+            f"{sorted(actual)}"
+        )
+
+    revisions = {
+        role: (revision, version)
+        for role, revision, version, _ in perf025_ab.POINTS
+    }
+
+    for entry in entries:
+        if entry.get("harness_revision") != producer_revision:
+            raise RuntimeError(
+                "PERF025 entry harness revision mismatch"
+            )
+
+        if (
+            entry.get("protos_revision"),
+            entry.get("protos_version"),
+        ) != revisions[str(entry.get("role"))]:
+            raise RuntimeError(
+                "PERF025 entry Protos identity mismatch"
+            )
 
 
 def verify_retained(
@@ -447,6 +577,12 @@ def verify_retained(
                 f"{raw_file}: retained result mismatch"
             )
 
+    if manifest.get("retention_profile") == "perf025":
+        require_perf025_matrix(
+            entries,
+            producer_revision,
+        )
+
     observed_counts = Counter(
         str(entry["measurement_class"])
         for entry in entries
@@ -499,10 +635,16 @@ def retain(
     producer_revision: str,
     workload_list: str,
     expected_count: int,
+    profile: str = "perf023",
 ) -> None:
     require_revision(
         producer_revision
     )
+
+    if profile not in RETENTION_PROFILES:
+        raise RuntimeError(
+            f"unknown retention profile: {profile}"
+        )
 
     if not CACHE.is_dir():
         raise RuntimeError(
@@ -555,6 +697,15 @@ def retain(
     for path in sorted(
         CACHE.glob("*.json")
     ):
+        if (
+            profile == "perf025"
+            and not perf025_selected(
+                path,
+                producer_revision,
+            )
+        ):
+            continue
+
         entry = validate_cache_entry(
             path,
             producer_revision,
@@ -578,18 +729,20 @@ def retain(
         for entry in entries
     )
 
-    expected_classes = {
-        "jvm-ab-reference": 4,
-        "jvm-reference": 6,
-        "jvm-smoke": 6,
-        "native-reference": 6,
-        "native-smoke": 6,
-    }
+    expected_classes = RETENTION_PROFILES[profile][
+        "expected_classes"
+    ]
 
     if dict(counts) != expected_classes:
         raise RuntimeError(
-            "unexpected PERF023 measurement-class "
+            f"unexpected {profile} measurement-class "
             f"distribution: {dict(counts)}"
+        )
+
+    if profile == "perf025":
+        require_perf025_matrix(
+            entries,
+            producer_revision,
         )
 
     temporary = (
@@ -636,6 +789,9 @@ def retain(
                     str(item["cache_key"]),
             ),
     }
+
+    if profile != "perf023":
+        manifest["retention_profile"] = profile
 
     (
         temporary
@@ -690,6 +846,11 @@ def main() -> None:
         type=int,
         required=True,
     )
+    retain_parser.add_argument(
+        "--profile",
+        choices=sorted(RETENTION_PROFILES),
+        default="perf023",
+    )
 
     verify_parser = sub.add_parser(
         "verify"
@@ -707,6 +868,7 @@ def main() -> None:
             args.producer_revision,
             args.workloads,
             args.expect,
+            args.profile,
         )
     else:
         verify_retained(

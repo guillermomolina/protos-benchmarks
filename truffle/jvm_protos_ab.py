@@ -427,9 +427,17 @@ def execute_case(
 
 
 def main() -> None:
+    if len(sys.argv) == 3 and sys.argv[1] == "perf025":
+        import perf025_ab
+
+        perf025_ab.main(sys.argv[2])
+        return
+
     if len(sys.argv) < 3 or sys.argv[1] != "benchmark":
         raise SystemExit(
-            "usage: jvm_protos_ab.py benchmark <repo-a> <repo-b> [...]"
+            "usage: jvm_protos_ab.py benchmark <repo-a> <repo-b> [...]\n"
+            "       jvm_protos_ab.py perf025 "
+            "<validate|prepare|smoke|benchmark>"
         )
 
     repos = [variant(argument) for argument in sys.argv[2:]]

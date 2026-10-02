@@ -2,12 +2,13 @@
 # ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina.
 # See LICENSE.TXT at the repository root.
 
-.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results
+.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference
 
 MAIN_CLASS := com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner
 
 WORKLOAD ?= all
 LANGUAGE ?= protos
+RETENTION_PROFILE ?= perf023
 
 prepare:
 	python3 prepare.py
@@ -29,6 +30,20 @@ jvm-ab:
 	WORKLOAD=$(WORKLOAD) python3 jvm_protos_ab.py benchmark \
 		.work/protos-ab/0.3.128 \
 		.work/protos-ab/0.3.129
+
+# PERF025: PRE_A/dynamic, A/dynamic, B/prepared, FINAL/prepared on the three
+# primitive embedding workloads. perf025-reference requires a clean harness.
+perf025-d2-validate:
+	python3 jvm_protos_ab.py perf025 validate
+
+perf025-d2-prepare:
+	python3 jvm_protos_ab.py perf025 prepare
+
+perf025-d2-smoke:
+	python3 jvm_protos_ab.py perf025 smoke
+
+perf025-reference:
+	python3 jvm_protos_ab.py perf025 benchmark
 
 
 jvm-jfr:
@@ -58,7 +73,8 @@ retain-results:
 		--work-item "$(WORK_ITEM)" \
 		--producer-revision "$(PRODUCER_REVISION)" \
 		--workloads "$(RETAIN_WORKLOADS)" \
-		--expect "$(EXPECTED_RETAINED)"
+		--expect "$(EXPECTED_RETAINED)" \
+		--profile "$(RETENTION_PROFILE)"
 
 verify-retained-results:
 	python3 retain_results.py verify \

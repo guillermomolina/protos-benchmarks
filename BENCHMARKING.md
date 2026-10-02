@@ -994,3 +994,60 @@ retains no timing. `reference` alone writes retained evidence to
 
 This publication is harness capability only. The retained reference run is a
 separate later slice executed from the exact published harness SHA.
+
+## PERF025 reusable-call dynamic/prepared A/B
+
+PERF025 measures the reusable top-level call path across four exact Protos
+revisions on the PERF024 primitive workloads `primitive-return-literal`,
+`primitive-closure-call`, and `primitive-method-call` (catalog
+`jvm_sample_calls=100`).
+
+| Role  | Protos revision                            | Version          | Run mode |
+|-------|--------------------------------------------|------------------|----------|
+| PRE_A | `f3c44554ddfb9004c43dbde5197b9805990f8a4a` | 0.3.129-SNAPSHOT | dynamic  |
+| A     | `d0045353d834257b5fb80581846b32aebd43c7e6` | 0.3.130-SNAPSHOT | dynamic  |
+| B     | `6811d0cef3735d39ffd3801b3bae6ef48318bb66` | 0.3.131-SNAPSHOT | prepared |
+| FINAL | `19d7426a5b8f0e3b93d36f56aee33377a4ee9985` | 0.3.143-SNAPSHOT | prepared |
+
+Timed region: `dynamic` opens the session and times
+`session.invokeTopLevel("run")`; `prepared` opens the session, calls
+`session.prepareTopLevel("run")` outside every timed sample (reported as
+`prepare_ns`), and times `prepared.invoke()`. Both modes share
+`ProtosJvmVariantRunner.measure`: the cold sample is the first invocation
+alone, and each warmup/steady sample is 100 invocations, each result checked.
+
+Compilation boundary: `ProtosJvmVariantRunner` is built by Maven against the
+common pinned `0.3.128-SNAPSHOT` artifact, which has no prepared API. The
+prepared runner lives in `truffle/src/prepared/java` and is compiled by
+`perf025_ab.py` with `javac` only against the B and FINAL variant classpaths.
+No reflection is used; `javap` structural checks fail closed on the call
+sites and on preparation ordering.
+
+Identity: `measurement_definition=jvm-protos-session-ab-v2` includes role,
+`run_mode`, harness revision/dirty state, Protos revision/version/Core hash,
+GraalVM (`25.4.4.1.1`, verified from the dependency classpath), Java, CPU
+identity, warmup/steady, `sample_calls`, and the admission policy. The full
+identity is the local cache key.
+
+Admission reuses `jvm_matrix.reference_admission` unchanged (warmup 60,
+steady 10). A `NOT_STABLE` observation is written to
+`results/local/truffle-rejected/`, is not cached, and is not retried.
+
+Interpretation (per workload, on steady amortized per-call p50; negative means
+the candidate took less time):
+
+- `A_DELTA`: A/dynamic vs PRE_A/dynamic
+- `B_DELTA`: B/prepared vs A/dynamic
+- `COMBINED_PRE_A_TO_POST_B_DELTA`: B/prepared vs PRE_A/dynamic
+- `FINAL_CURRENT_STATE`: FINAL/prepared, contextual only; it does not
+  attribute A or B.
+
+No aggregate across workloads or cross-language conclusion is produced.
+
+Commands (`make -C truffle ...`): `perf025-d2-validate` (static only),
+`perf025-d2-prepare` (exact checkouts under `.work/protos-ab/perf025-*`),
+`perf025-d2-smoke` (12 cases, warmup 2/steady 3, no cache, no timing
+interpretation), and `perf025-reference` (clean harness required).
+Retention of the 12 accepted reference observations uses
+`retain-results RETENTION_PROFILE=perf025 WORK_ITEM=PERF025-D3`
+into `results/perf025-d3/`; the default `perf023` profile is unchanged.

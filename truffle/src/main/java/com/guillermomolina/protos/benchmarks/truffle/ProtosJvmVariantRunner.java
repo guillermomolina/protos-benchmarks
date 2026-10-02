@@ -10,76 +10,140 @@ import com.guillermomolina.protos.execution.ProtosStandaloneHostedSession;
 import com.guillermomolina.protos.runtime.ProtosIntegerValue;
 import java.nio.file.Path;
 
+/**
+ * Exact-revision Protos runner using the dynamic top-level API.
+ *
+ * <p>This class is compiled against the common pinned Protos artifact, which
+ * predates the prepared top-level API, so it must not reference that API. The
+ * prepared runner lives in a separate source root and reuses {@link #measure}
+ * so both run modes share one timed loop and one correctness check.
+ */
 public final class ProtosJvmVariantRunner {
     private ProtosJvmVariantRunner() {}
 
-    public static void main(String[] args) throws Exception {
-        if (args.length != 4) {
-            throw new IllegalArgumentException(
-                    "usage: <core-root> <source> <warmup> <steady>");
-        }
+    @FunctionalInterface
+    public interface Invocation {
+        ProtosExecutionOutcome invoke() throws Exception;
+    }
 
-        Path coreRoot = Path.of(args[0]).toAbsolutePath().normalize();
-        Path source = Path.of(args[1]).toAbsolutePath().normalize();
-        int warmupIterations = Integer.parseInt(args[2]);
-        int steadyIterations = Integer.parseInt(args[3]);
+    public record Arguments(
+            Path coreRoot,
+            Path source,
+            int warmupIterations,
+            int steadyIterations,
+            int sampleCalls) {
+
+        public static Arguments parse(String[] args) {
+            if (args.length != 4 && args.length != 5) {
+                throw new IllegalArgumentException(
+                        "usage: <core-root> <source> <warmup> <steady> "
+                                + "[sample-calls]");
+            }
+
+            return new Arguments(
+                    Path.of(args[0]).toAbsolutePath().normalize(),
+                    Path.of(args[1]).toAbsolutePath().normalize(),
+                    Integer.parseInt(args[2]),
+                    Integer.parseInt(args[3]),
+                    args.length == 5 ? positiveInt(args[4]) : 1);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Arguments arguments = Arguments.parse(args);
 
         long setupStart = System.nanoTime();
 
-        try (ProtosStandaloneHostedSession session =
-                ProtosStandaloneHostedSession.open(coreRoot, source)) {
-            ProtosExecutionOutcome initial = session.initialOutcome();
-
-            if (initial.state() != ProtosExecutionOutcome.State.COMPLETED) {
-                throw new IllegalStateException(
-                        "initial source execution did not complete: "
-                                + initial.state());
-            }
-
+        try (ProtosStandaloneHostedSession session = openSession(arguments)) {
             long setupNs = System.nanoTime() - setupStart;
 
-            long started = System.nanoTime();
-            String expected = value(session.invokeTopLevel("run"));
-            long coldNs = System.nanoTime() - started;
+            measure(
+                    "dynamic",
+                    arguments,
+                    setupNs,
+                    () -> session.invokeTopLevel("run"));
+        }
+    }
 
-            System.out.println("mode=jvm");
-            System.out.println("language=protos");
-            System.out.println("source=" + source);
-            System.out.println("warmup_iterations=" + warmupIterations);
-            System.out.println("steady_iterations=" + steadyIterations);
-            System.out.println("setup_ns=" + setupNs);
+    public static ProtosStandaloneHostedSession openSession(
+            Arguments arguments) throws Exception {
+        ProtosStandaloneHostedSession session =
+                ProtosStandaloneHostedSession.open(
+                        arguments.coreRoot(),
+                        arguments.source());
+
+        ProtosExecutionOutcome initial = session.initialOutcome();
+
+        if (initial.state() != ProtosExecutionOutcome.State.COMPLETED) {
+            session.close();
+            throw new IllegalStateException(
+                    "initial source execution did not complete: "
+                            + initial.state());
+        }
+
+        return session;
+    }
+
+    /**
+     * Times the cold call, then warmup and steady samples of
+     * {@code sampleCalls} invocations each. Session opening and any
+     * preparation happen before this method is entered.
+     */
+    public static void measure(
+            String runMode,
+            Arguments arguments,
+            long setupNs,
+            Invocation invocation) throws Exception {
+        long started = System.nanoTime();
+        String expected = value(invocation.invoke());
+        long coldNs = System.nanoTime() - started;
+
+        System.out.println("mode=jvm");
+        System.out.println("language=protos");
+        System.out.println("run_mode=" + runMode);
+        System.out.println("source=" + arguments.source());
+        System.out.println(
+                "warmup_iterations=" + arguments.warmupIterations());
+        System.out.println(
+                "steady_iterations=" + arguments.steadyIterations());
+        System.out.println("sample_calls=" + arguments.sampleCalls());
+        System.out.println("setup_ns=" + setupNs);
+        System.out.println(
+                "sample phase=cold iteration=1 elapsed_ns=" + coldNs);
+
+        for (int i = 1; i <= arguments.warmupIterations(); i++) {
+            started = System.nanoTime();
+            invokeRepeated(invocation, expected, arguments.sampleCalls());
+            long elapsed = System.nanoTime() - started;
+
             System.out.println(
-                    "sample phase=cold iteration=1 elapsed_ns=" + coldNs);
+                    "sample phase=warmup iteration="
+                            + i
+                            + " elapsed_ns="
+                            + elapsed);
+        }
 
-            for (int i = 1; i <= warmupIterations; i++) {
-                started = System.nanoTime();
-                String actual = value(session.invokeTopLevel("run"));
-                long elapsed = System.nanoTime() - started;
+        for (int i = 1; i <= arguments.steadyIterations(); i++) {
+            started = System.nanoTime();
+            invokeRepeated(invocation, expected, arguments.sampleCalls());
+            long elapsed = System.nanoTime() - started;
 
-                requireSame(expected, actual);
+            System.out.println(
+                    "sample phase=steady iteration="
+                            + i
+                            + " elapsed_ns="
+                            + elapsed);
+        }
 
-                System.out.println(
-                        "sample phase=warmup iteration="
-                                + i
-                                + " elapsed_ns="
-                                + elapsed);
-            }
+        System.out.println("result=" + expected);
+    }
 
-            for (int i = 1; i <= steadyIterations; i++) {
-                started = System.nanoTime();
-                String actual = value(session.invokeTopLevel("run"));
-                long elapsed = System.nanoTime() - started;
-
-                requireSame(expected, actual);
-
-                System.out.println(
-                        "sample phase=steady iteration="
-                                + i
-                                + " elapsed_ns="
-                                + elapsed);
-            }
-
-            System.out.println("result=" + expected);
+    private static void invokeRepeated(
+            Invocation invocation,
+            String expected,
+            int count) throws Exception {
+        for (int i = 0; i < count; i++) {
+            requireSame(expected, value(invocation.invoke()));
         }
     }
 
@@ -107,5 +171,16 @@ public final class ProtosJvmVariantRunner {
                             + ", got "
                             + actual);
         }
+    }
+
+    private static int positiveInt(String value) {
+        int parsed = Integer.parseInt(value);
+
+        if (parsed <= 0) {
+            throw new IllegalArgumentException(
+                    "sample-calls must be positive: " + value);
+        }
+
+        return parsed;
     }
 }

@@ -1,0 +1,90 @@
+{
+  "admission": {
+    "scope": "steady-only",
+    "status": "PASS",
+    "steady": {
+      "latest_mad_pct": 1.338584635053249,
+      "latest_p50_ns": 71586060.0,
+      "median_drift_pct": 0.6387990188141677,
+      "previous_mad_pct": 2.3920481902392448,
+      "previous_p50_ns": 72046291.0,
+      "shape": {
+        "gap_high_ns": 75226022,
+        "gap_left_count": 7,
+        "gap_low_ns": 72922771,
+        "gap_right_count": 3,
+        "largest_internal_gap_ns": 2303251,
+        "largest_internal_gap_pct": 3.20714794955908,
+        "status": "PASS"
+      },
+      "status": "PASS"
+    },
+    "warmup": {
+      "latest_mad_pct": 0.3688515584120002,
+      "latest_p50_ns": 70945071.0,
+      "median_drift_pct": 0.2103235245635463,
+      "previous_mad_pct": 1.3092516162950623,
+      "previous_p50_ns": 70796170.0,
+      "shape": {
+        "gap_high_ns": 72329171,
+        "gap_left_count": 7,
+        "gap_low_ns": 71613901,
+        "gap_right_count": 3,
+        "largest_internal_gap_ns": 715270,
+        "largest_internal_gap_pct": 1.009261658715123,
+        "status": "PASS"
+      },
+      "status": "PASS"
+    }
+  },
+  "correctness": "PASS",
+  "identity": {
+    "ab_sha256": "04fb697148f63b13c980bc3a5e320e1e667ab207c95a4b84826d1df36a57b7ae",
+    "architecture": "x86_64",
+    "catalog_sha256": "23509226db6b9c15b41d7bb75a10fb8fbdac5f7553439c4fee5f9cf128cebe7c",
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "e3_sha256": "603a0dfbf35548612e67d98b2dd606a39b6e7053be27773cefe0167fb46a3db8",
+    "experiment": "PERF025-E3",
+    "graalvm_version": "25.4.4.1.1",
+    "harness_dirty": false,
+    "harness_revision": "3fb036ce86b6c452588230b5322967f55aaf0160",
+    "java_version": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)",
+    "javac_version": "javac 25.0.4.1.1",
+    "kernel": "7.2.8-zen1-1-zen",
+    "language": "protos",
+    "matrix_sha256": "54826133f73a97589b31c9d594b659e19c56ada8aa5c674f20f3a074b3a361ea",
+    "measurement_definition": "jvm-protos-carrier-e2-ab-v1",
+    "mode": "jvm",
+    "prepared_runner_classes_sha256": "37efd7e70e33524ae764af95166599c8cd45c02861873b9cec22719263f50486",
+    "prepared_runner_sha256": "d41e55b176bb588a96d86db6ec5852caeeae99a2583ce83fc963be3c6ecd541c",
+    "profile": "benchmark",
+    "protos_core_sha256": "cc5c6f797f45c64b54d5a5e087efbe43f3879b31b30722e9afe58da22c13fcca",
+    "protos_dependency_classpath_sha256": "fce40a309e44e6438b2eaf5f6932a3d49acc809260f46a22a2f6e15f670fad37",
+    "protos_revision": "ff618f0dd8ef680f7884c9145552f77912f040a2",
+    "protos_version": "0.3.145-SNAPSHOT",
+    "role": "E2",
+    "run_mode": "prepared",
+    "runner_classes_sha256": "25972811d496d56a00de90314563ba2384a3a0a7f7635e70d3e2cf6c472e7c62",
+    "runner_sha256": "de35161a16baa629baafac3a45c630d54d37b8127b6cece87385dedf9897a2bd",
+    "sample_calls": 10000,
+    "schema": 1,
+    "source_sha256": "60c558345a43a5283e8f7ac95b518fed14d80164e52e1b907b83fb4c432d2ed4",
+    "steady_iterations": 10,
+    "steady_state_admission": {
+      "mad_pct_max": 20.0,
+      "max_internal_gap_pct": 20.0,
+      "median_drift_pct_max": 15.0,
+      "min_gap_cluster_size": 3,
+      "scope": "steady-only",
+      "window": 5
+    },
+    "warmup_iterations": 50,
+    "workload": "primitive-closure-call"
+  },
+  "output": "WARNING: A restricted method in java.lang.System has been called\nWARNING: java.lang.System::load has been called by com.oracle.truffle.polyglot.JDKSupport in an unnamed module (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-api/25.4.4.1.1/truffle-api-25.4.4.1.1.jar)\nWARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module\nWARNING: Restricted methods will be blocked in a future release unless native access is enabled\n\nWARNING: A terminally deprecated method in sun.misc.Unsafe has been called\nWARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-runtime/25.4.4.1.1/truffle-runtime-25.4.4.1.1.jar)\nWARNING: Please consider reporting this to the maintainers of class com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime\nWARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release\nprepare_ns=541751\nmode=jvm\nlanguage=protos\nrun_mode=prepared\nsource=/workspaces/protos-benchmarks/truffle/workloads/primitive-closure-call/primitive-closure-call.protos\nwarmup_iterations=50\nsteady_iterations=10\nsample_calls=10000\nsetup_ns=952815130\nsample phase=cold iteration=1 elapsed_ns=17319790\nsample phase=warmup iteration=1 elapsed_ns=1198265660\nsample phase=warmup iteration=2 elapsed_ns=400623439\nsample phase=warmup iteration=3 elapsed_ns=272252697\nsample phase=warmup iteration=4 elapsed_ns=228510421\nsample phase=warmup iteration=5 elapsed_ns=198924423\nsample phase=warmup iteration=6 elapsed_ns=176721101\nsample phase=warmup iteration=7 elapsed_ns=173567830\nsample phase=warmup iteration=8 elapsed_ns=150248095\nsample phase=warmup iteration=9 elapsed_ns=141218301\nsample phase=warmup iteration=10 elapsed_ns=122557920\nsample phase=warmup iteration=11 elapsed_ns=123228810\nsample phase=warmup iteration=12 elapsed_ns=118823728\nsample phase=warmup iteration=13 elapsed_ns=115626926\nsample phase=warmup iteration=14 elapsed_ns=114894675\nsample phase=warmup iteration=15 elapsed_ns=122298310\nsample phase=warmup iteration=16 elapsed_ns=114994215\nsample phase=warmup iteration=17 elapsed_ns=118461097\nsample phase=warmup iteration=18 elapsed_ns=97682945\nsample phase=warmup iteration=19 elapsed_ns=120311299\nsample phase=warmup iteration=20 elapsed_ns=114806805\nsample phase=warmup iteration=21 elapsed_ns=114674175\nsample phase=warmup iteration=22 elapsed_ns=115021295\nsample phase=warmup iteration=23 elapsed_ns=112053003\nsample phase=warmup iteration=24 elapsed_ns=130238884\nsample phase=warmup iteration=25 elapsed_ns=117294487\nsample phase=warmup iteration=26 elapsed_ns=109271991\nsample phase=warmup iteration=27 elapsed_ns=110653043\nsample phase=warmup iteration=28 elapsed_ns=100028877\nsample phase=warmup iteration=29 elapsed_ns=103912399\nsample phase=warmup iteration=30 elapsed_ns=94461703\nsample phase=warmup iteration=31 elapsed_ns=69868889\nsample phase=warmup iteration=32 elapsed_ns=69834140\nsample phase=warmup iteration=33 elapsed_ns=74682022\nsample phase=warmup iteration=34 elapsed_ns=69834640\nsample phase=warmup iteration=35 elapsed_ns=69896349\nsample phase=warmup iteration=36 elapsed_ns=69880080\nsample phase=warmup iteration=37 elapsed_ns=74790622\nsample phase=warmup iteration=38 elapsed_ns=70005310\nsample phase=warmup iteration=39 elapsed_ns=69988129\nsample phase=warmup iteration=40 elapsed_ns=69723639\nsample phase=warmup iteration=41 elapsed_ns=69869270\nsample phase=warmup iteration=42 elapsed_ns=74750612\nsample phase=warmup iteration=43 elapsed_ns=72329171\nsample phase=warmup iteration=44 elapsed_ns=70412459\nsample phase=warmup iteration=45 elapsed_ns=70796170\nsample phase=warmup iteration=46 elapsed_ns=75725762\nsample phase=warmup iteration=47 elapsed_ns=70770660\nsample phase=warmup iteration=48 elapsed_ns=71613901\nsample phase=warmup iteration=49 elapsed_ns=70683389\nsample phase=warmup iteration=50 elapsed_ns=70945071\nsample phase=steady iteration=1 elapsed_ns=76056692\nsample phase=steady iteration=2 elapsed_ns=72046291\nsample phase=steady iteration=3 elapsed_ns=70322909\nsample phase=steady iteration=4 elapsed_ns=70924270\nsample phase=steady iteration=5 elapsed_ns=75226022\nsample phase=steady iteration=6 elapsed_ns=70627820\nsample phase=steady iteration=7 elapsed_ns=71586060\nsample phase=steady iteration=8 elapsed_ns=70909970\nsample phase=steady iteration=9 elapsed_ns=72922771\nsample phase=steady iteration=10 elapsed_ns=75371802\nresult=1\n"
+}

@@ -1176,3 +1176,26 @@ of the three workloads.
 
 PERF025-E3A publishes harness capability only and contains no reference
 result; the single reference and its retention are PERF025-E3B.
+
+### PERF025-E3B retained reference
+
+Single reference from exact clean harness
+`3fb036ce86b6c452588230b5322967f55aaf0160`, retained byte-for-byte in
+`results/perf025-e3/` (profile `perf025-e3`, 6/6
+`jvm-carrier-e2-ab-v1-reference`, all `correctness=PASS`, steady-only
+admission PASS, `harness_dirty=false`, CPU 0, GraalVM 25.4.4.1.1). No
+observation was rejected or retried.
+
+| Workload | PRE_E2 ns/call | E2 ns/call | E2_DELTA |
+|----------|---------------:|-----------:|---------:|
+| `primitive-return-literal` | 6692.7 | 6173.2 | -7.76% |
+| `primitive-closure-call`   | 7522.6 | 7181.6 | -4.53% |
+| `primitive-method-call`    | 7013.6 | 6589.4 | -6.05% |
+
+Values are steady amortized per-call p50 (median of 10 steady samples of
+10,000 `PreparedTopLevel.invoke()` calls). On this host and policy, E2 took
+less time than its exact parent on all three workloads. This is a single
+admitted reference per workload: it attributes the per-workload
+difference to the E2 carrier transport change only within this embedding
+call path, makes no claim about guest-dominated workloads, and is not
+aggregated across workloads.

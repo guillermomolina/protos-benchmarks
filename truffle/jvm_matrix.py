@@ -41,6 +41,35 @@ STABILITY_MAD_PCT = 20.0
 STABILITY_MAX_INTERNAL_GAP_PCT = 20.0
 STABILITY_MIN_GAP_CLUSTER_SIZE = 3
 
+
+def benchmark_sample_calls(
+    language: str,
+    workload: str,
+) -> int:
+    env_name = (
+        "JVM_SAMPLE_CALLS_"
+        + language.upper()
+    )
+    raw = os.environ.get(env_name)
+
+    if raw is None:
+        return jvm_sample_calls(workload)
+
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise RuntimeError(
+            f"{env_name} must be a positive integer"
+        ) from exc
+
+    if value <= 0:
+        raise RuntimeError(
+            f"{env_name} must be a positive integer"
+        )
+
+    return value
+
+
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -256,7 +285,10 @@ def identity(
         "pom_sha256": sha256_file(TRUFFLE / "pom.xml"),
         "warmup_iterations": warmup,
         "steady_iterations": steady,
-        "sample_calls": jvm_sample_calls(workload),
+        "sample_calls": benchmark_sample_calls(
+            language,
+            workload,
+        ),
         "cpu": cpu,
         "cpu_siblings": siblings,
         "cpu_model": cpu_model(),
@@ -737,7 +769,10 @@ def run_case(
 
     print()
     print(f"=== {language} {workload} ===")
-    sample_calls = jvm_sample_calls(workload)
+    sample_calls = benchmark_sample_calls(
+        language,
+        workload,
+    )
 
     print(f"cpu={cpu}")
     print(f"cpu_siblings={','.join(map(str, siblings))}")

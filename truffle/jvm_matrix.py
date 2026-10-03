@@ -16,6 +16,7 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import jvm_runtime
 from workload_catalog import (
     cases_for_selection,
     expected_result,
@@ -223,110 +224,8 @@ def protos_maven_version() -> str:
 
 
 def protos_identity() -> dict[str, object]:
-    version = protos_maven_version()
-
-    jar = (
-        Path.home()
-        / ".m2/repository/com/guillermomolina/protos"
-        / version
-        / f"protos-{version}.jar"
-    )
-
-    if not jar.is_file():
-        raise RuntimeError(
-            f"Protos JVM artifact not found: {jar}; "
-            "run make truffle-prepare"
-        )
-
-    stamp = PREPARE_STATE / f"jvm-{version}.json"
-
-    if not stamp.is_file():
-        raise RuntimeError(
-            f"prepared JVM identity missing: {stamp}; "
-            "run make truffle-prepare"
-        )
-
-    state = json.loads(
-        stamp.read_text(encoding="utf-8")
-    )
-
-    artifact_revision = state.get("revision")
-    artifact_version = state.get("version")
-    prepared_jar_sha = state.get("jar_sha256")
-    actual_jar_sha = sha256_file(jar)
-
-    if (
-        not isinstance(artifact_revision, str)
-        or len(artifact_revision) != 40
-    ):
-        raise RuntimeError(
-            "prepared JVM artifact revision is invalid"
-        )
-
-    if artifact_version != version:
-        raise RuntimeError(
-            "prepared JVM artifact version mismatch: "
-            f"{artifact_version} != {version}"
-        )
-
-    if prepared_jar_sha != actual_jar_sha:
-        raise RuntimeError(
-            "prepared JVM artifact hash mismatch"
-        )
-
-    artifact_checkout = (
-        AB_ROOT
-        / version.removesuffix("-SNAPSHOT")
-    )
-
-    checkout_revision = git_capture(
-        artifact_checkout,
-        "rev-parse",
-        "HEAD",
-    )
-
-    if checkout_revision != artifact_revision:
-        raise RuntimeError(
-            "prepared checkout revision mismatch: "
-            f"{checkout_revision} != {artifact_revision}"
-        )
-
-    artifact_core_sha = sha256_tree(
-        artifact_checkout
-        / "protos"
-        / "lib"
-        / "core"
-    )
-
-    workspace_core_sha = sha256_tree(
-        PROTOS_WORKSPACE
-        / "protos"
-        / "lib"
-        / "core"
-    )
-
-    if workspace_core_sha != artifact_core_sha:
-        raise RuntimeError(
-            "workspace Core differs from prepared "
-            "JVM artifact Core"
-        )
-
-    return {
-        "artifact": {
-            "version": version,
-            "revision": artifact_revision,
-            "jar_sha256": actual_jar_sha,
-        },
-        "core": {
-            "workspace_revision": git_capture(
-                PROTOS_WORKSPACE,
-                "rev-parse",
-                "HEAD",
-            ),
-            "artifact_revision": artifact_revision,
-            "sha256": workspace_core_sha,
-        },
-    }
+    """Identity of the Protos checkout selected for generic JVM runs."""
+    return jvm_runtime.protos_identity()
 
 
 def identity(
@@ -342,7 +241,7 @@ def identity(
     data: dict[str, object] = {
         "schema": 2,
         "measurement_definition":
-            "jvm-cross-truffle-v2",
+            "jvm-cross-truffle-generic-v3",
         "mode": "jvm",
         "profile": profile,
         "language": language,
@@ -351,11 +250,6 @@ def identity(
         "harness_revision": benchmark_revision(),
         "harness_dirty": benchmark_dirty(),
         "matrix_sha256": sha256_file(Path(__file__)),
-        "runner_sha256": sha256_file(
-            TRUFFLE
-            / "src/main/java/com/guillermomolina/protos/benchmarks"
-            / "truffle/TruffleJvmRunner.java"
-        ),
         "catalog_sha256": sha256_file(
             TRUFFLE / "workloads" / "catalog.json"
         ),
@@ -385,7 +279,21 @@ def identity(
         }
 
     if language == "protos":
-        data["protos"] = protos_identity()
+        runtime = jvm_runtime.protos_runtime()
+
+        data["run_mode"] = runtime["run_mode"]
+        data["runner_sha256"] = runtime["runner_source_sha256"]
+        data["protos"] = jvm_runtime.protos_identity(
+            runtime
+        )
+    else:
+        runtime = jvm_runtime.peer_runtime()
+
+        data["run_mode"] = "prepared"
+        data["runner_sha256"] = runtime["runner_source_sha256"]
+        data["peer_runtime"] = jvm_runtime.peer_identity(
+            runtime
+        )
 
     return data
 
@@ -866,24 +774,29 @@ def run_case(
 
     print("cache=miss")
 
-    relative_source = source.relative_to(ROOT)
+    if language == "protos":
+        runtime = jvm_runtime.protos_runtime()
 
-    command = [
-        "taskset",
-        "-c",
-        str(cpu),
-        "mvn",
-        "-f",
-        str(TRUFFLE / "pom.xml"),
-        "-q",
-        "exec:java",
-        f"-Dexec.mainClass={MAIN_CLASS}",
-        (
-            "-Dexec.args="
-            f"measure {language} {relative_source} "
-            f"{warmup} {steady} {sample_calls}"
-        ),
-    ]
+        command = jvm_runtime.protos_measure_command(
+            runtime,
+            source,
+            warmup,
+            steady,
+            sample_calls,
+            cpu,
+        )
+    else:
+        runtime = jvm_runtime.peer_runtime()
+
+        command = jvm_runtime.peer_measure_command(
+            runtime,
+            language,
+            source,
+            warmup,
+            steady,
+            sample_calls,
+            cpu,
+        )
 
     result = subprocess.run(
         command,
@@ -1003,11 +916,11 @@ def main() -> None:
         for _, ident in identities
     )
 
-    if needs_measurement:
-        if mode == "benchmark":
-            require_clean_reference_harness()
-
-        compile_runner()
+    if (
+        needs_measurement
+        and mode == "benchmark"
+    ):
+        require_clean_reference_harness()
 
     print("mode=jvm-matrix")
     print(f"profile={mode}")

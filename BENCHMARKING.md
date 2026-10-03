@@ -1052,6 +1052,95 @@ Retention of the 12 accepted reference observations uses
 `retain-results RETENTION_PROFILE=perf025 WORK_ITEM=PERF025-D3`
 into `results/perf025-d3/`; the default `perf023` profile is unchanged.
 
+## Generic JVM cross-Truffle harness: version-independent Protos authority
+
+The generic JVM harness is intentionally independent of any particular Protos
+release. Historical PERF experiments retain their exact pinned revisions and
+measurement definitions, but the ordinary `correctness`, `jvm-smoke`,
+`jvm-benchmark`, `jvm-jfr`, and `jvm-igv` entrypoints select a Protos checkout
+at execution time.
+
+`PROTOS_CHECKOUT` identifies the checkout and defaults to
+`/workspaces/protos`. The selected checkout must be a clean Git checkout,
+including no non-ignored untracked files. The harness records its exact HEAD
+revision, project version, Core SHA-256, `pom.xml` SHA-256, dependency
+classpath identity, runner source/classes identity, requested run mode and
+resolved run mode. Ignored build output may exist, but source/configuration
+drift that is not represented by the recorded Git revision is rejected.
+
+`PROTOS_RUN_MODE` accepts `auto`, `dynamic`, or `prepared` and defaults to
+`auto`:
+
+- `auto` selects `prepared` when the selected checkout exposes
+  `ProtosStandaloneHostedSession.PreparedTopLevel`;
+- otherwise `auto` selects the historical `dynamic` surface;
+- explicit `prepared` on a checkout without that API fails closed rather than
+  silently falling back.
+
+The Protos runner is compiled directly against the selected checkout's classes
+and dependency classpath. GraalJS and GraalPy use a separate
+`TrufflePeerJvmRunner` compiled only against the pinned Graal Polyglot/JS/Python
+dependencies; the peer runner has no Protos compile-time or runtime dependency.
+This removes the old generic-path dependency on the historical
+`com.guillermomolina:protos:0.3.128-SNAPSHOT` declaration in `truffle/pom.xml`.
+That declaration remains available to historical harness code that explicitly
+depends on the old pinned baseline.
+
+The generic matrix measurement definition is
+`jvm-cross-truffle-generic-v3`. Correctness is checked before any accepted
+timing or diagnostic output. `jvm-benchmark` retains the existing clean-harness
+reference gate and stability admission rules; changing the selected Protos
+checkout changes the evidence identity and therefore the cache key.
+
+Typical current-checkout commands are:
+
+```sh
+make -C truffle correctness WORKLOAD=primitive-return-literal
+make -C truffle jvm-smoke WORKLOAD=primitive-return-literal
+make -C truffle jvm-benchmark WORKLOAD=primitive-return-literal
+```
+
+A different compatible checkout is selected without changing harness source:
+
+```sh
+make -C truffle correctness   WORKLOAD=primitive-return-literal   PROTOS_CHECKOUT=/path/to/protos   PROTOS_RUN_MODE=auto
+```
+
+### Generic JFR and IGV diagnostics
+
+`jvm-jfr` and `jvm-igv` use the same version-independent runtime authority and
+the same resolved Protos run mode as the generic correctness/matrix paths.
+Diagnostic identity records the exact selected product/runtime identity and the
+diagnostic workload policy. Diagnostic timing is explicitly non-primary.
+
+Examples:
+
+```sh
+make -C truffle jvm-jfr   LANGUAGE=protos   WORKLOAD=primitive-return-literal
+
+make -C truffle jvm-igv   LANGUAGE=protos   WORKLOAD=primitive-return-literal
+
+make -C truffle jvm-igv   LANGUAGE=js   WORKLOAD=primitive-return-literal
+```
+
+`DIAGNOSTIC_WARMUP`, `DIAGNOSTIC_STEADY`, and
+`DIAGNOSTIC_SAMPLE_CALLS` may override the diagnostic work shape. JFR defaults
+to the workload catalog's sample-call count. IGV requires an optimizing
+compilation before a BGV can exist, so when `DIAGNOSTIC_SAMPLE_CALLS` is not
+specified it applies a 10,000-call minimum compilation floor. This floor is a
+diagnostic-capture policy, not timing evidence.
+
+The version-independent path was capability-validated across both sides of the
+prepared-API transition: Protos `f0791896c3c022a747b4d47af629227da58acfab`
+(`0.3.128-SNAPSHOT`) resolves to `dynamic`, while
+`cfc0fb433e82f0478c9fff9cc965c3fc506fabc9` (`0.3.169-SNAPSHOT`) resolves to
+`prepared`; forcing `prepared` on the former fails closed. Both revisions
+produced correctness-passing JFR recordings and IGV BGV output for
+`primitive-return-literal`. The same current harness also produced
+correctness-passing JFR and BGV output for GraalJS on that workload. These
+runs establish harness capability only and are not retained performance
+evidence.
+
 ## PERF024 current cross-Truffle re-baseline
 
 Owner: `guillermomolina/protos#756`. Re-baselines current Protos against the

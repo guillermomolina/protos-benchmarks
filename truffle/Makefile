@@ -8,6 +8,11 @@ MAIN_CLASS := com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner
 
 WORKLOAD ?= all
 LANGUAGE ?= protos
+PROTOS_CHECKOUT ?= /workspaces/protos
+PROTOS_RUN_MODE ?= auto
+DIAGNOSTIC_WARMUP ?= 5
+DIAGNOSTIC_STEADY ?= 10
+DIAGNOSTIC_SAMPLE_CALLS ?=
 RETENTION_PROFILE ?= perf023
 
 prepare:
@@ -16,14 +21,14 @@ prepare:
 compile:
 	mvn -q compile
 
-correctness: compile
-	python3 jvm_correctness.py $(WORKLOAD)
+correctness:
+	PROTOS_CHECKOUT="$(PROTOS_CHECKOUT)" PROTOS_RUN_MODE="$(PROTOS_RUN_MODE)" python3 jvm_correctness.py $(WORKLOAD)
 
 jvm-smoke:
-	python3 jvm_matrix.py smoke $(WORKLOAD)
+	PROTOS_CHECKOUT="$(PROTOS_CHECKOUT)" PROTOS_RUN_MODE="$(PROTOS_RUN_MODE)" python3 jvm_matrix.py smoke $(WORKLOAD)
 
 jvm-benchmark:
-	python3 jvm_matrix.py benchmark $(WORKLOAD)
+	PROTOS_CHECKOUT="$(PROTOS_CHECKOUT)" PROTOS_RUN_MODE="$(PROTOS_RUN_MODE)" python3 jvm_matrix.py benchmark $(WORKLOAD)
 
 
 jvm-ab:
@@ -77,10 +82,10 @@ perf025-e3-reference:
 
 
 jvm-jfr:
-	python3 jvm_diagnostic.py jfr $(LANGUAGE) $(WORKLOAD)
+	PROTOS_CHECKOUT="$(PROTOS_CHECKOUT)" PROTOS_RUN_MODE="$(PROTOS_RUN_MODE)" DIAGNOSTIC_WARMUP="$(DIAGNOSTIC_WARMUP)" DIAGNOSTIC_STEADY="$(DIAGNOSTIC_STEADY)" $(if $(DIAGNOSTIC_SAMPLE_CALLS),DIAGNOSTIC_SAMPLE_CALLS="$(DIAGNOSTIC_SAMPLE_CALLS)",) python3 jvm_diagnostic.py jfr $(LANGUAGE) $(WORKLOAD)
 
 jvm-igv:
-	python3 jvm_diagnostic.py igv $(LANGUAGE) $(WORKLOAD)
+	PROTOS_CHECKOUT="$(PROTOS_CHECKOUT)" PROTOS_RUN_MODE="$(PROTOS_RUN_MODE)" DIAGNOSTIC_WARMUP="$(DIAGNOSTIC_WARMUP)" DIAGNOSTIC_STEADY="$(DIAGNOSTIC_STEADY)" $(if $(DIAGNOSTIC_SAMPLE_CALLS),DIAGNOSTIC_SAMPLE_CALLS="$(DIAGNOSTIC_SAMPLE_CALLS)",) python3 jvm_diagnostic.py igv $(LANGUAGE) $(WORKLOAD)
 
 native-jfr:
 	@printf '%s\n' 'mode=native diagnostic=jfr status=N/A reason=pinned-native-runtime-not-built-and-validated-with-jfr-support'

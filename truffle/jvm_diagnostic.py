@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -77,6 +78,51 @@ def env_int(
         )
 
     return value
+
+
+def diagnostic_jvm_options(
+    environ: dict[str, str] | None = None,
+) -> list[str]:
+    raw = (
+        os.environ
+        if environ is None
+        else environ
+    ).get(
+        "DIAGNOSTIC_JVM_OPTIONS",
+        "",
+    )
+
+    if not raw.strip():
+        return []
+
+    return shlex.split(raw)
+
+
+def record_jvm_options(
+    identity: dict[str, object],
+    options: list[str],
+) -> dict[str, object]:
+    identity["diagnostic_jvm_options"] = list(
+        options
+    )
+
+    return identity
+
+
+def insert_java_options(
+    command: list[str],
+    options: list[str],
+) -> list[str]:
+    java_index = (
+        command.index("java")
+        + 1
+    )
+
+    return (
+        command[:java_index]
+        + list(options)
+        + command[java_index:]
+    )
 
 
 IGV_MIN_SAMPLE_CALLS = 10_000
@@ -153,8 +199,8 @@ def command_for(
     )
 
     identity: dict[str, object] = {
-        "schema": 3,
-        "definition": "jvm-diagnostic-v3",
+        "schema": 4,
+        "definition": "jvm-diagnostic-v4",
         "mode": "jvm",
         "language": language,
         "workload": workload,
@@ -330,6 +376,13 @@ def main() -> None:
 
     identity["diagnostic"] = diagnostic
 
+    extra_options = diagnostic_jvm_options()
+
+    record_jvm_options(
+        identity,
+        extra_options,
+    )
+
     artifact_dir = (
         RESULTS
         / diagnostic
@@ -382,11 +435,6 @@ def main() -> None:
         exist_ok=True,
     )
 
-    java_index = (
-        command.index("java")
-        + 1
-    )
-
     if diagnostic == "jfr":
         recording = (
             artifact_dir
@@ -420,9 +468,10 @@ def main() -> None:
             ),
         ]
 
-    command[
-        java_index:java_index
-    ] = options
+    command = insert_java_options(
+        command,
+        options + extra_options,
+    )
 
     result = subprocess.run(
         command,

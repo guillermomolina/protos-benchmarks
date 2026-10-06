@@ -101,28 +101,56 @@ changes its Truffle dependency.
 
 ## IGV diagnostic analyzer
 
-IdealGraphVisualizer analysis is deliberately isolated from benchmark runtime
-images. `docker/igv-analyzer/Dockerfile` pins the Graal `vm-24.0.0` commit
-`78238a5ee6e4ae827059c70549e286ae730b7730` and the matching mx `6.27.1` commit
-`d0d6d6cd2f70bb384dfba9f3f66f3dab21392ae4`.
+IdealGraphVisualizer (BGV) analysis is deliberately isolated from benchmark
+runtime images. The current/default analyzer is the official headless
+`GRAAL_IGVUTIL` utility (`org.graalvm.igvutil.IgvUtility`) from GraalVM
+25.4.4.1.1: `docker/igv-analyzer/Dockerfile` pins oracle/graal `vm-25.4.4.1.1`
+commit `95ce1499c8c96ab7d5a6697c5b4bf42160f3b68b`, mx `7.83.0` commit
+`22381992c7322f661498cd6101144f0f49c72ae1`, and the builder image by tag and
+digest. Only the collected runtime jars are shipped on a neutral Java 21 JRE.
 
-That Graal revision uses NetBeans 14 for IGV and its build still contains Java 7
-release targets. JDK 22 rejects `javac --release 7`, so the analyzer image uses
-JDK 17 exclusively for building and running the diagnostic exporter. This is a
-tooling compatibility boundary, not a change to the JDK/GraalVM used by the
-measured Protos runtime.
+The analyzer is consumed as a prebuilt, versioned image:
 
-Build the tool with `make igv-analyzer-build` and verify it with
-`make igv-analyzer-smoke`. Convert a BGV file from the directory containing it,
-or from the repository root, with for example:
-
-```sh
-./scripts/igv_analyzer.sh analyze results/example.bgv > results/example.json
+```text
+ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-25.4.4.1.1
 ```
 
-Runtime analysis uses `--network none`. The current working directory is mounted
-at `/work` so input paths and any explicitly requested output paths remain host
-artifacts rather than being trapped inside the diagnostic container.
+Its operations are deliberately separated:
+
+- **Build/publish (rare, maintainer):** `.github/workflows/igv-analyzer-image.yml`
+  builds and pushes the image on `workflow_dispatch` or when the analyzer
+  Dockerfile/workflow changes on `main`. `scripts/igv_analyzer.sh build` is the
+  equivalent local maintainer command. Only this step clones Graal/mx and runs
+  `mx build`. The build fails unless the shipped jars, on the shipped runtime,
+  `list` and `filter` (valid JSON) the upstream `bigv-3.0.bgv` fixture from the
+  exact pinned Graal checkout; the fixture is not shipped.
+- **Pull (one-time setup):** `scripts/igv_analyzer.sh pull`. This is the only
+  wrapper command that contacts a registry.
+- **Analyze (normal, cheap, offline):** `inspect`, `list`, `filter`, `flatten`
+  and `smoke` only run the already-present image with `--network none`. They
+  never build, clone, run mx or pull; a missing image fails with the pull
+  command.
+
+`inspect` is the cheap acceptance/triage surface for an existing BGV:
+
+```sh
+./scripts/igv_analyzer.sh inspect results/example.bgv protos-root:0123456789abcdef
+```
+
+It requires a non-empty file, runs only `IgvUtility list` (no JSON export),
+and reports `BGV_READABLE`, `SELECTED_ROOT_PRESENT` (`NOT_REQUESTED` without a
+selector) and `AFTER_TRUFFLE_TIER_PRESENT`, exiting nonzero unless all
+requested checks pass. The optional `protos-root:<16 lowercase hex>` selector is
+an opaque string located in the listing; the analyzer does not depend on a
+Protos checkout. `inspect` performs no causal graph interpretation.
+
+The low-level `list`, `filter` and `flatten` commands pass their arguments to
+`IgvUtility` with the current working directory mounted at `/work`, so input
+and explicitly requested output paths remain host artifacts.
+`PROTOS_IGV_ANALYZER_IMAGE` overrides the image reference.
+
+Historical Graal 24.0.0 PERF003 tooling remains isolated and unchanged under
+`docker/igv-analyzer24/` and `scripts/igv_analyzer24.sh`.
 
 ## PERF003-A external compilability diagnostic
 

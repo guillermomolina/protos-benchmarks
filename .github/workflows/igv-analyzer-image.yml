@@ -1,0 +1,67 @@
+# THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE
+# ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina. ANY USE, PUBLIC
+# DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR PREPARATION OF
+# DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES RECIPIENT'S ACCEPTANCE
+# OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH RECIPIENT READS THE TERMS OF
+# THE LICENSE. "LICENSED WORK" AND "RECIPIENT" ARE DEFINED IN THE LICENSE. A COPY
+# OF THE LICENSE IS LOCATED IN THE TEXT FILE ENTITLED "LICENSE.TXT" ACCOMPANYING
+# THE CONTENTS OF THIS FILE. IF A COPY OF THE LICENSE DOES NOT ACCOMPANY THIS
+# FILE, A COPY OF THE LICENSE MAY ALSO BE OBTAINED AT THE FOLLOWING WEB SITE:
+# https://github.com/guillermomolina/protos-benchmarks
+#
+# Software distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+# the specific language governing rights and limitations under the License.
+
+# Builds and publishes the prebuilt headless BGV analyzer image. This is the
+# only place GRAAL_IGVUTIL is compiled for consumers; normal analysis pulls
+# the versioned image and never builds it.
+
+name: igv-analyzer-image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - docker/igv-analyzer/**
+      - .github/workflows/igv-analyzer-image.yml
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: igv-analyzer-image
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer
+  ANALYZER_GRAAL_VERSION: 25.4.4.1.1
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/igv-analyzer/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:graal-${{ env.ANALYZER_GRAAL_VERSION }}
+            ${{ env.IMAGE }}:graal-${{ env.ANALYZER_GRAAL_VERSION }}-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}

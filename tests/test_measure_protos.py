@@ -12,6 +12,7 @@ result-retention behaviour without building or measuring anything.
 from __future__ import annotations
 
 import contextlib
+import inspect
 import io
 import json
 import shutil
@@ -397,7 +398,7 @@ class DriverTest(unittest.TestCase):
         timing = mp.resolve_policy(cases, WORKLOAD, "reference", "timing", {})
         self.assertEqual(
             (timing["warmup_iterations"], timing["steady_iterations"], timing["sample_calls"], timing["source"]),
-            (50, 10, 10000, "case-policy"),
+            (60, 10, 1_000_000, "case-policy"),
         )
         self.assertEqual(timing["admission_scope"], "steady-only")
         default = mp.resolve_policy(cases, "fibonacci", "reference", "timing", {})
@@ -409,6 +410,52 @@ class DriverTest(unittest.TestCase):
         self.assertEqual(jfr["sample_calls"], 1_000_000)
         override = mp.resolve_policy(cases, WORKLOAD, "reference", "timing", {"sample_calls": 7})
         self.assertEqual((override["sample_calls"], override["source"]), (7, "cli-override"))
+
+    def test_reference_policy_is_selected_by_workload_stage_and_kind_only(self):
+        # No language, surface or product revision can participate in selection.
+        params = list(inspect.signature(mp.resolve_policy).parameters)
+        self.assertEqual(params, ["cases", "workload", "stage", "kind", "overrides"])
+
+    def test_same_reference_timing_policy_for_every_language(self):
+        mp.peer_classpath = lambda: ("25.4.4.1.1", "/fake/peer.jar")
+        older = make_product(self.tmp, "protos-older", "0.3.0-SNAPSHOT")
+        runs = {
+            "protos": ["--dir", str(self.product), "--surface", "canonical"],
+            "protos-older": ["--dir", str(older), "--surface", "canonical"],
+            "js": ["--language", "js"],
+            "python": ["--language", "python"],
+        }
+        observed = {}
+        for name, selector in runs.items():
+            argv = [*selector, "--workload", WORKLOAD, "--stage", "reference",
+                    "--output", str(self.tmp / "results" / name)]
+            self.fakes.java_calls.clear()
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(mp.main(argv), 0, name)
+            timing = [c for c in self.fakes.java_calls if "measure" in c][0]
+            index = timing.index("measure")
+            observed[name] = tuple(timing[index + 3: index + 6])
+        self.assertEqual(set(observed.values()), {("60", "10", "1000000")}, observed)
+
+    def test_smoke_policy_stays_cheap(self):
+        cases = mp.load_cases()
+        smoke = mp.resolve_policy(cases, WORKLOAD, "smoke", "timing", {})
+        self.assertEqual(
+            (smoke["warmup_iterations"], smoke["steady_iterations"], smoke["sample_calls"]),
+            (2, 3, 1),
+        )
+
+    def test_other_primitive_reference_policies_unchanged(self):
+        cases = mp.load_cases()
+        for workload in cases["policy"]["workloads"]:
+            if workload == WORKLOAD:
+                continue
+            timing = mp.resolve_policy(cases, workload, "reference", "timing", {})
+            self.assertEqual(
+                (timing["warmup_iterations"], timing["steady_iterations"], timing["sample_calls"], timing["admission_scope"]),
+                (50, 10, 10000, "steady-only"),
+                workload,
+            )
 
     def test_reference_stage_admits_and_is_eligible(self):
         code, lines = self.run_driver("--stage", "reference")
@@ -485,6 +532,12 @@ class StaticArchitectureTest(unittest.TestCase):
         text = (ROOT / "truffle/measure_protos.py").read_text()
         for forbidden in ('"checkout"', '"clone"', '"reset"', '"worktree"', '"fetch"', "protos-ab"):
             self.assertNotIn(forbidden, text)
+
+    def test_measurement_code_has_no_work_item_branch(self):
+        paths = [ROOT / "truffle/measure_protos.py", *(ROOT / "truffle/measure").rglob("*.java")]
+        for path in paths:
+            text = path.read_text().upper()
+            self.assertNotRegex(text, r"PERF\d{3}", path)
 
 
 if __name__ == "__main__":

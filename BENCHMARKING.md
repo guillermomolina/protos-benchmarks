@@ -1406,7 +1406,17 @@ workload catalog's `jvm_sample_calls`. Timing policy also declares
 `admission_scope`: `warmup-and-steady` by default, and `steady-only` with
 10,000 calls/sample and 50 warmup + 10 steady iterations for the
 primitive embedding workloads, matching the established PERF025-D3 policy
-(sub-millisecond samples are dominated by isolated GC/compilation pauses). `--warmup`, `--steady` and
+(sub-millisecond samples are dominated by isolated GC/compilation pauses).
+`primitive-return-literal` uses 1,000,000 calls/sample and 60 warmup + 10
+steady iterations (still `steady-only`): ultra-small primitive reference
+workloads need a per-sample call count long enough that periodic runtime/host
+events are amortized rather than producing alternating timing populations,
+and enough total warmup calls to pass the final compilation transition.
+10,000 calls (~1 ms samples) produced alternating populations on the
+GraalJS/GraalPy peers; 100,000 calls removed them but left samples near 10 ms
+and 6M warmup calls, still short of final tiering on Protos. The policy
+is selected only by workload, stage and kind, so Protos and every peer
+language measure the same sample unit. `--warmup`, `--steady` and
 `--sample-calls` are diagnostic overrides: such runs record
 `source=cli-override` and are not `reference_eligible`.
 

@@ -2,7 +2,7 @@
 # ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina.
 # See LICENSE.TXT at the repository root.
 
-.PHONY: compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference perf024-rebaseline-validate perf024-rebaseline-prepare perf024-rebaseline-smoke perf024-rebaseline-reference perf025-e3-validate perf025-e3-prepare perf025-e3-smoke perf025-e3-reference
+.PHONY: measure compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference perf024-rebaseline-validate perf024-rebaseline-prepare perf024-rebaseline-smoke perf024-rebaseline-reference perf025-e3-validate perf025-e3-prepare perf025-e3-smoke perf025-e3-reference
 
 MAIN_CLASS := com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner
 
@@ -14,6 +14,19 @@ DIAGNOSTIC_WARMUP ?= 5
 DIAGNOSTIC_STEADY ?= 10
 DIAGNOSTIC_SAMPLE_CALLS ?=
 RETENTION_PROFILE ?= perf023
+
+# Revision-independent driver: measures exactly PROTOS_CHECKOUT. A new Protos
+# revision never requires editing harness source; see BENCHMARKING.md.
+SURFACE ?= canonical
+STAGE ?= reference
+PROFILE ?= none
+OUTPUT ?=
+
+measure:
+	python3 measure_protos.py --dir "$(PROTOS_CHECKOUT)" --language "$(LANGUAGE)" \
+		$(if $(filter protos,$(LANGUAGE)),--surface "$(SURFACE)",) \
+		--workload "$(WORKLOAD)" --stage "$(STAGE)" --profile "$(PROFILE)" \
+		--output "$(OUTPUT)"
 
 prepare:
 	python3 prepare.py

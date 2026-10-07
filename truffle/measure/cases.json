@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "surfaces": {
+    "dynamic": {
+      "language": "protos",
+      "classpath": "protos",
+      "main_class": "com.guillermomolina.protos.benchmarks.measure.protos.ProtosDynamicSurface",
+      "sources": [
+        "measure/surfaces/protos/ProtosSurfaceSupport.java",
+        "measure/surfaces/dynamic/ProtosDynamicSurface.java"
+      ],
+      "timed_call": "session.invokeTopLevel(\"run\")"
+    },
+    "prepared": {
+      "language": "protos",
+      "classpath": "protos",
+      "main_class": "com.guillermomolina.protos.benchmarks.measure.protos.ProtosPreparedSurface",
+      "sources": [
+        "measure/surfaces/protos/ProtosSurfaceSupport.java",
+        "measure/surfaces/prepared/ProtosPreparedSurface.java"
+      ],
+      "timed_call": "prepared.invoke()"
+    },
+    "canonical": {
+      "language": "protos",
+      "classpath": "protos",
+      "main_class": "com.guillermomolina.protos.benchmarks.measure.protos.ProtosCanonicalSurface",
+      "sources": [
+        "measure/surfaces/protos/ProtosSurfaceSupport.java",
+        "measure/surfaces/canonical/ProtosCanonicalSurface.java"
+      ],
+      "timed_call": "prepared.executable().execute()"
+    },
+    "executable-value": {
+      "language": "peer",
+      "classpath": "peer",
+      "main_class": "com.guillermomolina.protos.benchmarks.measure.peer.PeerExecutableSurface",
+      "sources": [
+        "measure/surfaces/peer/PeerExecutableSurface.java"
+      ],
+      "timed_call": "context.getBindings(language).getMember(\"truffleRun\").execute()"
+    }
+  },
+  "engine_sources": [
+    "measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java"
+  ],
+  "policy": {
+    "default": {
+      "reference": {
+        "timing": {
+          "warmup_iterations": 60,
+          "steady_iterations": 10,
+          "admission_scope": "warmup-and-steady"
+        },
+        "jfr": {
+          "warmup_iterations": 20,
+          "steady_iterations": 10,
+          "sample_calls": 1000
+        }
+      },
+      "smoke": {
+        "timing": {
+          "warmup_iterations": 2,
+          "steady_iterations": 3,
+          "sample_calls": 1
+        },
+        "jfr": {
+          "warmup_iterations": 1,
+          "steady_iterations": 1,
+          "sample_calls": 1
+        }
+      }
+    },
+    "workloads": {
+      "primitive-return-literal": {
+        "reference": {
+          "jfr": {
+            "sample_calls": 1000000
+          },
+          "timing": {
+            "warmup_iterations": 50,
+            "steady_iterations": 10,
+            "sample_calls": 10000,
+            "admission_scope": "steady-only"
+          }
+        }
+      },
+      "primitive-local-read": {
+        "reference": {
+          "jfr": {
+            "sample_calls": 1000000
+          },
+          "timing": {
+            "warmup_iterations": 50,
+            "steady_iterations": 10,
+            "sample_calls": 10000,
+            "admission_scope": "steady-only"
+          }
+        }
+      },
+      "primitive-local-write": {
+        "reference": {
+          "jfr": {
+            "sample_calls": 1000000
+          },
+          "timing": {
+            "warmup_iterations": 50,
+            "steady_iterations": 10,
+            "sample_calls": 10000,
+            "admission_scope": "steady-only"
+          }
+        }
+      },
+      "primitive-integer-add": {
+        "reference": {
+          "jfr": {
+            "sample_calls": 1000000
+          },
+          "timing": {
+            "warmup_iterations": 50,
+            "steady_iterations": 10,
+            "sample_calls": 10000,
+            "admission_scope": "steady-only"
+          }
+        }
+      },
+      "primitive-closure-call": {
+        "reference": {
+          "jfr": {
+            "sample_calls": 1000000
+          },
+          "timing": {
+            "warmup_iterations": 50,
+            "steady_iterations": 10,
+            "sample_calls": 10000,
+            "admission_scope": "steady-only"
+          }
+        }
+      },
+      "primitive-method-call": {
+        "reference": {
+          "jfr": {
+            "sample_calls": 1000000
+          },
+          "timing": {
+            "warmup_iterations": 50,
+            "steady_iterations": 10,
+            "sample_calls": 10000,
+            "admission_scope": "steady-only"
+          }
+        }
+      }
+    }
+  },
+  "jfr_jvm_options": [
+    "-XX:FlightRecorderOptions:stackdepth=256"
+  ]
+}

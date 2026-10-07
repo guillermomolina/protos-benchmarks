@@ -1316,3 +1316,142 @@ admitted reference per workload: it attributes the per-workload
 difference to the E2 carrier transport change only within this embedding
 call path, makes no claim about guest-dominated workloads, and is not
 aggregated across workloads.
+
+## Revision-independent Protos measurement driver (PERF033)
+
+`truffle/measure_protos.py` is the normal path for current and future
+measurements. The harness is a measuring instrument and a Protos revision is
+data: advancing Protos never requires editing harness source.
+
+    python3 truffle/measure_protos.py \
+        --dir ../protos \
+        --surface canonical \
+        --workload primitive-return-literal \
+        --profile jfr \
+        --output results/<protos-version>
+
+### Product selection
+
+`--dir` is authoritative: the driver measures exactly the files in that
+checkout. There is no option to select a revision, commit, tag or checkout,
+and the driver runs only read-only Git commands (`rev-parse`, `status`,
+`diff`, `ls-files`, `show`). It never clones, fetches, checks out or resets
+anything. Building the product into its ignored `target/` output is the only
+write to the checkout.
+
+Immediately before the batch it records the absolute directory, HEAD, the
+`pom.xml` version and GraalVM version, the clean/dirty state, a digest of all
+tracked and untracked source state, and the Core hash. After the complete
+batch it recomputes them (plus the hash of the built `target/classes`); any
+difference produces `MEASUREMENT_VALID=NO`,
+`REASON=PRODUCT_CHANGED_DURING_MEASUREMENT`. A dirty checkout is refused
+unless `--allow-dirty-product` is given, and such a run is never
+`reference_eligible`.
+
+### Historical data policy
+
+Saved results are the only historical source of truth. A past Protos revision
+that was not measured while current has no measurement; the driver has no
+mechanism to reconstruct one. The historical PERF-specific exact-revision
+harnesses (`perf024_rebaseline.py`, `perf025_*.py`, `jvm_protos_ab.py`) and
+their retained evidence remain as immutable historical artifacts and are not
+used by this driver.
+
+### Surfaces and adapters
+
+`truffle/measure/cases.json` lists the surfaces. Each surface is a small
+stable Java adapter compiled together with the JDK-only
+`MeasurementEngine` against the exact classpath of the selected checkout
+(`target/classes` plus `mvn dependency:build-classpath`). Requesting one
+surface never compiles another.
+
+| Surface | Setup before timing | Timed call |
+| --- | --- | --- |
+| `dynamic` | open session | `session.invokeTopLevel("run")` |
+| `prepared` | `prepareTopLevel("run")` | `prepared.invoke()` |
+| `canonical` | `prepareTopLevel("run")`, `executable()` | `executable.execute()` |
+| `executable-value` (GraalJS/GraalPy) | eval, `getMember("truffleRun")` | `run.execute()` |
+
+The canonical timed path takes no session gate and performs no
+`PreparedTopLevel.invoke()`, `invokeTopLevel()` or Context enter/leave.
+Polyglot results (canonical and peers) are normalized identically:
+`fitsInBigInteger()` → `asBigInteger().toString()`, otherwise `toString()`.
+Every timed call is checked against the first result, which is checked
+against the workload's expected value.
+
+If an adapter does not compile against the selected checkout the driver
+reports `SURFACE_SUPPORTED=NO`, `SURFACE=<name>`, `REASON=<javac error>` and
+exits 3; it never falls back to another surface. Adding a genuinely new
+surface is an allowed harness change; a new revision using an existing
+surface is not.
+
+Peers use `--language js|python` (no `--dir` needed) with the GraalJS/GraalPy
+version pinned by `truffle/pom.xml`; that runtime identity is recorded.
+
+### Compiled adapter cache
+
+Compiled adapters live in `.work/embedded/<protos-sha>/<surface>/<adapter-source-hash>/`
+with an `identity.json` covering the Protos revision and source-state digest,
+built product classes hash, dependency classpath hash, adapter source hash
+and Java home/runtime version. An entry is reused only when that identity
+matches exactly, otherwise it is recompiled. The cache is an optimization:
+deleting `.work/embedded` loses no evidence, and it is never consumed as a
+result.
+
+### Measurement policy
+
+Policy is data. `cases.json` holds default and per-workload `reference` and
+`smoke` policy for `timing` and `jfr`; timing `sample_calls` falls back to the
+workload catalog's `jvm_sample_calls`. Timing policy also declares
+`admission_scope`: `warmup-and-steady` by default, and `steady-only` with
+10,000 calls/sample and 50 warmup + 10 steady iterations for the
+primitive embedding workloads, matching the established PERF025-D3 policy
+(sub-millisecond samples are dominated by isolated GC/compilation pauses). `--warmup`, `--steady` and
+`--sample-calls` are diagnostic overrides: such runs record
+`source=cli-override` and are not `reference_eligible`.
+
+Order within a batch: correctness (single call, must equal the expected
+value) → timing run without instrumentation (reference stage requires the
+existing stability admission over the policy's `admission_scope`) → optional JFR run. The JFR run uses
+the same checkout, adapter, workload and case; the engine starts a
+`jdk.jfr.Recording` (`profile` settings, stack depth 256) immediately before
+the first steady iteration and stops it after the last, so the recording is
+bounded to steady state by the harness itself.
+
+### Results
+
+`--output` is a directory owned by the driver (marked by
+`.measure-protos-output`; the driver refuses a non-empty directory it did
+not create, which protects retained PERF result trees). Each run is written
+to `<output>/.staging/` and promoted only when complete to
+`<output>/<language>-<surface>--<workload>--<stage>-<profile>/<run-id>/`:
+
+- `metadata.json` — authoritative: `measurement_valid`, product identity
+  before/after, surface/workload/expected result, policy, harness Git HEAD,
+  `harness_dirty`, the exact SHA-256 of every harness source file that
+  produced the run, adapter source hash, compiled-adapter cache identity,
+  Java/GraalVM, OS/kernel/architecture, CPU and affinity, correctness.
+- `summary.json` — timing statistics and admission, JFR artifact hash.
+- `raw/` — product build, correctness, timing and JFR process logs.
+- `jfr/steady.jfr` when `--profile jfr`.
+
+Failed runs are promoted to `<run-id>.invalid` with
+`measurement_valid=false` and a reason, and are never reused. If a valid run
+with the same result key (product revision and source state, language,
+surface, workload, stage, profile, policy) exists, the driver prints
+`RESULT_ALREADY_EXISTS=YES` and measures nothing; `--remeasure` adds a new
+run and keeps the old one.
+
+### Dirty harness and publication
+
+The harness does not need to be committed before measuring. A dirty harness
+is recorded (`harness_dirty`) together with the exact producer source hashes,
+which are re-checked after the batch (`HARNESS_CHANGED_DURING_MEASUREMENT`
+invalidates it). Before publishing results, check that the files being
+committed are byte-identical to the producer:
+
+    python3 truffle/measure_protos.py --verify-producer <run-dir>
+
+`WORKING_TREE_MATCHES_PRODUCER=YES` before committing (and
+`HEAD_MATCHES_PRODUCER=YES` after) means the committed harness produced the
+run; otherwise either keep the exact producer bytes or remeasure.

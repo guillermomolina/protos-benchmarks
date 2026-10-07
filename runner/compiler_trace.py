@@ -81,8 +81,10 @@ LIFECYCLE_KINDS = frozenset(
     }
 )
 
-# Verbs are matched exactly. The invalidation aliases were not observed in the retained logs; they
-# are accepted because their meaning is unambiguous. Any other verb becomes OPT_UNKNOWN.
+# Verbs are matched exactly. `inval.` is the invalidation verb observed in GraalVM 25.4.4.1.1
+# logs (PERF032-F); the other invalidation aliases are accepted because their meaning is
+# unambiguous. Any other verb becomes OPT_UNKNOWN. Labels may contain spaces (GraalPy roots such as
+# `<bytecode run at 2cbc655a>`); a label ends at the first `|` field separator.
 VERB_KINDS = {
     "queued": OPT_QUEUED,
     "start": OPT_START,
@@ -92,6 +94,7 @@ VERB_KINDS = {
     "unque.": OPT_DEQUEUED,
     "deopt": OPT_DEOPT,
     "inv.": OPT_INVALIDATED,
+    "inval.": OPT_INVALIDATED,
     "inv": OPT_INVALIDATED,
     "invalid": OPT_INVALIDATED,
     "invalidated": OPT_INVALIDATED,
@@ -100,11 +103,11 @@ VERB_KINDS = {
 OPT_RE = re.compile(
     r"^\[engine\] opt (?P<verb>[A-Za-z.]+)\s+"
     r"(?:engine=(?P<engine>\d+)\s+id=(?P<id>\d+)\s+)?"
-    r"(?P<label>[^\s|]+)(?P<rest>\s*\|.*|\s*)$"
+    r"(?P<label>[^\s|][^|]*?)(?P<rest>\s*\|.*|\s*)$"
 )
 INLINE_RE = re.compile(
     r"^\[engine\] (?P<verb>Inline start|Inline done|Inlined|Cutoff|Removed|Expanded|Indirect|BailedOut)"
-    r"\s+(?P<label>\S+)\s*\|(?P<rest>.*)$"
+    r"\s+(?P<label>[^\s|][^|]*?)\s*\|(?P<rest>.*)$"
 )
 PERF_WARN_RE = re.compile(r"^\[engine\] perf warn\s+(?P<label>\S+)\s*\|(?P<message>.*)$")
 ENGINE_WARNING_RE = re.compile(r"^\[engine\] WARNING: (?P<text>.*)$")

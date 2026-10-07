@@ -1465,3 +1465,194 @@ committed are byte-identical to the producer:
 `WORKING_TREE_MATCHES_PRODUCER=YES` before committing (and
 `HEAD_MATCHES_PRODUCER=YES` after) means the committed harness produced the
 run; otherwise either keep the exact producer bytes or remeasure.
+
+## Cross-Truffle compiled-graph structural parity (PERF032-F)
+
+`truffle/measure_graphs.py` records the *structure* of the compiled Graal
+graphs that one steady prepared `Value.execute()` operation runs, for Protos
+and the GraalJS/GraalPy peers, on the same surfaces as the timing driver
+(Protos `canonical` `prepared.executable().execute()`, peer
+`executable-value` `truffleRun.execute()`). It produces no timing: graph
+instrumentation is never a timing run.
+
+### Selected graph and metric
+
+The selected phase is the Graal `StructuredGraph` **`After TruffleTier`**:
+after Truffle partial evaluation and Truffle-tier cleanup, before generic
+high/mid/low-tier optimization. The primary metric is
+
+    relevant_graph_nodes_total_after_truffle_tier
+
+the sum of the exact IR node counts of that graph over every relevant
+language-owned compilation unit of one steady operation, always reported with
+`primary_guest_graph_nodes`, `graph_count` and
+`additional_language_owned_compiled_units`. Each dump also contains a
+same-named non-IR view (the `AST` group's `After TruffleTier`,
+`graph_type=defaultType`); only `graph_type=StructuredGraph` graphs are
+candidates, and exactly one must match or the case fails closed
+(`PHASE_MISSING`/`PHASE_AMBIGUOUS`). The TraceCompilation `AST` count is not a
+graph-size metric; its `IR <after-truffle-tier>/<final>` value is retained as
+a cross-check, and in the PERF032-F matrix it equals the BGV node count.
+
+Secondary, per selected graph: the node-class histogram and the families
+derived from it (`invokes`, `control_flow_splits`, `allocations` including
+boxing, `guards_deopts`, `loads`, `loops`), surviving `Invoke` target
+methods, and the `TraceNodeExpansion` truffleTier table (Count, Size, Cycles,
+Ifs, Loops, Invokes, Allocs) with the largest-own-count expansion rows as
+language/runtime attribution.
+
+### Capture options
+
+Policy is data in `truffle/measure/graphs.json`:
+
+    -Dpolyglot.engine.AllowExperimentalOptions=true
+    -Dpolyglot.engine.TraceCompilation=true
+    -Dpolyglot.engine.BackgroundCompilation=false
+    -Dpolyglot.compiler.TraceNodeExpansion=truffleTier
+    -Dpolyglot.compiler.TraceInlining=true
+    -Djdk.graal.Dump=Truffle:1
+    -Djdk.graal.DumpPath=<case>/budget-<n>/dumps
+
+`CompileImmediately` and `Dump=Truffle:2` are not used; they are later
+escalation tools only. `TraceInlining` is needed for unit accounting.
+
+### Relevant compilation units
+
+Fully generic (`truffle/graph_evidence.py`); a language contributes only data
+(framework-label pattern, primary-label pattern):
+
+- **Lifecycle.** Compilations are grouped per CallTarget (`engine`, `id`).
+  The final compilation of a target is its last `opt done`; earlier tier
+  versions and retries are superseded and never summed. An invalidation
+  (`opt inval.`, `opt deopt … Invalidated true`) or failure after the final
+  compilation makes the unit unstable.
+- **Primary unit.** The framework entry root
+  (`org.graalvm.polyglot.Value<…>.execute`, common to all languages, never
+  counted) has exactly one depth-1 callee in its inlining trees; that is the
+  primary guest unit. It must match the language's primary-label pattern
+  (`run`, `<bytecode run at …>`, `Protos…RootNode…@…` or
+  `protos-root:<16 hex>`); GraalJS additionally must point `Src` at the
+  workload file.
+- **Additional units.** A callee that remains a call (`Cutoff`, `Indirect`,
+  `BailedOut`) in the final compilation of a counted unit, and is a
+  separately compiled language-owned target, is counted once, transitively.
+  Inlined callees are already in the caller's graph and are never added; a
+  callee that remains a call but was never compiled makes the run unstable.
+- Roots not reachable from the primary unit (setup, module evaluation,
+  GraalPy import machinery) are listed as `unattributed_language_targets` and
+  never counted.
+
+### Natural warmup and stabilization
+
+Each budget (`1,000`, `4,000`, `16,000`, `64,000`, `256,000` calls) is one
+fresh JVM running the engine `measure` mode with 0 warmup and 1 steady
+iteration of that many result-checked calls. A run is a stable candidate when
+every unit is at the final tier (2), was not invalidated or failed after its
+final compilation, and the trace parsed with no rejected option or unknown
+lifecycle event. The case is `STABLE` at the first two consecutive budgets
+with identical signatures (units, tier, IR count, truffleTier expansion
+totals). `summarize` re-confirms the pair on the BGVs (identical node count
+and histogram per unit) or reports `GRAPH_NOT_STABLE`. With no pair by 256k
+the case is `GRAPH_NOT_STABLE` and its evidence is kept, but no graph is
+chosen.
+
+### Comparison
+
+Per rung: Protos/JS/Python totals, graph counts and additional units. The
+peers are the structural reference: `PEER_REFERENCE=UNRESOLVED` when either
+peer has no valid stable evidence, when their `graph_count` differs, or when
+they disagree on the presence of invokes, allocations or loops. Otherwise
+`CONVERGED`, and their observed `[min, max]` band and spread form the envelope
+(no fixed tolerance). With converged peers, Protos is `STRUCTURAL_EXCESS`
+when it has an additional compiled unit, an excess over the peer maximum
+larger than the peer spread, or a family absent in both peers; otherwise
+`STRUCTURALLY_CONVERGED`. If Protos never stabilizes while the peers converge,
+the rung is `PROTOS_STABILIZATION=GRAPH_NOT_STABLE`,
+`PROTOS_STRUCTURAL_STATUS=DIVERGED_BEFORE_GRAPH_PARITY`, `PROTOS_NODE_TOTAL=N/A`,
+`PEER_NODE_COMPARISON=SKIPPED`, plus the final compilation state and
+lifecycle facts re-derived from the retained trace. Both kinds of status
+count as divergences for `first_divergent_rung`. These are findings, not
+acceptance constants; no optimization follows from them inside this
+harness.
+
+### Commands and hosts
+
+Capture needs the JVMs; BGV analysis needs Docker and uses only
+`scripts/igv_analyzer.sh` with the published GraalVM 25.4.4.1.1 IgvUtility
+image (see IGV analyzer generations). The two may run on different hosts
+that share the working tree.
+
+    make -C truffle graphs-test                       # unit/static tests
+    make -C truffle graphs-smoke                      # 1 budget, return-literal, 3 languages
+    make -C truffle graphs-capture PROTOS_CHECKOUT=…  # reference capture
+    make -C truffle graphs-analyze                    # Docker host: IgvUtility filter
+    make -C truffle graphs-summarize                  # unit.json + matrix.json
+    make -C truffle graphs-verify                     # producer hashes vs tree/HEAD
+
+`GRAPH_WORKLOAD` (default `ladder`), `GRAPH_LANGUAGE` (default `all`) and
+`GRAPH_OUTPUT` (default `results/perf032-f`) select the scope. A smoke admits
+the pipeline on one budget and is labelled `stage=smoke`; it is never
+evidence.
+
+### Retained evidence
+
+`<output>/<workload>/<language>/`:
+
+- `capture.json` — authoritative capture record: evidence-unit definition,
+  Protos identity before/after, exact producer source hashes and harness HEAD,
+  Java/GraalVM, host/CPU affinity, graph JVM options, correctness, every
+  budget's lifecycle assessment, resolved units, and the name/size/SHA-256
+  inventory of every BGV dump produced.
+- `budget-<n>/trace.log.gz` — raw trace of every budget run.
+- `budget-<n>/bgv/*.bgv.gz` — raw BGVs of the selected units of the stable
+  pair (or of the last two budgets when not stable), and the
+  `*.filter.json.gz` IgvUtility output next to each.
+- `raw/` — product build and correctness logs.
+- `unit.json` — the derived evidence unit (selected budget/tier/units,
+  per-unit graph metrics, totals, validity).
+- `<output>/matrix.json` — rung comparison and `first_divergent_rung`.
+
+### PERF032-F primitive ladder result
+
+Protos `c0ac98971df115d64b7bc9f146e8b02e11da30e6`, GraalVM CE 25.4.4.1.1
+(`25.0.4.1.1+1-jvmci-25.4-b23`), single pinned CPU, `results/perf032-f/`.
+All 24 cases passed correctness. 23 stabilized at the `[16000, 64000]` pair;
+`primitive-object-slot-write`/Protos did not stabilize by 256k. Every valid
+case has `graph_count=1`.
+
+| Rung | Protos | GraalJS | GraalPy | Peer band (spread) | Protos status |
+| --- | ---: | ---: | ---: | --- | --- |
+| primitive-return-literal | 282 | 13 | 49 | 13–49 (36) | STRUCTURAL_EXCESS |
+| primitive-local-read | 1283 | 13 | 49 | 13–49 (36) | STRUCTURAL_EXCESS |
+| primitive-local-write | 2343 | 13 | 49 | 13–49 (36) | STRUCTURAL_EXCESS |
+| primitive-integer-add | 4595 | 14 | 49 | 14–49 (35) | STRUCTURAL_EXCESS |
+| primitive-object-slot-read | 583 | 36 | 103 | 36–103 (67) | STRUCTURAL_EXCESS |
+| primitive-object-slot-write | N/A | 100 | 159 | 100–159 (59) | DIVERGED_BEFORE_GRAPH_PARITY |
+| primitive-closure-call | 4741 | 13 | 50 | 13–50 (37) | STRUCTURAL_EXCESS |
+| primitive-method-call | 2139 | 34 | 74 | 34–74 (40) | STRUCTURAL_EXCESS |
+
+The peers converge on every rung. **The first divergent rung is
+`primitive-return-literal`**, the baseline callable entry: the Protos
+After-TruffleTier graph has 282 nodes against a 13–49 peer band, with
+Protos-only surviving invokes (`ProtosBytecodeRootNode.selectGuestHandlerOnRootCrossing`,
+`ProtosFrameArguments.materializeCompactActivation`, `List.size`),
+control-flow splits (12) and guards/deoptimization checks (15). The largest
+own-count expansion rows are the generated
+`ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode`. The excess grows with
+local bindings (local-read adds `ProtosLexicalBindingAuthority*`/
+`ProtosLexicalFallback.readByName` invokes; local-write, integer-add,
+object-slot-read, closure-call and method-call also carry a Protos-only
+surviving loop).
+
+`primitive-object-slot-write`/Protos is `GRAPH_NOT_STABLE`: the primary root
+is invalidated after every Tier-1 compilation (100 compilations, 200
+invalidation events at 256k), fails with `Maximum compilation count 100
+reached.`, and the framework root then records it as `BailedOut`; no
+Protos graph is compared on that rung. Both peers are stable there.
+
+No rung needs an additional Protos compiled unit: the earlier double-Bytecode
+helper CallTarget does not appear on these primitive paths
+(`DOUBLE_BYTECODE_DISPATCH_CURRENTLY_ESTABLISHED=NO` for this ladder). The
+Protos excess lies inside the single primary semantic-Bytecode graph. These
+are structural findings only; no Protos product change, semantic change or
+microoptimization is part of PERF032-F.

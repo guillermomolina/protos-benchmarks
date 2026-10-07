@@ -672,6 +672,94 @@ def compile_adapter(
     }
 
 
+def prepare_surface_runtime(
+    cases: dict[str, object],
+    surface: str,
+    surface_def: dict[str, object],
+    language: str,
+    product_dir: Path | None,
+    product_before: dict[str, object] | None,
+    metadata: dict[str, object],
+    raw: Path,
+) -> dict[str, object]:
+    """Builds/resolves the exact runtime classpath for one surface and
+    compiles its adapter. Records cache and runtime identity in ``metadata``.
+    Shared by every driver that executes a surface (timing, graphs)."""
+    # Classpath of the exact runtime being measured.
+    if language == "protos":
+        assert product_dir is not None and product_before is not None
+        classes, dependency_cp = build_product(product_dir, raw / "product-build.log")
+        product_classes_sha = jvm_runtime.sha256_tree(classes)
+        compile_cp = os.pathsep.join([str(classes), dependency_cp])
+        owner = str(product_before["revision"])
+        cache_identity = {
+            "protos_revision": product_before["revision"],
+            "protos_source_state_sha256": product_before["source_state_sha256"],
+            "product_classes_sha256": product_classes_sha,
+            "dependency_classpath_sha256": sha256_bytes(dependency_cp.encode()),
+            "java_home": metadata["java"].get("java.home"),
+            "java_runtime_version": metadata["java"].get("java.runtime.version"),
+        }
+        metadata["product_classes_sha256"] = product_classes_sha
+        metadata["dependency_classpath_sha256"] = cache_identity[
+            "dependency_classpath_sha256"
+        ]
+        system_properties: list[str] = []
+        core_arg = str(product_before["core_root"])
+    else:
+        peer_version, dependency_cp = peer_classpath()
+        classes = None
+        compile_cp = dependency_cp
+        owner = f"peer-{peer_version}"
+        cache_identity = {
+            "peer_graalvm_version": peer_version,
+            "dependency_classpath_sha256": sha256_bytes(dependency_cp.encode()),
+            "java_home": metadata["java"].get("java.home"),
+            "java_runtime_version": metadata["java"].get("java.runtime.version"),
+        }
+        metadata["peer_runtime"] = {
+            "graalvm_version": peer_version,
+            "dependency_classpath_sha256": cache_identity[
+                "dependency_classpath_sha256"
+            ],
+            "protos_graalvm_version": (
+                product_before["graalvm_version"] if product_before else None
+            ),
+        }
+        system_properties = [f"-Dprotos.benchmarks.peer.language={language}"]
+        core_arg = "-"
+
+    sources = adapter_sources(cases, surface_def)
+    adapter = compile_adapter(
+        surface, surface_def, sources, owner, compile_cp, cache_identity
+    )
+    emit("SURFACE_SUPPORTED", "YES")
+    emit("ADAPTER_CACHE", adapter["status"])
+    emit("ADAPTER_CACHE_PATH", adapter["path"])
+    metadata["adapter_source_sha256"] = adapter["adapter_source_sha256"]
+    metadata["compiled_driver_cache"] = {
+        "status": adapter["status"],
+        "path": adapter["path"],
+        "identity": {**cache_identity, "surface": surface},
+        "identity_sha256": adapter["identity_sha256"],
+        "classes_sha256": adapter["classes_sha256"],
+        "is_evidence": False,
+    }
+
+    runtime_cp = os.pathsep.join(
+        [str(adapter["classes"]), *([str(classes)] if classes else []), dependency_cp]
+    )
+    main_class = str(surface_def["main_class"])
+
+    return {
+        "runtime_cp": runtime_cp,
+        "main_class": main_class,
+        "system_properties": system_properties,
+        "core_arg": core_arg,
+        "classes": classes,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Process execution
 
@@ -1083,71 +1171,14 @@ def measure(args: argparse.Namespace) -> int:
             and (product_before is None or bool(product_before["clean"]))
         )
 
-        # Classpath of the exact runtime being measured.
-        if language == "protos":
-            assert product_dir is not None and product_before is not None
-            classes, dependency_cp = build_product(product_dir, raw / "product-build.log")
-            product_classes_sha = jvm_runtime.sha256_tree(classes)
-            compile_cp = os.pathsep.join([str(classes), dependency_cp])
-            owner = str(product_before["revision"])
-            cache_identity = {
-                "protos_revision": product_before["revision"],
-                "protos_source_state_sha256": product_before["source_state_sha256"],
-                "product_classes_sha256": product_classes_sha,
-                "dependency_classpath_sha256": sha256_bytes(dependency_cp.encode()),
-                "java_home": metadata["java"].get("java.home"),
-                "java_runtime_version": metadata["java"].get("java.runtime.version"),
-            }
-            metadata["product_classes_sha256"] = product_classes_sha
-            metadata["dependency_classpath_sha256"] = cache_identity[
-                "dependency_classpath_sha256"
-            ]
-            system_properties: list[str] = []
-            core_arg = str(product_before["core_root"])
-        else:
-            peer_version, dependency_cp = peer_classpath()
-            classes = None
-            compile_cp = dependency_cp
-            owner = f"peer-{peer_version}"
-            cache_identity = {
-                "peer_graalvm_version": peer_version,
-                "dependency_classpath_sha256": sha256_bytes(dependency_cp.encode()),
-                "java_home": metadata["java"].get("java.home"),
-                "java_runtime_version": metadata["java"].get("java.runtime.version"),
-            }
-            metadata["peer_runtime"] = {
-                "graalvm_version": peer_version,
-                "dependency_classpath_sha256": cache_identity[
-                    "dependency_classpath_sha256"
-                ],
-                "protos_graalvm_version": (
-                    product_before["graalvm_version"] if product_before else None
-                ),
-            }
-            system_properties = [f"-Dprotos.benchmarks.peer.language={language}"]
-            core_arg = "-"
-
-        sources = adapter_sources(cases, surface_def)
-        adapter = compile_adapter(
-            surface, surface_def, sources, owner, compile_cp, cache_identity
+        runtime = prepare_surface_runtime(
+            cases, surface, surface_def, language, product_dir, product_before, metadata, raw
         )
-        emit("SURFACE_SUPPORTED", "YES")
-        emit("ADAPTER_CACHE", adapter["status"])
-        emit("ADAPTER_CACHE_PATH", adapter["path"])
-        metadata["adapter_source_sha256"] = adapter["adapter_source_sha256"]
-        metadata["compiled_driver_cache"] = {
-            "status": adapter["status"],
-            "path": adapter["path"],
-            "identity": {**cache_identity, "surface": surface},
-            "identity_sha256": adapter["identity_sha256"],
-            "classes_sha256": adapter["classes_sha256"],
-            "is_evidence": False,
-        }
-
-        runtime_cp = os.pathsep.join(
-            [str(adapter["classes"]), *([str(classes)] if classes else []), dependency_cp]
-        )
-        main_class = str(surface_def["main_class"])
+        runtime_cp = runtime["runtime_cp"]
+        main_class = runtime["main_class"]
+        system_properties = runtime["system_properties"]
+        core_arg = runtime["core_arg"]
+        classes = runtime["classes"]
 
         # 1. Correctness, before any timing.
         code, out = run_logged(

@@ -2,7 +2,7 @@
 # ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina.
 # See LICENSE.TXT at the repository root.
 
-.PHONY: measure compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference perf024-rebaseline-validate perf024-rebaseline-prepare perf024-rebaseline-smoke perf024-rebaseline-reference perf025-e3-validate perf025-e3-prepare perf025-e3-smoke perf025-e3-reference
+.PHONY: measure graphs-test graphs-smoke graphs-capture graphs-analyze graphs-summarize graphs-verify compile correctness jvm-smoke jvm-benchmark jvm-ab native-setup native-smoke native-benchmark clean prepare retain-results verify-retained-results perf025-d2-validate perf025-d2-prepare perf025-d2-smoke perf025-reference perf024-rebaseline-validate perf024-rebaseline-prepare perf024-rebaseline-smoke perf024-rebaseline-reference perf025-e3-validate perf025-e3-prepare perf025-e3-smoke perf025-e3-reference
 
 MAIN_CLASS := com.guillermomolina.protos.benchmarks.truffle.TruffleJvmRunner
 
@@ -27,6 +27,34 @@ measure:
 		$(if $(filter protos,$(LANGUAGE)),--surface "$(SURFACE)",) \
 		--workload "$(WORKLOAD)" --stage "$(STAGE)" --profile "$(PROFILE)" \
 		--output "$(OUTPUT)"
+
+# Cross-Truffle compiled-graph structural parity (no timing). capture runs
+# here; analyze needs Docker (scripts/igv_analyzer.sh); see BENCHMARKING.md.
+GRAPH_OUTPUT ?= $(abspath ../results/perf032-f)
+GRAPH_SMOKE_OUTPUT ?= $(abspath ../results/local/graphs-smoke)
+GRAPH_WORKLOAD ?= ladder
+GRAPH_LANGUAGE ?= all
+
+graphs-test:
+	cd .. && python3 -m unittest tests.test_graph_evidence tests.test_measure_graphs tests.test_compiler_lifecycle -v
+
+graphs-smoke:
+	python3 measure_graphs.py capture --dir "$(PROTOS_CHECKOUT)" --stage smoke \
+		--workload "$(if $(filter ladder,$(GRAPH_WORKLOAD)),primitive-return-literal,$(GRAPH_WORKLOAD))" \
+		--language "$(GRAPH_LANGUAGE)" --output "$(GRAPH_SMOKE_OUTPUT)" --remeasure
+
+graphs-capture:
+	python3 measure_graphs.py capture --dir "$(PROTOS_CHECKOUT)" --stage reference \
+		--workload "$(GRAPH_WORKLOAD)" --language "$(GRAPH_LANGUAGE)" --output "$(GRAPH_OUTPUT)"
+
+graphs-analyze:
+	python3 measure_graphs.py analyze --output "$(GRAPH_OUTPUT)"
+
+graphs-summarize:
+	python3 measure_graphs.py summarize --output "$(GRAPH_OUTPUT)"
+
+graphs-verify:
+	python3 measure_graphs.py verify --output "$(GRAPH_OUTPUT)"
 
 prepare:
 	python3 prepare.py

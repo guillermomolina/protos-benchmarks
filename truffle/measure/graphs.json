@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "selected_phase": "After TruffleTier",
+  "final_tier": 2,
+  "jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "dump_path_option": "-Djdk.graal.DumpPath=",
+  "budgets": {
+    "reference": [1000, 4000, 16000, 64000, 256000],
+    "smoke": [16000]
+  },
+  "framework_label_patterns": [
+    "^org\\.graalvm\\.polyglot\\.Value<[^>]*>\\.execute$"
+  ],
+  "call_edge_verbs": ["Cutoff", "Indirect", "BailedOut"],
+  "languages": {
+    "protos": {
+      "surface": "canonical",
+      "primary_label_pattern": "^(?:protos-root:[0-9a-f]{16}|Protos[A-Za-z]*RootNode[A-Za-z]*@[0-9a-f]+)$",
+      "primary_src_contains_source": false
+    },
+    "js": {
+      "surface": "executable-value",
+      "primary_label_pattern": "^run$",
+      "primary_src_contains_source": true
+    },
+    "python": {
+      "surface": "executable-value",
+      "primary_label_pattern": "^<bytecode run at [0-9a-f]+>$",
+      "primary_src_contains_source": false
+    }
+  },
+  "ladders": {
+    "primitive": [
+      {
+        "workload": "primitive-return-literal",
+        "mechanism": "baseline callable entry + return of one primitive literal"
+      },
+      {
+        "workload": "primitive-local-read",
+        "mechanism": "local/lexical binding definition + read"
+      },
+      {
+        "workload": "primitive-local-write",
+        "mechanism": "mutation of an established local/lexical binding"
+      },
+      {
+        "workload": "primitive-integer-add",
+        "mechanism": "primitive integer addition after local-binding machinery"
+      },
+      {
+        "workload": "primitive-object-slot-read",
+        "mechanism": "monomorphic read of an existing object slot/property/attribute"
+      },
+      {
+        "workload": "primitive-object-slot-write",
+        "mechanism": "monomorphic mutation of an existing object slot/property/attribute"
+      },
+      {
+        "workload": "primitive-closure-call",
+        "mechanism": "one ordinary direct identity Closure/function invocation"
+      },
+      {
+        "workload": "primitive-method-call",
+        "mechanism": "receiver lookup/dispatch + invocation"
+      }
+    ]
+  }
+}

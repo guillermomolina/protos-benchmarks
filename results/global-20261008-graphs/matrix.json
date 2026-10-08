@@ -1,0 +1,537 @@
+{
+  "analyzer": {
+    "command": "filter",
+    "graal_version": "25.4.4.1.1",
+    "image": "ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-25.4.4.1.1",
+    "script": "scripts/igv_analyzer.sh",
+    "script_sha256": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca"
+  },
+  "first_divergent_rung": {
+    "mechanism": "primitive integer addition after local-binding machinery",
+    "protos_status": "STRUCTURAL_EXCESS",
+    "signals": [
+      "NODE_EXCESS_BEYOND_PEER_SPREAD",
+      "PROTOS_ONLY_INVOKES",
+      "PROTOS_ONLY_CONTROL_FLOW_SPLITS",
+      "PROTOS_ONLY_GUARDS_DEOPTS",
+      "PROTOS_ONLY_LOOPS"
+    ],
+    "workload": "primitive-integer-add"
+  },
+  "harness_dirty": [
+    false
+  ],
+  "harness_git_heads": [
+    "98abc9af7a05a45a7d4056b72f36aef5889cb76f"
+  ],
+  "primary_metric": "relevant_graph_nodes_total_after_truffle_tier",
+  "protos_revisions": [
+    "b750036119ca3af14732c658819b62b49039b350",
+    "d59da442fd9bc6cf590fb9b2c82d3ff55c0391ae",
+    "d6efe02522f20015a4b9261bbe1bf83867bff749"
+  ],
+  "rungs": [
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-return-literal/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-return-literal/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-return-literal/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": -10,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 13,
+      "mechanism": "baseline callable entry + return of one primitive literal",
+      "peer_band": [
+        13,
+        49
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 36,
+      "protos_node_total": 39,
+      "protos_signals": [],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURALLY_CONVERGED",
+      "protos_total": 39,
+      "python_total": 49,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": -1,
+        "control_flow_splits": 0,
+        "guards_deopts": 0,
+        "invokes": 0,
+        "loads": -4,
+        "loops": 0
+      },
+      "workload": "primitive-return-literal"
+    },
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-read/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-read/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-read/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": -10,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 13,
+      "mechanism": "local/lexical binding definition + read",
+      "peer_band": [
+        13,
+        49
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 36,
+      "protos_node_total": 39,
+      "protos_signals": [],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURALLY_CONVERGED",
+      "protos_total": 39,
+      "python_total": 49,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": -1,
+        "control_flow_splits": 0,
+        "guards_deopts": 0,
+        "invokes": 0,
+        "loads": -4,
+        "loops": 0
+      },
+      "workload": "primitive-local-read"
+    },
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-write/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-write/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-write/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": -10,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 13,
+      "mechanism": "mutation of an established local/lexical binding",
+      "peer_band": [
+        13,
+        49
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 36,
+      "protos_node_total": 39,
+      "protos_signals": [],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURALLY_CONVERGED",
+      "protos_total": 39,
+      "python_total": 49,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": -1,
+        "control_flow_splits": 0,
+        "guards_deopts": 0,
+        "invokes": 0,
+        "loads": -4,
+        "loops": 0
+      },
+      "workload": "primitive-local-write"
+    },
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-integer-add/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-integer-add/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-integer-add/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": 2883,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 14,
+      "mechanism": "primitive integer addition after local-binding machinery",
+      "peer_band": [
+        14,
+        49
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 35,
+      "protos_node_total": 2932,
+      "protos_signals": [
+        "NODE_EXCESS_BEYOND_PEER_SPREAD",
+        "PROTOS_ONLY_INVOKES",
+        "PROTOS_ONLY_CONTROL_FLOW_SPLITS",
+        "PROTOS_ONLY_GUARDS_DEOPTS",
+        "PROTOS_ONLY_LOOPS"
+      ],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURAL_EXCESS",
+      "protos_total": 2932,
+      "python_total": 49,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": 59,
+        "control_flow_splits": 152,
+        "guards_deopts": 210,
+        "invokes": 16,
+        "loads": 217,
+        "loops": 3
+      },
+      "workload": "primitive-integer-add"
+    },
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-object-slot-read/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-object-slot-read/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-object-slot-read/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": 580,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 36,
+      "mechanism": "monomorphic read of an existing object slot/property/attribute",
+      "peer_band": [
+        36,
+        103
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 67,
+      "protos_node_total": 683,
+      "protos_signals": [
+        "NODE_EXCESS_BEYOND_PEER_SPREAD",
+        "PROTOS_ONLY_INVOKES",
+        "PROTOS_ONLY_LOOPS"
+      ],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURAL_EXCESS",
+      "protos_total": 683,
+      "python_total": 103,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": 16,
+        "control_flow_splits": 36,
+        "guards_deopts": 32,
+        "invokes": 14,
+        "loads": 35,
+        "loops": 2
+      },
+      "workload": "primitive-object-slot-read"
+    },
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-object-slot-write/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-object-slot-write/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-object-slot-write/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": 955,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 100,
+      "mechanism": "monomorphic mutation of an existing object slot/property/attribute",
+      "peer_band": [
+        100,
+        159
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 59,
+      "protos_node_total": 1114,
+      "protos_signals": [
+        "NODE_EXCESS_BEYOND_PEER_SPREAD",
+        "PROTOS_ONLY_INVOKES",
+        "PROTOS_ONLY_LOOPS"
+      ],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURAL_EXCESS",
+      "protos_total": 1114,
+      "python_total": 159,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": 20,
+        "control_flow_splits": 61,
+        "guards_deopts": 54,
+        "invokes": 26,
+        "loads": 64,
+        "loops": 3
+      },
+      "workload": "primitive-object-slot-write"
+    },
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-closure-call/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-closure-call/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-closure-call/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": 4483,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 13,
+      "mechanism": "one ordinary direct identity Closure/function invocation",
+      "peer_band": [
+        13,
+        50
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 37,
+      "protos_node_total": 4533,
+      "protos_signals": [
+        "NODE_EXCESS_BEYOND_PEER_SPREAD",
+        "PROTOS_ONLY_INVOKES",
+        "PROTOS_ONLY_CONTROL_FLOW_SPLITS",
+        "PROTOS_ONLY_LOOPS"
+      ],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURAL_EXCESS",
+      "protos_total": 4533,
+      "python_total": 50,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": 85,
+        "control_flow_splits": 293,
+        "guards_deopts": 240,
+        "invokes": 44,
+        "loads": 315,
+        "loops": 1
+      },
+      "workload": "primitive-closure-call"
+    },
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-method-call/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-method-call/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-method-call/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": 1715,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 34,
+      "mechanism": "receiver lookup/dispatch + invocation",
+      "peer_band": [
+        34,
+        74
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 40,
+      "protos_node_total": 1789,
+      "protos_signals": [
+        "NODE_EXCESS_BEYOND_PEER_SPREAD",
+        "PROTOS_ONLY_INVOKES",
+        "PROTOS_ONLY_CONTROL_FLOW_SPLITS",
+        "PROTOS_ONLY_LOOPS"
+      ],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURAL_EXCESS",
+      "protos_total": 1789,
+      "python_total": 74,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": 40,
+        "control_flow_splits": 107,
+        "guards_deopts": 81,
+        "invokes": 30,
+        "loads": 100,
+        "loops": 1
+      },
+      "workload": "primitive-method-call"
+    }
+  ],
+  "rungs_before_first_divergence_not_converged": [],
+  "schema_version": 1,
+  "selected_phase": "After TruffleTier",
+  "stages": [
+    "reference"
+  ]
+}

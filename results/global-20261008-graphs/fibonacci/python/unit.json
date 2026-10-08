@@ -1,0 +1,715 @@
+{
+  "analyzer": {
+    "command": "filter",
+    "graal_version": "25.4.4.1.1",
+    "image": "ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-25.4.4.1.1",
+    "script": "scripts/igv_analyzer.sh",
+    "script_sha256": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca"
+  },
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "budgets_run": [
+    1000,
+    4000,
+    16000,
+    64000
+  ],
+  "correctness": {
+    "actual": "6765",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "evidence_valid": true,
+  "expected_result": "6765",
+  "framework_targets": [
+    "org.graalvm.polyglot.Value<PFunction>.execute"
+  ],
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness_dirty": false,
+  "harness_git_head": "98abc9af7a05a45a7d4056b72f36aef5889cb76f",
+  "harness_source_sha256": {
+    "runner/compiler_trace.py": "e965c1edbbfd5e81c066074fcc3d3c33535c54fab89de1d57930e51d08fa570d",
+    "scripts/igv_analyzer.sh": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca",
+    "truffle/graph_evidence.py": "2e4f96ddd00167a6c7fa3f0fbe53f5ea95ba8daea9d715555f52e096efcb69e4",
+    "truffle/jvm_matrix.py": "ae934519c867540f01af3459619a8b170eb5f2611805ea3b3e8182d5cc2d5747",
+    "truffle/jvm_runtime.py": "9c136ee85c515f40855b67e30d85d3e77485b8c0f767c8d20de2b12554a2e05b",
+    "truffle/measure/cases.json": "a102b667bf4107e42a268a1de70288722bd50b7c5150166ce483313eaafb5f34",
+    "truffle/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "81e629d37ee484f8e9449405061aa445b3105091915109a50f658350cc0ae80b",
+    "truffle/measure/graphs.json": "97d05eed011f5add5ac8d9e57d2f51dc106e4329540022ea929fcca8f712e151",
+    "truffle/measure/surfaces/peer/PeerExecutableSurface.java": "83dfdd84edffa1a3f5faf404e85b0f365ea33979202fa8b717e18000f09d35ce",
+    "truffle/measure_graphs.py": "afeae531da01120825ddade8263b947c95cc05d1e788ad0a2dc1162d0f35cc02",
+    "truffle/measure_protos.py": "681bd34abfce1a0f34fa67a8f1555ebe503cdfb4f12c11fae7f71d4db68f5263",
+    "truffle/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+    "truffle/workload_catalog.py": "07e57debb5b2b0efe91dddbdc8d030f09b1c9ea6a55677d49e4605c09b2833a3",
+    "truffle/workloads/catalog.json": "caa141cc16d01f24827fed4f2bd5c22cd24113ac9a75e000a838d9d894de00b7",
+    "truffle/workloads/fibonacci/fibonacci.py": "2034afbad00b1f23ff5d60d7ce3109ce91c0377dfd3a502f0840218aa92e0c1b"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "fce511f5f7c0",
+    "kernel": "7.2.9-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "python",
+  "protos_revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+  "schema_version": 1,
+  "selected_budget": 64000,
+  "selected_phase": "After TruffleTier",
+  "selected_stable_tier": 2,
+  "stabilization": {
+    "after_truffle_tier_confirmed": true,
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "summary": {
+    "additional_language_owned_compiled_units": [
+      {
+        "edge": "Cutoff",
+        "label": "<bytecode fibonacci at 6ca421a0>",
+        "nodes": 1530,
+        "via": "<bytecode run at 3744fc1c>"
+      }
+    ],
+    "families": {
+      "allocations": 131,
+      "control_flow_splits": 15,
+      "guards_deopts": 336,
+      "invokes": 32,
+      "loads": 167,
+      "loops": 0
+    },
+    "graph_count": 2,
+    "node_class_histogram": {
+      "AllocatedObjectNode": 32,
+      "BeginNode": 62,
+      "BoxNode$AllocatingBoxNode": 34,
+      "BoxNode$TrustedBoxedValue": 33,
+      "CommitAllocationNode": 32,
+      "ConstantNode": 78,
+      "DeoptimizeNode": 32,
+      "EndNode": 30,
+      "ExceptionObjectNode": 32,
+      "FixedGuardNode": 304,
+      "FrameState": 849,
+      "IfNode": 15,
+      "InstanceOfNode": 62,
+      "IntegerAddExactNode": 30,
+      "IntegerAddExactOverflowNode": 30,
+      "IntegerLessThanNode": 15,
+      "IntegerSubExactNode": 30,
+      "IntegerSubExactOverflowNode": 30,
+      "InvokeWithExceptionNode": 32,
+      "LoadFieldNode": 154,
+      "LoadIndexedNode": 13,
+      "MergeNode": 15,
+      "MethodCallTargetNode": 32,
+      "ObjectEqualsNode": 95,
+      "ParameterNode": 2,
+      "PiArrayNode": 2,
+      "PiNode": 132,
+      "ReturnNode": 2,
+      "StartNode": 2,
+      "TrufflePreserveFrameStateNode": 2,
+      "UnboxNode": 33,
+      "ValuePhiNode": 16,
+      "VirtualArrayNode": 156,
+      "VirtualBoxingNode": 50,
+      "VirtualInstanceNode": 62,
+      "VirtualObjectState": 334
+    },
+    "primary_guest_graph_nodes": 1334,
+    "relevant_graph_nodes_total_after_truffle_tier": 2864,
+    "trace_node_expansion_truffle_tier": [
+      {
+        "allocs": 49,
+        "count": 1003,
+        "cycles": 946,
+        "ifs": 0,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1467
+      },
+      {
+        "allocs": 49,
+        "count": 1516,
+        "cycles": 1617,
+        "ifs": 15,
+        "invokes": 0,
+        "loops": 0,
+        "size": 2270
+      }
+    ]
+  },
+  "surface": "executable-value",
+  "surface_timed_call": "run.execute()",
+  "trace_log": "budget-64000/trace.log.gz",
+  "unattributed_language_targets": [
+    "<builtin function StringBuiltins.rpartition at 3b164bc5>",
+    "<bytecode ModuleSpec.parent at 5ff61556>"
+  ],
+  "units": [
+    {
+      "analysis": "budget-64000/bgv/TruffleHotSpotCompilation-5101[<bytecode_run_at_3744fc1c>].filter.json.gz",
+      "analysis_sha256": "83acd2f9f3328a8049c5f13d2fc073c51ef486677f09ebcfba171b704eb563a3",
+      "attribution": [
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+          "self": {
+            "allocs": 0,
+            "count": 6,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 4
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "PBytecodeDSLRootNodeGen$PyNumberAdd_Node",
+          "self": {
+            "allocs": 0,
+            "count": 6,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 38
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "PBytecodeDSLRootNodeGen$PyNumberAdd_Node",
+          "self": {
+            "allocs": 0,
+            "count": 6,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 38
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 5,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 1
+          }
+        }
+      ],
+      "bgv": "budget-64000/bgv/TruffleHotSpotCompilation-5101[<bytecode_run_at_3744fc1c>].bgv.gz",
+      "bgv_sha256": "ad845f42ffae1859d4736f171be782ee232929e92a2dc4d2145caf55244f56bf",
+      "comp_id": 5101,
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 49,
+        "count": 1003,
+        "cycles": 946,
+        "ifs": 0,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1467
+      },
+      "graph": {
+        "allocations": 65,
+        "control_flow_splits": 0,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier2.<bytecode_run_at_3744fc1c>()"
+        ],
+        "guards_deopts": 155,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.callBoundary": 16
+        },
+        "invokes": 16,
+        "loads": 84,
+        "loops": 0,
+        "node_class_histogram": {
+          "AllocatedObjectNode": 16,
+          "BeginNode": 16,
+          "BoxNode$AllocatingBoxNode": 17,
+          "BoxNode$TrustedBoxedValue": 16,
+          "CommitAllocationNode": 16,
+          "ConstantNode": 46,
+          "DeoptimizeNode": 16,
+          "ExceptionObjectNode": 16,
+          "FixedGuardNode": 139,
+          "FrameState": 424,
+          "InstanceOfNode": 31,
+          "IntegerAddExactNode": 15,
+          "IntegerAddExactOverflowNode": 15,
+          "InvokeWithExceptionNode": 16,
+          "LoadFieldNode": 78,
+          "LoadIndexedNode": 6,
+          "MethodCallTargetNode": 16,
+          "ObjectEqualsNode": 48,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 66,
+          "ReturnNode": 1,
+          "StartNode": 1,
+          "TrufflePreserveFrameStateNode": 1,
+          "UnboxNode": 16,
+          "VirtualArrayNode": 80,
+          "VirtualBoxingNode": 22,
+          "VirtualInstanceNode": 32,
+          "VirtualObjectState": 166
+        },
+        "node_count": 1334,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>"
+      ],
+      "ir_after_truffle_tier": 1334,
+      "label": "<bytecode run at 3744fc1c>",
+      "role": "primary",
+      "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:10 0xf0dd426f",
+      "superseded_comp_ids": [
+        4992
+      ],
+      "tier": 2,
+      "via": null
+    },
+    {
+      "analysis": "budget-64000/bgv/TruffleHotSpotCompilation-4853[<bytecode_fibonacci_at_6ca421a0>].filter.json.gz",
+      "analysis_sha256": "c31393152d42a671ab078678acf1bea53cfa74027368321164b77ac2d084633f",
+      "attribution": [
+        {
+          "location": "python:4:96-192",
+          "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+          "self": {
+            "allocs": 0,
+            "count": 14,
+            "cycles": 4,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 25
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "python:4:96-192",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        }
+      ],
+      "bgv": "budget-64000/bgv/TruffleHotSpotCompilation-4853[<bytecode_fibonacci_at_6ca421a0>].bgv.gz",
+      "bgv_sha256": "a74f6863786df797e8203ddd31c2a223df5d4681e16bbc328a437891ee510694",
+      "comp_id": 4853,
+      "edge": "Cutoff",
+      "expansion_truffle_tier": {
+        "allocs": 49,
+        "count": 1516,
+        "cycles": 1617,
+        "ifs": 15,
+        "invokes": 0,
+        "loops": 0,
+        "size": 2270
+      },
+      "graph": {
+        "allocations": 66,
+        "control_flow_splits": 15,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier2.<bytecode_fibonacci_at_6ca421a0>()"
+        ],
+        "guards_deopts": 181,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.callBoundary": 16
+        },
+        "invokes": 16,
+        "loads": 83,
+        "loops": 0,
+        "node_class_histogram": {
+          "AllocatedObjectNode": 16,
+          "BeginNode": 46,
+          "BoxNode$AllocatingBoxNode": 17,
+          "BoxNode$TrustedBoxedValue": 17,
+          "CommitAllocationNode": 16,
+          "ConstantNode": 32,
+          "DeoptimizeNode": 16,
+          "EndNode": 30,
+          "ExceptionObjectNode": 16,
+          "FixedGuardNode": 165,
+          "FrameState": 425,
+          "IfNode": 15,
+          "InstanceOfNode": 31,
+          "IntegerAddExactNode": 15,
+          "IntegerAddExactOverflowNode": 15,
+          "IntegerLessThanNode": 15,
+          "IntegerSubExactNode": 30,
+          "IntegerSubExactOverflowNode": 30,
+          "InvokeWithExceptionNode": 16,
+          "LoadFieldNode": 76,
+          "LoadIndexedNode": 7,
+          "MergeNode": 15,
+          "MethodCallTargetNode": 16,
+          "ObjectEqualsNode": 47,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 66,
+          "ReturnNode": 1,
+          "StartNode": 1,
+          "TrufflePreserveFrameStateNode": 1,
+          "UnboxNode": 17,
+          "ValuePhiNode": 16,
+          "VirtualArrayNode": 76,
+          "VirtualBoxingNode": 28,
+          "VirtualInstanceNode": 30,
+          "VirtualObjectState": 168
+        },
+        "node_count": 1530,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>",
+        "<bytecode fibonacci at 6ca421a0>"
+      ],
+      "ir_after_truffle_tier": 1530,
+      "label": "<bytecode fibonacci at 6ca421a0>",
+      "role": "additional",
+      "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:4 0xf0dd426f",
+      "superseded_comp_ids": [
+        4817
+      ],
+      "tier": 2,
+      "via": "<bytecode run at 3744fc1c>"
+    }
+  ],
+  "workload": "fibonacci",
+  "workload_source_sha256": "2034afbad00b1f23ff5d60d7ce3109ce91c0377dfd3a502f0840218aa92e0c1b"
+}

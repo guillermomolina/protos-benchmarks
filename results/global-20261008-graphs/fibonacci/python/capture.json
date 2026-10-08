@@ -1,0 +1,2233 @@
+{
+  "adapter_source_sha256": "d0088eaa89ece882c7363b6d2a332ffbdffae8594feb7a0767135a1f7f2b5cd4",
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "capture_finished": "2026-10-08T17:41:32.388505+00:00",
+  "capture_key": {
+    "budgets": [
+      1000,
+      4000,
+      16000,
+      64000,
+      256000
+    ],
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "language": "python",
+    "protos_revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+    "protos_source_state_sha256": "b79bdef9b46ee16e4070202e759cd87dba844b65839245abce4b39fb52e1f5dc",
+    "stage": "reference",
+    "surface": "executable-value",
+    "workload": "fibonacci"
+  },
+  "capture_started": "2026-10-08T17:40:52.941361+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "4115a2d3a0391a891c3c2f1fc1b2f4cda3255ea46cfc8c2cc637cc689b0d2a16",
+    "identity": {
+      "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+      "java_home": "/opt/graalvm-community-java25i4",
+      "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+      "peer_graalvm_version": "25.4.4.1.1",
+      "surface": "executable-value"
+    },
+    "identity_sha256": "d8cabd24be9ab489e9e6bc6d905028d2bbc05da88267e3fedb8e2c68a8b8dc4e",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/peer-25.4.4.1.1/executable-value/d0088eaa89ece882c7363b6d2a332ffbdffae8594feb7a0767135a1f7f2b5cd4",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "6765",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "expected_result": "6765",
+  "final_tier": 2,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "98abc9af7a05a45a7d4056b72f36aef5889cb76f",
+    "porcelain": "",
+    "source_sha256": {
+      "runner/compiler_trace.py": "e965c1edbbfd5e81c066074fcc3d3c33535c54fab89de1d57930e51d08fa570d",
+      "scripts/igv_analyzer.sh": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca",
+      "truffle/graph_evidence.py": "2e4f96ddd00167a6c7fa3f0fbe53f5ea95ba8daea9d715555f52e096efcb69e4",
+      "truffle/jvm_matrix.py": "ae934519c867540f01af3459619a8b170eb5f2611805ea3b3e8182d5cc2d5747",
+      "truffle/jvm_runtime.py": "9c136ee85c515f40855b67e30d85d3e77485b8c0f767c8d20de2b12554a2e05b",
+      "truffle/measure/cases.json": "a102b667bf4107e42a268a1de70288722bd50b7c5150166ce483313eaafb5f34",
+      "truffle/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "81e629d37ee484f8e9449405061aa445b3105091915109a50f658350cc0ae80b",
+      "truffle/measure/graphs.json": "97d05eed011f5add5ac8d9e57d2f51dc106e4329540022ea929fcca8f712e151",
+      "truffle/measure/surfaces/peer/PeerExecutableSurface.java": "83dfdd84edffa1a3f5faf404e85b0f365ea33979202fa8b717e18000f09d35ce",
+      "truffle/measure_graphs.py": "afeae531da01120825ddade8263b947c95cc05d1e788ad0a2dc1162d0f35cc02",
+      "truffle/measure_protos.py": "681bd34abfce1a0f34fa67a8f1555ebe503cdfb4f12c11fae7f71d4db68f5263",
+      "truffle/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+      "truffle/workload_catalog.py": "07e57debb5b2b0efe91dddbdc8d030f09b1c9ea6a55677d49e4605c09b2833a3",
+      "truffle/workloads/catalog.json": "caa141cc16d01f24827fed4f2bd5c22cd24113ac9a75e000a838d9d894de00b7",
+      "truffle/workloads/fibonacci/fibonacci.py": "2034afbad00b1f23ff5d60d7ce3109ce91c0377dfd3a502f0840218aa92e0c1b"
+    }
+  },
+  "harness_dirty": false,
+  "harness_git_head": "98abc9af7a05a45a7d4056b72f36aef5889cb76f",
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "fce511f5f7c0",
+    "kernel": "7.2.9-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "python",
+  "peer_runtime": {
+    "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+    "graalvm_version": "25.4.4.1.1",
+    "protos_graalvm_version": "25.4.4.1.1"
+  },
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "6fc767ea1ad6b93b820059610c7f5b8424670ee0b80ce642040ce4e3a8dc098e",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "96aff5b8fd5e6415772dddb0fc2904d7e844e9bad8c4426e16006d489720149b",
+    "porcelain": "",
+    "revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+    "source_state_sha256": "b79bdef9b46ee16e4070202e759cd87dba844b65839245abce4b39fb52e1f5dc",
+    "version": "0.3.312-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "6fc767ea1ad6b93b820059610c7f5b8424670ee0b80ce642040ce4e3a8dc098e",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "96aff5b8fd5e6415772dddb0fc2904d7e844e9bad8c4426e16006d489720149b",
+    "porcelain": "",
+    "revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+    "source_state_sha256": "b79bdef9b46ee16e4070202e759cd87dba844b65839245abce4b39fb52e1f5dc",
+    "version": "0.3.312-SNAPSHOT"
+  },
+  "protos_revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+  "runs": [
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 157,
+              "cycles": 153,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 206
+            },
+            "ir_after_truffle_tier": 158,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 1
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1516,
+              "cycles": 1617,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 2270
+            },
+            "ir_after_truffle_tier": 1530,
+            "label": "<bytecode fibonacci at *>",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 1000,
+      "calls": 1001,
+      "compilation_count": 10,
+      "dump_inventory": [
+        {
+          "bytes": 920804,
+          "name": "TruffleHotSpotCompilation-4109[<builtin_function_StringBuiltins.rpartition_at_361372b4>].bgv",
+          "sha256": "a3ef2748e93df10b5bd8cfd8808abb7b46c8fe71ad73f548f980a911d00272f2"
+        },
+        {
+          "bytes": 365212,
+          "name": "TruffleHotSpotCompilation-4130[<builtin_function_StringBuiltins.rpartition_at_361372b4>].bgv",
+          "sha256": "dc3aaf2727097c696e6d58646ef12017e86c0ccbef95400bd361d7929a4c3098"
+        },
+        {
+          "bytes": 771335,
+          "name": "TruffleHotSpotCompilation-4200[<bytecode_ModuleSpec.parent_at_a87ea87>].bgv",
+          "sha256": "088f6c1ed47e18b348d6078a494bb8cf15efa61d6060f0ecd5fc2a958da1a4b1"
+        },
+        {
+          "bytes": 318085,
+          "name": "TruffleHotSpotCompilation-4276[<bytecode_ModuleSpec.parent_at_a87ea87>].bgv",
+          "sha256": "5a5aeb97aed2f9d63cded213b5d4a03bb9ca710217d87b97095842f5bb2995ed"
+        },
+        {
+          "bytes": 375435,
+          "name": "TruffleHotSpotCompilation-4568[<bytecode_ModuleSpec.parent_at_a87ea87>].bgv",
+          "sha256": "08ac9b3110ea5bd3d199cd181bb058a6e493da0d9bab9e154052ab83298a9b28"
+        },
+        {
+          "bytes": 321894,
+          "name": "TruffleHotSpotCompilation-4583[<bytecode_ModuleSpec.parent_at_a87ea87>].bgv",
+          "sha256": "76e7a46eedb73c34cc35a203a38744dac3151cd0a3b72cf78a4e93a68595780a"
+        },
+        {
+          "bytes": 679510,
+          "name": "TruffleHotSpotCompilation-4956[<bytecode_fibonacci_at_456aada6>].bgv",
+          "sha256": "30564fa06071bb01eb0e7a71a2dce744087177e6ceb0d4d344e310a06b31cdce"
+        },
+        {
+          "bytes": 3973652,
+          "name": "TruffleHotSpotCompilation-4986[<bytecode_fibonacci_at_456aada6>].bgv",
+          "sha256": "9de173283ff5c16acfabf90c9cc9d066c170a96a47d2202f7dcf565965cf1c7c"
+        },
+        {
+          "bytes": 965215,
+          "name": "TruffleHotSpotCompilation-5111[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "73dfd57dc169726c886edb21cc3c34f18f2d877ffa314708f9a66d7ebddd87c1"
+        },
+        {
+          "bytes": 259636,
+          "name": "TruffleHotSpotCompilation-5119[<bytecode_run_at_4dac6c6f>].bgv",
+          "sha256": "eb15807e30cd3c4adc05e5f6831bd7afa0434f168de7a97be1be45065c589312"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 4dac6c6f>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at 361372b4>",
+          "<bytecode ModuleSpec.parent at a87ea87>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 6,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 11
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "PBytecodeDSLRootNodeGen$ReadGlobal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 14,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ExecutionContextFactory$CallContextNodeGen$PassExceptionStateNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "ReadAttributeFromPythonObjectNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ReadAttributeFromPythonObjectNodeGen$ReceiverCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "DynamicObjectFactory$GetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "PBytecodeDSLRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5119[<bytecode_run_at_4dac6c6f>].bgv"
+            ],
+            "comp_id": 5119,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 157,
+              "cycles": 153,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 206
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 158,
+            "label": "<bytecode run at 4dac6c6f>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:10 0xf0dd426f",
+            "superseded_comp_ids": [],
+            "target": "1:466",
+            "tier": 1,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 14,
+                  "cycles": 4,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 25
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4986[<bytecode_fibonacci_at_456aada6>].bgv"
+            ],
+            "comp_id": 4986,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1516,
+              "cycles": 1617,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 2270
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>",
+              "<bytecode fibonacci at 456aada6>"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1530,
+            "label": "<bytecode fibonacci at 456aada6>",
+            "normalized_label": "<bytecode fibonacci at *>",
+            "role": "additional",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:4 0xf0dd426f",
+            "superseded_comp_ids": [
+              4956
+            ],
+            "target": "1:467",
+            "tier": 2,
+            "via": "<bytecode run at 4dac6c6f>"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [],
+      "trace_log": "budget-1000/trace.log.gz",
+      "trace_log_sha256": "84f602191da5d57130f16bdc7aca7f8b58b608f022dbbef41828a72b8863122d"
+    },
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 157,
+              "cycles": 153,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 206
+            },
+            "ir_after_truffle_tier": 158,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 1
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1516,
+              "cycles": 1617,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 2270
+            },
+            "ir_after_truffle_tier": 1530,
+            "label": "<bytecode fibonacci at *>",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 4000,
+      "calls": 4001,
+      "compilation_count": 10,
+      "dump_inventory": [
+        {
+          "bytes": 920801,
+          "name": "TruffleHotSpotCompilation-3990[<builtin_function_StringBuiltins.rpartition_at_4d825cbf>].bgv",
+          "sha256": "f3b32db482f1787af5d57e8c7a5e28489c60002085c3109598968e3232fb9f15"
+        },
+        {
+          "bytes": 365211,
+          "name": "TruffleHotSpotCompilation-4014[<builtin_function_StringBuiltins.rpartition_at_4d825cbf>].bgv",
+          "sha256": "7bef7245cd46c8a2eab4f9535344cdfae7ac3b7f52983c2301988d03df2de03d"
+        },
+        {
+          "bytes": 771339,
+          "name": "TruffleHotSpotCompilation-4077[<bytecode_ModuleSpec.parent_at_759453d8>].bgv",
+          "sha256": "694b4e6d332a7ccc8e6080d125f926ab258f214cdd397c51f8eac0dd2c90f9e7"
+        },
+        {
+          "bytes": 318089,
+          "name": "TruffleHotSpotCompilation-4139[<bytecode_ModuleSpec.parent_at_759453d8>].bgv",
+          "sha256": "ef0c8ee063b685190d9c14307cd0aaf1a1b9cfae668fd54533bc3b8e7b8216cb"
+        },
+        {
+          "bytes": 375439,
+          "name": "TruffleHotSpotCompilation-4442[<bytecode_ModuleSpec.parent_at_759453d8>].bgv",
+          "sha256": "f90344f08eed9a31bd9916d16d2391ed8222f8c25f55d0845811604f88e1baf2"
+        },
+        {
+          "bytes": 321896,
+          "name": "TruffleHotSpotCompilation-4450[<bytecode_ModuleSpec.parent_at_759453d8>].bgv",
+          "sha256": "437f4ebc63027db81e142dbb1e828028e022ddc0c0c23b39c2ee6d79d425ab21"
+        },
+        {
+          "bytes": 679507,
+          "name": "TruffleHotSpotCompilation-4824[<bytecode_fibonacci_at_268c475a>].bgv",
+          "sha256": "928b9b44c7dcda7acd0b18171f1f26c8d84c2e061e38c2203f780a13cb2c6c7e"
+        },
+        {
+          "bytes": 3973649,
+          "name": "TruffleHotSpotCompilation-4861[<bytecode_fibonacci_at_268c475a>].bgv",
+          "sha256": "212bace7c3959ac55c823ba42d7888c01a2b47d54389d0723dc2cf358da09ae9"
+        },
+        {
+          "bytes": 965215,
+          "name": "TruffleHotSpotCompilation-4999[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "971f5da58025387a1ea36f4b7e54a129793cd328123067ebcd03626c27157f3a"
+        },
+        {
+          "bytes": 259634,
+          "name": "TruffleHotSpotCompilation-5013[<bytecode_run_at_1976d52>].bgv",
+          "sha256": "c57303f56942d70b55b3a2aeaf0b1ae74cbb75e4e3cdfc28fe235046bea97d7f"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 1976d52>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at 4d825cbf>",
+          "<bytecode ModuleSpec.parent at 759453d8>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 6,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 11
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "PBytecodeDSLRootNodeGen$ReadGlobal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 14,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ExecutionContextFactory$CallContextNodeGen$PassExceptionStateNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "ReadAttributeFromPythonObjectNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ReadAttributeFromPythonObjectNodeGen$ReceiverCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "DynamicObjectFactory$GetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "PBytecodeDSLRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:10:194-229",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5013[<bytecode_run_at_1976d52>].bgv"
+            ],
+            "comp_id": 5013,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 157,
+              "cycles": 153,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 206
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 158,
+            "label": "<bytecode run at 1976d52>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:10 0xf0dd426f",
+            "superseded_comp_ids": [],
+            "target": "1:466",
+            "tier": 1,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 14,
+                  "cycles": 4,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 25
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4861[<bytecode_fibonacci_at_268c475a>].bgv"
+            ],
+            "comp_id": 4861,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1516,
+              "cycles": 1617,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 2270
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>",
+              "<bytecode fibonacci at 268c475a>"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1530,
+            "label": "<bytecode fibonacci at 268c475a>",
+            "normalized_label": "<bytecode fibonacci at *>",
+            "role": "additional",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:4 0xf0dd426f",
+            "superseded_comp_ids": [
+              4824
+            ],
+            "target": "1:467",
+            "tier": 2,
+            "via": "<bytecode run at 1976d52>"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [],
+      "trace_log": "budget-4000/trace.log.gz",
+      "trace_log_sha256": "f0b638ec7f5d08220dc583fabef23046d84d1c9a58beb80d111072b54f040905"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1003,
+              "cycles": 946,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1467
+            },
+            "ir_after_truffle_tier": 1334,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 2
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1516,
+              "cycles": 1617,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 2270
+            },
+            "ir_after_truffle_tier": 1530,
+            "label": "<bytecode fibonacci at *>",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 16000,
+      "calls": 16001,
+      "compilation_count": 12,
+      "dump_inventory": [
+        {
+          "bytes": 920797,
+          "name": "TruffleHotSpotCompilation-4056[<builtin_function_StringBuiltins.rpartition_at_a66db4c>].bgv",
+          "sha256": "75b5303f3e423c6f0fbd5c4c113829ec282f24bd4142abd2a0af92cf1f89366f"
+        },
+        {
+          "bytes": 365206,
+          "name": "TruffleHotSpotCompilation-4077[<builtin_function_StringBuiltins.rpartition_at_a66db4c>].bgv",
+          "sha256": "4a196e11c34b56e6c5e5bd275d8ec3c9f754d677a565c60a8de0c15e0ff259fe"
+        },
+        {
+          "bytes": 771338,
+          "name": "TruffleHotSpotCompilation-4135[<bytecode_ModuleSpec.parent_at_30c060fc>].bgv",
+          "sha256": "3645ad8ad965b7639326d82adffbc6e2b666e5c8070045330faac119e2b32ea6"
+        },
+        {
+          "bytes": 318087,
+          "name": "TruffleHotSpotCompilation-4199[<bytecode_ModuleSpec.parent_at_30c060fc>].bgv",
+          "sha256": "72d3231944b7815729e0e17c2fd75705a2da4b7e4f06c3f1fd5199c13d868899"
+        },
+        {
+          "bytes": 375438,
+          "name": "TruffleHotSpotCompilation-4517[<bytecode_ModuleSpec.parent_at_30c060fc>].bgv",
+          "sha256": "213e8abbd8ad3ac62cc7e3ca5847e46e344d49f13897b1ad12055c9d9b99cb82"
+        },
+        {
+          "bytes": 321897,
+          "name": "TruffleHotSpotCompilation-4525[<bytecode_ModuleSpec.parent_at_30c060fc>].bgv",
+          "sha256": "8691a864c264a4b22ecd94c9eb5e411612e1005af2ff13cb75eaf92463c9b7ff"
+        },
+        {
+          "bytes": 679507,
+          "name": "TruffleHotSpotCompilation-4893[<bytecode_fibonacci_at_331c9294>].bgv",
+          "sha256": "5b69c764dd43c9f2f7c8cad035b3d1392930c30e128006f7260b0e80472d9856"
+        },
+        {
+          "bytes": 3973648,
+          "name": "TruffleHotSpotCompilation-4931[<bytecode_fibonacci_at_331c9294>].bgv",
+          "sha256": "9f5c2572538f09fb4217e230a2c9c046247231b564f980a4b85595a3672392a0"
+        },
+        {
+          "bytes": 965213,
+          "name": "TruffleHotSpotCompilation-5057[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "43605faa56230a917db2ef523c451936be99b4d8ee5657fe6996f256bad975f4"
+        },
+        {
+          "bytes": 259632,
+          "name": "TruffleHotSpotCompilation-5066[<bytecode_run_at_62dd0738>].bgv",
+          "sha256": "4f4ba17475eea284a103faabd86cb858d0d2c68c839295bc8b9cb3fd7165ecae"
+        },
+        {
+          "bytes": 5169970,
+          "name": "TruffleHotSpotCompilation-5136[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "1e8906596ed3c2201d2b4d21f745a237d0b309ff3401bac2110142f5ca368065"
+        },
+        {
+          "bytes": 4468346,
+          "name": "TruffleHotSpotCompilation-5168[<bytecode_run_at_62dd0738>].bgv",
+          "sha256": "afb8ca1d4cb6a71af346ef3ccf232f0dcdb87fc5c671578d4e09653d5cec0f13"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 62dd0738>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at a66db4c>",
+          "<bytecode ModuleSpec.parent at 30c060fc>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$PyNumberAdd_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$PyNumberAdd_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5168[<bytecode_run_at_62dd0738>].bgv"
+            ],
+            "comp_id": 5168,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1003,
+              "cycles": 946,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1467
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1334,
+            "label": "<bytecode run at 62dd0738>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:10 0xf0dd426f",
+            "superseded_comp_ids": [
+              5066
+            ],
+            "target": "1:466",
+            "tier": 2,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 14,
+                  "cycles": 4,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 25
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4931[<bytecode_fibonacci_at_331c9294>].bgv"
+            ],
+            "comp_id": 4931,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1516,
+              "cycles": 1617,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 2270
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>",
+              "<bytecode fibonacci at 331c9294>"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1530,
+            "label": "<bytecode fibonacci at 331c9294>",
+            "normalized_label": "<bytecode fibonacci at *>",
+            "role": "additional",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:4 0xf0dd426f",
+            "superseded_comp_ids": [
+              4893
+            ],
+            "target": "1:467",
+            "tier": 2,
+            "via": "<bytecode run at 62dd0738>"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [
+        "budget-16000/bgv/TruffleHotSpotCompilation-5168[<bytecode_run_at_62dd0738>].bgv.gz",
+        "budget-16000/bgv/TruffleHotSpotCompilation-4931[<bytecode_fibonacci_at_331c9294>].bgv.gz"
+      ],
+      "trace_log": "budget-16000/trace.log.gz",
+      "trace_log_sha256": "030c2863de062a34133c9fc1c1073efc9cdab6ad96dc08c347a6fea46fff63e8"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1003,
+              "cycles": 946,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1467
+            },
+            "ir_after_truffle_tier": 1334,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 2
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1516,
+              "cycles": 1617,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 2270
+            },
+            "ir_after_truffle_tier": 1530,
+            "label": "<bytecode fibonacci at *>",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 64000,
+      "calls": 64001,
+      "compilation_count": 12,
+      "dump_inventory": [
+        {
+          "bytes": 920805,
+          "name": "TruffleHotSpotCompilation-3953[<builtin_function_StringBuiltins.rpartition_at_3b164bc5>].bgv",
+          "sha256": "81946155df845653c749202ba823f26e5f82148b6f1a6062d8c4ff075dbfb12e"
+        },
+        {
+          "bytes": 365213,
+          "name": "TruffleHotSpotCompilation-3975[<builtin_function_StringBuiltins.rpartition_at_3b164bc5>].bgv",
+          "sha256": "fad7204fd09db0fc20cfbfb4d8c83a223144154f58f8b29e97fdf0ed1a99547a"
+        },
+        {
+          "bytes": 771340,
+          "name": "TruffleHotSpotCompilation-4042[<bytecode_ModuleSpec.parent_at_5ff61556>].bgv",
+          "sha256": "89eb3f8dafdc769f21bff1e618014532767862f7e8c98c010cafc0fb1f62329b"
+        },
+        {
+          "bytes": 318089,
+          "name": "TruffleHotSpotCompilation-4111[<bytecode_ModuleSpec.parent_at_5ff61556>].bgv",
+          "sha256": "d75e30d2ca4e76e32ad59971df1c8e3c61fbf32089b00abaac68b2d454ea9c72"
+        },
+        {
+          "bytes": 375440,
+          "name": "TruffleHotSpotCompilation-4450[<bytecode_ModuleSpec.parent_at_5ff61556>].bgv",
+          "sha256": "c4d340efc5b2189b86f2d7d11b3d45fb74c286c7fb8cfccd66e69f25d4aa4983"
+        },
+        {
+          "bytes": 321899,
+          "name": "TruffleHotSpotCompilation-4465[<bytecode_ModuleSpec.parent_at_5ff61556>].bgv",
+          "sha256": "df75831a348d604c6c895c18992dee20caf170184c44115256a0ee4d5ed78744"
+        },
+        {
+          "bytes": 679506,
+          "name": "TruffleHotSpotCompilation-4817[<bytecode_fibonacci_at_6ca421a0>].bgv",
+          "sha256": "1a93ed35cfb1af31b618467f0da2dfddf2ffe49f872f3875b659e72e8737c028"
+        },
+        {
+          "bytes": 3973648,
+          "name": "TruffleHotSpotCompilation-4853[<bytecode_fibonacci_at_6ca421a0>].bgv",
+          "sha256": "a74f6863786df797e8203ddd31c2a223df5d4681e16bbc328a437891ee510694"
+        },
+        {
+          "bytes": 965215,
+          "name": "TruffleHotSpotCompilation-4982[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "2d4cab3d6d9519c3dc8c3a85f2488c7d8ec5feabe729542a3d2aeabc4d01b415"
+        },
+        {
+          "bytes": 259637,
+          "name": "TruffleHotSpotCompilation-4992[<bytecode_run_at_3744fc1c>].bgv",
+          "sha256": "05fb8fbefe9cc7ff61dd91912b11fe0e89d4ec30829c2aef3978dcc1cf946682"
+        },
+        {
+          "bytes": 5169980,
+          "name": "TruffleHotSpotCompilation-5073[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "d8ba549abed8334efcd2457cd2b8b145b7cba0b555af9da88a4e5f4695706996"
+        },
+        {
+          "bytes": 4468352,
+          "name": "TruffleHotSpotCompilation-5101[<bytecode_run_at_3744fc1c>].bgv",
+          "sha256": "ad845f42ffae1859d4736f171be782ee232929e92a2dc4d2145caf55244f56bf"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 3744fc1c>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at 3b164bc5>",
+          "<bytecode ModuleSpec.parent at 5ff61556>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$PyNumberAdd_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$PyNumberAdd_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5101[<bytecode_run_at_3744fc1c>].bgv"
+            ],
+            "comp_id": 5101,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1003,
+              "cycles": 946,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1467
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1334,
+            "label": "<bytecode run at 3744fc1c>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:10 0xf0dd426f",
+            "superseded_comp_ids": [
+              4992
+            ],
+            "target": "1:466",
+            "tier": 2,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "python:4:96-192",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 14,
+                  "cycles": 4,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 25
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "python:4:96-192",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4853[<bytecode_fibonacci_at_6ca421a0>].bgv"
+            ],
+            "comp_id": 4853,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1516,
+              "cycles": 1617,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 2270
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>",
+              "<bytecode fibonacci at 6ca421a0>"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1530,
+            "label": "<bytecode fibonacci at 6ca421a0>",
+            "normalized_label": "<bytecode fibonacci at *>",
+            "role": "additional",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.py:4 0xf0dd426f",
+            "superseded_comp_ids": [
+              4817
+            ],
+            "target": "1:467",
+            "tier": 2,
+            "via": "<bytecode run at 3744fc1c>"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [
+        "budget-64000/bgv/TruffleHotSpotCompilation-5101[<bytecode_run_at_3744fc1c>].bgv.gz",
+        "budget-64000/bgv/TruffleHotSpotCompilation-4853[<bytecode_fibonacci_at_6ca421a0>].bgv.gz"
+      ],
+      "trace_log": "budget-64000/trace.log.gz",
+      "trace_log_sha256": "e8aef77a543ce568db21e11258dc068f821dcf612154b5d9fd0ec13513ab73e3"
+    }
+  ],
+  "schema_version": 1,
+  "selected_phase": "After TruffleTier",
+  "stabilization": {
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "surface": "executable-value",
+  "surface_timed_call": "run.execute()",
+  "timing_evidence": "NONE (graph instrumentation is never a timing run)",
+  "workload": "fibonacci",
+  "workload_source": "truffle/workloads/fibonacci/fibonacci.py",
+  "workload_source_sha256": "2034afbad00b1f23ff5d60d7ce3109ce91c0377dfd3a502f0840218aa92e0c1b"
+}

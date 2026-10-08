@@ -1,0 +1,1183 @@
+{
+  "adapter_source_sha256": "d0088eaa89ece882c7363b6d2a332ffbdffae8594feb7a0767135a1f7f2b5cd4",
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "capture_finished": "2026-10-08T17:09:04.263303+00:00",
+  "capture_key": {
+    "budgets": [
+      1000,
+      4000,
+      16000,
+      64000,
+      256000
+    ],
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "language": "python",
+    "protos_revision": "d59da442fd9bc6cf590fb9b2c82d3ff55c0391ae",
+    "protos_source_state_sha256": "13a14409014a7213f789e248a7f8920a8a7829c294f9abd36d58bf690780ddd7",
+    "stage": "reference",
+    "surface": "executable-value",
+    "workload": "primitive-object-slot-read"
+  },
+  "capture_started": "2026-10-08T17:08:32.845971+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "4115a2d3a0391a891c3c2f1fc1b2f4cda3255ea46cfc8c2cc637cc689b0d2a16",
+    "identity": {
+      "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+      "java_home": "/opt/graalvm-community-java25i4",
+      "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+      "peer_graalvm_version": "25.4.4.1.1",
+      "surface": "executable-value"
+    },
+    "identity_sha256": "d8cabd24be9ab489e9e6bc6d905028d2bbc05da88267e3fedb8e2c68a8b8dc4e",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/peer-25.4.4.1.1/executable-value/d0088eaa89ece882c7363b6d2a332ffbdffae8594feb7a0767135a1f7f2b5cd4",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "1",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "expected_result": "1",
+  "final_tier": 2,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "98abc9af7a05a45a7d4056b72f36aef5889cb76f",
+    "porcelain": "",
+    "source_sha256": {
+      "runner/compiler_trace.py": "e965c1edbbfd5e81c066074fcc3d3c33535c54fab89de1d57930e51d08fa570d",
+      "scripts/igv_analyzer.sh": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca",
+      "truffle/graph_evidence.py": "2e4f96ddd00167a6c7fa3f0fbe53f5ea95ba8daea9d715555f52e096efcb69e4",
+      "truffle/jvm_matrix.py": "ae934519c867540f01af3459619a8b170eb5f2611805ea3b3e8182d5cc2d5747",
+      "truffle/jvm_runtime.py": "9c136ee85c515f40855b67e30d85d3e77485b8c0f767c8d20de2b12554a2e05b",
+      "truffle/measure/cases.json": "a102b667bf4107e42a268a1de70288722bd50b7c5150166ce483313eaafb5f34",
+      "truffle/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "81e629d37ee484f8e9449405061aa445b3105091915109a50f658350cc0ae80b",
+      "truffle/measure/graphs.json": "97d05eed011f5add5ac8d9e57d2f51dc106e4329540022ea929fcca8f712e151",
+      "truffle/measure/surfaces/peer/PeerExecutableSurface.java": "83dfdd84edffa1a3f5faf404e85b0f365ea33979202fa8b717e18000f09d35ce",
+      "truffle/measure_graphs.py": "afeae531da01120825ddade8263b947c95cc05d1e788ad0a2dc1162d0f35cc02",
+      "truffle/measure_protos.py": "681bd34abfce1a0f34fa67a8f1555ebe503cdfb4f12c11fae7f71d4db68f5263",
+      "truffle/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+      "truffle/workload_catalog.py": "07e57debb5b2b0efe91dddbdc8d030f09b1c9ea6a55677d49e4605c09b2833a3",
+      "truffle/workloads/catalog.json": "caa141cc16d01f24827fed4f2bd5c22cd24113ac9a75e000a838d9d894de00b7",
+      "truffle/workloads/primitive-object-slot-read/primitive-object-slot-read.py": "90cf667d528a98d1b66fb67b7ef86a08c13c0b27e3a5afa0aff57031535292d1"
+    }
+  },
+  "harness_dirty": false,
+  "harness_git_head": "98abc9af7a05a45a7d4056b72f36aef5889cb76f",
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "fce511f5f7c0",
+    "kernel": "7.2.9-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "python",
+  "peer_runtime": {
+    "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+    "graalvm_version": "25.4.4.1.1",
+    "protos_graalvm_version": "25.4.4.1.1"
+  },
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "6fc767ea1ad6b93b820059610c7f5b8424670ee0b80ce642040ce4e3a8dc098e",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "96aff5b8fd5e6415772dddb0fc2904d7e844e9bad8c4426e16006d489720149b",
+    "porcelain": "",
+    "revision": "d59da442fd9bc6cf590fb9b2c82d3ff55c0391ae",
+    "source_state_sha256": "13a14409014a7213f789e248a7f8920a8a7829c294f9abd36d58bf690780ddd7",
+    "version": "0.3.312-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "6fc767ea1ad6b93b820059610c7f5b8424670ee0b80ce642040ce4e3a8dc098e",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "96aff5b8fd5e6415772dddb0fc2904d7e844e9bad8c4426e16006d489720149b",
+    "porcelain": "",
+    "revision": "d59da442fd9bc6cf590fb9b2c82d3ff55c0391ae",
+    "source_state_sha256": "13a14409014a7213f789e248a7f8920a8a7829c294f9abd36d58bf690780ddd7",
+    "version": "0.3.312-SNAPSHOT"
+  },
+  "protos_revision": "d59da442fd9bc6cf590fb9b2c82d3ff55c0391ae",
+  "runs": [
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 162,
+              "cycles": 152,
+              "ifs": 5,
+              "invokes": 0,
+              "loops": 0,
+              "size": 198
+            },
+            "ir_after_truffle_tier": 162,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 1
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 1000,
+      "calls": 1001,
+      "compilation_count": 8,
+      "dump_inventory": [
+        {
+          "bytes": 920839,
+          "name": "TruffleHotSpotCompilation-4044[<builtin_function_StringBuiltins.rpartition_at_40923948>].bgv",
+          "sha256": "8fac993629eab651eab2745c98f16f70e4776ad08f095a7b604362a79d9b1e7c"
+        },
+        {
+          "bytes": 365237,
+          "name": "TruffleHotSpotCompilation-4066[<builtin_function_StringBuiltins.rpartition_at_40923948>].bgv",
+          "sha256": "619efa6444e4559437694f402629dddfe39548d8eb3fc7c81f94c63284533c3f"
+        },
+        {
+          "bytes": 771376,
+          "name": "TruffleHotSpotCompilation-4131[<bytecode_ModuleSpec.parent_at_352aef4d>].bgv",
+          "sha256": "6fc75ff66354e3abea3ea61ebee7ac6f541a302eff1d9a500ab94338be6f8d94"
+        },
+        {
+          "bytes": 318127,
+          "name": "TruffleHotSpotCompilation-4196[<bytecode_ModuleSpec.parent_at_352aef4d>].bgv",
+          "sha256": "f5187367f0f40b031fe262c33036d11a444027d6258aba1bb47ba18c197138f0"
+        },
+        {
+          "bytes": 375476,
+          "name": "TruffleHotSpotCompilation-4496[<bytecode_ModuleSpec.parent_at_352aef4d>].bgv",
+          "sha256": "252358b5496962e8def19a0cb5ff3e20070f90c29e66fb66289d263ee24752d2"
+        },
+        {
+          "bytes": 321932,
+          "name": "TruffleHotSpotCompilation-4509[<bytecode_ModuleSpec.parent_at_352aef4d>].bgv",
+          "sha256": "9f1883184dd6d396a0aab2ae88fd62f97f37c8af42a7031aa7e1e39ee93867a8"
+        },
+        {
+          "bytes": 1049160,
+          "name": "TruffleHotSpotCompilation-4949[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "34fba7a1ccedaf72a6c7ec4c50add15cf866d8602cc050110b8e130a6a80855d"
+        },
+        {
+          "bytes": 285720,
+          "name": "TruffleHotSpotCompilation-4975[<bytecode_run_at_4341b149>].bgv",
+          "sha256": "6de2af1f520e969620fb288c87e889ededc31fd6870729f79d04a52d2716f644"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 4341b149>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at 40923948>",
+          "<bytecode ModuleSpec.parent at 352aef4d>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$GetAttribute_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 13,
+                  "cycles": 31,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 27
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$ReadGlobal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 12,
+                  "cycles": 16,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "InlineWeakValueProfileNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ReadAttributeFromPythonObjectNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ReadAttributeFromPythonObjectNodeGen$ReceiverCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "DynamicObjectFactory$GetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4975[<bytecode_run_at_4341b149>].bgv"
+            ],
+            "comp_id": 4975,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 162,
+              "cycles": 152,
+              "ifs": 5,
+              "invokes": 0,
+              "loops": 0,
+              "size": 198
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 162,
+            "label": "<bytecode run at 4341b149>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-object-slot-read/primitive-object-slot-read.py:24 0xfeed11c7",
+            "superseded_comp_ids": [],
+            "target": "1:468",
+            "tier": 1,
+            "via": null
+          }
+        ]
+      },
+      "result": "1",
+      "retained_bgv": [],
+      "trace_log": "budget-1000/trace.log.gz",
+      "trace_log_sha256": "57195f99a0d8c72757dbc71c9574bc7737514d4fa2fcf416ee433350e7aa4235"
+    },
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 162,
+              "cycles": 152,
+              "ifs": 5,
+              "invokes": 0,
+              "loops": 0,
+              "size": 198
+            },
+            "ir_after_truffle_tier": 162,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 1
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 4000,
+      "calls": 4001,
+      "compilation_count": 8,
+      "dump_inventory": [
+        {
+          "bytes": 920832,
+          "name": "TruffleHotSpotCompilation-4066[<builtin_function_StringBuiltins.rpartition_at_a66db4c>].bgv",
+          "sha256": "a06ee128d803d0461200e49a3c481130f7b9ab1d4e167e1089cad8563c60b00a"
+        },
+        {
+          "bytes": 365240,
+          "name": "TruffleHotSpotCompilation-4090[<builtin_function_StringBuiltins.rpartition_at_a66db4c>].bgv",
+          "sha256": "3f2e8a2ba928d892e5ec22286544ab320a67682faf126462f013e4ef813cdab5"
+        },
+        {
+          "bytes": 771380,
+          "name": "TruffleHotSpotCompilation-4162[<bytecode_ModuleSpec.parent_at_78b2dcbf>].bgv",
+          "sha256": "f73a7dbb69c79613dd2c26a140b57a60baaed0277074435b6f0cdb6702adb4b2"
+        },
+        {
+          "bytes": 318123,
+          "name": "TruffleHotSpotCompilation-4227[<bytecode_ModuleSpec.parent_at_78b2dcbf>].bgv",
+          "sha256": "1633bc497ae299f07ad01e12ad75a09dca157514f21c8029a0e5151977bfd0f7"
+        },
+        {
+          "bytes": 375474,
+          "name": "TruffleHotSpotCompilation-4544[<bytecode_ModuleSpec.parent_at_78b2dcbf>].bgv",
+          "sha256": "1551b97e0a89c41f6874ba613a74774b43a20ec514629214e93f2ad3c31219fe"
+        },
+        {
+          "bytes": 321931,
+          "name": "TruffleHotSpotCompilation-4550[<bytecode_ModuleSpec.parent_at_78b2dcbf>].bgv",
+          "sha256": "172b0a5b877920ee6323be7e71415e1c4f22524bd0ef153003f8b7cd4a587cdd"
+        },
+        {
+          "bytes": 1049170,
+          "name": "TruffleHotSpotCompilation-4988[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "003825115f291c0ddb1709e049cb83d3cc69e8fcd8121a40af6ed45b2d56042e"
+        },
+        {
+          "bytes": 285721,
+          "name": "TruffleHotSpotCompilation-5008[<bytecode_run_at_49e46633>].bgv",
+          "sha256": "e007301cb6785f9bc88355f76699a7aee1207e321ec4118039c1c58a251feb77"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 49e46633>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at a66db4c>",
+          "<bytecode ModuleSpec.parent at 78b2dcbf>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$GetAttribute_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 13,
+                  "cycles": 31,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 27
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$ReadGlobal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 12,
+                  "cycles": 16,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "InlineWeakValueProfileNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ReadAttributeFromPythonObjectNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ReadAttributeFromPythonObjectNodeGen$ReceiverCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "DynamicObjectFactory$GetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5008[<bytecode_run_at_49e46633>].bgv"
+            ],
+            "comp_id": 5008,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 162,
+              "cycles": 152,
+              "ifs": 5,
+              "invokes": 0,
+              "loops": 0,
+              "size": 198
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 162,
+            "label": "<bytecode run at 49e46633>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-object-slot-read/primitive-object-slot-read.py:24 0xfeed11c7",
+            "superseded_comp_ids": [],
+            "target": "1:468",
+            "tier": 1,
+            "via": null
+          }
+        ]
+      },
+      "result": "1",
+      "retained_bgv": [],
+      "trace_log": "budget-4000/trace.log.gz",
+      "trace_log_sha256": "8b1d47981ed5985635cbe577af3081fb04c41227f9d5c5334a4e49a4edd751a8"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 103,
+              "cycles": 108,
+              "ifs": 1,
+              "invokes": 0,
+              "loops": 0,
+              "size": 146
+            },
+            "ir_after_truffle_tier": 103,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 16000,
+      "calls": 16001,
+      "compilation_count": 10,
+      "dump_inventory": [
+        {
+          "bytes": 920837,
+          "name": "TruffleHotSpotCompilation-4033[<builtin_function_StringBuiltins.rpartition_at_76648f7a>].bgv",
+          "sha256": "158944c7922b4aae3639edac4f6b332e69c248dc68d9aa6c84d000e4f5c443d7"
+        },
+        {
+          "bytes": 365245,
+          "name": "TruffleHotSpotCompilation-4053[<builtin_function_StringBuiltins.rpartition_at_76648f7a>].bgv",
+          "sha256": "9e18fa0e16638cb1face9efd2c6f171432e210ba9567b11ce1c75603b66f339a"
+        },
+        {
+          "bytes": 771382,
+          "name": "TruffleHotSpotCompilation-4118[<bytecode_ModuleSpec.parent_at_40ae5d08>].bgv",
+          "sha256": "ac3e33936a05430e9033f168f8c067025205ef6909157da3f8945851f8576587"
+        },
+        {
+          "bytes": 318125,
+          "name": "TruffleHotSpotCompilation-4192[<bytecode_ModuleSpec.parent_at_40ae5d08>].bgv",
+          "sha256": "e74632129928a5d371c1d50e8cb30b90744cdfb8ce439c6351472d50e544cfdf"
+        },
+        {
+          "bytes": 375476,
+          "name": "TruffleHotSpotCompilation-4507[<bytecode_ModuleSpec.parent_at_40ae5d08>].bgv",
+          "sha256": "e6bb1d39973f8b9674a3358d7f6033b8b67ae4eef831f3e5d74229cc169d1f84"
+        },
+        {
+          "bytes": 321935,
+          "name": "TruffleHotSpotCompilation-4520[<bytecode_ModuleSpec.parent_at_40ae5d08>].bgv",
+          "sha256": "67a22fa7e4d36687ef4e7d965ab55349fb1b4f908c659afd4355284bbff2c7cf"
+        },
+        {
+          "bytes": 1049167,
+          "name": "TruffleHotSpotCompilation-4954[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "6593729da56f0ceee93d3b8b32f61e69f3d7e00d607edba964f16ec8eadef312"
+        },
+        {
+          "bytes": 285720,
+          "name": "TruffleHotSpotCompilation-4982[<bytecode_run_at_2b68db2d>].bgv",
+          "sha256": "f4f0d5e0e21eac0b84afc188023668150e330506cf02f80069d546e9314a50ed"
+        },
+        {
+          "bytes": 592133,
+          "name": "TruffleHotSpotCompilation-5049[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "076d9aa9dc76a4958f583be89c5d341738c5f324d198b95a5cbdc58493062c24"
+        },
+        {
+          "bytes": 194870,
+          "name": "TruffleHotSpotCompilation-5060[<bytecode_run_at_2b68db2d>].bgv",
+          "sha256": "f4e507bdc678b4d871b5cc77444bb139c422561e2ced4164c159446663ac474e"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 2b68db2d>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at 76648f7a>",
+          "<bytecode ModuleSpec.parent at 40ae5d08>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$GetAttribute_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 13,
+                  "cycles": 31,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 27
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$ReadGlobal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 12,
+                  "cycles": 16,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "InlineWeakValueProfileNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ReadAttributeFromPythonObjectNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ReadAttributeFromPythonObjectNodeGen$ReceiverCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "DynamicObjectFactory$GetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5060[<bytecode_run_at_2b68db2d>].bgv"
+            ],
+            "comp_id": 5060,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 103,
+              "cycles": 108,
+              "ifs": 1,
+              "invokes": 0,
+              "loops": 0,
+              "size": 146
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 103,
+            "label": "<bytecode run at 2b68db2d>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-object-slot-read/primitive-object-slot-read.py:24 0xfeed11c7",
+            "superseded_comp_ids": [
+              4982
+            ],
+            "target": "1:468",
+            "tier": 2,
+            "via": null
+          }
+        ]
+      },
+      "result": "1",
+      "retained_bgv": [
+        "budget-16000/bgv/TruffleHotSpotCompilation-5060[<bytecode_run_at_2b68db2d>].bgv.gz"
+      ],
+      "trace_log": "budget-16000/trace.log.gz",
+      "trace_log_sha256": "78fa4a04ba0a4f9a296c7544369b7e41a56f70f5a3884a3128c9c59bc35d0bd7"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 103,
+              "cycles": 108,
+              "ifs": 1,
+              "invokes": 0,
+              "loops": 0,
+              "size": 146
+            },
+            "ir_after_truffle_tier": 103,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 64000,
+      "calls": 64001,
+      "compilation_count": 10,
+      "dump_inventory": [
+        {
+          "bytes": 920837,
+          "name": "TruffleHotSpotCompilation-4100[<builtin_function_StringBuiltins.rpartition_at_32be861d>].bgv",
+          "sha256": "3cafb13d9ff9d57acf07757ca7a0ab72a49aec6189111b2fee503ea7a4010259"
+        },
+        {
+          "bytes": 365246,
+          "name": "TruffleHotSpotCompilation-4127[<builtin_function_StringBuiltins.rpartition_at_32be861d>].bgv",
+          "sha256": "672791930b24b55d6c41e38155a36e10ffedd184b0cfa7b597c685495fff7103"
+        },
+        {
+          "bytes": 771379,
+          "name": "TruffleHotSpotCompilation-4198[<bytecode_ModuleSpec.parent_at_742838a1>].bgv",
+          "sha256": "3edf21be66300f8d8721ad6cc376cd1fc289ec5c5387ad571d65f7d60c3e3dc6"
+        },
+        {
+          "bytes": 318123,
+          "name": "TruffleHotSpotCompilation-4265[<bytecode_ModuleSpec.parent_at_742838a1>].bgv",
+          "sha256": "0ed0302614db341636c3a478d5b2f6f8b8fa027ccc6772dd28a1b27a557e29e9"
+        },
+        {
+          "bytes": 375473,
+          "name": "TruffleHotSpotCompilation-4579[<bytecode_ModuleSpec.parent_at_742838a1>].bgv",
+          "sha256": "e4172cf0a63d6cbb6ac28e185eefd89676d82531fec1ac837fe99be9e4a05d2c"
+        },
+        {
+          "bytes": 321929,
+          "name": "TruffleHotSpotCompilation-4587[<bytecode_ModuleSpec.parent_at_742838a1>].bgv",
+          "sha256": "91e858a38130a1c70babee7a2ad73523b9d24958309b0cb4f6c9e4cd4d3b8929"
+        },
+        {
+          "bytes": 1049166,
+          "name": "TruffleHotSpotCompilation-5006[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "0db6be88c55b0c1cf4dd458c4232374597c6ef597d76dc4bc414c69300259777"
+        },
+        {
+          "bytes": 285715,
+          "name": "TruffleHotSpotCompilation-5028[<bytecode_run_at_668a91cc>].bgv",
+          "sha256": "90a6ceb67f459a5413cc6f2e1dad012ac83435866c0a216e415e96ec5b178809"
+        },
+        {
+          "bytes": 592127,
+          "name": "TruffleHotSpotCompilation-5110[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "5d40c4919027c05aa475dbdf50c69b78ac0141d2a848e3de58e8289c81d90913"
+        },
+        {
+          "bytes": 194864,
+          "name": "TruffleHotSpotCompilation-5130[<bytecode_run_at_668a91cc>].bgv",
+          "sha256": "febc245983b59bf483cdc74de5af60d3df468df0bc5d603de0cc47890de219e0"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 668a91cc>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at 32be861d>",
+          "<bytecode ModuleSpec.parent at 742838a1>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$GetAttribute_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 13,
+                  "cycles": 31,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 27
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$ReadGlobal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 12,
+                  "cycles": 16,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "InlineWeakValueProfileNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ReadAttributeFromPythonObjectNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ReadAttributeFromPythonObjectNodeGen$ReceiverCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "DynamicObjectFactory$GetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "python:24:1095-1129",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5130[<bytecode_run_at_668a91cc>].bgv"
+            ],
+            "comp_id": 5130,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 103,
+              "cycles": 108,
+              "ifs": 1,
+              "invokes": 0,
+              "loops": 0,
+              "size": 146
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 103,
+            "label": "<bytecode run at 668a91cc>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-object-slot-read/primitive-object-slot-read.py:24 0xfeed11c7",
+            "superseded_comp_ids": [
+              5028
+            ],
+            "target": "1:468",
+            "tier": 2,
+            "via": null
+          }
+        ]
+      },
+      "result": "1",
+      "retained_bgv": [
+        "budget-64000/bgv/TruffleHotSpotCompilation-5130[<bytecode_run_at_668a91cc>].bgv.gz"
+      ],
+      "trace_log": "budget-64000/trace.log.gz",
+      "trace_log_sha256": "edf501eca471e73ad2e70929d5792e8431dd79ae495cfdbf8b695ba9733fd119"
+    }
+  ],
+  "schema_version": 1,
+  "selected_phase": "After TruffleTier",
+  "stabilization": {
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "surface": "executable-value",
+  "surface_timed_call": "run.execute()",
+  "timing_evidence": "NONE (graph instrumentation is never a timing run)",
+  "workload": "primitive-object-slot-read",
+  "workload_source": "truffle/workloads/primitive-object-slot-read/primitive-object-slot-read.py",
+  "workload_source_sha256": "90cf667d528a98d1b66fb67b7ef86a08c13c0b27e3a5afa0aff57031535292d1"
+}

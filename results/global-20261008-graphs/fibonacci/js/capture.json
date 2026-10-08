@@ -1,0 +1,1949 @@
+{
+  "adapter_source_sha256": "d0088eaa89ece882c7363b6d2a332ffbdffae8594feb7a0767135a1f7f2b5cd4",
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "capture_finished": "2026-10-08T17:40:52.892461+00:00",
+  "capture_key": {
+    "budgets": [
+      1000,
+      4000,
+      16000,
+      64000,
+      256000
+    ],
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "language": "js",
+    "protos_revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+    "protos_source_state_sha256": "b79bdef9b46ee16e4070202e759cd87dba844b65839245abce4b39fb52e1f5dc",
+    "stage": "reference",
+    "surface": "executable-value",
+    "workload": "fibonacci"
+  },
+  "capture_started": "2026-10-08T17:40:32.014482+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "4115a2d3a0391a891c3c2f1fc1b2f4cda3255ea46cfc8c2cc637cc689b0d2a16",
+    "identity": {
+      "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+      "java_home": "/opt/graalvm-community-java25i4",
+      "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+      "peer_graalvm_version": "25.4.4.1.1",
+      "surface": "executable-value"
+    },
+    "identity_sha256": "d8cabd24be9ab489e9e6bc6d905028d2bbc05da88267e3fedb8e2c68a8b8dc4e",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/peer-25.4.4.1.1/executable-value/d0088eaa89ece882c7363b6d2a332ffbdffae8594feb7a0767135a1f7f2b5cd4",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "6765",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "expected_result": "6765",
+  "final_tier": 2,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "98abc9af7a05a45a7d4056b72f36aef5889cb76f",
+    "porcelain": "",
+    "source_sha256": {
+      "runner/compiler_trace.py": "e965c1edbbfd5e81c066074fcc3d3c33535c54fab89de1d57930e51d08fa570d",
+      "scripts/igv_analyzer.sh": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca",
+      "truffle/graph_evidence.py": "2e4f96ddd00167a6c7fa3f0fbe53f5ea95ba8daea9d715555f52e096efcb69e4",
+      "truffle/jvm_matrix.py": "ae934519c867540f01af3459619a8b170eb5f2611805ea3b3e8182d5cc2d5747",
+      "truffle/jvm_runtime.py": "9c136ee85c515f40855b67e30d85d3e77485b8c0f767c8d20de2b12554a2e05b",
+      "truffle/measure/cases.json": "a102b667bf4107e42a268a1de70288722bd50b7c5150166ce483313eaafb5f34",
+      "truffle/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "81e629d37ee484f8e9449405061aa445b3105091915109a50f658350cc0ae80b",
+      "truffle/measure/graphs.json": "97d05eed011f5add5ac8d9e57d2f51dc106e4329540022ea929fcca8f712e151",
+      "truffle/measure/surfaces/peer/PeerExecutableSurface.java": "83dfdd84edffa1a3f5faf404e85b0f365ea33979202fa8b717e18000f09d35ce",
+      "truffle/measure_graphs.py": "afeae531da01120825ddade8263b947c95cc05d1e788ad0a2dc1162d0f35cc02",
+      "truffle/measure_protos.py": "681bd34abfce1a0f34fa67a8f1555ebe503cdfb4f12c11fae7f71d4db68f5263",
+      "truffle/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+      "truffle/workload_catalog.py": "07e57debb5b2b0efe91dddbdc8d030f09b1c9ea6a55677d49e4605c09b2833a3",
+      "truffle/workloads/catalog.json": "caa141cc16d01f24827fed4f2bd5c22cd24113ac9a75e000a838d9d894de00b7",
+      "truffle/workloads/fibonacci/fibonacci.mjs": "9b6cd70250e918dfb35f10a1b235c9a20ee7c33ae9b8d6c1d1e9a7c149725cc2"
+    }
+  },
+  "harness_dirty": false,
+  "harness_git_head": "98abc9af7a05a45a7d4056b72f36aef5889cb76f",
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "fce511f5f7c0",
+    "kernel": "7.2.9-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "js",
+  "peer_runtime": {
+    "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+    "graalvm_version": "25.4.4.1.1",
+    "protos_graalvm_version": "25.4.4.1.1"
+  },
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "6fc767ea1ad6b93b820059610c7f5b8424670ee0b80ce642040ce4e3a8dc098e",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "96aff5b8fd5e6415772dddb0fc2904d7e844e9bad8c4426e16006d489720149b",
+    "porcelain": "",
+    "revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+    "source_state_sha256": "b79bdef9b46ee16e4070202e759cd87dba844b65839245abce4b39fb52e1f5dc",
+    "version": "0.3.312-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "6fc767ea1ad6b93b820059610c7f5b8424670ee0b80ce642040ce4e3a8dc098e",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "96aff5b8fd5e6415772dddb0fc2904d7e844e9bad8c4426e16006d489720149b",
+    "porcelain": "",
+    "revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+    "source_state_sha256": "b79bdef9b46ee16e4070202e759cd87dba844b65839245abce4b39fb52e1f5dc",
+    "version": "0.3.312-SNAPSHOT"
+  },
+  "protos_revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+  "runs": [
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 136,
+              "cycles": 148,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 186
+            },
+            "ir_after_truffle_tier": 136,
+            "label": "run",
+            "role": "primary",
+            "tier": 1
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 882,
+              "cycles": 1224,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1482
+            },
+            "ir_after_truffle_tier": 891,
+            "label": "fibonacci",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 1000,
+      "calls": 1001,
+      "compilation_count": 4,
+      "dump_inventory": [
+        {
+          "bytes": 840448,
+          "name": "TruffleHotSpotCompilation-2384[fibonacci].bgv",
+          "sha256": "d673f4ced5521dd0b87e7601bf044b755199f317771151110dd7f3a6035929f8"
+        },
+        {
+          "bytes": 2032765,
+          "name": "TruffleHotSpotCompilation-2473[fibonacci].bgv",
+          "sha256": "ecdbf6cd3bccb0121737eea58bb17db4947555bb6310439b3bda9a1316f6aaaa"
+        },
+        {
+          "bytes": 697587,
+          "name": "TruffleHotSpotCompilation-2710[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "58ab678e014b98ed5dfed11db036692facb5997c71794b91973f74eb75d9a33d"
+        },
+        {
+          "bytes": 209965,
+          "name": "TruffleHotSpotCompilation-2721[run].bgv",
+          "sha256": "c82ef4b6825cb072d718830ed3dff497ed6bcb77627c3adc2af9e7da6a187feb"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<InteropBoundFunction>.execute"
+        ],
+        "primary_label": "run",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "js:6:105-220",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 24,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 26
+                }
+              },
+              {
+                "location": "js:15:250-259",
+                "name": "JSReadScopeFrameSlotNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 19,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 16,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "js:15:250-263",
+                "name": "JSFunctionCallNode$Call1Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 5,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:14:222-266",
+                "name": "FunctionRootNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:15:260-262",
+                "name": "JSConstantNode$JSConstantIntegerNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 1,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "js:15:250-263",
+                "name": "JSFunctionCallNode$FunctionInstanceCacheNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 1,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2721[run].bgv"
+            ],
+            "comp_id": 2721,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 136,
+              "cycles": 148,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 186
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 136,
+            "label": "run",
+            "normalized_label": "run",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:14 0x9734a6db",
+            "superseded_comp_ids": [],
+            "target": "1:259",
+            "tier": 1,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2473[fibonacci].bgv"
+            ],
+            "comp_id": 2473,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 882,
+              "cycles": 1224,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1482
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 891,
+            "label": "fibonacci",
+            "normalized_label": "fibonacci",
+            "role": "additional",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:6 0x9734a6db",
+            "superseded_comp_ids": [
+              2384
+            ],
+            "target": "1:260",
+            "tier": 2,
+            "via": "run"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [],
+      "trace_log": "budget-1000/trace.log.gz",
+      "trace_log_sha256": "c4a9dc2fa6836fd5a80d5a71fc0937a213192629f2564f09e209ce61872ed3c4"
+    },
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 136,
+              "cycles": 148,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 186
+            },
+            "ir_after_truffle_tier": 136,
+            "label": "run",
+            "role": "primary",
+            "tier": 1
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 882,
+              "cycles": 1224,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1482
+            },
+            "ir_after_truffle_tier": 891,
+            "label": "fibonacci",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 4000,
+      "calls": 4001,
+      "compilation_count": 4,
+      "dump_inventory": [
+        {
+          "bytes": 840447,
+          "name": "TruffleHotSpotCompilation-2395[fibonacci].bgv",
+          "sha256": "ef0c4a11d1621cf1d5e8a65b6a064ef1b2a8e74a88c254450db15a96db9f2d5b"
+        },
+        {
+          "bytes": 2032764,
+          "name": "TruffleHotSpotCompilation-2496[fibonacci].bgv",
+          "sha256": "2e168284eb3223e0961bbcb104ba19f40e53d130350a593dbe1f85b57f83b8b5"
+        },
+        {
+          "bytes": 697589,
+          "name": "TruffleHotSpotCompilation-2710[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "7a01443577a511336157bb2ec65ab52453773e90eef9da4012fc02dac8bc81e0"
+        },
+        {
+          "bytes": 209966,
+          "name": "TruffleHotSpotCompilation-2721[run].bgv",
+          "sha256": "2d1e24715404b5d99e379f779dcce8ab17946ec5d11582228bcbccf57f882b5e"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<InteropBoundFunction>.execute"
+        ],
+        "primary_label": "run",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "js:6:105-220",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 24,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 26
+                }
+              },
+              {
+                "location": "js:15:250-259",
+                "name": "JSReadScopeFrameSlotNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 19,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 16,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "js:15:250-263",
+                "name": "JSFunctionCallNode$Call1Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 5,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:14:222-266",
+                "name": "FunctionRootNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:15:260-262",
+                "name": "JSConstantNode$JSConstantIntegerNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 1,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "js:15:250-263",
+                "name": "JSFunctionCallNode$FunctionInstanceCacheNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 1,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2721[run].bgv"
+            ],
+            "comp_id": 2721,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 136,
+              "cycles": 148,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 186
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 136,
+            "label": "run",
+            "normalized_label": "run",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:14 0x9734a6db",
+            "superseded_comp_ids": [],
+            "target": "1:259",
+            "tier": 1,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2496[fibonacci].bgv"
+            ],
+            "comp_id": 2496,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 882,
+              "cycles": 1224,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1482
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 891,
+            "label": "fibonacci",
+            "normalized_label": "fibonacci",
+            "role": "additional",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:6 0x9734a6db",
+            "superseded_comp_ids": [
+              2395
+            ],
+            "target": "1:260",
+            "tier": 2,
+            "via": "run"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [],
+      "trace_log": "budget-4000/trace.log.gz",
+      "trace_log_sha256": "289375f79ce21082a9d4184ba824cf1b85017d583dd425e689fe5536eb0ecf66"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 798,
+              "cycles": 1146,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1383
+            },
+            "ir_after_truffle_tier": 806,
+            "label": "run",
+            "role": "primary",
+            "tier": 2
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 882,
+              "cycles": 1224,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1482
+            },
+            "ir_after_truffle_tier": 891,
+            "label": "fibonacci",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 16000,
+      "calls": 16001,
+      "compilation_count": 6,
+      "dump_inventory": [
+        {
+          "bytes": 840449,
+          "name": "TruffleHotSpotCompilation-2376[fibonacci].bgv",
+          "sha256": "e9034a2b61d849c8bed580de452437c2ad6d1ee134552cb42e955b73c9e7a29d"
+        },
+        {
+          "bytes": 2032766,
+          "name": "TruffleHotSpotCompilation-2468[fibonacci].bgv",
+          "sha256": "439f3d94fa870f600739404c30fb069a492a76529530da3f1bca72f0691ec461"
+        },
+        {
+          "bytes": 697590,
+          "name": "TruffleHotSpotCompilation-2680[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "7e5ea0fb81a9e229b63bf9392ed1db2a7872df36ed56bb017e429a1b53a94269"
+        },
+        {
+          "bytes": 209967,
+          "name": "TruffleHotSpotCompilation-2693[run].bgv",
+          "sha256": "918c19b52a6960084e980997e84464c6f06f0f30a24ff419930a2059cb26370e"
+        },
+        {
+          "bytes": 2294406,
+          "name": "TruffleHotSpotCompilation-2757[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "3e08595bbf099be9437cbfad53d128008cd278c0246165f63c582d1f9a40b6c1"
+        },
+        {
+          "bytes": 2025429,
+          "name": "TruffleHotSpotCompilation-2794[run].bgv",
+          "sha256": "1ea1987cc748a90393f5cee37ec7a62b56c6c361269d8e1c87fa5f2e543e47f1"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<InteropBoundFunction>.execute"
+        ],
+        "primary_label": "run",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 45,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 39
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 45,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 39
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 45,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 39
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 45,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 39
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 19,
+                  "cycles": 37,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 31
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 19,
+                  "cycles": 37,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 31
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2794[run].bgv"
+            ],
+            "comp_id": 2794,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 798,
+              "cycles": 1146,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1383
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 806,
+            "label": "run",
+            "normalized_label": "run",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:14 0x9734a6db",
+            "superseded_comp_ids": [
+              2693
+            ],
+            "target": "1:259",
+            "tier": 2,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2468[fibonacci].bgv"
+            ],
+            "comp_id": 2468,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 882,
+              "cycles": 1224,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1482
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 891,
+            "label": "fibonacci",
+            "normalized_label": "fibonacci",
+            "role": "additional",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:6 0x9734a6db",
+            "superseded_comp_ids": [
+              2376
+            ],
+            "target": "1:260",
+            "tier": 2,
+            "via": "run"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [
+        "budget-16000/bgv/TruffleHotSpotCompilation-2794[run].bgv.gz",
+        "budget-16000/bgv/TruffleHotSpotCompilation-2468[fibonacci].bgv.gz"
+      ],
+      "trace_log": "budget-16000/trace.log.gz",
+      "trace_log_sha256": "b538fde6ca7ec76ad40e13cf6cf26430a32c60a4615ed79406fd21351e4cf8db"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 798,
+              "cycles": 1146,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1383
+            },
+            "ir_after_truffle_tier": 806,
+            "label": "run",
+            "role": "primary",
+            "tier": 2
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 882,
+              "cycles": 1224,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1482
+            },
+            "ir_after_truffle_tier": 891,
+            "label": "fibonacci",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 64000,
+      "calls": 64001,
+      "compilation_count": 6,
+      "dump_inventory": [
+        {
+          "bytes": 840447,
+          "name": "TruffleHotSpotCompilation-2408[fibonacci].bgv",
+          "sha256": "68e012456d743d55aef57e77a207b7f54b9138ea859bec8978fe793176100c3b"
+        },
+        {
+          "bytes": 2032763,
+          "name": "TruffleHotSpotCompilation-2506[fibonacci].bgv",
+          "sha256": "fb98e508f00ad0089d44bd7bde93695ef248296985fed515c971aebda34e063d"
+        },
+        {
+          "bytes": 697587,
+          "name": "TruffleHotSpotCompilation-2712[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "175e7e4961a65bc2818b36fce0b1a91e99b8d4e1ac150a457bd1ff6657f4bffb"
+        },
+        {
+          "bytes": 209965,
+          "name": "TruffleHotSpotCompilation-2723[run].bgv",
+          "sha256": "cf7b18fa83f656e246e18f289a68804c14e83340af3a08555ed49ea5eb677582"
+        },
+        {
+          "bytes": 2294401,
+          "name": "TruffleHotSpotCompilation-2787[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "6a8ec887f4ada699f1bdddc59c533ce9b8020b043a46a47a102047784e2a5469"
+        },
+        {
+          "bytes": 2025427,
+          "name": "TruffleHotSpotCompilation-2825[run].bgv",
+          "sha256": "865125db9563c48814c9d63f0c59e5f0d26d9893c3b9441ba1ed8a5f406be3e5"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<InteropBoundFunction>.execute"
+        ],
+        "primary_label": "run",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 45,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 39
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 45,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 39
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 45,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 39
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 45,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 39
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 19,
+                  "cycles": 37,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 31
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 19,
+                  "cycles": 37,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 31
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2825[run].bgv"
+            ],
+            "comp_id": 2825,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 798,
+              "cycles": 1146,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1383
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 806,
+            "label": "run",
+            "normalized_label": "run",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:14 0x9734a6db",
+            "superseded_comp_ids": [
+              2723
+            ],
+            "target": "1:259",
+            "tier": 2,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 33
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 47,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 41
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2506[fibonacci].bgv"
+            ],
+            "comp_id": 2506,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 25,
+              "count": 882,
+              "cycles": 1224,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1482
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci",
+              "fibonacci"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 891,
+            "label": "fibonacci",
+            "normalized_label": "fibonacci",
+            "role": "additional",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:6 0x9734a6db",
+            "superseded_comp_ids": [
+              2408
+            ],
+            "target": "1:260",
+            "tier": 2,
+            "via": "run"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [
+        "budget-64000/bgv/TruffleHotSpotCompilation-2825[run].bgv.gz",
+        "budget-64000/bgv/TruffleHotSpotCompilation-2506[fibonacci].bgv.gz"
+      ],
+      "trace_log": "budget-64000/trace.log.gz",
+      "trace_log_sha256": "c9fc23a5533603503cc82388c7e55632f7492ceffdfed60dc5552ea311f34602"
+    }
+  ],
+  "schema_version": 1,
+  "selected_phase": "After TruffleTier",
+  "stabilization": {
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "surface": "executable-value",
+  "surface_timed_call": "run.execute()",
+  "timing_evidence": "NONE (graph instrumentation is never a timing run)",
+  "workload": "fibonacci",
+  "workload_source": "truffle/workloads/fibonacci/fibonacci.mjs",
+  "workload_source_sha256": "9b6cd70250e918dfb35f10a1b235c9a20ee7c33ae9b8d6c1d1e9a7c149725cc2"
+}

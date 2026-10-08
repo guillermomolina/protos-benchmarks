@@ -1,0 +1,702 @@
+{
+  "analyzer": {
+    "command": "filter",
+    "graal_version": "25.4.4.1.1",
+    "image": "ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-25.4.4.1.1",
+    "script": "scripts/igv_analyzer.sh",
+    "script_sha256": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca"
+  },
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "budgets_run": [
+    1000,
+    4000,
+    16000,
+    64000
+  ],
+  "correctness": {
+    "actual": "6765",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "evidence_valid": true,
+  "expected_result": "6765",
+  "framework_targets": [
+    "org.graalvm.polyglot.Value<InteropBoundFunction>.execute"
+  ],
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness_dirty": false,
+  "harness_git_head": "98abc9af7a05a45a7d4056b72f36aef5889cb76f",
+  "harness_source_sha256": {
+    "runner/compiler_trace.py": "e965c1edbbfd5e81c066074fcc3d3c33535c54fab89de1d57930e51d08fa570d",
+    "scripts/igv_analyzer.sh": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca",
+    "truffle/graph_evidence.py": "2e4f96ddd00167a6c7fa3f0fbe53f5ea95ba8daea9d715555f52e096efcb69e4",
+    "truffle/jvm_matrix.py": "ae934519c867540f01af3459619a8b170eb5f2611805ea3b3e8182d5cc2d5747",
+    "truffle/jvm_runtime.py": "9c136ee85c515f40855b67e30d85d3e77485b8c0f767c8d20de2b12554a2e05b",
+    "truffle/measure/cases.json": "a102b667bf4107e42a268a1de70288722bd50b7c5150166ce483313eaafb5f34",
+    "truffle/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "81e629d37ee484f8e9449405061aa445b3105091915109a50f658350cc0ae80b",
+    "truffle/measure/graphs.json": "97d05eed011f5add5ac8d9e57d2f51dc106e4329540022ea929fcca8f712e151",
+    "truffle/measure/surfaces/peer/PeerExecutableSurface.java": "83dfdd84edffa1a3f5faf404e85b0f365ea33979202fa8b717e18000f09d35ce",
+    "truffle/measure_graphs.py": "afeae531da01120825ddade8263b947c95cc05d1e788ad0a2dc1162d0f35cc02",
+    "truffle/measure_protos.py": "681bd34abfce1a0f34fa67a8f1555ebe503cdfb4f12c11fae7f71d4db68f5263",
+    "truffle/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+    "truffle/workload_catalog.py": "07e57debb5b2b0efe91dddbdc8d030f09b1c9ea6a55677d49e4605c09b2833a3",
+    "truffle/workloads/catalog.json": "caa141cc16d01f24827fed4f2bd5c22cd24113ac9a75e000a838d9d894de00b7",
+    "truffle/workloads/fibonacci/fibonacci.mjs": "9b6cd70250e918dfb35f10a1b235c9a20ee7c33ae9b8d6c1d1e9a7c149725cc2"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "fce511f5f7c0",
+    "kernel": "7.2.9-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "js",
+  "protos_revision": "d6efe02522f20015a4b9261bbe1bf83867bff749",
+  "schema_version": 1,
+  "selected_budget": 64000,
+  "selected_phase": "After TruffleTier",
+  "selected_stable_tier": 2,
+  "stabilization": {
+    "after_truffle_tier_confirmed": true,
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "summary": {
+    "additional_language_owned_compiled_units": [
+      {
+        "edge": "Cutoff",
+        "label": "fibonacci",
+        "nodes": 891,
+        "via": "run"
+      }
+    ],
+    "families": {
+      "allocations": 67,
+      "control_flow_splits": 7,
+      "guards_deopts": 288,
+      "invokes": 16,
+      "loads": 121,
+      "loops": 0
+    },
+    "graph_count": 2,
+    "node_class_histogram": {
+      "AllocatedObjectNode": 16,
+      "BeginNode": 30,
+      "BoxNode$AllocatingBoxNode": 18,
+      "BoxNode$TrustedBoxedValue": 17,
+      "CommitAllocationNode": 16,
+      "ConstantNode": 48,
+      "DeoptimizeNode": 16,
+      "EndNode": 14,
+      "ExceptionObjectNode": 16,
+      "FixedGuardNode": 243,
+      "FrameState": 375,
+      "GuardedUnsafeLoadNode": 29,
+      "IfNode": 7,
+      "InstanceOfNode": 58,
+      "IntegerAddExactNode": 14,
+      "IntegerAddExactOverflowNode": 14,
+      "IntegerEqualsNode": 29,
+      "IntegerLessThanNode": 7,
+      "IntegerSubExactNode": 14,
+      "IntegerSubExactOverflowNode": 14,
+      "InvokeWithExceptionNode": 16,
+      "IsNullNode": 71,
+      "LoadFieldNode": 87,
+      "LoadIndexedNode": 34,
+      "MergeNode": 7,
+      "MethodCallTargetNode": 16,
+      "ObjectEqualsNode": 29,
+      "ParameterNode": 2,
+      "PiArrayNode": 2,
+      "PiNode": 206,
+      "ReturnNode": 2,
+      "StartNode": 2,
+      "UnboxNode": 17,
+      "ValuePhiNode": 9,
+      "VirtualArrayNode": 73,
+      "VirtualBoxingNode": 20,
+      "VirtualInstanceNode": 15,
+      "VirtualObjectState": 94
+    },
+    "primary_guest_graph_nodes": 806,
+    "relevant_graph_nodes_total_after_truffle_tier": 1697,
+    "trace_node_expansion_truffle_tier": [
+      {
+        "allocs": 25,
+        "count": 798,
+        "cycles": 1146,
+        "ifs": 0,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1383
+      },
+      {
+        "allocs": 25,
+        "count": 882,
+        "cycles": 1224,
+        "ifs": 7,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1482
+      }
+    ]
+  },
+  "surface": "executable-value",
+  "surface_timed_call": "run.execute()",
+  "trace_log": "budget-64000/trace.log.gz",
+  "unattributed_language_targets": [],
+  "units": [
+    {
+      "analysis": "budget-64000/bgv/TruffleHotSpotCompilation-2825[run].filter.json.gz",
+      "analysis_sha256": "b6e24650495ce6db03c740900abc4b273301ab4cb84ce6c3da7d8cffc83c02cd",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 20,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 20,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 20,
+            "cycles": 45,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 39
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 20,
+            "cycles": 45,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 39
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 20,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 20,
+            "cycles": 45,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 39
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 20,
+            "cycles": 45,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 39
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 19,
+            "cycles": 37,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 31
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 19,
+            "cycles": 37,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 31
+          }
+        }
+      ],
+      "bgv": "budget-64000/bgv/TruffleHotSpotCompilation-2825[run].bgv.gz",
+      "bgv_sha256": "865125db9563c48814c9d63f0c59e5f0d26d9893c3b9441ba1ed8a5f406be3e5",
+      "comp_id": 2825,
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 25,
+        "count": 798,
+        "cycles": 1146,
+        "ifs": 0,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1383
+      },
+      "graph": {
+        "allocations": 33,
+        "control_flow_splits": 0,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier2.run()"
+        ],
+        "guards_deopts": 135,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.callBoundary": 8
+        },
+        "invokes": 8,
+        "loads": 62,
+        "loops": 0,
+        "node_class_histogram": {
+          "AllocatedObjectNode": 8,
+          "BeginNode": 8,
+          "BoxNode$AllocatingBoxNode": 9,
+          "BoxNode$TrustedBoxedValue": 8,
+          "CommitAllocationNode": 8,
+          "ConstantNode": 30,
+          "DeoptimizeNode": 8,
+          "ExceptionObjectNode": 8,
+          "FixedGuardNode": 112,
+          "FrameState": 189,
+          "GuardedUnsafeLoadNode": 15,
+          "InstanceOfNode": 30,
+          "IntegerAddExactNode": 7,
+          "IntegerAddExactOverflowNode": 7,
+          "IntegerEqualsNode": 15,
+          "InvokeWithExceptionNode": 8,
+          "IsNullNode": 37,
+          "LoadFieldNode": 45,
+          "LoadIndexedNode": 17,
+          "MethodCallTargetNode": 8,
+          "ObjectEqualsNode": 15,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 106,
+          "ReturnNode": 1,
+          "StartNode": 1,
+          "UnboxNode": 8,
+          "VirtualArrayNode": 37,
+          "VirtualBoxingNode": 7,
+          "VirtualInstanceNode": 8,
+          "VirtualObjectState": 44
+        },
+        "node_count": 806,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [
+        "fibonacci",
+        "fibonacci",
+        "fibonacci",
+        "fibonacci",
+        "fibonacci",
+        "fibonacci",
+        "fibonacci"
+      ],
+      "ir_after_truffle_tier": 806,
+      "label": "run",
+      "role": "primary",
+      "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:14 0x9734a6db",
+      "superseded_comp_ids": [
+        2723
+      ],
+      "tier": 2,
+      "via": null
+    },
+    {
+      "analysis": "budget-64000/bgv/TruffleHotSpotCompilation-2506[fibonacci].filter.json.gz",
+      "analysis_sha256": "79dba596b58dac01c4d70f63218184a97e1232cbcda6622ec83a0ff8598eb552",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 39,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 33
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 47,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        }
+      ],
+      "bgv": "budget-64000/bgv/TruffleHotSpotCompilation-2506[fibonacci].bgv.gz",
+      "bgv_sha256": "fb98e508f00ad0089d44bd7bde93695ef248296985fed515c971aebda34e063d",
+      "comp_id": 2506,
+      "edge": "Cutoff",
+      "expansion_truffle_tier": {
+        "allocs": 25,
+        "count": 882,
+        "cycles": 1224,
+        "ifs": 7,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1482
+      },
+      "graph": {
+        "allocations": 34,
+        "control_flow_splits": 7,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier2.fibonacci()"
+        ],
+        "guards_deopts": 153,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.callBoundary": 8
+        },
+        "invokes": 8,
+        "loads": 59,
+        "loops": 0,
+        "node_class_histogram": {
+          "AllocatedObjectNode": 8,
+          "BeginNode": 22,
+          "BoxNode$AllocatingBoxNode": 9,
+          "BoxNode$TrustedBoxedValue": 9,
+          "CommitAllocationNode": 8,
+          "ConstantNode": 18,
+          "DeoptimizeNode": 8,
+          "EndNode": 14,
+          "ExceptionObjectNode": 8,
+          "FixedGuardNode": 131,
+          "FrameState": 186,
+          "GuardedUnsafeLoadNode": 14,
+          "IfNode": 7,
+          "InstanceOfNode": 28,
+          "IntegerAddExactNode": 7,
+          "IntegerAddExactOverflowNode": 7,
+          "IntegerEqualsNode": 14,
+          "IntegerLessThanNode": 7,
+          "IntegerSubExactNode": 14,
+          "IntegerSubExactOverflowNode": 14,
+          "InvokeWithExceptionNode": 8,
+          "IsNullNode": 34,
+          "LoadFieldNode": 42,
+          "LoadIndexedNode": 17,
+          "MergeNode": 7,
+          "MethodCallTargetNode": 8,
+          "ObjectEqualsNode": 14,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 100,
+          "ReturnNode": 1,
+          "StartNode": 1,
+          "UnboxNode": 9,
+          "ValuePhiNode": 9,
+          "VirtualArrayNode": 36,
+          "VirtualBoxingNode": 13,
+          "VirtualInstanceNode": 7,
+          "VirtualObjectState": 50
+        },
+        "node_count": 891,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [
+        "fibonacci",
+        "fibonacci",
+        "fibonacci",
+        "fibonacci",
+        "fibonacci",
+        "fibonacci"
+      ],
+      "ir_after_truffle_tier": 891,
+      "label": "fibonacci",
+      "role": "additional",
+      "src": "/workspaces/protos-benchmarks/truffle/workloads/fibonacci/fibonacci.mjs:6 0x9734a6db",
+      "superseded_comp_ids": [
+        2408
+      ],
+      "tier": 2,
+      "via": "run"
+    }
+  ],
+  "workload": "fibonacci",
+  "workload_source_sha256": "9b6cd70250e918dfb35f10a1b235c9a20ee7c33ae9b8d6c1d1e9a7c149725cc2"
+}

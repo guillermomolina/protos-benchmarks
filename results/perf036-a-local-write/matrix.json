@@ -1,0 +1,87 @@
+{
+  "analyzer": {
+    "command": "filter",
+    "graal_version": "25.4.4.1.1",
+    "image": "ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-25.4.4.1.1",
+    "script": "scripts/igv_analyzer.sh",
+    "script_sha256": "b91bbf9f1069dc7cb42e4f61af7b6706687c02fe8e3473e0c1c0a1060cdc11ca"
+  },
+  "first_divergent_rung": null,
+  "harness_dirty": [
+    true
+  ],
+  "harness_git_heads": [
+    "e221bb056a208693c9102891df2e13d65e61eefb"
+  ],
+  "primary_metric": "relevant_graph_nodes_total_after_truffle_tier",
+  "protos_revisions": [
+    "997f633755574bab438897379229b75ace2bd733"
+  ],
+  "rungs": [
+    {
+      "additional_units": {
+        "js": [],
+        "protos": [],
+        "python": []
+      },
+      "evidence": {
+        "js": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-write/js/unit.json",
+          "valid": true
+        },
+        "protos": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-write/protos/unit.json",
+          "valid": true
+        },
+        "python": {
+          "reason": null,
+          "stabilization": "STABLE",
+          "unit": "primitive-local-write/python/unit.json",
+          "valid": true
+        }
+      },
+      "excess_over_peer_max": -10,
+      "final_compilation_state": null,
+      "graph_counts": {
+        "js": 1,
+        "protos": 1,
+        "python": 1
+      },
+      "js_total": 13,
+      "mechanism": "mutation of an established local/lexical binding",
+      "peer_band": [
+        13,
+        49
+      ],
+      "peer_node_comparison": "PERFORMED",
+      "peer_reasons": [],
+      "peer_reference": "CONVERGED",
+      "peer_spread": 36,
+      "protos_node_total": 39,
+      "protos_signals": [],
+      "protos_stabilization": "STABLE",
+      "protos_status": "STRUCTURALLY_CONVERGED",
+      "protos_total": 39,
+      "python_total": 49,
+      "secondary_deltas_vs_peer_max": {
+        "allocations": -1,
+        "control_flow_splits": 0,
+        "guards_deopts": 0,
+        "invokes": 0,
+        "loads": -4,
+        "loops": 0
+      },
+      "workload": "primitive-local-write"
+    }
+  ],
+  "rungs_before_first_divergence_not_converged": [],
+  "schema_version": 1,
+  "selected_phase": "After TruffleTier",
+  "stages": [
+    "reference"
+  ]
+}

@@ -1,0 +1,90 @@
+$ taskset -c 0 java -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.TraceCompilation=true -Xlog:gc -cp /workspaces/protos-benchmarks/.work/embedded/db85f8538479ef0dd0b44cbe9ece32f0eeb2dbbf/canonical/b02ba483daf51d2246cae320fba6e0529488d3632928219a811f1208dd30a294/classes:/workspaces/protos/target/classes:/home/vscode/.m2/repository/org/jline/jline/3.30.6/jline-3.30.6.jar:/home/vscode/.m2/repository/com/ibm/icu/icu4j/78.1/icu4j-78.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/graal-sdk/25.4.4.1.1/graal-sdk-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/collections/25.4.4.1.1/collections-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/nativeimage/25.4.4.1.1/nativeimage-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/word/25.4.4.1.1/word-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/polyglot/polyglot/25.4.4.1.1/polyglot-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-api/25.4.4.1.1/truffle-api-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/jniutils/25.4.4.1.1/jniutils-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-runtime/25.4.4.1.1/truffle-runtime-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-compiler/25.4.4.1.1/truffle-compiler-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/polyglot/dap/25.4.4.1.1/dap-25.4.4.1.1.pom:/home/vscode/.m2/repository/org/graalvm/tools/dap-tool/25.4.4.1.1/dap-tool-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/shadowed/json/25.4.4.1.1/json-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/eclipse/lsp4j/org.eclipse.lsp4j/1.0.0/org.eclipse.lsp4j-1.0.0.jar:/home/vscode/.m2/repository/org/eclipse/lsp4j/org.eclipse.lsp4j.jsonrpc/1.0.0/org.eclipse.lsp4j.jsonrpc-1.0.0.jar:/home/vscode/.m2/repository/com/google/code/gson/gson/2.14.0/gson-2.14.0.jar:/home/vscode/.m2/repository/com/google/errorprone/error_prone_annotations/2.48.0/error_prone_annotations-2.48.0.jar:/home/vscode/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.2/junit-jupiter-5.10.2.jar:/home/vscode/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.2/junit-jupiter-api-5.10.2.jar:/home/vscode/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/vscode/.m2/repository/org/junit/platform/junit-platform-commons/1.10.2/junit-platform-commons-1.10.2.jar:/home/vscode/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/vscode/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.2/junit-jupiter-params-5.10.2.jar:/home/vscode/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.2/junit-jupiter-engine-5.10.2.jar:/home/vscode/.m2/repository/org/junit/platform/junit-platform-engine/1.10.2/junit-platform-engine-1.10.2.jar com.guillermomolina.protos.benchmarks.measure.protos.ProtosCanonicalSurface measure /workspaces/protos/protos/lib/core /workspaces/protos-benchmarks/truffle/workloads/primitive-local-read/primitive-local-read.protos 50 10 10000 -
+[0.002s][info][gc] Using Serial
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by com.oracle.truffle.polyglot.JDKSupport in an unnamed module (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-api/25.4.4.1.1/truffle-api-25.4.4.1.1.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-runtime/25.4.4.1.1/truffle-runtime-25.4.4.1.1.jar)
+WARNING: Please consider reporting this to the maintainers of class com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+mode=jvm
+surface=canonical
+language=protos
+run_mode=canonical
+source=/workspaces/protos-benchmarks/truffle/workloads/primitive-local-read/primitive-local-read.protos
+warmup_iterations=50
+steady_iterations=10
+sample_calls=10000
+setup_ns=1068827631
+sample phase=cold iteration=1 elapsed_ns=14634136
+sample phase=warmup iteration=1 elapsed_ns=395282536
+sample phase=warmup iteration=2 elapsed_ns=76127082
+sample phase=warmup iteration=3 elapsed_ns=54866123
+sample phase=warmup iteration=4 elapsed_ns=31966430
+[To redirect Truffle log output to a file use one of the following options:
+* '--log.file=<path>' if the option is passed using a guest language launcher.
+* '-Dpolyglot.log.file=<path>' if the option is passed using the host Java launcher.
+* Configure logging using the polyglot embedding API.]
+[engine] opt done   engine=1  id=274   org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute |Tier 1|Time   458( 327+131 )ms|AST    6|Inlined   0Y   1N|IR   1310/  2607|CodeSize   12649|Addr 0x7fb5e653e680|CompId 2167   |UTC 2026-10-08T14:26:14.298|Src n/a
+sample phase=warmup iteration=5 elapsed_ns=52397876
+sample phase=warmup iteration=6 elapsed_ns=26859703
+sample phase=warmup iteration=7 elapsed_ns=26431826
+sample phase=warmup iteration=8 elapsed_ns=25060306
+sample phase=warmup iteration=9 elapsed_ns=25153390
+sample phase=warmup iteration=10 elapsed_ns=19940913
+[engine] opt done   engine=1  id=3     ProtosSemanticBytecodeRootNodeGen@5a4d861a         |Tier 1|Time   176( 169+6   )ms|AST    2|Inlined   0Y   0N|IR     98/   114|CodeSize     438|Addr 0x7fb5e6547400|CompId 2358   |UTC 2026-10-08T14:26:14.482|Src n/a
+sample phase=warmup iteration=11 elapsed_ns=54582308
+sample phase=warmup iteration=12 elapsed_ns=9075847
+sample phase=warmup iteration=13 elapsed_ns=7647124
+sample phase=warmup iteration=14 elapsed_ns=10375256
+sample phase=warmup iteration=15 elapsed_ns=14551814
+sample phase=warmup iteration=16 elapsed_ns=8601426
+sample phase=warmup iteration=17 elapsed_ns=8896769
+sample phase=warmup iteration=18 elapsed_ns=7960394
+sample phase=warmup iteration=19 elapsed_ns=9309920
+sample phase=warmup iteration=20 elapsed_ns=8465633
+sample phase=warmup iteration=21 elapsed_ns=8421189
+sample phase=warmup iteration=22 elapsed_ns=8642864
+sample phase=warmup iteration=23 elapsed_ns=8155766
+[engine] opt done   engine=1  id=274   org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute |Tier 2|Time   163(  42+121 )ms|AST    6|Inlined   1Y   0N|IR   1232/  1109|CodeSize    5929|Addr 0x7fb5e654a900|CompId 2393   |UTC 2026-10-08T14:26:14.646|Src n/a
+sample phase=warmup iteration=24 elapsed_ns=13384081
+sample phase=warmup iteration=25 elapsed_ns=4070085
+sample phase=warmup iteration=26 elapsed_ns=10049840
+sample phase=warmup iteration=27 elapsed_ns=2331680
+sample phase=warmup iteration=28 elapsed_ns=8044948
+sample phase=warmup iteration=29 elapsed_ns=2569445
+sample phase=warmup iteration=30 elapsed_ns=2298710
+sample phase=warmup iteration=31 elapsed_ns=4986675
+sample phase=warmup iteration=32 elapsed_ns=4996832
+sample phase=warmup iteration=33 elapsed_ns=6574585
+[2.617s][info][gc] GC(0) Pause Young (Allocation Failure) 202M->7M(728M) 10.146ms
+sample phase=warmup iteration=34 elapsed_ns=17151982
+sample phase=warmup iteration=35 elapsed_ns=2008694
+sample phase=warmup iteration=36 elapsed_ns=5760313
+sample phase=warmup iteration=37 elapsed_ns=3664988
+sample phase=warmup iteration=38 elapsed_ns=5005705
+sample phase=warmup iteration=39 elapsed_ns=4094029
+sample phase=warmup iteration=40 elapsed_ns=1978012
+sample phase=warmup iteration=41 elapsed_ns=4120325
+sample phase=warmup iteration=42 elapsed_ns=5171618
+sample phase=warmup iteration=43 elapsed_ns=1916423
+sample phase=warmup iteration=44 elapsed_ns=4874450
+sample phase=warmup iteration=45 elapsed_ns=4584106
+sample phase=warmup iteration=46 elapsed_ns=1645481
+sample phase=warmup iteration=47 elapsed_ns=4540039
+sample phase=warmup iteration=48 elapsed_ns=4924227
+sample phase=warmup iteration=49 elapsed_ns=1624631
+sample phase=warmup iteration=50 elapsed_ns=4519902
+sample phase=steady iteration=1 elapsed_ns=1626782
+sample phase=steady iteration=2 elapsed_ns=1630920
+sample phase=steady iteration=3 elapsed_ns=4476460
+sample phase=steady iteration=4 elapsed_ns=1629462
+sample phase=steady iteration=5 elapsed_ns=4473305
+sample phase=steady iteration=6 elapsed_ns=4553373
+sample phase=steady iteration=7 elapsed_ns=1650714
+sample phase=steady iteration=8 elapsed_ns=3665211
+sample phase=steady iteration=9 elapsed_ns=1666409
+sample phase=steady iteration=10 elapsed_ns=3928453
+result=1

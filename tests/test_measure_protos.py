@@ -517,9 +517,9 @@ class StaticArchitectureTest(unittest.TestCase):
     def test_canonical_adapter_timed_path(self):
         text = (ROOT / "truffle/measure/surfaces/canonical/ProtosCanonicalSurface.java").read_text()
         body = text.split("public static void main", 1)[1]
-        self.assertIn("prepared.executable()", body)
-        self.assertIn("() -> normalize(executable.execute())", body)
-        for forbidden in ("invokeTopLevel(", "prepared.invoke(", ".enter(", ".leave(", "Lock", "synchronized", "AtomicBoolean", "compareAndSet"):
+        self.assertIn('context.getBindings("protos").getMember("run")', body)
+        self.assertIn("() -> normalize(run.execute())", body)
+        for forbidden in ("prepareTopLevel(", "invokeTopLevel(", "prepared.invoke(", ".enter(", ".leave(", "Lock", "synchronized", "AtomicBoolean", "compareAndSet"):
             self.assertNotIn(forbidden, body)
 
     def test_no_reflection_in_adapters(self):

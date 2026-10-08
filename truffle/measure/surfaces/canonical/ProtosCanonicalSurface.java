@@ -5,17 +5,19 @@
  */
 package com.guillermomolina.protos.benchmarks.measure.protos;
 
-import com.guillermomolina.protos.execution.ProtosStandaloneHostedSession;
 import com.guillermomolina.protos.benchmarks.measure.MeasurementEngine;
+import java.nio.file.Files;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 
 /**
- * Surface {@code canonical}: {@code session.prepareTopLevel("run")} and
- * {@code prepared.executable()} happen exactly once before timing; each timed
- * call is exactly {@code executable.execute()}, with no session gate, no
- * {@code PreparedTopLevel.invoke()}, no {@code invokeTopLevel()} and no
- * explicit Context enter/leave. The Polyglot result is normalized exactly as
- * the GraalJS/GraalPy peer surface normalizes its result.
+ * Surface {@code canonical}: standard Polyglot embedding, identical in shape
+ * to the GraalJS/GraalPy peer surface. The source is evaluated with
+ * {@code context.eval(source)} and its {@code run} member is acquired once
+ * through {@code context.getBindings("protos").getMember("run")} before
+ * timing; each timed call is exactly {@code run.execute()}. The Polyglot
+ * result is normalized exactly as the peer surface normalizes its result.
  */
 public final class ProtosCanonicalSurface {
     private ProtosCanonicalSurface() {}
@@ -23,17 +25,26 @@ public final class ProtosCanonicalSurface {
     public static void main(String[] args) throws Exception {
         MeasurementEngine.Arguments arguments = MeasurementEngine.Arguments.parse(args);
 
+        Source source =
+                Source.newBuilder(
+                                "protos",
+                                Files.readString(arguments.source()),
+                                arguments.source().toString())
+                        .build();
+
         long setupStart = System.nanoTime();
 
-        try (ProtosStandaloneHostedSession session =
-                ProtosSurfaceSupport.openCompleted(arguments)) {
-            ProtosStandaloneHostedSession.PreparedTopLevel prepared =
-                    session.prepareTopLevel("run");
-            Value executable = prepared.executable();
+        try (Context context =
+                Context.newBuilder("protos")
+                        .allowExperimentalOptions(true)
+                        .option("protos.CoreRoot", arguments.requireCoreRoot().toString())
+                        .build()) {
+            context.eval(source);
 
-            if (executable == null || !executable.canExecute()) {
-                throw new IllegalStateException(
-                        "prepared top-level executable is not executable");
+            Value run = context.getBindings("protos").getMember("run");
+
+            if (run == null || !run.canExecute()) {
+                throw new IllegalStateException("workload does not expose executable run");
             }
 
             long setupNs = System.nanoTime() - setupStart;
@@ -43,7 +54,7 @@ public final class ProtosCanonicalSurface {
                     "protos",
                     arguments,
                     setupNs,
-                    () -> normalize(executable.execute()));
+                    () -> normalize(run.execute()));
         }
     }
 

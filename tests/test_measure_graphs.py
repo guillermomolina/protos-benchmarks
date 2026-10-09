@@ -68,6 +68,34 @@ class PolicyTest(unittest.TestCase):
                 self.assertNotIn("new ", body)
                 self.assertIn("holder", text.split("run", 1)[0], f"{workload}/{language}: holder outside run")
 
+    def test_control_flow_workloads_are_individual_and_outside_ladder(self):
+        expected = {
+            "primitive-if-true": "1",
+            "primitive-if-false": "1",
+            "primitive-while-zero": "1",
+            "primitive-while-once": "1",
+            "primitive-while-counted": "8",
+        }
+        ladder = mg.select_workloads(self.policy, "ladder")
+        cases = mp.load_cases()
+        for workload, result in expected.items():
+            self.assertEqual(result, workload_catalog.expected_result(workload))
+            self.assertEqual((workload,), workload_catalog.select_workloads(workload))
+            self.assertEqual([workload], mg.select_workloads(self.policy, workload))
+            self.assertNotIn(workload, ladder)
+            self.assertEqual(
+                cases["policy"]["workloads"]["primitive-method-call"],
+                cases["policy"]["workloads"][workload],
+            )
+            for language in mg.LANGUAGES:
+                self.assertTrue(workload_catalog.source_for(workload, language).is_file())
+        protos = {w: workload_catalog.source_for(w, "protos").read_text() for w in expected}
+        self.assertIn("true.ifTrue()", protos["primitive-if-true"])
+        self.assertIn("false.ifTrue()", protos["primitive-if-false"])
+        self.assertIn("(() => false).whileTrue()", protos["primitive-while-zero"])
+        self.assertIn("(() => i < 1).whileTrue()", protos["primitive-while-once"])
+        self.assertIn("(() => i < 8).whileTrue()", protos["primitive-while-counted"])
+
     def test_surfaces_exist_and_options_are_normal_capture(self):
         cases = mp.load_cases()
         for language, entry in self.policy["languages"].items():

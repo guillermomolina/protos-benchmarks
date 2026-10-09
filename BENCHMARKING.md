@@ -1656,3 +1656,38 @@ helper CallTarget does not appear on these primitive paths
 Protos excess lies inside the single primary semantic-Bytecode graph. These
 are structural findings only; no Protos product change, semantic change or
 microoptimization is part of PERF032-F.
+
+## Minimal ifTrue / whileTrue control-flow workloads (PERF039-A)
+
+Five catalogued workloads (`truffle/workloads/catalog.json`) add control-flow
+probes to the cross-Truffle set. They are selectable individually by every
+existing driver (`WORKLOAD=<id>`, `GRAPH_WORKLOAD=<id>`) and are deliberately
+**not** added to the `primitive` graph ladder in `truffle/measure/graphs.json`.
+
+| Workload | Protos `run` | Expected | Condition evals | Body execs |
+|---|---|---|---|---|
+| `primitive-if-true` | `true.ifTrue() { 1 }` | 1 | 1 (receiver) | 1 |
+| `primitive-if-false` | `false.ifTrue() { 99 }`; `1` | 1 | 1 (receiver) | 0 |
+| `primitive-while-zero` | `(() => false).whileTrue() { 99 }`; `1` | 1 | 1 | 0 |
+| `primitive-while-once` | `i: 0`; `(() => i < 1).whileTrue() { i = i + 1 }`; `i` | 1 | 2 | 1 |
+| `primitive-while-counted` | same with `i < 8` | 8 | 9 | 8 |
+
+Protos expresses these as ordinary messages with Closure arguments
+(`Boolean.ifTrue`, `Object.whileTrue` on a condition Closure); the benchmark
+does not bypass lookup, Closure creation, canonical-Boolean checking or any
+other observable behavior. GraalJS and GraalPy use the native `if`/`while`
+statements with the same observable result, the same decision to execute or
+skip the body, the same logical number of condition evaluations and body
+executions, and the same state updates in the same order. Their physical
+representation (no Closure objects, no message send, truthiness-capable
+statements) need not match the Protos protocol; `primitive-if-true` in JS/Python
+stores the branch value in a local initialized to `null`/`None`, mirroring
+`ifTrue`'s value/`null` result. Constant conditions may legitimately be folded
+away by any compiler; that is part of what these probes observe.
+
+`primitive-while-counted` necessarily includes captured-variable reads and
+writes, integer comparison and addition, so it is not a pure control-flow
+cost. Measurement policy reuses the established primitive-workload policy
+(`jvm_sample_calls` 100; reference timing `steady-only`, 50 warmup + 10 steady,
+10,000 calls/sample; JFR 1,000,000 calls/sample) with no global policy change.
+No timing, node-parity or compilation result is claimed for these workloads.

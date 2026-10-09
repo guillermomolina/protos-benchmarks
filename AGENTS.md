@@ -112,6 +112,9 @@ be used merely to checkpoint failed or incomplete iterations — defects
 discovered while validating a slice are repaired within that same slice, not
 published as separate commits.
 
+Commit messages are a single line (subject only, no body) and carry no
+AI-assistance attribution or trailers such as `Co-Authored-By`.
+
 Repository bootstrap is a special one-time case: the initial commit may be
 created only while both the local repository and the remote repository have no
 commits. If another initial commit appears remotely, abort instead of reconciling

@@ -16,9 +16,17 @@
       ]
     }
   },
+
+  // Docker:
+  // "runArgs": [
+  //   "--userns=host"
+  // ],
+
+  // Podman rootless:
   "runArgs": [
-    "--userns=host"
+    "--userns=keep-id"
   ],
+
   "initializeCommand": "mkdir -p \"${localEnv:HOME}/.claude\"",
   "mounts": [
     "source=${localWorkspaceFolder}/../protos,target=/workspaces/protos,type=bind,consistency=cached",

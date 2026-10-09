@@ -26,11 +26,13 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "truffle"))
 
+import graph_cache as gc  # noqa: E402
 import measure_graphs as mg  # noqa: E402
 import measure_protos as mp  # noqa: E402
 import workload_catalog  # noqa: E402
@@ -57,6 +59,47 @@ class PolicyTest(unittest.TestCase):
         for workload in mg.select_workloads(self.policy, "ladder"):
             for language in mg.LANGUAGES:
                 self.assertTrue(workload_catalog.source_for(workload, language).is_file())
+
+    def test_all_graph_workloads_are_catalogued(self):
+        self.assertEqual(
+            list(workload_catalog.workload_ids()),
+            mg.select_workloads(self.policy, "all"),
+        )
+        self.assertEqual(17, len(mg.select_workloads(self.policy, "all")))
+
+    def test_peer_capture_key_is_independent_of_protos(self):
+        java = {"java.runtime.version": "25.0.4.1.1"}
+        old_product = {
+            "revision": "a" * 40,
+            "source_state_sha256": "b" * 64,
+        }
+        new_product = {
+            "revision": "c" * 40,
+            "source_state_sha256": "d" * 64,
+        }
+
+        for language in ("js", "python"):
+            old = mg.graph_capture_key(
+                self.policy, old_product, language, "executable-value",
+                "primitive-return-literal", "reference", java,
+            )
+            new = mg.graph_capture_key(
+                self.policy, new_product, language, "executable-value",
+                "primitive-return-literal", "reference", java,
+            )
+            self.assertEqual(old, new)
+            self.assertNotIn("protos_revision", old)
+            self.assertNotIn("workload_source_sha256", old)
+
+        old = mg.graph_capture_key(
+            self.policy, old_product, "protos", "canonical",
+            "primitive-return-literal", "reference", java,
+        )
+        new = mg.graph_capture_key(
+            self.policy, new_product, "protos", "canonical",
+            "primitive-return-literal", "reference", java,
+        )
+        self.assertNotEqual(old, new)
 
     def test_new_object_slot_workloads(self):
         self.assertEqual("1", workload_catalog.expected_result("primitive-object-slot-read"))
@@ -182,6 +225,11 @@ class AnalyzeSummarizeTest(unittest.TestCase):
         mg.ANALYZER = analyzer
         self.addCleanup(setattr, mg, "ANALYZER", self.saved)
         self.addCleanup(self.tmp.cleanup)
+        runtime_probe = patch.object(
+            mg.shutil, "which", return_value="/usr/bin/podman"
+        )
+        runtime_probe.start()
+        self.addCleanup(runtime_probe.stop)
 
     def run_cmd(self, *argv):
         out = io.StringIO()
@@ -197,6 +245,45 @@ class AnalyzeSummarizeTest(unittest.TestCase):
                 units[b].append(unit_record("additional", "helper", 20 + i))
                 docs[(b, "helper")] = igv_doc(extra)
         write_case(self.output, workload, language, units, docs)
+
+    def test_analyze_without_runtime_reports_host_requirement(self):
+        self.single("primitive-return-literal", "js", ["A"] * 3)
+        stderr = io.StringIO()
+
+        with (
+            patch.object(mg.shutil, "which", return_value=None),
+            patch.dict(mg.os.environ, {"DOCKER": ""}),
+            contextlib.redirect_stderr(stderr),
+        ):
+            code, output = self.run_cmd(
+                "analyze", "--output", str(self.output)
+            )
+
+        self.assertEqual(mp.EXIT_USAGE, code)
+        self.assertIn("CONTAINER_RUNTIME_NOT_FOUND", stderr.getvalue())
+        self.assertIn("outside the devcontainer", stderr.getvalue())
+        self.assertNotIn("ANALYZED=", output)
+
+    def test_analyze_without_pending_work_needs_no_runtime(self):
+        self.single("primitive-return-literal", "js", ["A"] * 3)
+
+        for packed in self.output.rglob("*.bgv.gz"):
+            result = packed.with_name(
+                packed.name[:-len(".bgv.gz")] + ".filter.json.gz"
+            )
+            with gzip.open(result, "wb") as stream:
+                stream.write(b"{}")
+
+        with (
+            patch.object(mg.shutil, "which", return_value=None),
+            patch.dict(mg.os.environ, {"DOCKER": ""}),
+        ):
+            code, output = self.run_cmd(
+                "analyze", "--output", str(self.output)
+            )
+
+        self.assertEqual(mp.EXIT_OK, code)
+        self.assertIn("ANALYZE_FAILURES=0", output)
 
     def test_analyze_then_summarize_builds_matrix(self):
         self.single("primitive-return-literal", "js", ["A"] * 10)
@@ -268,6 +355,80 @@ class VerifyTest(unittest.TestCase):
             self.assertEqual(1, code)
             self.assertIn("WORKING_TREE_MISMATCH=truffle/measure_graphs.py", out.getvalue())
             self.assertNotIn(f"WORKING_TREE_MISMATCH={good}", out.getvalue())
+
+
+
+class HistoricalCachePromotionTest(unittest.TestCase):
+    def test_local_evidence_promotion_preserves_original(self):
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            original = (
+                root / "results" / "local" / "old"
+                / "primitive-method-call" / "js"
+            )
+            original.mkdir(parents=True)
+
+            capture = {
+                "workload": "primitive-method-call",
+                "language": "js",
+                "protos_revision": "a" * 40,
+                "harness_git_head": "b" * 40,
+            }
+            unit = {"evidence_valid": True}
+
+            mp.write_json(original / "capture.json", capture)
+            mp.write_json(original / "unit.json", unit)
+
+            original_capture_sha = mp.sha256_file(
+                original / "capture.json"
+            )
+            original_unit_sha = mp.sha256_file(
+                original / "unit.json"
+            )
+
+            with patch.object(
+                gc, "complete_evidence", return_value=True
+            ):
+                imported = gc.publishable_source(
+                    root, original, capture, unit
+                )
+
+                self.assertTrue(imported.is_dir())
+                self.assertTrue(
+                    imported.is_relative_to(
+                        root / "results" / "graph-cache-imported"
+                    )
+                )
+                self.assertTrue(
+                    (imported / "import-provenance.json").is_file()
+                )
+
+                self.assertEqual(
+                    original_capture_sha,
+                    mp.sha256_file(original / "capture.json"),
+                )
+                self.assertEqual(
+                    original_unit_sha,
+                    mp.sha256_file(original / "unit.json"),
+                )
+
+                self.assertEqual(
+                    imported,
+                    gc.publishable_source(
+                        root, original, capture, unit
+                    ),
+                )
+
+                (imported / "capture.json").write_text(
+                    "{}", encoding="utf-8"
+                )
+
+                with self.assertRaises(mp.UsageError):
+                    gc.publishable_source(
+                        root, original, capture, unit
+                    )
 
 
 if __name__ == "__main__":

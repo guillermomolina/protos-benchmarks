@@ -1,0 +1,338 @@
+{
+  "analyzer": {
+    "command": "filter",
+    "graal_version": "25.4.4.1.1",
+    "image": "ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-25.4.4.1.1",
+    "script": "scripts/igv_analyzer.sh",
+    "script_sha256": "1c08e71204f0ef6f71167a5f8bc0bc015a96ee7277ecf5c6cc7a75d213b51d55"
+  },
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "budgets_run": [
+    1000,
+    4000,
+    16000
+  ],
+  "correctness": {
+    "actual": "8",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "evidence_valid": true,
+  "expected_result": "8",
+  "framework_targets": [
+    "org.graalvm.polyglot.Value<InteropBoundFunction>.execute"
+  ],
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness_dirty": true,
+  "harness_git_head": "d9719253b628faad1ca296daef4a7ed566196216",
+  "harness_source_sha256": {
+    "runner/compiler_trace.py": "e965c1edbbfd5e81c066074fcc3d3c33535c54fab89de1d57930e51d08fa570d",
+    "scripts/igv_analyzer.sh": "1c08e71204f0ef6f71167a5f8bc0bc015a96ee7277ecf5c6cc7a75d213b51d55",
+    "truffle/graph_cache.py": "14ec45126261f51e87ff38a67fd44aefe09153186c42758e7d34acb4ec750e4f",
+    "truffle/graph_evidence.py": "2e4f96ddd00167a6c7fa3f0fbe53f5ea95ba8daea9d715555f52e096efcb69e4",
+    "truffle/jvm_matrix.py": "ae934519c867540f01af3459619a8b170eb5f2611805ea3b3e8182d5cc2d5747",
+    "truffle/jvm_runtime.py": "9c136ee85c515f40855b67e30d85d3e77485b8c0f767c8d20de2b12554a2e05b",
+    "truffle/measure/cases.json": "db1d81e19d180043cf85653dc5dfb640a91761f4ee25015debcb999ea6ac6fd2",
+    "truffle/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "81e629d37ee484f8e9449405061aa445b3105091915109a50f658350cc0ae80b",
+    "truffle/measure/graphs.json": "97d05eed011f5add5ac8d9e57d2f51dc106e4329540022ea929fcca8f712e151",
+    "truffle/measure/surfaces/peer/PeerExecutableSurface.java": "83dfdd84edffa1a3f5faf404e85b0f365ea33979202fa8b717e18000f09d35ce",
+    "truffle/measure_graphs.py": "89b5bd619f53223b790dca0646914c351513c1c5d267a0674abc5b0ef2da6695",
+    "truffle/measure_protos.py": "681bd34abfce1a0f34fa67a8f1555ebe503cdfb4f12c11fae7f71d4db68f5263",
+    "truffle/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+    "truffle/workload_catalog.py": "07e57debb5b2b0efe91dddbdc8d030f09b1c9ea6a55677d49e4605c09b2833a3",
+    "truffle/workloads/catalog.json": "55b922e9b2d3b5bc3260519fea404201f0189c0633c0b7a41751cb718aba7b40",
+    "truffle/workloads/primitive-while-counted/primitive-while-counted.mjs": "824a4618ca97df593f2a7b32ac2d2e0d926a6dfb46f4636db2664b14c7341abe"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "5379213d8e29",
+    "kernel": "7.2.9-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "js",
+  "protos_revision": "0db24f00ff2d92d642351d7f7535517fe01a55ce",
+  "schema_version": 1,
+  "selected_budget": 16000,
+  "selected_phase": "After TruffleTier",
+  "selected_stable_tier": 2,
+  "stabilization": {
+    "after_truffle_tier_confirmed": true,
+    "pair": [
+      4000,
+      16000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "summary": {
+    "additional_language_owned_compiled_units": [],
+    "families": {
+      "allocations": 1,
+      "control_flow_splits": 1,
+      "guards_deopts": 1,
+      "invokes": 0,
+      "loads": 2,
+      "loops": 1
+    },
+    "graph_count": 1,
+    "node_class_histogram": {
+      "BeginNode": 1,
+      "BoxNode$AllocatingBoxNode": 1,
+      "ConstantNode": 14,
+      "EndNode": 1,
+      "FixedGuardNode": 1,
+      "FrameState": 11,
+      "IfNode": 1,
+      "IntegerAddExactNode": 1,
+      "IntegerAddExactOverflowNode": 1,
+      "IntegerLessThanNode": 1,
+      "LoadIndexedNode": 2,
+      "LoopBeginNode": 1,
+      "LoopEndNode": 1,
+      "LoopExitNode": 1,
+      "ParameterNode": 1,
+      "PiArrayNode": 1,
+      "PiNode": 3,
+      "ReturnNode": 1,
+      "StartNode": 1,
+      "ValuePhiNode": 1,
+      "ValueProxyNode": 1,
+      "VirtualArrayNode": 4,
+      "VirtualInstanceNode": 1,
+      "VirtualObjectState": 6
+    },
+    "primary_guest_graph_nodes": 58,
+    "relevant_graph_nodes_total_after_truffle_tier": 58,
+    "trace_node_expansion_truffle_tier": [
+      {
+        "allocs": 1,
+        "count": 58,
+        "cycles": 36,
+        "ifs": 1,
+        "invokes": 0,
+        "loops": 1,
+        "size": 70
+      }
+    ]
+  },
+  "surface": "executable-value",
+  "surface_timed_call": "run.execute()",
+  "trace_log": "budget-16000/trace.log.gz",
+  "unattributed_language_targets": [],
+  "units": [
+    {
+      "analysis": "budget-16000/bgv/TruffleHotSpotCompilation-2582[run].filter.json.gz",
+      "analysis_sha256": "4f4bfe3dc8d3d70a854ea11d001e7dedeba939c2b476f482b8ffa791d6be3db7",
+      "attribution": [
+        {
+          "location": "js:20:1069-1109",
+          "name": "OptimizedOSRLoopNode$OptimizedDefaultOSRLoopNode",
+          "self": {
+            "allocs": 0,
+            "count": 5,
+            "cycles": 2,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 1,
+            "size": 4
+          }
+        },
+        {
+          "location": "js:21:1097-1102",
+          "name": "JSAddConstantRightNumberNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 3,
+            "cycles": 6,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 6
+          }
+        },
+        {
+          "location": "js:20:1069-1109",
+          "name": "WhileNode$WhileDoRepeatingNode",
+          "self": {
+            "allocs": 0,
+            "count": 3,
+            "cycles": 1,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 7
+          }
+        },
+        {
+          "location": "js:23:1121-1122",
+          "name": "JSReadCurrentFrameSlotNodeGen",
+          "self": {
+            "allocs": 1,
+            "count": 2,
+            "cycles": 8,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 9
+          }
+        },
+        {
+          "location": "js:18:1033-1125",
+          "name": "FunctionRootNode",
+          "self": {
+            "allocs": 0,
+            "count": 1,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 1
+          }
+        },
+        {
+          "location": "js:20:1076-1081",
+          "name": "JSLessThanNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 1,
+            "cycles": 1,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 1
+          }
+        },
+        {
+          "location": "js:21:1097-1098",
+          "name": "JSReadCurrentFrameSlotNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 1,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 0
+          }
+        }
+      ],
+      "bgv": "budget-16000/bgv/TruffleHotSpotCompilation-2582[run].bgv.gz",
+      "bgv_sha256": "a1eebee9673efad2747e56743d661353ed2381a3f74d2a94f134acca9c16bda4",
+      "comp_id": 2582,
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 1,
+        "count": 58,
+        "cycles": 36,
+        "ifs": 1,
+        "invokes": 0,
+        "loops": 1,
+        "size": 70
+      },
+      "graph": {
+        "allocations": 1,
+        "control_flow_splits": 1,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier2.run()"
+        ],
+        "guards_deopts": 1,
+        "histogram_available": true,
+        "invoke_targets": {},
+        "invokes": 0,
+        "loads": 2,
+        "loops": 1,
+        "node_class_histogram": {
+          "BeginNode": 1,
+          "BoxNode$AllocatingBoxNode": 1,
+          "ConstantNode": 14,
+          "EndNode": 1,
+          "FixedGuardNode": 1,
+          "FrameState": 11,
+          "IfNode": 1,
+          "IntegerAddExactNode": 1,
+          "IntegerAddExactOverflowNode": 1,
+          "IntegerLessThanNode": 1,
+          "LoadIndexedNode": 2,
+          "LoopBeginNode": 1,
+          "LoopEndNode": 1,
+          "LoopExitNode": 1,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 3,
+          "ReturnNode": 1,
+          "StartNode": 1,
+          "ValuePhiNode": 1,
+          "ValueProxyNode": 1,
+          "VirtualArrayNode": 4,
+          "VirtualInstanceNode": 1,
+          "VirtualObjectState": 6
+        },
+        "node_count": 58,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [],
+      "ir_after_truffle_tier": 58,
+      "label": "run",
+      "role": "primary",
+      "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-while-counted/primitive-while-counted.mjs:18 0xd081540b",
+      "superseded_comp_ids": [
+        2378
+      ],
+      "tier": 2,
+      "via": null
+    }
+  ],
+  "workload": "primitive-while-counted",
+  "workload_source_sha256": "824a4618ca97df593f2a7b32ac2d2e0d926a6dfb46f4636db2664b14c7341abe"
+}

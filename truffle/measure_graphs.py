@@ -46,6 +46,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import graph_cache
 import graph_evidence as ge
 import measure_protos as mp
 import workload_catalog
@@ -68,6 +69,7 @@ EVIDENCE_UNIT_DEFINITION = (
 GRAPH_PRODUCER_FILES = (
     TRUFFLE / "measure_graphs.py",
     TRUFFLE / "graph_evidence.py",
+    TRUFFLE / "graph_cache.py",
     POLICY,
     ROOT / "runner" / "compiler_trace.py",
     ANALYZER,
@@ -97,7 +99,7 @@ def select_workloads(policy: dict[str, Any], selector: str) -> list[str]:
         raise mp.UsageError(str(exc)) from exc
 
     if selector == "all":
-        raise mp.UsageError("--workload must be 'ladder' or one workload")
+        return list(workload_catalog.workload_ids())
 
     return [selector]
 
@@ -108,6 +110,50 @@ def select_languages(selector: str) -> list[str]:
     if selector not in LANGUAGES:
         raise mp.UsageError(f"unknown language {selector!r}")
     return [selector]
+
+
+
+def graph_capture_key(
+    policy: dict[str, Any],
+    product: dict[str, Any],
+    language: str,
+    surface: str,
+    workload: str,
+    stage: str,
+    java: dict[str, str],
+) -> dict[str, Any]:
+    """Language-owned capture identity.
+
+    Workload IDs are stable benchmark contracts. The source SHA-256 is
+    retained in capture evidence but does not invalidate the cache.
+    """
+    if language == "protos":
+        runtime = {
+            "revision": product["revision"],
+            "source_state_sha256": product["source_state_sha256"],
+        }
+    else:
+        version = mp.jvm_runtime.harness_graalvm_version()
+        runtime = {
+            "graalvm_version": version,
+            "peer_dependencies_sha256": mp.sha256_bytes(
+                mp.jvm_runtime.peer_pom(version).encode("utf-8")
+            ),
+        }
+
+    return {
+        "language": language,
+        "runtime": runtime,
+        "java_runtime_version": java.get("java.runtime.version"),
+        "surface": surface,
+        "workload": workload,
+        "stage": stage,
+        "expected_result": workload_catalog.expected_result(workload),
+        "budgets": list(policy["budgets"][stage]),
+        "graph_jvm_options": policy["jvm_options"],
+        "selected_phase": policy["selected_phase"],
+        "final_tier": policy["final_tier"],
+    }
 
 
 def case_dir(output: Path, workload: str, language: str) -> Path:
@@ -174,24 +220,75 @@ def capture_case(
         | {path.resolve() for path in GRAPH_PRODUCER_FILES}
     )
     harness_before = mp.harness_identity(files)
-    key = {
-        "language": language,
-        "surface": surface,
-        "workload": workload,
-        "stage": args.stage,
-        "protos_revision": product_before["revision"],
-        "protos_source_state_sha256": product_before["source_state_sha256"],
-        "budgets": budgets,
-        "graph_jvm_options": policy["jvm_options"],
-    }
+    java = mp.java_identity()
+    key = graph_capture_key(
+        policy, product_before, language, surface, workload,
+        args.stage, java,
+    )
 
     existing = destination / "capture.json"
+    existing_ref = destination / graph_cache.REFERENCE_NAME
+
+    if existing_ref.is_file() and not args.remeasure:
+        referenced_dir, referenced, _ = graph_cache.resolve_reference(
+            ROOT, existing_ref
+        )
+        reference = json.loads(existing_ref.read_text(encoding="utf-8"))
+        if reference["cache_key"] == key:
+            mp.emit("CASE", f"{workload}/{language} EXISTS HISTORICAL")
+            return referenced
 
     if existing.is_file() and not args.remeasure:
         previous = json.loads(existing.read_text(encoding="utf-8"))
         if previous.get("capture_key") == key and previous.get("capture_valid"):
             mp.emit("CASE", f"{workload}/{language} EXISTS")
             return previous
+
+    if destination.exists() and any(destination.iterdir()) and not args.remeasure:
+        raise mp.UsageError(
+            f"case destination already contains different evidence: {destination}"
+        )
+
+    if args.stage == "reference" and not args.remeasure:
+        candidates = [
+            path for path in args.historical_captures
+            if path.parent.name == language
+            and path.parent.parent.name == workload
+        ]
+        if candidates:
+            adapter_hash = mp.adapter_source_sha256(
+                mp.adapter_sources(cases, surface_def)
+            )
+            cpu, siblings, allowed = mp.choose_cpu(args.cpu)
+            current_host = mp.host_identity(cpu, siblings, allowed)
+            peer_hash = None
+            if language != "protos":
+                if not hasattr(args, "peer_classpath_hash"):
+                    _, peer_cp = mp.peer_classpath()
+                    args.peer_classpath_hash = mp.sha256_bytes(
+                        peer_cp.encode("utf-8")
+                    )
+                peer_hash = args.peer_classpath_hash
+
+            found = graph_cache.find(
+                ROOT, output, candidates, key, adapter_hash,
+                current_host, peer_hash,
+            )
+            if found is not None:
+                historical_dir, historical, historical_unit = found
+                historical_dir = graph_cache.publishable_source(
+                    ROOT, historical_dir, historical, historical_unit
+                )
+                destination.mkdir(parents=True, exist_ok=True)
+                reference = graph_cache.make_reference(
+                    ROOT, historical_dir, historical, key
+                )
+                mp.write_json(existing_ref, reference)
+                mp.emit(
+                    "CASE",
+                    f"{workload}/{language} REUSED {reference['source']}",
+                )
+                return historical
 
     staging = output / ".staging" / f"{workload}--{language}"
     shutil.rmtree(staging, ignore_errors=True)
@@ -222,7 +319,7 @@ def capture_case(
         "harness": harness_before,
         "harness_git_head": harness_before["git_head"],
         "harness_dirty": harness_before["dirty"],
-        "java": mp.java_identity(),
+        "java": java,
         "host": mp.host_identity(cpu, siblings, allowed),
         "timing_evidence": "NONE (graph instrumentation is never a timing run)",
     }
@@ -432,6 +529,10 @@ def capture(args: argparse.Namespace) -> int:
     cases = mp.load_cases()
     output = args.output.expanduser().resolve()
     prepare_output(output)
+    args.historical_captures = (
+        graph_cache.historical_candidates(ROOT)
+        if args.stage == "reference" and not args.remeasure else []
+    )
     invalid = 0
 
     for workload in select_workloads(policy, args.workload):
@@ -452,8 +553,42 @@ def capture(args: argparse.Namespace) -> int:
 
 
 def iter_cases(output: Path):
-    for capture_file in sorted(output.glob("*/*/capture.json")):
-        yield capture_file.parent, json.loads(capture_file.read_text(encoding="utf-8"))
+    for directory in sorted(output.glob("*/*")):
+        if not directory.is_dir():
+            continue
+        capture_file = directory / "capture.json"
+        reference_file = directory / graph_cache.REFERENCE_NAME
+        if capture_file.is_file() and reference_file.is_file():
+            raise mp.UsageError(f"ambiguous case evidence: {directory}")
+        if capture_file.is_file():
+            yield directory, json.loads(capture_file.read_text(encoding="utf-8"))
+        elif reference_file.is_file():
+            source, metadata, _ = graph_cache.resolve_reference(
+                ROOT, reference_file
+            )
+            yield source, metadata
+
+
+
+def require_analysis_container_runtime() -> None:
+    """Fail with actionable guidance before invoking the IGV analyzer."""
+    configured = os.environ.get("DOCKER", "").strip()
+
+    if configured:
+        available = shutil.which(configured)
+        requested = f"DOCKER={configured}"
+    else:
+        available = shutil.which("podman") or shutil.which("docker")
+        requested = "podman or docker"
+
+    if available is None:
+        raise mp.UsageError(
+            f"CONTAINER_RUNTIME_NOT_FOUND: {requested} is unavailable. "
+            "Run graph analysis outside the devcontainer, on the host "
+            "with Docker or Podman installed and access to the results "
+            "directory. Capture, summarize and verify do not require "
+            "a container runtime."
+        )
 
 
 def analyze(args: argparse.Namespace) -> int:
@@ -461,8 +596,12 @@ def analyze(args: argparse.Namespace) -> int:
     retained BGV that has no analysis yet."""
     output = args.output.expanduser().resolve()
     failures = 0
+    runtime_checked = False
 
     for directory, metadata in iter_cases(output):
+        if not directory.is_relative_to(output):
+            mp.emit("ANALYZE_REUSED", f"{metadata['workload']}/{metadata['language']}")
+            continue
         for run in metadata.get("runs", []):
             for relative in run.get("retained_bgv", []):
                 packed = directory / relative
@@ -470,6 +609,10 @@ def analyze(args: argparse.Namespace) -> int:
 
                 if result.is_file() and not args.reanalyze:
                     continue
+
+                if not runtime_checked:
+                    require_analysis_container_runtime()
+                    runtime_checked = True
 
                 with tempfile.TemporaryDirectory(prefix="graph-analyze-") as tmp:
                     bgv = Path(tmp) / "input.bgv"
@@ -656,9 +799,18 @@ def summarize(args: argparse.Namespace) -> int:
     output = args.output.expanduser().resolve()
     phase = policy["selected_phase"]
     units: dict[tuple[str, str], dict[str, Any]] = {}
+    evidence_paths: dict[tuple[str, str], str] = {}
 
     for directory, metadata in iter_cases(output):
-        unit = summarize_case(directory, metadata, phase)
+        evidence_paths[
+            (metadata["workload"], metadata["language"])
+        ] = os.path.relpath(directory / "unit.json", output)
+        if directory.is_relative_to(output):
+            unit = summarize_case(directory, metadata, phase)
+        else:
+            unit = json.loads(
+                (directory / "unit.json").read_text(encoding="utf-8")
+            )
         units[(metadata["workload"], metadata["language"])] = unit
         mp.emit(
             "UNIT",
@@ -673,7 +825,18 @@ def summarize(args: argparse.Namespace) -> int:
 
     rungs = []
 
-    for rung in ladder(policy):
+    original_ladder = ladder(policy)
+    original_ids = {item["workload"] for item in original_ladder}
+    complete_ladder = [
+        *original_ladder,
+        *(
+            {"workload": workload, "mechanism": f"catalogued workload: {workload}"}
+            for workload in workload_catalog.workload_ids()
+            if workload not in original_ids
+        ),
+    ]
+
+    for rung in complete_ladder:
         present = {lang: units.get((rung["workload"], lang)) for lang in LANGUAGES}
 
         if not any(present.values()):
@@ -691,7 +854,7 @@ def summarize(args: argparse.Namespace) -> int:
             lang: (
                 {"valid": u["evidence_valid"], "reason": u.get("invalid_reason"),
                  "stabilization": (u.get("stabilization") or {}).get("status"),
-                 "unit": f"{rung['workload']}/{lang}/unit.json"}
+                 "unit": evidence_paths[(rung["workload"], lang)]}
                 if u else None
             )
             for lang, u in present.items()
@@ -746,8 +909,12 @@ def verify(args: argparse.Namespace) -> int:
     head_mismatch: set[str] = set()
     cases = 0
 
-    for _, metadata in iter_cases(output):
+    historical_references = 0
+    for directory, metadata in iter_cases(output):
         cases += 1
+        if not directory.is_relative_to(output):
+            historical_references += 1
+            continue
         for relative, expected in metadata["harness"]["source_sha256"].items():
             path = ROOT / relative
             if not path.is_file() or mp.sha256_file(path) != expected:
@@ -761,6 +928,7 @@ def verify(args: argparse.Namespace) -> int:
                 head_mismatch.add(relative)
 
     mp.emit("CASES", cases)
+    mp.emit("HISTORICAL_REFERENCES_VERIFIED", historical_references)
     mp.emit("WORKING_TREE_MATCHES_PRODUCER", "NO" if working_mismatch else "YES")
     for relative in sorted(working_mismatch):
         mp.emit("WORKING_TREE_MISMATCH", relative)

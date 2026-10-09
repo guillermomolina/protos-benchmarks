@@ -1,0 +1,826 @@
+{
+  "adapter_source_sha256": "d0088eaa89ece882c7363b6d2a332ffbdffae8594feb7a0767135a1f7f2b5cd4",
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "capture_finished": "2026-10-09T10:11:10.477090+00:00",
+  "capture_key": {
+    "budgets": [
+      1000,
+      4000,
+      16000,
+      64000,
+      256000
+    ],
+    "expected_result": "1",
+    "final_tier": 2,
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "language": "python",
+    "runtime": {
+      "graalvm_version": "25.4.4.1.1",
+      "peer_dependencies_sha256": "584324ce50be1948837ba1406465685b3ce4ec5b8f68b5f73466dd1987c1da2c"
+    },
+    "selected_phase": "After TruffleTier",
+    "stage": "reference",
+    "surface": "executable-value",
+    "workload": "primitive-while-zero"
+  },
+  "capture_started": "2026-10-09T10:10:42.794585+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "4115a2d3a0391a891c3c2f1fc1b2f4cda3255ea46cfc8c2cc637cc689b0d2a16",
+    "identity": {
+      "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+      "java_home": "/opt/graalvm-community-java25i4",
+      "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+      "peer_graalvm_version": "25.4.4.1.1",
+      "surface": "executable-value"
+    },
+    "identity_sha256": "d8cabd24be9ab489e9e6bc6d905028d2bbc05da88267e3fedb8e2c68a8b8dc4e",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/peer-25.4.4.1.1/executable-value/d0088eaa89ece882c7363b6d2a332ffbdffae8594feb7a0767135a1f7f2b5cd4",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "1",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "expected_result": "1",
+  "final_tier": 2,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness": {
+    "dirty": true,
+    "git_head": "d9719253b628faad1ca296daef4a7ed566196216",
+    "porcelain": "M tests/test_measure_graphs.py\n M truffle/measure_graphs.py\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/budget-1000/trace.log.gz\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/budget-16000/bgv/TruffleHotSpotCompilation-4981[<bytecode_run_at_6bf8cce7>].bgv.gz\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/budget-16000/bgv/TruffleHotSpotCompilation-4981[<bytecode_run_at_6bf8cce7>].filter.json.gz\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/budget-16000/trace.log.gz\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/budget-4000/trace.log.gz\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/budget-64000/bgv/TruffleHotSpotCompilation-5011[<bytecode_run_at_49e46633>].bgv.gz\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/budget-64000/bgv/TruffleHotSpotCompilation-5011[<bytecode_run_at_49e46633>].filter.json.gz\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/budget-64000/trace.log.gz\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/capture.json\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/import-provenance.json\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/raw/correctness.log\n?? results/graph-cache-imported/41823f7990d427af212c/primitive-closure-call/python/unit.json\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/budget-1000/trace.log.gz\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/budget-16000/bgv/TruffleHotSpotCompilation-5106[<bytecode_run_at_3bf8f081>].bgv.gz\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/budget-16000/bgv/TruffleHotSpotCompilation-5106[<bytecode_run_at_3bf8f081>].filter.json.gz\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/budget-16000/trace.log.gz\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/budget-4000/trace.log.gz\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/budget-64000/bgv/TruffleHotSpotCompilation-5071[<bytecode_run_at_34aded29>].bgv.gz\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/budget-64000/bgv/TruffleHotSpotCompilation-5071[<bytecode_run_at_34aded29>].filter.json.gz\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/budget-64000/trace.log.gz\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/capture.json\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/import-provenance.json\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/raw/correctness.log\n?? results/graph-cache-imported/73443c0cf17cd40e4034/primitive-method-call/python/unit.json\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/budget-1000/trace.log.gz\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/budget-16000/bgv/TruffleHotSpotCompilation-2668[run].bgv.gz\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/budget-16000/bgv/TruffleHotSpotCompilation-2668[run].filter.json.gz\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/budget-16000/trace.log.gz\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/budget-4000/trace.log.gz\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/budget-64000/bgv/TruffleHotSpotCompilation-2674[run].bgv.gz\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/budget-64000/bgv/TruffleHotSpotCompilation-2674[run].filter.json.gz\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/budget-64000/trace.log.gz\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/capture.json\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/import-provenance.json\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/raw/correctness.log\n?? results/graph-cache-imported/80993700339d408cdcde/primitive-closure-call/js/unit.json\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/budget-1000/trace.log.gz\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/budget-16000/bgv/TruffleHotSpotCompilation-2657[run].bgv.gz\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/budget-16000/bgv/TruffleHotSpotCompilation-2657[run].filter.json.gz\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/budget-16000/trace.log.gz\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/budget-4000/trace.log.gz\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/budget-64000/bgv/TruffleHotSpotCompilation-2662[run].bgv.gz\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/budget-64000/bgv/TruffleHotSpotCompilation-2662[run].filter.json.gz\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/budget-64000/trace.log.gz\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/capture.json\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/import-provenance.json\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/raw/correctness.log\n?? results/graph-cache-imported/eb1e265e8fc04f95f133/primitive-method-call/js/unit.json\n?? results/graphs-full-0db24f00ff2d/.measure-graphs-output\n?? results/graphs-full-0db24f00ff2d/factorial/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/factorial/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/factorial/protos/budget-16000/bgv/TruffleHotSpotCompilation-2898[ProtosSemanticBytecodeRootNodeGen@708f7487].bgv.gz\n?? results/graphs-full-0db24f00ff2d/factorial/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/factorial/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/factorial/protos/budget-64000/bgv/TruffleHotSpotCompilation-2951[ProtosSemanticBytecodeRootNodeGen@4e38678a].bgv.gz\n?? results/graphs-full-0db24f00ff2d/factorial/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/factorial/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/factorial/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/factorial/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/factorial/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/fibonacci/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/budget-16000/bgv/TruffleHotSpotCompilation-2910[ProtosSemanticBytecodeRootNodeGen@3e1820ea].bgv.gz\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/budget-64000/bgv/TruffleHotSpotCompilation-2908[ProtosSemanticBytecodeRootNodeGen@4fe4cb58].bgv.gz\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/fibonacci/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/fibonacci/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/integer-loop/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/integer-loop/protos/budget-1000/bgv/TruffleHotSpotCompilation-2584[ProtosSemanticBytecodeRootNodeGen@35a7a90f].bgv.gz\n?? results/graphs-full-0db24f00ff2d/integer-loop/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/integer-loop/protos/budget-4000/bgv/TruffleHotSpotCompilation-2596[ProtosSemanticBytecodeRootNodeGen@35a7a90f].bgv.gz\n?? results/graphs-full-0db24f00ff2d/integer-loop/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/integer-loop/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/integer-loop/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/integer-loop/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/integer-loop/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/method-call/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/method-call/protos/budget-1000/bgv/TruffleHotSpotCompilation-2685[ProtosSemanticBytecodeRootNodeGen@68758d54].bgv.gz\n?? results/graphs-full-0db24f00ff2d/method-call/protos/budget-1000/bgv/TruffleHotSpotCompilation-2757[ProtosSemanticBytecodeRootNodeGen@63be7808].bgv.gz\n?? results/graphs-full-0db24f00ff2d/method-call/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/method-call/protos/budget-4000/bgv/TruffleHotSpotCompilation-2583[ProtosSemanticBytecodeRootNodeGen@5e6cec6].bgv.gz\n?? results/graphs-full-0db24f00ff2d/method-call/protos/budget-4000/bgv/TruffleHotSpotCompilation-2657[ProtosSemanticBytecodeRootNodeGen@5717d7a4].bgv.gz\n?? results/graphs-full-0db24f00ff2d/method-call/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/method-call/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/method-call/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/method-call/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/method-call/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-256000/bgv/TruffleHotSpotCompilation-2389[ProtosSemanticBytecodeRootNodeGen@15c5ee6c].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-256000/bgv/TruffleHotSpotCompilation-2427[ProtosSemanticBytecodeRootNodeGen@60ea6b82].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-256000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-64000/bgv/TruffleHotSpotCompilation-2456[ProtosSemanticBytecodeRootNodeGen@997943c].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-64000/bgv/TruffleHotSpotCompilation-2493[ProtosSemanticBytecodeRootNodeGen@6fb982eb].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-closure-call/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/js/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/js/budget-16000/bgv/TruffleHotSpotCompilation-2589[run].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/js/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/js/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/js/budget-64000/bgv/TruffleHotSpotCompilation-2574[run].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/js/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/js/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/js/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/budget-16000/bgv/TruffleHotSpotCompilation-2417[ProtosSemanticBytecodeRootNodeGen@1d1b25d2].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/budget-64000/bgv/TruffleHotSpotCompilation-2423[ProtosSemanticBytecodeRootNodeGen@2bc9aff8].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/python/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/python/budget-16000/bgv/TruffleHotSpotCompilation-5023[<bytecode_run_at_49e46633>].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/python/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/python/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/python/budget-64000/bgv/TruffleHotSpotCompilation-4969[<bytecode_run_at_41158f0c>].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/python/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/python/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-if-false/python/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/js/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/js/budget-16000/bgv/TruffleHotSpotCompilation-2597[run].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/js/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/js/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/js/budget-64000/bgv/TruffleHotSpotCompilation-2629[run].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/js/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/js/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/js/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/budget-16000/bgv/TruffleHotSpotCompilation-2464[ProtosSemanticBytecodeRootNodeGen@c799afa].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/budget-64000/bgv/TruffleHotSpotCompilation-2494[ProtosSemanticBytecodeRootNodeGen@5009e453].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/python/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/python/budget-16000/bgv/TruffleHotSpotCompilation-5037[<bytecode_run_at_50fe5954>].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/python/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/python/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/python/budget-64000/bgv/TruffleHotSpotCompilation-4982[<bytecode_run_at_385f4a79>].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/python/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/python/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-if-true/python/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/budget-16000/bgv/TruffleHotSpotCompilation-2403[ProtosSemanticBytecodeRootNodeGen@7c030b4d].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/budget-64000/bgv/TruffleHotSpotCompilation-2409[ProtosSemanticBytecodeRootNodeGen@4da68bb6].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-integer-add/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/budget-16000/bgv/TruffleHotSpotCompilation-2348[ProtosSemanticBytecodeRootNodeGen@29750442].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/budget-64000/bgv/TruffleHotSpotCompilation-2306[ProtosSemanticBytecodeRootNodeGen@7f44744].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-local-read/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/budget-16000/bgv/TruffleHotSpotCompilation-2305[ProtosSemanticBytecodeRootNodeGen@1d1730c9].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/budget-64000/bgv/TruffleHotSpotCompilation-2302[ProtosSemanticBytecodeRootNodeGen@7fc46af].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-local-write/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/budget-16000/bgv/TruffleHotSpotCompilation-2472[ProtosSemanticBytecodeRootNodeGen@6fb982eb].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/budget-64000/bgv/TruffleHotSpotCompilation-2445[ProtosSemanticBytecodeRootNodeGen@6fb982eb].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-method-call/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/budget-16000/bgv/TruffleHotSpotCompilation-2365[ProtosSemanticBytecodeRootNodeGen@7cac2f4e].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/budget-64000/bgv/TruffleHotSpotCompilation-2315[ProtosSemanticBytecodeRootNodeGen@7f44744].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-read/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/budget-16000/bgv/TruffleHotSpotCompilation-2388[ProtosSemanticBytecodeRootNodeGen@6fb982eb].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/budget-64000/bgv/TruffleHotSpotCompilation-2433[ProtosSemanticBytecodeRootNodeGen@1d1b25d2].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-object-slot-write/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/js/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/budget-16000/bgv/TruffleHotSpotCompilation-2321[ProtosSemanticBytecodeRootNodeGen@6faecde0].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/budget-64000/bgv/TruffleHotSpotCompilation-2283[ProtosSemanticBytecodeRootNodeGen@24cf41cc].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/protos/raw/product-build.log\n?? results/graphs-full-0db24f00ff2d/primitive-return-literal/python/reuse.json\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/js/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/js/budget-16000/bgv/TruffleHotSpotCompilation-2533[run].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/js/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/js/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/js/budget-64000/bgv/TruffleHotSpotCompilation-2567[run].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/js/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/js/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/js/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/budget-1000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/budget-16000/bgv/TruffleHotSpotCompilation-2480[ProtosSemanticBytecodeRootNodeGen@180d9922].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/budget-16000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/budget-4000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/budget-64000/bgv/TruffleHotSpotCompilation-2477[ProtosSemanticBytecodeRootNodeGen@22787edc].bgv.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/budget-64000/trace.log.gz\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/capture.json\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/raw/correctness.log\n?? results/graphs-full-0db24f00ff2d/primitive-while-zero/protos/raw/product-build.log\n?? truffle/graph_cache.py",
+    "source_sha256": {
+      "runner/compiler_trace.py": "e965c1edbbfd5e81c066074fcc3d3c33535c54fab89de1d57930e51d08fa570d",
+      "scripts/igv_analyzer.sh": "1c08e71204f0ef6f71167a5f8bc0bc015a96ee7277ecf5c6cc7a75d213b51d55",
+      "truffle/graph_cache.py": "14ec45126261f51e87ff38a67fd44aefe09153186c42758e7d34acb4ec750e4f",
+      "truffle/graph_evidence.py": "2e4f96ddd00167a6c7fa3f0fbe53f5ea95ba8daea9d715555f52e096efcb69e4",
+      "truffle/jvm_matrix.py": "ae934519c867540f01af3459619a8b170eb5f2611805ea3b3e8182d5cc2d5747",
+      "truffle/jvm_runtime.py": "9c136ee85c515f40855b67e30d85d3e77485b8c0f767c8d20de2b12554a2e05b",
+      "truffle/measure/cases.json": "db1d81e19d180043cf85653dc5dfb640a91761f4ee25015debcb999ea6ac6fd2",
+      "truffle/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "81e629d37ee484f8e9449405061aa445b3105091915109a50f658350cc0ae80b",
+      "truffle/measure/graphs.json": "97d05eed011f5add5ac8d9e57d2f51dc106e4329540022ea929fcca8f712e151",
+      "truffle/measure/surfaces/peer/PeerExecutableSurface.java": "83dfdd84edffa1a3f5faf404e85b0f365ea33979202fa8b717e18000f09d35ce",
+      "truffle/measure_graphs.py": "89b5bd619f53223b790dca0646914c351513c1c5d267a0674abc5b0ef2da6695",
+      "truffle/measure_protos.py": "681bd34abfce1a0f34fa67a8f1555ebe503cdfb4f12c11fae7f71d4db68f5263",
+      "truffle/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+      "truffle/workload_catalog.py": "07e57debb5b2b0efe91dddbdc8d030f09b1c9ea6a55677d49e4605c09b2833a3",
+      "truffle/workloads/catalog.json": "55b922e9b2d3b5bc3260519fea404201f0189c0633c0b7a41751cb718aba7b40",
+      "truffle/workloads/primitive-while-zero/primitive-while-zero.py": "4474422c5afdd6378cc131951014821db6875a8615d4b2cfd7d7bddfa0e80a08"
+    }
+  },
+  "harness_dirty": true,
+  "harness_git_head": "d9719253b628faad1ca296daef4a7ed566196216",
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "5379213d8e29",
+    "kernel": "7.2.9-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "python",
+  "peer_runtime": {
+    "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+    "graalvm_version": "25.4.4.1.1",
+    "protos_graalvm_version": "25.4.4.1.1"
+  },
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "6fc767ea1ad6b93b820059610c7f5b8424670ee0b80ce642040ce4e3a8dc098e",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "8b19bd5e04cf1472bf64f63e6de41f0eabcdee33cf914bf60b41dbb23ff7d248",
+    "porcelain": "",
+    "revision": "0db24f00ff2d92d642351d7f7535517fe01a55ce",
+    "source_state_sha256": "cba4cd3f0136d7dea9ae3bbc29c23a99ca87b93f2a46397fa64620047802eaa8",
+    "version": "0.3.324-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "6fc767ea1ad6b93b820059610c7f5b8424670ee0b80ce642040ce4e3a8dc098e",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "8b19bd5e04cf1472bf64f63e6de41f0eabcdee33cf914bf60b41dbb23ff7d248",
+    "porcelain": "",
+    "revision": "0db24f00ff2d92d642351d7f7535517fe01a55ce",
+    "source_state_sha256": "cba4cd3f0136d7dea9ae3bbc29c23a99ca87b93f2a46397fa64620047802eaa8",
+    "version": "0.3.324-SNAPSHOT"
+  },
+  "protos_revision": "0db24f00ff2d92d642351d7f7535517fe01a55ce",
+  "runs": [
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 106,
+              "cycles": 102,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 135
+            },
+            "ir_after_truffle_tier": 106,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 1
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 1000,
+      "calls": 1001,
+      "compilation_count": 8,
+      "dump_inventory": [
+        {
+          "bytes": 926498,
+          "name": "TruffleHotSpotCompilation-4076[<builtin_function_StringBuiltins.rpartition_at_a66db4c>].bgv",
+          "sha256": "ddc4b9c4945b8fc2ac1a57345965957827cb8f067d56d457bc5314e28cbf58ba"
+        },
+        {
+          "bytes": 365744,
+          "name": "TruffleHotSpotCompilation-4099[<builtin_function_StringBuiltins.rpartition_at_a66db4c>].bgv",
+          "sha256": "1fa090d40c5e958db6f4c6ff799f0279dcd40fce0de2fc728aec311257680561"
+        },
+        {
+          "bytes": 775240,
+          "name": "TruffleHotSpotCompilation-4163[<bytecode_ModuleSpec.parent_at_1c22676>].bgv",
+          "sha256": "57e0a085fd3dcc88bbee0bd8164a611698dbc355e916633e7587cd970c6417bf"
+        },
+        {
+          "bytes": 318590,
+          "name": "TruffleHotSpotCompilation-4229[<bytecode_ModuleSpec.parent_at_1c22676>].bgv",
+          "sha256": "fb0f969a32d56a6baa58dd5cc82fdf8207280a1751e2d8c51677f071a17d44af"
+        },
+        {
+          "bytes": 375692,
+          "name": "TruffleHotSpotCompilation-4557[<bytecode_ModuleSpec.parent_at_1c22676>].bgv",
+          "sha256": "8c8ffcb810b5f7db04710234888581420c0195c2e773368bb6aa9f32301da662"
+        },
+        {
+          "bytes": 322396,
+          "name": "TruffleHotSpotCompilation-4570[<bytecode_ModuleSpec.parent_at_1c22676>].bgv",
+          "sha256": "8dd204701801417f1401223f1536931227d91a29002864894f523923070ecf67"
+        },
+        {
+          "bytes": 1055054,
+          "name": "TruffleHotSpotCompilation-4948[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "df8cc48300dd6c86cbbb50ad9b62eff3fcf0b85008a66959b9f2a111a07f201d"
+        },
+        {
+          "bytes": 150849,
+          "name": "TruffleHotSpotCompilation-4974[<bytecode_run_at_2137ed5f>].bgv",
+          "sha256": "06a93d71fb5cc012d6aa47c780028a6746437958b1a8331359e0623dfe2e0cf7"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 2137ed5f>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at a66db4c>",
+          "<bytecode ModuleSpec.parent at 1c22676>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:16:1012-1063",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 9
+                }
+              },
+              {
+                "location": "python:16:1012-1063",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:16:1012-1063",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4974[<bytecode_run_at_2137ed5f>].bgv"
+            ],
+            "comp_id": 4974,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 106,
+              "cycles": 102,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 135
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 106,
+            "label": "<bytecode run at 2137ed5f>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-while-zero/primitive-while-zero.py:16 0xf3c2995c",
+            "superseded_comp_ids": [],
+            "target": "1:466",
+            "tier": 1,
+            "via": null
+          }
+        ]
+      },
+      "result": "1",
+      "retained_bgv": [],
+      "trace_log": "budget-1000/trace.log.gz",
+      "trace_log_sha256": "e33a0f044916e94ab079ef87c50a90fc4356168e94ab4421776495d03d7ca163"
+    },
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 106,
+              "cycles": 102,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 135
+            },
+            "ir_after_truffle_tier": 106,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 1
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 4000,
+      "calls": 4001,
+      "compilation_count": 8,
+      "dump_inventory": [
+        {
+          "bytes": 926505,
+          "name": "TruffleHotSpotCompilation-4069[<builtin_function_StringBuiltins.rpartition_at_32be861d>].bgv",
+          "sha256": "826c10e904a04bf4a044a9118cf4d75e76c9135e23cfcef12d20f0f09d0033da"
+        },
+        {
+          "bytes": 365762,
+          "name": "TruffleHotSpotCompilation-4094[<builtin_function_StringBuiltins.rpartition_at_32be861d>].bgv",
+          "sha256": "524200ea2d67ad25e09c83ffb2dc2c3fcbcb3923515b547f380405d360038b9c"
+        },
+        {
+          "bytes": 775248,
+          "name": "TruffleHotSpotCompilation-4157[<bytecode_ModuleSpec.parent_at_264afb60>].bgv",
+          "sha256": "01964a606e77bed6f1b0c383d6fd13f39d08ba2b692982ce2910cc5e8ecccbfc"
+        },
+        {
+          "bytes": 318597,
+          "name": "TruffleHotSpotCompilation-4217[<bytecode_ModuleSpec.parent_at_264afb60>].bgv",
+          "sha256": "31b37ad07139965ca0ef77b1c5a74acc361950bd1e371c6594ab796f867331b2"
+        },
+        {
+          "bytes": 375700,
+          "name": "TruffleHotSpotCompilation-4525[<bytecode_ModuleSpec.parent_at_264afb60>].bgv",
+          "sha256": "0d248c1b5c9d60733e87c2c89b4102255a6a65bea85948400f608fd22cb7189c"
+        },
+        {
+          "bytes": 322404,
+          "name": "TruffleHotSpotCompilation-4540[<bytecode_ModuleSpec.parent_at_264afb60>].bgv",
+          "sha256": "bd7ae8d3a7b5c2e8d14539b9861c855fb37bb532e8033af87c6980001642ba6a"
+        },
+        {
+          "bytes": 1055051,
+          "name": "TruffleHotSpotCompilation-4949[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "a6e2363622d6dee3b04205fab4fcf89ec6d183ecb08e964cf978f7eecab08d9f"
+        },
+        {
+          "bytes": 150845,
+          "name": "TruffleHotSpotCompilation-4974[<bytecode_run_at_36eed0b>].bgv",
+          "sha256": "98278f50fa19e5ae9dfa5451cca2eaf19f0cbfc6e4c4cf9f160c18641c43505b"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 36eed0b>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at 32be861d>",
+          "<bytecode ModuleSpec.parent at 264afb60>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:16:1012-1063",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 9
+                }
+              },
+              {
+                "location": "python:16:1012-1063",
+                "name": "ExecutionContext$CalleeContext",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "python:16:1012-1063",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4974[<bytecode_run_at_36eed0b>].bgv"
+            ],
+            "comp_id": 4974,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 106,
+              "cycles": 102,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 135
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 106,
+            "label": "<bytecode run at 36eed0b>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-while-zero/primitive-while-zero.py:16 0xf3c2995c",
+            "superseded_comp_ids": [],
+            "target": "1:466",
+            "tier": 1,
+            "via": null
+          }
+        ]
+      },
+      "result": "1",
+      "retained_bgv": [],
+      "trace_log": "budget-4000/trace.log.gz",
+      "trace_log_sha256": "022c7a7aa4746303a96ab5557ffae9d6d1cb26433adbddcca4f98a7cfff3ceab"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 49,
+              "cycles": 58,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 83
+            },
+            "ir_after_truffle_tier": 49,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 16000,
+      "calls": 16001,
+      "compilation_count": 10,
+      "dump_inventory": [
+        {
+          "bytes": 926498,
+          "name": "TruffleHotSpotCompilation-4044[<builtin_function_StringBuiltins.rpartition_at_a66db4c>].bgv",
+          "sha256": "afb81a9569765743d520d504e1a66655735395bd8f77b36a25d64ad94a719756"
+        },
+        {
+          "bytes": 365744,
+          "name": "TruffleHotSpotCompilation-4069[<builtin_function_StringBuiltins.rpartition_at_a66db4c>].bgv",
+          "sha256": "f440df1d4d3975fbd13dd8c52d39f4cd939f58dcb0752074b07f2a739a9da6f5"
+        },
+        {
+          "bytes": 775247,
+          "name": "TruffleHotSpotCompilation-4120[<bytecode_ModuleSpec.parent_at_72b31083>].bgv",
+          "sha256": "8fa2143af8575702877879713e9b85f01a3145361e9fa738b91847041b8c06bb"
+        },
+        {
+          "bytes": 318596,
+          "name": "TruffleHotSpotCompilation-4179[<bytecode_ModuleSpec.parent_at_72b31083>].bgv",
+          "sha256": "13278fcf4d38a78a4abc38a94d46285f0c78ab4dbcb9ea068dcac154b6942e3f"
+        },
+        {
+          "bytes": 375699,
+          "name": "TruffleHotSpotCompilation-4473[<bytecode_ModuleSpec.parent_at_72b31083>].bgv",
+          "sha256": "abd33fb0cb3f0af539bea80325a8c938e9948d5cef6d437b8a667df11d8a3e3a"
+        },
+        {
+          "bytes": 322403,
+          "name": "TruffleHotSpotCompilation-4487[<bytecode_ModuleSpec.parent_at_72b31083>].bgv",
+          "sha256": "9d271a5b5052af0731860311d1bfcaa399f467448581a0f5ac7eda79247551fa"
+        },
+        {
+          "bytes": 1055052,
+          "name": "TruffleHotSpotCompilation-4899[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "7eb7cfc471f6074af66f6237cc91de60fa52f3596c4aad813bc9ed7c496b9edd"
+        },
+        {
+          "bytes": 150847,
+          "name": "TruffleHotSpotCompilation-4920[<bytecode_run_at_a9f43ff>].bgv",
+          "sha256": "b8985b6849bdf8a2b93b9c8a96a54ca0b2c2bb7955144ca264118c2a9e805d5f"
+        },
+        {
+          "bytes": 500834,
+          "name": "TruffleHotSpotCompilation-4978[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "c0b0ea3ac7522f441a0ff563e860d78fe28087e60316e2afa83fcb7f09ba1847"
+        },
+        {
+          "bytes": 113079,
+          "name": "TruffleHotSpotCompilation-5004[<bytecode_run_at_a9f43ff>].bgv",
+          "sha256": "628b102e970fe6311f6378a4b59be10cdce8ed65ffb07acf09903c41892b2330"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at a9f43ff>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at a66db4c>",
+          "<bytecode ModuleSpec.parent at 72b31083>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:16:1012-1063",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 9
+                }
+              },
+              {
+                "location": "python:16:1012-1063",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5004[<bytecode_run_at_a9f43ff>].bgv"
+            ],
+            "comp_id": 5004,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 49,
+              "cycles": 58,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 83
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 49,
+            "label": "<bytecode run at a9f43ff>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-while-zero/primitive-while-zero.py:16 0xf3c2995c",
+            "superseded_comp_ids": [
+              4920
+            ],
+            "target": "1:466",
+            "tier": 2,
+            "via": null
+          }
+        ]
+      },
+      "result": "1",
+      "retained_bgv": [
+        "budget-16000/bgv/TruffleHotSpotCompilation-5004[<bytecode_run_at_a9f43ff>].bgv.gz"
+      ],
+      "trace_log": "budget-16000/trace.log.gz",
+      "trace_log_sha256": "a88427aba05bd2bcf2317d3740d687bfe42d2a76fb2b054a6608c0585a8d5939"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 49,
+              "cycles": 58,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 83
+            },
+            "ir_after_truffle_tier": 49,
+            "label": "<bytecode run at *>",
+            "role": "primary",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 64000,
+      "calls": 64001,
+      "compilation_count": 10,
+      "dump_inventory": [
+        {
+          "bytes": 926503,
+          "name": "TruffleHotSpotCompilation-4050[<builtin_function_StringBuiltins.rpartition_at_4d825cbf>].bgv",
+          "sha256": "56eaffe9ebd8b8b49518d8c5174655b93e43404618320a5f880f94af1637c889"
+        },
+        {
+          "bytes": 365759,
+          "name": "TruffleHotSpotCompilation-4073[<builtin_function_StringBuiltins.rpartition_at_4d825cbf>].bgv",
+          "sha256": "c15bf63a05fad5f3087af492a6e6bd1e5de7093e4df58e3baf06ec54bd6f01ca"
+        },
+        {
+          "bytes": 775245,
+          "name": "TruffleHotSpotCompilation-4143[<bytecode_ModuleSpec.parent_at_759453d8>].bgv",
+          "sha256": "5ec468512b9fcfbc61b13f32680b86cc4ed94f5535eb6b3f6fba3789269eedf6"
+        },
+        {
+          "bytes": 318593,
+          "name": "TruffleHotSpotCompilation-4211[<bytecode_ModuleSpec.parent_at_759453d8>].bgv",
+          "sha256": "4feb57397442610ba8b5a7088e4dc920d9a5540c1f42a996602fba2b29fda427"
+        },
+        {
+          "bytes": 375697,
+          "name": "TruffleHotSpotCompilation-4527[<bytecode_ModuleSpec.parent_at_759453d8>].bgv",
+          "sha256": "ed6d044d26b6beeb6cfe2830d397a7461c41c7cbf52d113afc709535d638940b"
+        },
+        {
+          "bytes": 322404,
+          "name": "TruffleHotSpotCompilation-4541[<bytecode_ModuleSpec.parent_at_759453d8>].bgv",
+          "sha256": "59805f86c5cd34a49c26d9653a7af9030c819557b218465df96ac80f2cd62d64"
+        },
+        {
+          "bytes": 1055050,
+          "name": "TruffleHotSpotCompilation-4935[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "9f13c80c1f3a5315b14ff5256f844c728f94c31eb382348152b236cceada49f7"
+        },
+        {
+          "bytes": 150855,
+          "name": "TruffleHotSpotCompilation-4958[<bytecode_run_at_7cdf7459>].bgv",
+          "sha256": "5cdfc047fd003a977d5b616d943c84f41269324103635f52a5f2439c6a2eb427"
+        },
+        {
+          "bytes": 500834,
+          "name": "TruffleHotSpotCompilation-5015[org.graalvm.polyglot.Value<PFunction>.execute].bgv",
+          "sha256": "f41c7c4c779225e3638c20580499667955a79585d8fdfbba274a82a8b3146ea5"
+        },
+        {
+          "bytes": 113088,
+          "name": "TruffleHotSpotCompilation-5036[<bytecode_run_at_7cdf7459>].bgv",
+          "sha256": "4daf187e891915700bd80a27a0055b296d4bd300df8039057b5f6c9a00e7dff3"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 3,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<PFunction>.execute"
+        ],
+        "primary_label": "<bytecode run at 7cdf7459>",
+        "unattributed_language_targets": [
+          "<builtin function StringBuiltins.rpartition at 4d825cbf>",
+          "<bytecode ModuleSpec.parent at 759453d8>"
+        ],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "python:16:1012-1063",
+                "name": "PBytecodeDSLRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 9
+                }
+              },
+              {
+                "location": "python:16:1012-1063",
+                "name": "PBytecodeDSLRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5036[<bytecode_run_at_7cdf7459>].bgv"
+            ],
+            "comp_id": 5036,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 49,
+              "cycles": 58,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 83
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 49,
+            "label": "<bytecode run at 7cdf7459>",
+            "normalized_label": "<bytecode run at *>",
+            "role": "primary",
+            "src": "/workspaces/protos-benchmarks/truffle/workloads/primitive-while-zero/primitive-while-zero.py:16 0xf3c2995c",
+            "superseded_comp_ids": [
+              4958
+            ],
+            "target": "1:466",
+            "tier": 2,
+            "via": null
+          }
+        ]
+      },
+      "result": "1",
+      "retained_bgv": [
+        "budget-64000/bgv/TruffleHotSpotCompilation-5036[<bytecode_run_at_7cdf7459>].bgv.gz"
+      ],
+      "trace_log": "budget-64000/trace.log.gz",
+      "trace_log_sha256": "ded76be7148ce42e9cb88150829108a532e9b5bb87a06a7b26ef214fad8a3be1"
+    }
+  ],
+  "schema_version": 1,
+  "selected_phase": "After TruffleTier",
+  "stabilization": {
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "surface": "executable-value",
+  "surface_timed_call": "run.execute()",
+  "timing_evidence": "NONE (graph instrumentation is never a timing run)",
+  "workload": "primitive-while-zero",
+  "workload_source": "truffle/workloads/primitive-while-zero/primitive-while-zero.py",
+  "workload_source_sha256": "4474422c5afdd6378cc131951014821db6875a8615d4b2cfd7d7bddfa0e80a08"
+}

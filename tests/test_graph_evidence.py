@@ -156,6 +156,48 @@ class UnitAccountingTest(unittest.TestCase):
         self.assertEqual(("run", "Cutoff"), (resolution["units"][1]["via"], resolution["units"][1]["edge"]))
         self.assertEqual(2668, resolution["units"][1]["comp_id"])
 
+    def test_expanded_callee_is_counted_separately(self):
+        resolution = resolve(js_trace(run_tier2_edge="Expanded"))
+
+        self.assertEqual(
+            ["run", "identity"],
+            [unit["label"] for unit in resolution["units"]],
+        )
+        self.assertEqual("Expanded", resolution["units"][1]["edge"])
+        self.assertEqual([], resolution["unattributed_language_targets"])
+
+    def test_expanded_recursive_callee_is_counted_once(self):
+        sample = "\n".join([
+            *compile_(
+                FW, 1, 2, 10, 40,
+                [("Inlined", "run", 1),
+                 ("Expanded", "recursive", 2)],
+            ),
+            *compile_(
+                "run", 2, 2, 11, 393,
+                [("Expanded", "recursive", 1)],
+                src=JS_SRC + ":1",
+            ),
+            *compile_(
+                "recursive", 3, 2, 12, 200,
+                [("Cutoff", "recursive", 1)],
+                src=JS_SRC + ":2",
+            ),
+        ]) + "\n"
+
+        resolution = resolve(sample)
+
+        self.assertEqual(
+            ["primary", "additional"],
+            [unit["role"] for unit in resolution["units"]],
+        )
+        self.assertEqual(
+            ["run", "recursive"],
+            [unit["label"] for unit in resolution["units"]],
+        )
+        self.assertEqual([], resolution["unattributed_language_targets"])
+        self.assertEqual([], resolution["uncompiled_callees"])
+
     def test_uncompiled_cutoff_callee_is_not_stable(self):
         text = "\n".join([
             *compile_(FW, 1, 2, 10, 50, [("Cutoff", "run", 1)]),

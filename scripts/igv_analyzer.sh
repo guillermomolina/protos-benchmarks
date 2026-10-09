@@ -20,7 +20,19 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 ANALYZER_GRAAL_VERSION=25.4.4.1.1
 DEFAULT_IMAGE=ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-$ANALYZER_GRAAL_VERSION
 IMAGE=${PROTOS_IGV_ANALYZER_IMAGE:-$DEFAULT_IMAGE}
-DOCKER=${DOCKER:-docker}
+# Prefer Podman when available; retain Docker as an alternative.
+if [ -z "${DOCKER:-}" ]; then
+    if command -v podman >/dev/null 2>&1; then
+        DOCKER=podman
+    else
+        DOCKER=docker
+    fi
+fi
+
+# Preserve host UID/GID access to bind-mounted files under rootless Podman.
+if [ "${DOCKER##*/}" = "podman" ]; then
+    export PODMAN_USERNS="${PODMAN_USERNS:-keep-id}"
+fi
 
 usage() {
     cat <<'USAGE'

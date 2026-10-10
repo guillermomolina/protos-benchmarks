@@ -8,6 +8,8 @@ package com.guillermomolina.protos.benchmarks.measure.protos;
 import com.guillermomolina.protos.execution.ProtosExecutionOutcome;
 import com.guillermomolina.protos.execution.ProtosStandaloneHostedSession;
 import com.guillermomolina.protos.runtime.ProtosIntegerValue;
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.guillermomolina.protos.benchmarks.measure.MeasurementEngine;
 
 /**
@@ -47,6 +49,14 @@ final class ProtosSurfaceSupport {
                     "benchmark result is not an Integer: " + outcome.value());
         }
 
-        return integer.value().toString();
+        // Both the historical BigInteger-backed and current long-only
+        // representations export their exact value through Truffle interop.
+        try {
+            return InteropLibrary.getUncached().asBigInteger(integer).toString();
+        } catch (UnsupportedMessageException exception) {
+            throw new IllegalStateException(
+                    "benchmark Integer has no exact BigInteger interop projection",
+                    exception);
+        }
     }
 }

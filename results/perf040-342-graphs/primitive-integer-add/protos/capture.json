@@ -1,0 +1,1233 @@
+{
+  "adapter_source_sha256": "80f3567199987ce2f4a2b10ef5d91387967408cdc8d7d766570157687d1e9ba2",
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "capture_finished": "2026-10-12T16:06:36.569962+00:00",
+  "capture_key": {
+    "budgets": [
+      1000,
+      4000,
+      16000,
+      64000,
+      256000
+    ],
+    "expected_result": "3",
+    "final_tier": 2,
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "language": "protos",
+    "runtime": {
+      "revision": "18f71b2a664c56ac808e2f508b6369984de02280",
+      "source_state_sha256": "4525e17e5462bdc424941e399dcc8b2da332c4ea1e09240e104f1b64f2612cb2"
+    },
+    "selected_phase": "After TruffleTier",
+    "stage": "reference",
+    "surface": "canonical",
+    "workload": "primitive-integer-add"
+  },
+  "capture_started": "2026-10-12T16:06:22.922668+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "a5af5ec453ad62118d2cf3cff8e14146960a139112437a661084f4ac50843399",
+    "identity": {
+      "dependency_classpath_sha256": "bff2b4123ee08dbbf1a0291a6738d5a228776abf3333fe38fbba4644405e639b",
+      "java_home": "/opt/graalvm-community-java25i4",
+      "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+      "product_classes_sha256": "9ab6848f46a64a3eaedb499321d9e7f24a439a97183e07623448ca92b236e9a0",
+      "protos_revision": "18f71b2a664c56ac808e2f508b6369984de02280",
+      "protos_source_state_sha256": "4525e17e5462bdc424941e399dcc8b2da332c4ea1e09240e104f1b64f2612cb2",
+      "surface": "canonical"
+    },
+    "identity_sha256": "f41589a28b0dd2e0b94e7bdb942be8cd175ba5831d7cffb24a8220a6b908fbea",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/18f71b2a664c56ac808e2f508b6369984de02280/canonical/80f3567199987ce2f4a2b10ef5d91387967408cdc8d7d766570157687d1e9ba2",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "3",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "dependency_classpath_sha256": "bff2b4123ee08dbbf1a0291a6738d5a228776abf3333fe38fbba4644405e639b",
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "expected_result": "3",
+  "final_tier": 2,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness": {
+    "dirty": true,
+    "git_head": "1725cd030d6a82167c49124d434944b7b364cd9b",
+    "porcelain": "?? results/perf040-342-graphs/.measure-graphs-output\n?? results/perf040-342-graphs/primitive-local-read/protos/budget-1000/trace.log.gz\n?? results/perf040-342-graphs/primitive-local-read/protos/budget-16000/bgv/TruffleHotSpotCompilation-2668[ProtosSemanticBytecodeRootNodeGen@698577b8].bgv.gz\n?? results/perf040-342-graphs/primitive-local-read/protos/budget-16000/trace.log.gz\n?? results/perf040-342-graphs/primitive-local-read/protos/budget-4000/trace.log.gz\n?? results/perf040-342-graphs/primitive-local-read/protos/budget-64000/bgv/TruffleHotSpotCompilation-2673[ProtosSemanticBytecodeRootNodeGen@7c437436].bgv.gz\n?? results/perf040-342-graphs/primitive-local-read/protos/budget-64000/trace.log.gz\n?? results/perf040-342-graphs/primitive-local-read/protos/capture.json\n?? results/perf040-342-graphs/primitive-local-read/protos/raw/correctness.log\n?? results/perf040-342-graphs/primitive-local-read/protos/raw/product-build.log\n?? results/perf040-342-graphs/primitive-local-write/protos/budget-1000/trace.log.gz\n?? results/perf040-342-graphs/primitive-local-write/protos/budget-16000/bgv/TruffleHotSpotCompilation-2661[ProtosSemanticBytecodeRootNodeGen@58d0a601].bgv.gz\n?? results/perf040-342-graphs/primitive-local-write/protos/budget-16000/trace.log.gz\n?? results/perf040-342-graphs/primitive-local-write/protos/budget-4000/trace.log.gz\n?? results/perf040-342-graphs/primitive-local-write/protos/budget-64000/bgv/TruffleHotSpotCompilation-2654[ProtosSemanticBytecodeRootNodeGen@1200ca06].bgv.gz\n?? results/perf040-342-graphs/primitive-local-write/protos/budget-64000/trace.log.gz\n?? results/perf040-342-graphs/primitive-local-write/protos/capture.json\n?? results/perf040-342-graphs/primitive-local-write/protos/raw/correctness.log\n?? results/perf040-342-graphs/primitive-local-write/protos/raw/product-build.log\n?? results/perf040-342-graphs/primitive-return-literal/protos/budget-1000/trace.log.gz\n?? results/perf040-342-graphs/primitive-return-literal/protos/budget-16000/bgv/TruffleHotSpotCompilation-2658[ProtosSemanticBytecodeRootNodeGen@710da23].bgv.gz\n?? results/perf040-342-graphs/primitive-return-literal/protos/budget-16000/trace.log.gz\n?? results/perf040-342-graphs/primitive-return-literal/protos/budget-4000/trace.log.gz\n?? results/perf040-342-graphs/primitive-return-literal/protos/budget-64000/bgv/TruffleHotSpotCompilation-2624[ProtosSemanticBytecodeRootNodeGen@391d5bca].bgv.gz\n?? results/perf040-342-graphs/primitive-return-literal/protos/budget-64000/trace.log.gz\n?? results/perf040-342-graphs/primitive-return-literal/protos/capture.json\n?? results/perf040-342-graphs/primitive-return-literal/protos/raw/correctness.log\n?? results/perf040-342-graphs/primitive-return-literal/protos/raw/product-build.log\n?? results/perf040-integer-ab/.measure-protos-output\n?? results/perf040-integer-ab/protos-canonical--integer-loop--reference-none/20261012T155002336261Z/metadata.json\n?? results/perf040-integer-ab/protos-canonical--integer-loop--reference-none/20261012T155002336261Z/raw/correctness.log\n?? results/perf040-integer-ab/protos-canonical--integer-loop--reference-none/20261012T155002336261Z/raw/product-build.log\n?? results/perf040-integer-ab/protos-canonical--integer-loop--reference-none/20261012T155002336261Z/raw/timing.log\n?? results/perf040-integer-ab/protos-canonical--integer-loop--reference-none/20261012T155002336261Z/summary.json\n?? results/perf040-integer-ab/protos-canonical--primitive-integer-add--reference-none/20261012T154928391819Z/metadata.json\n?? results/perf040-integer-ab/protos-canonical--primitive-integer-add--reference-none/20261012T154928391819Z/raw/correctness.log\n?? results/perf040-integer-ab/protos-canonical--primitive-integer-add--reference-none/20261012T154928391819Z/raw/product-build.log\n?? results/perf040-integer-ab/protos-canonical--primitive-integer-add--reference-none/20261012T154928391819Z/raw/timing.log\n?? results/perf040-integer-ab/protos-canonical--primitive-integer-add--reference-none/20261012T154928391819Z/summary.json",
+    "source_sha256": {
+      "runner/compiler_trace.py": "e965c1edbbfd5e81c066074fcc3d3c33535c54fab89de1d57930e51d08fa570d",
+      "scripts/igv_analyzer.sh": "1c08e71204f0ef6f71167a5f8bc0bc015a96ee7277ecf5c6cc7a75d213b51d55",
+      "truffle/graph_cache.py": "14ec45126261f51e87ff38a67fd44aefe09153186c42758e7d34acb4ec750e4f",
+      "truffle/graph_evidence.py": "2e4f96ddd00167a6c7fa3f0fbe53f5ea95ba8daea9d715555f52e096efcb69e4",
+      "truffle/jvm_matrix.py": "ae934519c867540f01af3459619a8b170eb5f2611805ea3b3e8182d5cc2d5747",
+      "truffle/jvm_runtime.py": "9c136ee85c515f40855b67e30d85d3e77485b8c0f767c8d20de2b12554a2e05b",
+      "truffle/measure/cases.json": "db1d81e19d180043cf85653dc5dfb640a91761f4ee25015debcb999ea6ac6fd2",
+      "truffle/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "81e629d37ee484f8e9449405061aa445b3105091915109a50f658350cc0ae80b",
+      "truffle/measure/graphs.json": "0d5189bb6781982b1473642387787f22f2340242cfaefef3c4fc1f14e5613ea5",
+      "truffle/measure/surfaces/canonical/ProtosCanonicalSurface.java": "0e1e54c4d7a694c3ede886d0e14daf31ec329485beb8baf1ded142d0de52c0a2",
+      "truffle/measure/surfaces/protos/ProtosSurfaceSupport.java": "ecf0dc74892a9dccf5af9a374eda45cc3b47e69d0a52454a4d8a7334dcdf8003",
+      "truffle/measure_graphs.py": "89b5bd619f53223b790dca0646914c351513c1c5d267a0674abc5b0ef2da6695",
+      "truffle/measure_protos.py": "681bd34abfce1a0f34fa67a8f1555ebe503cdfb4f12c11fae7f71d4db68f5263",
+      "truffle/workload_catalog.py": "07e57debb5b2b0efe91dddbdc8d030f09b1c9ea6a55677d49e4605c09b2833a3",
+      "truffle/workloads/catalog.json": "55b922e9b2d3b5bc3260519fea404201f0189c0633c0b7a41751cb718aba7b40",
+      "truffle/workloads/primitive-integer-add/primitive-integer-add.protos": "ae8ba162beb092793920a40655bc10d1ff57b4dc62edbae370ad86c0d1e97aff"
+    }
+  },
+  "harness_dirty": true,
+  "harness_git_head": "1725cd030d6a82167c49124d434944b7b364cd9b",
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "5379213d8e29",
+    "kernel": "7.2.9-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "protos",
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "851825c82cb2b7ff4f43cc94b1416c562bac4b99d46682df7e33c3da2039fa85",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "ccdbb263647f4433219859c2524abcbc413f40c89708b9390145ddaa6382b8b0",
+    "porcelain": "",
+    "revision": "18f71b2a664c56ac808e2f508b6369984de02280",
+    "source_state_sha256": "4525e17e5462bdc424941e399dcc8b2da332c4ea1e09240e104f1b64f2612cb2",
+    "version": "0.3.342-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "851825c82cb2b7ff4f43cc94b1416c562bac4b99d46682df7e33c3da2039fa85",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.4.4.1.1",
+    "maven_compiler_release": "21",
+    "pom_sha256": "ccdbb263647f4433219859c2524abcbc413f40c89708b9390145ddaa6382b8b0",
+    "porcelain": "",
+    "revision": "18f71b2a664c56ac808e2f508b6369984de02280",
+    "source_state_sha256": "4525e17e5462bdc424941e399dcc8b2da332c4ea1e09240e104f1b64f2612cb2",
+    "version": "0.3.342-SNAPSHOT"
+  },
+  "product_classes_sha256": "9ab6848f46a64a3eaedb499321d9e7f24a439a97183e07623448ca92b236e9a0",
+  "protos_revision": "18f71b2a664c56ac808e2f508b6369984de02280",
+  "runs": [
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 34,
+              "count": 4566,
+              "cycles": 6555,
+              "ifs": 327,
+              "invokes": 0,
+              "loops": 0,
+              "size": 7885
+            },
+            "ir_after_truffle_tier": 2830,
+            "label": "ProtosSemanticBytecodeRootNodeGen@*",
+            "role": "primary",
+            "tier": 1
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 1000,
+      "calls": 1001,
+      "compilation_count": 3,
+      "dump_inventory": [
+        {
+          "bytes": 2056136,
+          "name": "TruffleHotSpotCompilation-2584[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "a31e40c6ab57476a77c5417438fba8f02d36b41f7891b81f215c1874710d40af"
+        },
+        {
+          "bytes": 673658,
+          "name": "TruffleHotSpotCompilation-2648[ProtosSemanticBytecodeRootNodeGen@2001fbbf].bgv",
+          "sha256": "aaa99974888f0654c460be9a0aac3d2705128b666cd8a845248d76a61e5fea89"
+        },
+        {
+          "bytes": 2942746,
+          "name": "TruffleHotSpotCompilation-2672[ProtosSemanticBytecodeRootNodeGen@2001fbbf].bgv",
+          "sha256": "64430f0fa6bc086ae3f1f45e8eafcc297588c69e3ef0fe7c5ee397b06d637680"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 1,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+        ],
+        "primary_label": "ProtosSemanticBytecodeRootNodeGen@2001fbbf",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 21,
+                  "count": 2245,
+                  "cycles": 2936,
+                  "ifs": 82,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3760
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 833,
+                  "cycles": 1479,
+                  "ifs": 120,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1640
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 833,
+                  "cycles": 1479,
+                  "ifs": 120,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1640
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 33,
+                  "cycles": 12,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 24,
+                  "cycles": 12,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 31
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CurrentCallerReference_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 25,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 27
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$ReadRootFrameLocal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 48,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 45
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 17,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 17,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 8,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosPrimitiveNumericSendFastPathsBaseFactory$IntegerArithmeticNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosPrimitiveNumericSendFastPathsBaseFactory$IntegerArithmeticNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2672[ProtosSemanticBytecodeRootNodeGen@2001fbbf].bgv"
+            ],
+            "comp_id": 2672,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 34,
+              "count": 4566,
+              "cycles": 6555,
+              "ifs": 327,
+              "invokes": 0,
+              "loops": 0,
+              "size": 7885
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 2830,
+            "label": "ProtosSemanticBytecodeRootNodeGen@2001fbbf",
+            "normalized_label": "ProtosSemanticBytecodeRootNodeGen@*",
+            "role": "primary",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              2648
+            ],
+            "target": "1:3",
+            "tier": 1,
+            "via": null
+          }
+        ]
+      },
+      "result": "3",
+      "retained_bgv": [],
+      "trace_log": "budget-1000/trace.log.gz",
+      "trace_log_sha256": "ad86deb2ac6299ae24c581e374665d2c926806a5dfcce90add97cf0ccd206344"
+    },
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 34,
+              "count": 4566,
+              "cycles": 6555,
+              "ifs": 327,
+              "invokes": 0,
+              "loops": 0,
+              "size": 7885
+            },
+            "ir_after_truffle_tier": 2830,
+            "label": "ProtosSemanticBytecodeRootNodeGen@*",
+            "role": "primary",
+            "tier": 1
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 4000,
+      "calls": 4001,
+      "compilation_count": 3,
+      "dump_inventory": [
+        {
+          "bytes": 2056135,
+          "name": "TruffleHotSpotCompilation-2583[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "1acd5af0c2031ca171a430136c595f07dfb1a6e101e3fe9952ff423a1d826928"
+        },
+        {
+          "bytes": 673657,
+          "name": "TruffleHotSpotCompilation-2647[ProtosSemanticBytecodeRootNodeGen@5b6fea2e].bgv",
+          "sha256": "286ae541c8e8e8ca6f18098f07ab96fabb9cc4082d3123e996a65177da5ec356"
+        },
+        {
+          "bytes": 2942745,
+          "name": "TruffleHotSpotCompilation-2667[ProtosSemanticBytecodeRootNodeGen@5b6fea2e].bgv",
+          "sha256": "2379b91d21d03c71195176143ec1fc7e62d505bd1048f7fe2f730eb0d50144e1"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 1,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+        ],
+        "primary_label": "ProtosSemanticBytecodeRootNodeGen@5b6fea2e",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 21,
+                  "count": 2245,
+                  "cycles": 2936,
+                  "ifs": 82,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3760
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 833,
+                  "cycles": 1479,
+                  "ifs": 120,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1640
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 833,
+                  "cycles": 1479,
+                  "ifs": 120,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1640
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 33,
+                  "cycles": 12,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 24,
+                  "cycles": 12,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 31
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CurrentCallerReference_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 25,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 27
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$ReadRootFrameLocal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 48,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 45
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 17,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 17,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 8,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosPrimitiveNumericSendFastPathsBaseFactory$IntegerArithmeticNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosPrimitiveNumericSendFastPathsBaseFactory$IntegerArithmeticNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2667[ProtosSemanticBytecodeRootNodeGen@5b6fea2e].bgv"
+            ],
+            "comp_id": 2667,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 34,
+              "count": 4566,
+              "cycles": 6555,
+              "ifs": 327,
+              "invokes": 0,
+              "loops": 0,
+              "size": 7885
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 2830,
+            "label": "ProtosSemanticBytecodeRootNodeGen@5b6fea2e",
+            "normalized_label": "ProtosSemanticBytecodeRootNodeGen@*",
+            "role": "primary",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              2647
+            ],
+            "target": "1:3",
+            "tier": 1,
+            "via": null
+          }
+        ]
+      },
+      "result": "3",
+      "retained_bgv": [],
+      "trace_log": "budget-4000/trace.log.gz",
+      "trace_log_sha256": "c062e4d67f77f889d9a330fc42c878aeb20ca3efe22a9d6cb9ee5384aff6b41c"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 30,
+              "count": 3105,
+              "cycles": 4336,
+              "ifs": 181,
+              "invokes": 0,
+              "loops": 0,
+              "size": 5311
+            },
+            "ir_after_truffle_tier": 2771,
+            "label": "ProtosSemanticBytecodeRootNodeGen@*",
+            "role": "primary",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 16000,
+      "calls": 16001,
+      "compilation_count": 7,
+      "dump_inventory": [
+        {
+          "bytes": 2056133,
+          "name": "TruffleHotSpotCompilation-2601[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "534fefe3aaf742778a74803b3343ff2507692a986e7a24065b20ef85eef51037"
+        },
+        {
+          "bytes": 673662,
+          "name": "TruffleHotSpotCompilation-2656[ProtosSemanticBytecodeRootNodeGen@3452daff].bgv",
+          "sha256": "f38012cc478fb766bea978b9af05bc09dad68e5ccc616dd0413049b7f8e3a9ad"
+        },
+        {
+          "bytes": 2942753,
+          "name": "TruffleHotSpotCompilation-2685[ProtosSemanticBytecodeRootNodeGen@3452daff].bgv",
+          "sha256": "643341e908db5e7da204de129bd02cf0b21576a9ae5eb3fd3c2617da98c0d74e"
+        },
+        {
+          "bytes": 1214778,
+          "name": "TruffleHotSpotCompilation-2780[ProtosSemanticBytecodeRootNodeGen@3452daff].bgv",
+          "sha256": "4279a07c463bcc0ffc5555a25039ad3b0a2859b6c56f1b8a1487a646717e373d"
+        },
+        {
+          "bytes": 969179,
+          "name": "TruffleHotSpotCompilation-2793[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "64eb9f9d49c5ebfc9c719769c53600a7d446b1eb8066dcc8ecbe331523d616d0"
+        },
+        {
+          "bytes": 1421044,
+          "name": "TruffleHotSpotCompilation-2804[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "0361d11ba4c5dec8a0e6827e6015816d0cc48fa83643f37368867d1c97e12132"
+        },
+        {
+          "bytes": 3122588,
+          "name": "TruffleHotSpotCompilation-2813[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "fcc788ea626f842030d8950515dd7d8bd6d9ff94e3a334f5e82c92665cbbe190"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 2,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+        ],
+        "primary_label": "ProtosSemanticBytecodeRootNodeGen@3452daff",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 17,
+                  "count": 1576,
+                  "cycles": 2062,
+                  "ifs": 54,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2673
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 839,
+                  "cycles": 1491,
+                  "ifs": 120,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1652
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 79,
+                  "cycles": 121,
+                  "ifs": 3,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 147
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 35,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CreateCurrentFrameLocal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 32,
+                  "cycles": 38,
+                  "ifs": 3,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 45
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CurrentCallerReference_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 25,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 27
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$ReadRootFrameLocal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 46,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 43
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 14,
+                  "cycles": 35,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 48
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 17,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 17,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosPrimitiveNumericSendFastPathsBaseFactory$IntegerArithmeticNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosPrimitiveNumericSendFastPathsBaseFactory$IntegerArithmeticNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2780[ProtosSemanticBytecodeRootNodeGen@3452daff].bgv"
+            ],
+            "comp_id": 2780,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 30,
+              "count": 3105,
+              "cycles": 4336,
+              "ifs": 181,
+              "invokes": 0,
+              "loops": 0,
+              "size": 5311
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 2771,
+            "label": "ProtosSemanticBytecodeRootNodeGen@3452daff",
+            "normalized_label": "ProtosSemanticBytecodeRootNodeGen@*",
+            "role": "primary",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              2656,
+              2685
+            ],
+            "target": "1:3",
+            "tier": 2,
+            "via": null
+          }
+        ]
+      },
+      "result": "3",
+      "retained_bgv": [
+        "budget-16000/bgv/TruffleHotSpotCompilation-2780[ProtosSemanticBytecodeRootNodeGen@3452daff].bgv.gz"
+      ],
+      "trace_log": "budget-16000/trace.log.gz",
+      "trace_log_sha256": "f03d6c3eab8ad733780cd3d522e115ed13dc14eb5ebed14987cf527557988ae4"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 30,
+              "count": 3105,
+              "cycles": 4336,
+              "ifs": 181,
+              "invokes": 0,
+              "loops": 0,
+              "size": 5311
+            },
+            "ir_after_truffle_tier": 2771,
+            "label": "ProtosSemanticBytecodeRootNodeGen@*",
+            "role": "primary",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 64000,
+      "calls": 64001,
+      "compilation_count": 7,
+      "dump_inventory": [
+        {
+          "bytes": 2056133,
+          "name": "TruffleHotSpotCompilation-2564[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "a504ab147ea2d7c85320030b31f2d4343c350df21825ffac45285c6fdf5ec373"
+        },
+        {
+          "bytes": 673653,
+          "name": "TruffleHotSpotCompilation-2624[ProtosSemanticBytecodeRootNodeGen@652a44b].bgv",
+          "sha256": "f010884faa9ca6f5cdd9611197bb8844164d70593c7502894221894e166cfcc3"
+        },
+        {
+          "bytes": 2942744,
+          "name": "TruffleHotSpotCompilation-2645[ProtosSemanticBytecodeRootNodeGen@652a44b].bgv",
+          "sha256": "b6b54b5e27d462e90a2afbd483cdcc41819b6c2fd1dcfbcd01f23de7e26825f4"
+        },
+        {
+          "bytes": 1214768,
+          "name": "TruffleHotSpotCompilation-2740[ProtosSemanticBytecodeRootNodeGen@652a44b].bgv",
+          "sha256": "aa3f5f583b31052ee0e30182bb228316d46fecf3a7d46db45a43a96bd60397a8"
+        },
+        {
+          "bytes": 969173,
+          "name": "TruffleHotSpotCompilation-2753[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "b435cd7efb303a52d66d96b7ac173c44a586cf33a6a6b0e19dfc91b4e9ea28df"
+        },
+        {
+          "bytes": 1421044,
+          "name": "TruffleHotSpotCompilation-2764[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "0484826f36d1144a631594c404d026e1e232ce3b0549dc649a3eded7f2ac990e"
+        },
+        {
+          "bytes": 3122566,
+          "name": "TruffleHotSpotCompilation-2773[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "83a682d3ec8ab36d80a8247f37c57e68063d03610d80bf11a5993b73ef2cd36c"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 2,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+        ],
+        "primary_label": "ProtosSemanticBytecodeRootNodeGen@652a44b",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 17,
+                  "count": 1576,
+                  "cycles": 2062,
+                  "ifs": 54,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2673
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 839,
+                  "cycles": 1491,
+                  "ifs": 120,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1652
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 79,
+                  "cycles": 121,
+                  "ifs": 3,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 147
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$TryPrimitiveNumericSendOne_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 35,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CreateCurrentFrameLocal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 32,
+                  "cycles": 38,
+                  "ifs": 3,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 45
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CurrentCallerReference_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 25,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 27
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$ReadRootFrameLocal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 46,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 43
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 14,
+                  "cycles": 35,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 48
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 17,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosSemanticBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 17,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosPrimitiveNumericSendFastPathsBaseFactory$IntegerArithmeticNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosPrimitiveNumericSendFastPathsBaseFactory$IntegerArithmeticNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2740[ProtosSemanticBytecodeRootNodeGen@652a44b].bgv"
+            ],
+            "comp_id": 2740,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 30,
+              "count": 3105,
+              "cycles": 4336,
+              "ifs": 181,
+              "invokes": 0,
+              "loops": 0,
+              "size": 5311
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 2771,
+            "label": "ProtosSemanticBytecodeRootNodeGen@652a44b",
+            "normalized_label": "ProtosSemanticBytecodeRootNodeGen@*",
+            "role": "primary",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              2624,
+              2645
+            ],
+            "target": "1:3",
+            "tier": 2,
+            "via": null
+          }
+        ]
+      },
+      "result": "3",
+      "retained_bgv": [
+        "budget-64000/bgv/TruffleHotSpotCompilation-2740[ProtosSemanticBytecodeRootNodeGen@652a44b].bgv.gz"
+      ],
+      "trace_log": "budget-64000/trace.log.gz",
+      "trace_log_sha256": "632e795a208abd8a2c6417120b6243f96f81a5543d35e8ae9636568e49d5f026"
+    }
+  ],
+  "schema_version": 1,
+  "selected_phase": "After TruffleTier",
+  "stabilization": {
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "surface": "canonical",
+  "surface_timed_call": "run.execute()",
+  "timing_evidence": "NONE (graph instrumentation is never a timing run)",
+  "workload": "primitive-integer-add",
+  "workload_source": "truffle/workloads/primitive-integer-add/primitive-integer-add.protos",
+  "workload_source_sha256": "ae8ba162beb092793920a40655bc10d1ff57b4dc62edbae370ad86c0d1e97aff"
+}

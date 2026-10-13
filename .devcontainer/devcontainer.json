@@ -7,7 +7,7 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/protos-benchmarks,type=bind,consistency=cached",
   "workspaceFolder": "/workspaces/protos-benchmarks",
   "remoteUser": "vscode",
-  "updateRemoteUserUID": true,
+  "updateRemoteUserUID": false,
   "customizations": {
     "vscode": {
       "extensions": [
@@ -24,7 +24,7 @@
 
   // Podman rootless:
   "runArgs": [
-    "--userns=keep-id"
+    "--userns=keep-id:uid=1000,gid=1000"
   ],
 
   "initializeCommand": "mkdir -p \"${localEnv:HOME}/.claude\"",

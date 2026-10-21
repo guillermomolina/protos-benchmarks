@@ -514,6 +514,38 @@ class DriverTest(unittest.TestCase):
 
 
 class StaticArchitectureTest(unittest.TestCase):
+    def test_canonical_compiles_only_polyglot_adapter(self):
+        cases = mp.load_cases()
+        surfaces = cases["surfaces"]
+
+        sources = mp.adapter_sources(
+            cases, surfaces["canonical"]
+        )
+        names = {path.name for path in sources}
+
+        self.assertEqual(
+            names,
+            {
+                "MeasurementEngine.java",
+                "ProtosCanonicalSurface.java",
+            },
+        )
+
+        support = (
+            "measure/surfaces/protos/"
+            "ProtosSurfaceSupport.java"
+        )
+
+        self.assertNotIn(
+            support, surfaces["canonical"]["sources"]
+        )
+        self.assertIn(
+            support, surfaces["dynamic"]["sources"]
+        )
+        self.assertIn(
+            support, surfaces["prepared"]["sources"]
+        )
+
     def test_canonical_adapter_timed_path(self):
         text = (ROOT / "truffle/measure/surfaces/canonical/ProtosCanonicalSurface.java").read_text()
         body = text.split("public static void main", 1)[1]

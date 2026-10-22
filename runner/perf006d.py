@@ -192,7 +192,10 @@ def validate() -> dict[str, Any]:
     assert "def reference(" in runner_text
     assert "def timing_smoke(" in runner_text
 
-    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    root_makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    if "include docker/Makefile" not in root_makefile.splitlines():
+        raise RuntimeError("missing include docker/Makefile")
+    makefile = (ROOT / "docker/Makefile").read_text(encoding="utf-8")
     assert "perf006d-timing-smoke:" in makefile
     assert "perf006d-reference:" in makefile
 

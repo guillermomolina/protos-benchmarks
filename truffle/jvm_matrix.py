@@ -514,10 +514,37 @@ def internal_gap_check(
     }
 
 
-def stability_window(
+def extreme_sample_check(
     samples: list[int],
 ) -> dict[str, object]:
     required = STABILITY_WINDOW * 2
+
+    if not samples:
+        return {
+            "status": "NOT_STABLE",
+            "reason": "empty-samples",
+            "required_samples": required,
+            "actual_samples": 0,
+        }
+
+    invalid = [
+        {"index": index, "value_ns": value}
+        for index, value in enumerate(samples)
+        if (
+            not isinstance(value, (int, float))
+            or isinstance(value, bool)
+            or not (0 < value < float("inf"))
+        )
+    ]
+
+    if invalid:
+        return {
+            "status": "NOT_STABLE",
+            "reason": "non-positive-or-invalid-samples",
+            "required_samples": required,
+            "actual_samples": len(samples),
+            "invalid_samples": invalid,
+        }
 
     if len(samples) < required:
         return {
@@ -525,6 +552,61 @@ def stability_window(
             "reason": "insufficient-samples",
             "required_samples": required,
             "actual_samples": len(samples),
+        }
+
+    median = float(statistics.median(samples))
+    lower = median / 2.0
+    upper = median * 2.0
+
+    extremes = [
+        {
+            "index": index,
+            "value_ns": value,
+            "side": (
+                "below-half-median"
+                if value < lower
+                else "above-double-median"
+            ),
+        }
+        for index, value in enumerate(samples)
+        if value < lower or value > upper
+    ]
+
+    result = {
+        "status": "NOT_STABLE" if extremes else "PASS",
+        "median_ns": median,
+        "lower_bound_ns": lower,
+        "upper_bound_ns": upper,
+        "extreme_sample_count": len(extremes),
+        "extreme_samples": extremes,
+    }
+
+    if extremes:
+        result["reason"] = "extreme-samples"
+
+    return result
+
+
+def stability_window(
+    samples: list[int],
+) -> dict[str, object]:
+    required = STABILITY_WINDOW * 2
+    extremes = extreme_sample_check(samples[-required:])
+
+    if len(samples) < required:
+        return {
+            "status": "NOT_STABLE",
+            "reason": "insufficient-samples",
+            "required_samples": required,
+            "actual_samples": len(samples),
+            "extreme_sample_check": extremes,
+        }
+
+    if "median_ns" not in extremes:
+        return {
+            "status": "NOT_STABLE",
+            "reason": extremes["reason"],
+            "extreme_sample_check": extremes,
         }
 
     previous = samples[
@@ -568,6 +650,7 @@ def stability_window(
         and previous_mad_pct <= STABILITY_MAD_PCT
         and latest_mad_pct <= STABILITY_MAD_PCT
         and shape["status"] == "PASS"
+        and extremes["status"] == "PASS"
     )
 
     return {
@@ -578,6 +661,7 @@ def stability_window(
         "previous_mad_pct": previous_mad_pct,
         "latest_mad_pct": latest_mad_pct,
         "shape": shape,
+        "extreme_sample_check": extremes,
     }
 
 

@@ -136,11 +136,29 @@ class Perf010aContractTest(unittest.TestCase):
             capture_output=True,
         )
         self.assertEqual(0, completed.returncode)
-        self.assertIn(
-            "{validate,smoke,reference,discrimination-validate,discrimination-smoke,"
-            "discrimination-reference,source-identity-validate,source-identity-smoke}",
-            completed.stdout,
+        positional = completed.stdout.split("positional arguments:", 1)[1]
+        positional = positional.split("options:", 1)[0]
+        commands = (
+            "validate", "smoke", "reference",
+            "discrimination-validate", "discrimination-smoke",
+            "discrimination-reference",
+            "source-identity-validate", "source-identity-smoke",
+            "stable-identity-phase1-validate",
+            "stable-identity-phase1-smoke",
+            "stable-identity-phase1-reference",
+            "phase2-validate", "phase2-smoke", "phase2-reference",
         )
+        choices = re.search(r"\{([^}]+)\}", positional)
+        self.assertIsNotNone(choices)
+
+        available = {
+            name.strip()
+            for name in choices.group(1).split(",")
+        }
+
+        for command in commands:
+            with self.subTest(command=command):
+                self.assertIn(command, available)
 
     def test_reference_requires_output_dir(self):
         completed = subprocess.run(

@@ -533,7 +533,10 @@ def validate() -> dict[str, Any]:
     if 'mode.equals("correctness")' not in driver_text or 'mode.equals("timing")' not in driver_text:
         raise RuntimeError("DIST006-D driver must separate correctness from timing")
 
-    makefile = MAKEFILE.read_text(encoding="utf-8")
+    root_makefile = MAKEFILE.read_text(encoding="utf-8")
+    if "include docker/Makefile" not in root_makefile.splitlines():
+        raise RuntimeError("missing include docker/Makefile")
+    makefile = (ROOT / "docker/Makefile").read_text(encoding="utf-8")
     for target in ("dist006d-validate:", "dist006d-smoke:", "dist006d-reference:"):
         if target not in makefile:
             raise RuntimeError("missing Makefile target: " + target[:-1])

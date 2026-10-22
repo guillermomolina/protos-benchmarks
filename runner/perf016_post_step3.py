@@ -1926,7 +1926,10 @@ def validate() -> dict[str, Any]:
     rejected = run_rejection_self_test(cfg)
     malformed = run_harness_revision_self_test()
 
-    makefile = MAKEFILE.read_text(encoding="utf-8")
+    root_makefile = MAKEFILE.read_text(encoding="utf-8")
+    if "include docker/Makefile" not in root_makefile.splitlines():
+        raise RuntimeError("missing include docker/Makefile")
+    makefile = (ROOT / "docker/Makefile").read_text(encoding="utf-8")
     for target in (
         "perf016-post-step3-validate:",
         "perf016-post-step3-smoke:",

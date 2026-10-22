@@ -528,7 +528,10 @@ def validate() -> dict[str, Any]:
     assert "import jdk.jfr" not in timing_driver
     assert "steady_ns" in timing_driver
 
-    makefile = MAKEFILE.read_text(encoding="utf-8")
+    root_makefile = MAKEFILE.read_text(encoding="utf-8")
+    if "include docker/Makefile" not in root_makefile.splitlines():
+        raise RuntimeError("missing include docker/Makefile")
+    makefile = (ROOT / "docker/Makefile").read_text(encoding="utf-8")
     for target in (
         "upstream003-validate:",
         "upstream003-smoke:",

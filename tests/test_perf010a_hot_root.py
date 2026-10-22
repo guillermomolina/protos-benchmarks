@@ -182,7 +182,9 @@ class StaticContractTest(unittest.TestCase):
             self.assertNotIn(forbidden, text)
 
     def test_makefile_targets_exist(self):
-        make = (ROOT / "Makefile").read_text(encoding="utf-8")
+        root_makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        self.assertIn("include docker/Makefile", root_makefile.splitlines())
+        make = (ROOT / "docker/Makefile").read_text(encoding="utf-8")
         for target in ("perf010a-hot-root-validate:", "perf010a-hot-root-smoke:", "perf010a-hot-root-diagnostic:"):
             self.assertIn(target, make)
 

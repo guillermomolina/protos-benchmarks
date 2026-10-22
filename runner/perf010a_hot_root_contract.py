@@ -398,7 +398,10 @@ def validate_no_hard_coded_root_numbers(cfg: dict[str, Any]) -> None:
 
 
 def validate_makefile() -> None:
-    text = MAKEFILE.read_text(encoding="utf-8")
+    root_makefile = MAKEFILE.read_text(encoding="utf-8")
+    if "include docker/Makefile" not in root_makefile.splitlines():
+        raise RuntimeError("missing include docker/Makefile")
+    text = (ROOT / "docker/Makefile").read_text(encoding="utf-8")
     for target in ("perf010a-hot-root-validate:", "perf010a-hot-root-smoke:", "perf010a-hot-root-diagnostic:"):
         require(target in text, "missing Makefile target: " + target[:-1])
 

@@ -1274,7 +1274,9 @@ class Perf016EvidenceTest(unittest.TestCase):
 
 class Perf016CommandLineAndMakefileTest(unittest.TestCase):
     def make_block(self):
-        text = (ROOT / "Makefile").read_text(encoding="utf-8")
+        root_makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        self.assertIn("include docker/Makefile", root_makefile.splitlines())
+        text = (ROOT / "docker/Makefile").read_text(encoding="utf-8")
         start = text.index(".PHONY: perf016-post-step3-validate")
         end = text.find("\n.PHONY:", start + 1)
         return text[start:] if end < 0 else text[start:end]

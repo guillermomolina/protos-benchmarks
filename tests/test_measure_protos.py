@@ -145,11 +145,17 @@ class DriverTest(unittest.TestCase):
             setattr(mp, name, value)
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def run_driver(self, *extra: str, product: Path | None = None, surface: str = "canonical"):
+    def run_driver(
+        self,
+        *extra: str,
+        product: Path | None = None,
+        surface: str = "canonical",
+        workload: str = WORKLOAD,
+    ):
         argv = [
             "--dir", str(product or self.product),
             "--surface", surface,
-            "--workload", WORKLOAD,
+            "--workload", workload,
             "--stage", "smoke",
             "--output", str(self.output),
             *extra,
@@ -463,6 +469,24 @@ class DriverTest(unittest.TestCase):
         self.assertEqual(lines["STEADY_STATE_ADMISSION"], "PASS")
         self.assertTrue(self.metadata(lines)["reference_eligible"])
 
+        summary = json.loads(
+            (Path(lines["RESULT"]) / "summary.json").read_text()
+        )
+        admission = summary["timing"]["admission"]
+        self.assertEqual(admission["scope"], "steady-only")
+        self.assertEqual(
+            admission["steady"]["extreme_sample_check"]["status"],
+            "PASS",
+        )
+        self.assertEqual(
+            admission["steady"]["extreme_sample_check"]["extreme_sample_count"],
+            0,
+        )
+        self.assertEqual(
+            admission["steady"]["extreme_sample_check"]["median_ns"],
+            100.0,
+        )
+
     def test_steady_only_admission_ignores_unsettled_warmup(self):
         original = self.fakes.run_logged
 
@@ -484,6 +508,120 @@ class DriverTest(unittest.TestCase):
         self.assertEqual(summary["timing"]["admission"]["scope"], "steady-only")
         self.assertEqual(summary["timing"]["admission"]["warmup"]["status"], "NOT_STABLE")
         self.assertEqual(summary["timing"]["admission"]["status"], "PASS")
+        self.assertEqual(
+            summary["timing"]["admission"]["warmup"]["extreme_sample_check"]["status"],
+            "NOT_STABLE",
+        )
+        self.assertEqual(
+            summary["timing"]["admission"]["steady"]["extreme_sample_check"]["status"],
+            "PASS",
+        )
+
+
+    def test_extreme_steady_sample_retained_in_invalid_reference(self):
+        original = self.fakes.run_logged
+
+        def isolated_spike(command, log):
+            code, out = original(command, log)
+
+            if "measure" in command:
+                before = (
+                    "sample phase=steady iteration=10 elapsed_ns=100"
+                )
+                after = (
+                    "sample phase=steady iteration=10 elapsed_ns=3000000"
+                )
+                self.assertIn(before, out)
+                out = out.replace(before, after, 1)
+                log.write_text(out)
+
+            return code, out
+
+        mp.run_logged = isolated_spike
+
+        code, lines = self.run_driver("--stage", "reference")
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertEqual(lines["MEASUREMENT_VALID"], "NO")
+        self.assertEqual(lines["REASON"], "NOT_STEADY_STATE_ADMITTED")
+
+        record = Path(lines["INVALID_RECORD"])
+        self.assertTrue(record.name.endswith(".invalid"))
+
+        summary = json.loads((record / "summary.json").read_text())
+        metadata = json.loads((record / "metadata.json").read_text())
+        admission = summary["timing"]["admission"]
+        extreme = admission["steady"]["extreme_sample_check"]
+
+        self.assertFalse(summary["measurement_valid"])
+        self.assertFalse(metadata["measurement_valid"])
+        self.assertEqual(admission["scope"], "steady-only")
+        self.assertEqual(admission["status"], "NOT_STABLE")
+        self.assertEqual(admission["steady"]["shape"]["status"], "PASS")
+        self.assertEqual(extreme["status"], "NOT_STABLE")
+        self.assertEqual(extreme["reason"], "extreme-samples")
+        self.assertEqual(extreme["extreme_sample_count"], 1)
+        self.assertEqual(
+            extreme["extreme_samples"],
+            [{
+                "index": 9,
+                "value_ns": 3000000,
+                "side": "above-double-median",
+            }],
+        )
+        self.assertEqual(summary["timing"]["steady_ns"][-1], 3000000)
+        self.assertIn(
+            "iteration=10 elapsed_ns=3000000",
+            (record / "raw" / "timing.log").read_text(),
+        )
+
+    def test_warmup_and_steady_rejects_unsettled_warmup(self):
+        workload = "fibonacci"
+        self.fakes.result = mp.workload_catalog.expected_result(workload)
+        original = self.fakes.run_logged
+
+        def warmup_spike(command, log):
+            code, out = original(command, log)
+
+            if "measure" in command:
+                before = (
+                    "sample phase=warmup iteration=60 elapsed_ns=100"
+                )
+                after = (
+                    "sample phase=warmup iteration=60 elapsed_ns=900"
+                )
+                self.assertIn(before, out)
+                out = out.replace(before, after, 1)
+                log.write_text(out)
+
+            return code, out
+
+        mp.run_logged = warmup_spike
+
+        code, lines = self.run_driver(
+            "--stage", "reference", workload=workload
+        )
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertEqual(lines["REASON"], "NOT_STEADY_STATE_ADMITTED")
+
+        record = Path(lines["INVALID_RECORD"])
+        summary = json.loads((record / "summary.json").read_text())
+        admission = summary["timing"]["admission"]
+
+        self.assertEqual(admission["scope"], "warmup-and-steady")
+        self.assertEqual(admission["status"], "NOT_STABLE")
+        self.assertEqual(admission["warmup"]["status"], "NOT_STABLE")
+        self.assertEqual(
+            admission["warmup"]["extreme_sample_check"]["status"],
+            "NOT_STABLE",
+        )
+        self.assertEqual(admission["steady"]["status"], "PASS")
+        self.assertEqual(
+            admission["steady"]["extreme_sample_check"]["status"],
+            "PASS",
+        )
+        self.assertEqual(summary["timing"]["warmup_ns"][-1], 900)
 
     def test_diagnostic_jvm_option_recorded_and_not_eligible(self):
         code, lines = self.run_driver("--stage", "reference", "--jvm-option=-Xlog:gc")
@@ -511,6 +649,131 @@ class DriverTest(unittest.TestCase):
             code = mp.main(["--verify-producer", lines["RESULT"]])
         self.assertEqual(code, 0)
         self.assertIn("WORKING_TREE_MATCHES_PRODUCER=YES", buffer.getvalue())
+
+
+
+class ExtremeSampleAdmissionTest(unittest.TestCase):
+    def test_ten_samples_around_40_us_pass(self):
+        samples = [
+            39980, 39990, 40005, 40010, 39995,
+            40000, 40015, 39985, 40020, 40002,
+        ]
+        original = samples.copy()
+
+        result = mp.jvm_matrix.stability_window(samples)
+        extreme = result["extreme_sample_check"]
+
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["shape"]["status"], "PASS")
+        self.assertEqual(extreme["status"], "PASS")
+        self.assertEqual(extreme["extreme_sample_count"], 0)
+        self.assertEqual(samples, original)
+
+    def test_isolated_3000_us_spike_rejected(self):
+        samples = [
+            39980, 39990, 40005, 40010, 39995,
+            40000, 40015, 39985, 40020, 3000000,
+        ]
+
+        result = mp.jvm_matrix.stability_window(samples)
+        extreme = result["extreme_sample_check"]
+
+        self.assertEqual(result["shape"]["status"], "PASS")
+        self.assertEqual(result["status"], "NOT_STABLE")
+        self.assertEqual(extreme["status"], "NOT_STABLE")
+        self.assertEqual(extreme["extreme_sample_count"], 1)
+        self.assertEqual(extreme["extreme_samples"][0]["index"], 9)
+        self.assertEqual(
+            extreme["extreme_samples"][0]["value_ns"], 3000000
+        )
+        self.assertGreater(
+            3000000, extreme["upper_bound_ns"]
+        )
+
+    def test_two_spikes_above_1200_ns_rejected(self):
+        samples = [
+            328, 332, 330, 329, 331,
+            327, 334, 333, 1250, 1275,
+        ]
+
+        result = mp.jvm_matrix.stability_window(samples)
+        extreme = result["extreme_sample_check"]
+
+        self.assertEqual(result["status"], "NOT_STABLE")
+        self.assertEqual(extreme["status"], "NOT_STABLE")
+        self.assertEqual(extreme["extreme_sample_count"], 2)
+        self.assertEqual(
+            [item["value_ns"] for item in extreme["extreme_samples"]],
+            [1250, 1275],
+        )
+
+    def test_two_distinct_performance_populations_rejected(self):
+        samples = [
+            1100000, 1100001, 1099999, 1100002, 1099998,
+            40000, 40020, 39980, 40010, 39990,
+        ]
+
+        result = mp.jvm_matrix.stability_window(samples)
+        extreme = result["extreme_sample_check"]
+
+        self.assertEqual(result["status"], "NOT_STABLE")
+        self.assertEqual(extreme["status"], "NOT_STABLE")
+        self.assertEqual(extreme["extreme_sample_count"], 5)
+        self.assertEqual(
+            {item["side"] for item in extreme["extreme_samples"]},
+            {"below-half-median"},
+        )
+
+    def test_stable_1100_us_is_not_compilation_evidence(self):
+        samples = [
+            1099980, 1100010, 1100005, 1099990, 1100020,
+            1099995, 1100015, 1100000, 1099985, 1100002,
+        ]
+
+        result = mp.jvm_matrix.stability_window(samples)
+
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(
+            result["extreme_sample_check"]["status"], "PASS"
+        )
+        self.assertNotIn("compiled", result)
+        self.assertNotIn("compilation_status", result)
+
+    def test_empty_non_positive_and_insufficient_samples(self):
+        check = mp.jvm_matrix.extreme_sample_check
+
+        self.assertEqual(check([])["reason"], "empty-samples")
+        self.assertEqual(
+            check([100] * 9)["reason"],
+            "insufficient-samples",
+        )
+
+        for samples in ([0] * 10, [-1] + [100] * 9):
+            result = check(samples)
+            self.assertEqual(result["status"], "NOT_STABLE")
+            self.assertEqual(
+                result["reason"],
+                "non-positive-or-invalid-samples",
+            )
+
+            window = mp.jvm_matrix.stability_window(samples)
+            self.assertEqual(window["status"], "NOT_STABLE")
+            self.assertEqual(
+                window["extreme_sample_check"]["status"],
+                "NOT_STABLE",
+            )
+
+    def test_exact_ratio_boundaries_are_inclusive(self):
+        samples = [100] * 8 + [50, 200]
+        original = samples.copy()
+
+        result = mp.jvm_matrix.extreme_sample_check(samples)
+
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["median_ns"], 100.0)
+        self.assertEqual(result["lower_bound_ns"], 50.0)
+        self.assertEqual(result["upper_bound_ns"], 200.0)
+        self.assertEqual(samples, original)
 
 
 class StaticArchitectureTest(unittest.TestCase):

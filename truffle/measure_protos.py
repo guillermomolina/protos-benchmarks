@@ -1243,6 +1243,9 @@ def measure(args: argparse.Namespace) -> int:
         else:
             admission = {"status": "N/A", "reason": "smoke-stage"}
 
+        # Retain complete phase diagnostics, including extreme samples,
+        # before admission can reject this reference. Both accepted and
+        # invalid runs persist this same summary.
         timing["admission"] = admission
         summary["timing"] = timing
         emit("STEADY_P50_NS_PER_CALL", f"{timing['steady_amortized_p50_ns_per_call']:.3f}")

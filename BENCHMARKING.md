@@ -1421,12 +1421,58 @@ language measure the same sample unit. `--warmup`, `--steady` and
 `source=cli-override` and are not `reference_eligible`.
 
 Order within a batch: correctness (single call, must equal the expected
-value) → timing run without instrumentation (reference stage requires the
-existing stability admission over the policy's `admission_scope`) → optional JFR run. The JFR run uses
-the same checkout, adapter, workload and case; the engine starts a
+value) → timing run without instrumentation → optional JFR run. Reference-stage
+timing applies stability admission under the selected `admission_scope`, including
+the existing statistical controls and the additional extreme-sample check.
+The JFR run uses the same checkout, adapter, workload and case; the engine starts a
 `jdk.jfr.Recording` (`profile` settings, stack depth 256) immediately before
 the first steady iteration and stops it after the last, so the recording is
 bounded to steady state by the harness itself.
+
+### Extreme-sample reference admission (methodology boundary)
+
+Reference stability is evaluated on the **last 10 samples in acquisition order** of each
+examined phase (two five-sample windows). The previously established controls
+remain in force: median drift <= 15%, MAD relative to each window median <=
+20%, and maximum internal gap <= 20% of the combined median when both sides
+of the gap have at least three samples. The new `extreme_sample_check` adds an
+**independent per-sample requirement**: compute the positive median `m` of
+the same 10 samples and reject the window if **any** sample is strictly below
+`m / 2` or strictly above `2 * m`. The bounds themselves are admitted. Empty,
+insufficient (fewer than 10), non-positive or invalid samples are explicitly
+`NOT_STABLE`, not accepted or silently discarded. This is a dimensionless
+relative rule; it does not use a fixed nanosecond or microsecond cutoff.
+
+A lone very large sample can leave window medians and MAD nearly unchanged,
+while the internal-gap test ignores a one-sample tail because it requires at
+least three samples on each side. Such a spike can indicate a performance
+transition or significant runtime/host interference: the reference must be
+rejected rather than treating the remaining nine samples as sufficient.
+No outlier is trimmed, replaced, or used to alter original timings. The raw
+ordered warmup and steady values remain authoritative.
+
+`steady-only` still gates the reference on steady stability alone; warmup
+stability is evaluated and recorded but is not an admission prerequisite.
+`warmup-and-steady` still requires both phases to pass. Both modes use the
+same checks for Protos, GraalJS and GraalPy. `summary.json` retains the
+per-phase `timing.admission.{warmup,steady}.extreme_sample_check` detail,
+including its status, median, bounds and the indices/values of any extreme
+samples, for accepted references and `.invalid` rejected records alike.
+Correctness, reference eligibility, sample counts, warmup, affinity and JVM
+measurement configuration are unchanged.
+
+**Statistical stability is not proof that the guest code was compiled by
+Truffle.** A stable 1,100 us sample population, for example, passes the
+statistical checks if internally consistent, without establishing compiled
+execution. Direct compilation-state evidence would require a separate,
+non-timing diagnostic; timing duration is not a substitute for such evidence.
+
+Adding this criterion is a **new methodological boundary** for future
+admissions. Previously published results remain attached to their exact
+historical harness revision and its original admission rule: they are not
+automatically reclassified, rewritten or removed. Any comparison crossing
+this boundary must state the distinct harness/methodology identities rather
+than silently treating both cohorts as if they used identical admission.
 
 ### Results
 

@@ -219,7 +219,10 @@ def validate() -> dict[str, Any]:
         if forbidden in runner_text:
             raise RuntimeError("heavy diagnostics leaked into PERF004-A2 timing runner")
 
-    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    root_makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    if "include docker/Makefile" not in root_makefile.splitlines():
+        raise RuntimeError("missing include docker/Makefile")
+    makefile = (ROOT / "docker/Makefile").read_text(encoding="utf-8")
     for target in ("perf004a-validate:", "perf004a-smoke:", "perf004a-reference:"):
         if target not in makefile:
             raise RuntimeError(f"missing Makefile target {target}")

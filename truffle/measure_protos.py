@@ -1171,6 +1171,9 @@ def measure(args: argparse.Namespace) -> int:
         "diagnostic_jvm_options": list(args.jvm_option),
     }
 
+    if surface in ("canonical", "executable-value"):
+        result_key["verification_protocol"] = "polyglot-typed-v1"
+
     if args.diagnostic:
         result_key["diagnostic_capture"] = "thread-cpu-gc-ctx-v2-dedicated-file"
     if args.diagnostic_jit:

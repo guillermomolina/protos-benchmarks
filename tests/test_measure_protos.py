@@ -525,9 +525,15 @@ class DriverTest(unittest.TestCase):
             if workload == WORKLOAD:
                 continue
             timing = mp.resolve_policy(cases, workload, "reference", "timing", {})
+            expected_warmup = (
+                150 if workload == "primitive-while-zero" else 50
+            )
+            expected_calls = (
+                1000000 if workload == "primitive-while-zero" else 10000
+            )
             self.assertEqual(
                 (timing["warmup_iterations"], timing["steady_iterations"], timing["sample_calls"], timing["admission_scope"]),
-                (50, 10, 10000, "steady-only"),
+                (expected_warmup, 10, expected_calls, "steady-only"),
                 workload,
             )
 
@@ -1279,6 +1285,7 @@ class StaticArchitectureTest(unittest.TestCase):
             {
                 "MeasurementEngine.java",
                 "ProtosCanonicalSurface.java",
+                "PolyglotResultInvocation.java",
             },
         )
 
@@ -1301,9 +1308,54 @@ class StaticArchitectureTest(unittest.TestCase):
         text = (ROOT / "truffle/measure/surfaces/canonical/ProtosCanonicalSurface.java").read_text()
         body = text.split("public static void main", 1)[1]
         self.assertIn('context.getBindings("protos").getMember("run")', body)
-        self.assertIn("() -> normalize(run.execute())", body)
+        self.assertIn("new PolyglotResultInvocation(run)", body)
         for forbidden in ("prepareTopLevel(", "invokeTopLevel(", "prepared.invoke(", ".enter(", ".leave(", "Lock", "synchronized", "AtomicBoolean", "compareAndSet"):
             self.assertNotIn(forbidden, body)
+
+    def test_shared_polyglot_result_verification(self):
+        shared = (
+            ROOT
+            / "truffle/measure/surfaces/shared/"
+            "PolyglotResultInvocation.java"
+        ).read_text()
+
+        self.assertIn("Value value = run.execute()", shared)
+        self.assertIn("value.fitsInBigInteger()", shared)
+        self.assertIn("expectedInteger.equals(actual)", shared)
+        self.assertIn("return expectedText;", shared)
+
+        for relative in (
+            "canonical/ProtosCanonicalSurface.java",
+            "peer/PeerExecutableSurface.java",
+        ):
+            adapter = (
+                ROOT / "truffle/measure/surfaces" / relative
+            ).read_text()
+
+            self.assertIn(
+                "new PolyglotResultInvocation(run)", adapter
+            )
+            self.assertNotIn(
+                "() -> normalize(run.execute())", adapter
+            )
+
+        cases = mp.load_cases()
+        shared_source = (
+            "measure/surfaces/shared/"
+            "PolyglotResultInvocation.java"
+        )
+
+        for surface in ("canonical", "executable-value"):
+            self.assertIn(
+                shared_source,
+                cases["surfaces"][surface]["sources"],
+            )
+
+        self.assertEqual(
+            cases["policy"]["workloads"]["primitive-while-zero"]
+            ["reference"]["timing"]["warmup_iterations"],
+            150,
+        )
 
     def test_no_reflection_in_adapters(self):
         for path in (ROOT / "truffle/measure").rglob("*.java"):

@@ -6,6 +6,7 @@
 package com.guillermomolina.protos.benchmarks.measure.peer;
 
 import com.guillermomolina.protos.benchmarks.measure.MeasurementEngine;
+import com.guillermomolina.protos.benchmarks.measure.shared.PolyglotResultInvocation;
 import java.nio.file.Files;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
@@ -56,14 +57,7 @@ public final class PeerExecutableSurface {
                     language,
                     arguments,
                     setupNs,
-                    () -> normalize(run.execute()));
+                    new PolyglotResultInvocation(run));
         }
-    }
-
-    private static String normalize(Value value) {
-        if (value.fitsInBigInteger()) {
-            return value.asBigInteger().toString();
-        }
-        return value.toString();
     }
 }

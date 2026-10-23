@@ -6,6 +6,7 @@
 package com.guillermomolina.protos.benchmarks.measure.protos;
 
 import com.guillermomolina.protos.benchmarks.measure.MeasurementEngine;
+import com.guillermomolina.protos.benchmarks.measure.shared.PolyglotResultInvocation;
 import java.nio.file.Files;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
@@ -54,14 +55,8 @@ public final class ProtosCanonicalSurface {
                     "protos",
                     arguments,
                     setupNs,
-                    () -> normalize(run.execute()));
+                    new PolyglotResultInvocation(run));
         }
     }
 
-    private static String normalize(Value value) {
-        if (value.fitsInBigInteger()) {
-            return value.asBigInteger().toString();
-        }
-        return value.toString();
-    }
 }

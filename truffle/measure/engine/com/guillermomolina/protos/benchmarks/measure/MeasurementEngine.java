@@ -175,31 +175,43 @@ public final class MeasurementEngine {
     private static void runDiagnostic(
             Arguments arguments, Invocation invocation) throws Exception {
         DiagnosticSampler sampler = new DiagnosticSampler();
+        DiagnosticJfr jit = DiagnosticJfr.startIfRequested();
 
-        DiagnosticSnapshot before = sampler.before();
-        long started = System.nanoTime();
-        long cpuStarted = sampler.cpuNow();
-        String expected = invocation.invoke();
-        long cpuElapsed = sampler.cpuNow() - cpuStarted;
-        long elapsed = System.nanoTime() - started;
-        DiagnosticSnapshot after = sampler.after();
+        try {
+            DiagnosticSnapshot before = sampler.before();
+            DiagnosticSampleEvent event =
+                    beginSample(jit, "cold", 1, 1);
 
-        sample("cold", 1, elapsed);
-        sampler.report("cold", 1, before, after, cpuElapsed);
+            long started = System.nanoTime();
+            long cpuStarted = sampler.cpuNow();
+            String expected = invocation.invoke();
+            long cpuElapsed = sampler.cpuNow() - cpuStarted;
+            long elapsed = System.nanoTime() - started;
 
-        for (int i = 1; i <= arguments.warmupIterations(); i++) {
-            diagnosticRepeated(
-                    invocation, expected, arguments.sampleCalls(),
-                    "warmup", i, sampler);
+            endSample(event);
+            DiagnosticSnapshot after = sampler.after();
+
+            sample("cold", 1, elapsed);
+            sampler.report("cold", 1, before, after, cpuElapsed);
+
+            for (int i = 1; i <= arguments.warmupIterations(); i++) {
+                diagnosticRepeated(
+                        invocation, expected, arguments.sampleCalls(),
+                        "warmup", i, sampler, jit);
+            }
+
+            for (int i = 1; i <= arguments.steadyIterations(); i++) {
+                diagnosticRepeated(
+                        invocation, expected, arguments.sampleCalls(),
+                        "steady", i, sampler, jit);
+            }
+
+            System.out.println("result=" + expected);
+        } finally {
+            if (jit != null) {
+                jit.finish();
+            }
         }
-
-        for (int i = 1; i <= arguments.steadyIterations(); i++) {
-            diagnosticRepeated(
-                    invocation, expected, arguments.sampleCalls(),
-                    "steady", i, sampler);
-        }
-
-        System.out.println("result=" + expected);
     }
 
     private static void diagnosticRepeated(
@@ -208,17 +220,125 @@ public final class MeasurementEngine {
             int calls,
             String phase,
             int iteration,
-            DiagnosticSampler sampler) throws Exception {
+            DiagnosticSampler sampler,
+            DiagnosticJfr jit) throws Exception {
         DiagnosticSnapshot before = sampler.before();
+        DiagnosticSampleEvent event =
+                beginSample(jit, phase, iteration, calls);
+
         long started = System.nanoTime();
         long cpuStarted = sampler.cpuNow();
         invokeRepeated(invocation, expected, calls);
         long cpuElapsed = sampler.cpuNow() - cpuStarted;
         long elapsed = System.nanoTime() - started;
+
+        endSample(event);
         DiagnosticSnapshot after = sampler.after();
 
         sample(phase, iteration, elapsed);
         sampler.report(phase, iteration, before, after, cpuElapsed);
+    }
+
+    private static DiagnosticSampleEvent beginSample(
+            DiagnosticJfr jit,
+            String phase,
+            int iteration,
+            int calls) {
+        if (jit == null) {
+            return null;
+        }
+
+        DiagnosticSampleEvent event = new DiagnosticSampleEvent();
+        event.phase = phase;
+        event.iteration = iteration;
+        event.sampleCalls = calls;
+        event.begin();
+        return event;
+    }
+
+    private static void endSample(DiagnosticSampleEvent event) {
+        if (event != null) {
+            event.end();
+            event.commit();
+        }
+    }
+
+    @jdk.jfr.Name("protos.benchmarks.SampleWindow")
+    @jdk.jfr.Label("Protos Benchmark Sample Window")
+    @jdk.jfr.StackTrace(false)
+    public static final class DiagnosticSampleEvent
+            extends jdk.jfr.Event {
+        @jdk.jfr.Label("Phase")
+        public String phase;
+
+        @jdk.jfr.Label("Iteration")
+        public int iteration;
+
+        @jdk.jfr.Label("Sample Calls")
+        public int sampleCalls;
+    }
+
+    private static final class DiagnosticJfr {
+        private final jdk.jfr.Recording recording;
+        private final Path destination;
+
+        private DiagnosticJfr(
+                jdk.jfr.Recording recording,
+                Path destination) {
+            this.recording = recording;
+            this.destination = destination;
+        }
+
+        static DiagnosticJfr startIfRequested() throws Exception {
+            String value = System.getProperty(
+                    "protos.benchmarks.measure.jitJfr");
+
+            if (value == null) {
+                return null;
+            }
+
+            if (value.isBlank()) {
+                throw new IllegalArgumentException(
+                        "JIT JFR destination must not be empty");
+            }
+
+            Path destination = Path.of(value)
+                    .toAbsolutePath().normalize();
+
+            jdk.jfr.Recording recording =
+                    new jdk.jfr.Recording(
+                            jdk.jfr.Configuration.getConfiguration(
+                                    "profile"));
+
+            recording.setName("protos-benchmarks-jit-diagnostic");
+
+            recording.enable(DiagnosticSampleEvent.class)
+                    .withThreshold(java.time.Duration.ZERO)
+                    .withoutStackTrace();
+
+            recording.enable("jdk.Compilation")
+                    .withThreshold(java.time.Duration.ZERO);
+
+            recording.enable("jdk.Deoptimization");
+            recording.enable("jdk.GarbageCollection");
+
+            recording.start();
+
+            System.out.println("diagnostic_jfr_mode=ENABLED");
+
+            return new DiagnosticJfr(recording, destination);
+        }
+
+        void finish() throws Exception {
+            try {
+                recording.stop();
+                recording.dump(destination);
+            } finally {
+                recording.close();
+            }
+
+            System.out.println("diagnostic_jfr_scope=all-samples");
+        }
     }
 
     private record DiagnosticSnapshot(

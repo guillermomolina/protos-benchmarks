@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 import sys
 
@@ -131,6 +132,12 @@ class Fakes:
                             f"gc_sample phase={phase} iteration={iteration} "
                             "count_delta=0 time_ms_delta=0",
                         ])
+            for option in command:
+                prefix = "-Dprotos.benchmarks.measure.jitJfr="
+                if option.startswith(prefix):
+                    destination = Path(option[len(prefix):])
+                    destination.write_bytes(b"simulated-jfr")
+                    lines.append("diagnostic_jfr_scope=all-samples")
             lines.append(f"result={self.result}")
             out = "\n".join(lines) + "\n"
 
@@ -764,6 +771,127 @@ class DriverTest(unittest.TestCase):
                 self.assertTrue(
                     Path(lines["INVALID_RECORD"]).is_dir()
                 )
+
+    def test_jit_capture_requires_diagnostic(self):
+        code, _ = self.run_driver("--diagnostic-jit")
+        self.assertEqual(code, mp.EXIT_USAGE)
+        self.assertEqual(self.fakes.java_calls, [])
+
+    def test_jit_capture_retains_separate_jfr(self):
+        synthetic_timeline = {
+            "schema": 1,
+            "classification": "DIAGNOSTIC_ONLY",
+            "event_sample_correlation": "TEMPORAL_OVERLAP_ONLY",
+            "jit_maturity": "NOT_PROVEN",
+            "windows": [],
+        }
+        with mock.patch(
+            "jit_timeline.analyze_jfr",
+            return_value=synthetic_timeline,
+        ):
+            code, lines = self.run_driver(
+                "--diagnostic", "--diagnostic-jit",
+                "--stage", "reference",
+            )
+        self.assertEqual(code, 0)
+        self.assertEqual(lines["REFERENCE_ELIGIBLE"], "NO")
+
+        result = Path(lines["RESULT"])
+        metadata = json.loads((result / "metadata.json").read_text())
+        report = json.loads((result / "diagnostic.json").read_text())
+        jit = result / "raw" / "jit-timeline.jfr"
+
+        self.assertTrue(jit.is_file())
+        timeline_path = result / "jit-timeline.json"
+        self.assertTrue(timeline_path.is_file())
+        timeline = json.loads(timeline_path.read_text())
+        self.assertEqual(
+            timeline["event_sample_correlation"],
+            "TEMPORAL_OVERLAP_ONLY",
+        )
+        self.assertEqual(
+            metadata["diagnostic_jit"]["timeline_sha256"],
+            __import__("hashlib").sha256(
+                timeline_path.read_bytes()
+            ).hexdigest(),
+        )
+        self.assertFalse(metadata["reference_eligible"])
+        self.assertEqual(
+            metadata["diagnostic_jit"]["sample_event"],
+            "protos.benchmarks.SampleWindow",
+        )
+        self.assertEqual(
+            report["jit_capture"]["event_correlation"],
+            "TEMPORAL_OVERLAP_ONLY",
+        )
+        self.assertEqual(report["jit_maturity"], "NOT_PROVEN")
+
+        import hashlib
+        self.assertEqual(
+            metadata["diagnostic_jit"]["sha256"],
+            hashlib.sha256(jit.read_bytes()).hexdigest(),
+        )
+
+        correctness = [
+            command for command in self.fakes.java_calls
+            if "correctness" in command
+        ][0]
+        timing = [
+            command for command in self.fakes.java_calls
+            if "measure" in command
+        ][0]
+
+        self.assertNotIn("-XX:+PrintCompilation", correctness)
+        self.assertIn("-XX:+PrintCompilation", timing)
+        self.assertIn(
+            "-Dpolyglot.engine.TraceCompilation=true", timing
+        )
+
+    def test_jit_capture_rejects_missing_jfr(self):
+        original = self.fakes.run_logged
+
+        def without_jfr(command, log):
+            code, out = original(command, log)
+
+            if "measure" in command:
+                for option in command:
+                    prefix = "-Dprotos.benchmarks.measure.jitJfr="
+                    if option.startswith(prefix):
+                        destination = Path(option[len(prefix):])
+                        destination.unlink(missing_ok=True)
+
+            return code, out
+
+        mp.run_logged = without_jfr
+
+        code, lines = self.run_driver(
+            "--diagnostic", "--diagnostic-jit"
+        )
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertEqual(
+            lines["REASON"], "DIAGNOSTIC_JIT_JFR_MISSING"
+        )
+        self.assertTrue(
+            Path(lines["INVALID_RECORD"]).is_dir()
+        )
+
+    def test_jit_capture_rejects_invalid_timeline(self):
+        with mock.patch(
+            "jit_timeline.analyze_jfr",
+            side_effect=ValueError("JFR windows missing"),
+        ):
+            code, lines = self.run_driver(
+                "--diagnostic", "--diagnostic-jit"
+            )
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertEqual(
+            lines["REASON"], "DIAGNOSTIC_JIT_TIMELINE_INVALID"
+        )
+        self.assertTrue(
+            Path(lines["INVALID_RECORD"]).is_dir()
+        )
 
     def test_peer_language_needs_no_product(self):
         argv = ["--language", "js", "--workload", WORKLOAD, "--stage", "smoke", "--output", str(self.output)]

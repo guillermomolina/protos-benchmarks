@@ -979,6 +979,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="collect per-sample JVM diagnostics; never reference-eligible",
     )
+    parser.add_argument(
+        "--diagnostic-jit",
+        action="store_true",
+        help="capture JIT logs and JFR sample windows in a diagnostic JVM",
+    )
     parser.add_argument("--warmup", type=int, help="diagnostic override")
     parser.add_argument("--steady", type=int, help="diagnostic override")
     parser.add_argument("--sample-calls", type=int, help="diagnostic override")
@@ -1033,6 +1038,14 @@ def measure(args: argparse.Namespace) -> int:
 
     if args.diagnostic and args.profile != "none":
         raise UsageError("--diagnostic requires --profile none")
+
+    if args.diagnostic_jit and not args.diagnostic:
+        raise UsageError("--diagnostic-jit requires --diagnostic")
+
+    if args.diagnostic_jit and args.jvm_option:
+        raise UsageError(
+            "--diagnostic-jit uses a fixed JVM trace configuration"
+        )
 
     cases = load_cases()
 
@@ -1095,6 +1108,11 @@ def measure(args: argparse.Namespace) -> int:
             *files,
             (TRUFFLE / "measure_diagnostics.py").resolve(),
         ]))
+    if args.diagnostic_jit:
+        files = sorted(set([
+            *files,
+            (TRUFFLE / "jit_timeline.py").resolve(),
+        ]))
     harness_before = harness_identity(files)
 
     result_key = {
@@ -1114,11 +1132,15 @@ def measure(args: argparse.Namespace) -> int:
 
     if args.diagnostic:
         result_key["diagnostic_capture"] = "thread-cpu-gc-ctx-v1"
+    if args.diagnostic_jit:
+        result_key["diagnostic_jit"] = "jfr-sample-windows-v1"
 
     prepare_output(output)
     case = case_id(language, surface, args.workload, args.stage, args.profile)
     if args.diagnostic:
         case += "--diagnostic"
+    if args.diagnostic_jit:
+        case += "-jit"
     existing = find_existing(output, case, result_key)
 
     emit("PRODUCT_DIRECTORY", product_dir or "-")
@@ -1149,6 +1171,7 @@ def measure(args: argparse.Namespace) -> int:
     staging.mkdir(parents=True)
     raw = staging / "raw"
     raw.mkdir()
+    jit_jfr = raw / "jit-timeline.jfr" if args.diagnostic_jit else None
 
     cpu, siblings, allowed = choose_cpu(args.cpu)
     metadata: dict[str, object] = {
@@ -1228,6 +1251,15 @@ def measure(args: argparse.Namespace) -> int:
                 "-Dprotos.benchmarks.measure.diagnostic=true"
             )
 
+        if args.diagnostic_jit:
+            timing_jvm_options.extend([
+                "-Dpolyglot.engine.BackgroundCompilation=false",
+                "-Dpolyglot.engine.TraceCompilation=true",
+                "-XX:+PrintCompilation",
+                "-Xlog:gc=info,safepoint=info",
+                "-Dprotos.benchmarks.measure.jitJfr=" + str(jit_jfr),
+            ])
+
         code, out = run_logged(
             java_command(
                 runtime_cp,
@@ -1251,6 +1283,17 @@ def measure(args: argparse.Namespace) -> int:
 
         if parsed is None or parsed["result"] != expected:
             raise InvalidMeasurement("TIMING_RUN_FAILED", str(raw / "timing.log"))
+
+        if args.diagnostic_jit:
+            if (
+                "diagnostic_jfr_scope=all-samples" not in out
+                or jit_jfr is None
+                or not jit_jfr.is_file()
+                or jit_jfr.stat().st_size == 0
+            ):
+                raise InvalidMeasurement(
+                    "DIAGNOSTIC_JIT_JFR_MISSING"
+                )
 
         timing = timing_summary(parsed)
 
@@ -1378,8 +1421,51 @@ def measure(args: argparse.Namespace) -> int:
                 "report": "diagnostic.json",
             }
 
+        if args.diagnostic_jit:
+            jit_evidence = {
+                "classification": "DIAGNOSTIC_ONLY",
+                "file": "raw/jit-timeline.jfr",
+                "sha256": sha256_file(jit_jfr),
+                "scope": "cold-warmup-steady",
+                "sample_event": "protos.benchmarks.SampleWindow",
+                "jvm_options": timing_jvm_options,
+                "event_correlation": "PENDING_JFR_VALIDATION",
+                "jit_maturity": "NOT_PROVEN",
+            }
+            metadata["diagnostic_jit"] = jit_evidence
+            summary["diagnostic"]["jit"] = jit_evidence
+
         write_json(staging / "summary.json", summary)
         write_json(staging / "metadata.json", metadata)
+
+        if args.diagnostic_jit:
+            import jit_timeline
+
+            try:
+                timeline = jit_timeline.analyze_jfr(
+                    jit_jfr,
+                    {
+                        "cold": 1,
+                        "warmup": timing_policy["warmup_iterations"],
+                        "steady": timing_policy["steady_iterations"],
+                    },
+                    timing_policy["sample_calls"],
+                )
+            except (ValueError, OSError, subprocess.SubprocessError) as exc:
+                raise InvalidMeasurement(
+                    "DIAGNOSTIC_JIT_TIMELINE_INVALID", str(exc)
+                ) from exc
+
+            timeline_path = staging / "jit-timeline.json"
+            write_json(timeline_path, timeline)
+
+            evidence = metadata["diagnostic_jit"]
+            evidence["timeline_file"] = "jit-timeline.json"
+            evidence["timeline_sha256"] = sha256_file(timeline_path)
+            evidence["event_correlation"] = "TEMPORAL_OVERLAP_ONLY"
+
+            write_json(staging / "summary.json", summary)
+            write_json(staging / "metadata.json", metadata)
 
         if args.diagnostic:
             import measure_diagnostics
@@ -1409,6 +1495,8 @@ def measure(args: argparse.Namespace) -> int:
             report["source"]["path"] = str(
                 (output / case / run_id / "raw" / "timing.log").resolve()
             )
+            if args.diagnostic_jit:
+                report["jit_capture"] = metadata["diagnostic_jit"]
             write_json(staging / "diagnostic.json", report)
 
         final = promote(staging, output / case / run_id)
@@ -1416,6 +1504,9 @@ def measure(args: argparse.Namespace) -> int:
         if args.diagnostic:
             emit("DIAGNOSTIC_REPORT", final / "diagnostic.json")
             emit("REFERENCE_ELIGIBLE", "NO")
+        if args.diagnostic_jit:
+            emit("DIAGNOSTIC_JFR", final / "raw" / "jit-timeline.jfr")
+            emit("JIT_TIMELINE", final / "jit-timeline.json")
         emit("RESULT", final)
         return EXIT_OK
 

@@ -138,6 +138,19 @@ class Fakes:
                     destination = Path(option[len(prefix):])
                     destination.write_bytes(b"simulated-jfr")
                     lines.append("diagnostic_jfr_scope=all-samples")
+            for option in command:
+                prefix = "-Dprotos.benchmarks.measure.affinityProfile="
+                if option.startswith(prefix):
+                    profile = option[len(prefix):]
+                    initial = "0-1" if profile == "C" else "0"
+                    lines.extend([
+                        f"AFFINITY_PROFILE={profile}",
+                        f"AFFINITY_INITIAL_MAIN={initial}",
+                        "MEASURE_THREAD_TID=12345",
+                        "MEASURE_THREAD_AFFINITY=0",
+                        f"AFFINITY_SNAPSHOT phase=before aux=3 expected={initial}",
+                        f"AFFINITY_SNAPSHOT phase=after aux=3 expected={initial}",
+                    ])
             lines.append(f"result={self.result}")
             out = "\n".join(lines) + "\n"
 
@@ -888,6 +901,112 @@ class DriverTest(unittest.TestCase):
         self.assertEqual(code, mp.EXIT_INVALID)
         self.assertEqual(
             lines["REASON"], "DIAGNOSTIC_JIT_TIMELINE_INVALID"
+        )
+        self.assertTrue(
+            Path(lines["INVALID_RECORD"]).is_dir()
+        )
+
+    def test_affinity_requires_diagnostic_and_cpu_zero(self):
+        with mock.patch.object(
+            mp.os, "sched_getaffinity", return_value={0, 1}
+        ):
+            code, _ = self.run_driver(
+                "--diagnostic-affinity", "A", "--cpu", "0"
+            )
+            self.assertEqual(code, mp.EXIT_USAGE)
+
+            code, _ = self.run_driver(
+                "--diagnostic",
+                "--diagnostic-affinity", "A",
+            )
+            self.assertEqual(code, mp.EXIT_USAGE)
+
+        self.assertEqual(self.fakes.java_calls, [])
+
+    def test_affinity_profiles_launch_different_cpu_sets(self):
+        with mock.patch.object(
+            mp.os, "sched_getaffinity", return_value={0, 1}
+        ):
+            for profile, mask in (("A", "0"), ("C", "0,1")):
+                with self.subTest(profile=profile):
+                    code, lines = self.run_driver(
+                        "--diagnostic", "--cpu", "0",
+                        "--diagnostic-affinity", profile,
+                    )
+
+                    self.assertEqual(code, 0)
+
+                    result = Path(lines["RESULT"])
+                    metadata = json.loads(
+                        (result / "metadata.json").read_text()
+                    )
+                    report = json.loads(
+                        (result / "diagnostic.json").read_text()
+                    )
+
+                    self.assertFalse(metadata["reference_eligible"])
+                    self.assertEqual(
+                        metadata["diagnostic_affinity"]["profile"],
+                        profile,
+                    )
+                    self.assertEqual(
+                        report["affinity"]["status"], "VERIFIED"
+                    )
+
+                    timing = [
+                        call for call in self.fakes.java_calls
+                        if "measure" in call
+                    ][-1]
+
+                    self.assertEqual(timing[:3], [
+                        "taskset", "-c", mask,
+                    ])
+                    self.assertIn(
+                        "-Dprotos.benchmarks.measure.affinityProfile="
+                        + profile,
+                        timing,
+                    )
+
+    def test_affinity_c_requires_both_cpus(self):
+        with mock.patch.object(
+            mp.os, "sched_getaffinity", return_value={0}
+        ):
+            code, _ = self.run_driver(
+                "--diagnostic", "--cpu", "0",
+                "--diagnostic-affinity", "C",
+            )
+
+        self.assertEqual(code, mp.EXIT_USAGE)
+        self.assertEqual(self.fakes.java_calls, [])
+
+    def test_affinity_missing_proof_invalidates_run(self):
+        original = self.fakes.run_logged
+
+        def missing_proof(command, log):
+            code, out = original(command, log)
+
+            if "measure" in command:
+                out = "".join(
+                    line for line in out.splitlines(keepends=True)
+                    if not line.startswith("MEASURE_THREAD_AFFINITY=")
+                )
+                log.write_text(out)
+
+            return code, out
+
+        mp.run_logged = missing_proof
+
+        with mock.patch.object(
+            mp.os, "sched_getaffinity", return_value={0, 1}
+        ):
+            code, lines = self.run_driver(
+                "--diagnostic", "--cpu", "0",
+                "--diagnostic-affinity", "C",
+            )
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertEqual(
+            lines["REASON"], "DIAGNOSTIC_AFFINITY_INVALID"
         )
         self.assertTrue(
             Path(lines["INVALID_RECORD"]).is_dir()

@@ -130,7 +130,22 @@ public final class MeasurementEngine {
                 throw new IllegalArgumentException(
                         "diagnostic capture cannot share the JFR timing run");
             }
-            runDiagnostic(arguments, invocation);
+            String profile = System.getProperty(
+                    "protos.benchmarks.measure.affinityProfile");
+            String measuredTid = null;
+
+            if (profile != null) {
+                measuredTid = pinDiagnosticThread(profile);
+                verifyDiagnosticThreads("before", profile, measuredTid);
+            }
+
+            try {
+                runDiagnostic(arguments, invocation);
+            } finally {
+                if (profile != null) {
+                    verifyDiagnosticThreads("after", profile, measuredTid);
+                }
+            }
             return;
         }
 
@@ -467,6 +482,203 @@ public final class MeasurementEngine {
             return Long.parseLong(
                     line.substring(line.indexOf(':') + 1).trim());
         }
+    }
+
+    /**
+     * Diagnostic-only Linux affinity setup. Executed after guest setup,
+     * before cold/warmup/steady. Never used by ordinary measurements.
+     */
+    private static String pinDiagnosticThread(String profile)
+            throws Exception {
+        if (!"A".equals(profile) && !"C".equals(profile)) {
+            throw new IllegalArgumentException(
+                    "unsupported diagnostic affinity profile: " + profile);
+        }
+
+        String initialMask = "A".equals(profile) ? "0" : "0-1";
+        String observed = readDiagnosticMask(
+                Path.of("/proc/thread-self/status"));
+
+        if (!initialMask.equals(observed)) {
+            throw new IllegalStateException(
+                    "wrong initial measurement-thread affinity: "
+                            + observed + ", expected " + initialMask);
+        }
+
+        String tid = Files.readSymbolicLink(
+                Path.of("/proc/thread-self")).getFileName().toString();
+
+        Process process = new ProcessBuilder(
+                "taskset", "-pc", "0", tid)
+                .redirectErrorStream(true)
+                .start();
+
+        String output = new String(
+                process.getInputStream().readAllBytes(),
+                java.nio.charset.StandardCharsets.UTF_8);
+
+        if (process.waitFor() != 0) {
+            throw new IllegalStateException(
+                    "cannot pin measurement thread: " + output);
+        }
+
+        String pinned = readDiagnosticMask(
+                Path.of("/proc/thread-self/status"));
+
+        if (!"0".equals(pinned)) {
+            throw new IllegalStateException(
+                    "measurement thread not pinned to CPU 0: " + pinned);
+        }
+
+        System.out.println("AFFINITY_PROFILE=" + profile);
+        System.out.println("AFFINITY_INITIAL_MAIN=" + initialMask);
+        System.out.println("MEASURE_THREAD_TID=" + tid);
+        System.out.println("MEASURE_THREAD_AFFINITY=" + pinned);
+        return tid;
+    }
+
+    private static String readDiagnosticMask(Path status)
+            throws java.io.IOException {
+        for (String line : Files.readAllLines(status)) {
+            if (line.startsWith("Cpus_allowed_list:")) {
+                return line.substring(line.indexOf(':') + 1).trim();
+            }
+        }
+
+        throw new IllegalStateException(
+                "Cpus_allowed_list unavailable in " + status);
+    }
+
+    private static void verifyDiagnosticThreads(
+            String phase, String profile, String measuredTid)
+            throws Exception {
+        boolean isC = "C".equals(profile);
+        String initialMask = isC ? "0-1" : "0";
+
+        int auxiliaries = 0;
+        int compilerThreads = 0;
+        int compilerWide = 0;
+        int auxiliaryWide = 0;
+        int auxiliaryNarrow = 0;
+        boolean foundMeasured = false;
+
+        try (var tasks = Files.list(Path.of("/proc/self/task"))) {
+            for (Path task : tasks.toList()) {
+                String tid = task.getFileName().toString();
+                String mask;
+                String name;
+
+                try {
+                    mask = readDiagnosticMask(task.resolve("status"));
+                    name = Files.readString(task.resolve("comm")).trim();
+                } catch (java.nio.file.NoSuchFileException disappeared) {
+                    // A thread may finish while /proc is being inspected.
+                    continue;
+                }
+
+                boolean measured = tid.equals(measuredTid);
+                boolean compiler = name.contains("Compiler")
+                        || name.contains("JVMCI");
+
+                String role = measured
+                        ? "measured"
+                        : compiler ? "compiler" : "auxiliary";
+
+                System.out.println(
+                        "AFFINITY_THREAD phase=" + phase
+                                + " tid=" + tid
+                                + " name=" + name.replace(' ', '_')
+                                + " role=" + role
+                                + " mask=" + mask);
+
+                if (measured) {
+                    foundMeasured = true;
+
+                    if (!"0".equals(mask)) {
+                        throw new IllegalStateException(
+                                "measurement thread lost CPU0 affinity:"
+                                        + " phase=" + phase
+                                        + " tid=" + tid
+                                        + " mask=" + mask);
+                    }
+
+                    continue;
+                }
+
+                auxiliaries++;
+
+                if (!"0".equals(mask) && !"0-1".equals(mask)) {
+                    throw new IllegalStateException(
+                            "unexpected auxiliary affinity:"
+                                    + " phase=" + phase
+                                    + " tid=" + tid
+                                    + " name=" + name
+                                    + " mask=" + mask);
+                }
+
+                if (!isC && !"0".equals(mask)) {
+                    throw new IllegalStateException(
+                            "profile A auxiliary escaped CPU0:"
+                                    + " phase=" + phase
+                                    + " tid=" + tid
+                                    + " name=" + name
+                                    + " mask=" + mask);
+                }
+
+                if (compiler) {
+                    compilerThreads++;
+
+                    if (isC && !"0-1".equals(mask)) {
+                        throw new IllegalStateException(
+                                "profile C compiler lacks CPU1 access:"
+                                        + " phase=" + phase
+                                        + " tid=" + tid
+                                        + " name=" + name
+                                        + " mask=" + mask);
+                    }
+
+                    if ("0-1".equals(mask)) {
+                        compilerWide++;
+                    }
+                }
+
+                if ("0-1".equals(mask)) {
+                    auxiliaryWide++;
+                } else {
+                    auxiliaryNarrow++;
+                }
+            }
+        }
+
+        if (!foundMeasured || auxiliaries == 0) {
+            throw new IllegalStateException(
+                    "incomplete thread-affinity snapshot: " + phase);
+        }
+
+        if (isC && compilerThreads == 0) {
+            throw new IllegalStateException(
+                    "profile C has no identifiable compiler threads:"
+                            + " phase=" + phase);
+        }
+
+        if (isC && compilerWide != compilerThreads) {
+            throw new IllegalStateException(
+                    "profile C compiler affinity incomplete: " + phase);
+        }
+
+        if (!isC && auxiliaryWide != 0) {
+            throw new IllegalStateException(
+                    "profile A has auxiliary threads outside CPU0");
+        }
+
+        System.out.println(
+                "AFFINITY_SNAPSHOT phase=" + phase
+                        + " aux=" + auxiliaries
+                        + " compilers=" + compilerThreads
+                        + " compiler_wide=" + compilerWide
+                        + " auxiliary_wide=" + auxiliaryWide
+                        + " auxiliary_narrow=" + auxiliaryNarrow
+                        + " initial=" + initialMask);
     }
 
     private static void invokeRepeated(

@@ -984,6 +984,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="capture JIT logs and JFR sample windows in a diagnostic JVM",
     )
+    parser.add_argument(
+        "--diagnostic-affinity",
+        choices=("A", "C"),
+        help="A: all JVM threads CPU0; C: JVM CPU0,1, measured thread CPU0",
+    )
     parser.add_argument("--warmup", type=int, help="diagnostic override")
     parser.add_argument("--steady", type=int, help="diagnostic override")
     parser.add_argument("--sample-calls", type=int, help="diagnostic override")
@@ -1041,6 +1046,34 @@ def measure(args: argparse.Namespace) -> int:
 
     if args.diagnostic_jit and not args.diagnostic:
         raise UsageError("--diagnostic-jit requires --diagnostic")
+
+    if args.diagnostic_affinity:
+        if not args.diagnostic or args.cpu != 0:
+            raise UsageError(
+                "--diagnostic-affinity requires --diagnostic --cpu 0"
+            )
+
+        if platform.system() != "Linux":
+            raise UsageError("diagnostic affinity requires Linux")
+
+        required = (
+            {0, 1} if args.diagnostic_affinity == "C" else {0}
+        )
+        available = set(os.sched_getaffinity(0))
+
+        if not required.issubset(available):
+            raise UsageError(
+                f"required CPUs {sorted(required)} unavailable: "
+                f"{sorted(available)}"
+            )
+
+        if any(
+            option.startswith("-Dprotos.benchmarks.measure.")
+            for option in args.jvm_option
+        ):
+            raise UsageError(
+                "diagnostic affinity reserves measurement JVM properties"
+            )
 
     if args.diagnostic_jit and args.jvm_option:
         raise UsageError(
@@ -1134,6 +1167,10 @@ def measure(args: argparse.Namespace) -> int:
         result_key["diagnostic_capture"] = "thread-cpu-gc-ctx-v1"
     if args.diagnostic_jit:
         result_key["diagnostic_jit"] = "jfr-sample-windows-v1"
+    if args.diagnostic_affinity:
+        result_key["diagnostic_affinity"] = (
+            args.diagnostic_affinity + "-linux-thread-v1"
+        )
 
     prepare_output(output)
     case = case_id(language, surface, args.workload, args.stage, args.profile)
@@ -1141,6 +1178,8 @@ def measure(args: argparse.Namespace) -> int:
         case += "--diagnostic"
     if args.diagnostic_jit:
         case += "-jit"
+    if args.diagnostic_affinity:
+        case += "--affinity-" + args.diagnostic_affinity.lower()
     existing = find_existing(output, case, result_key)
 
     emit("PRODUCT_DIRECTORY", product_dir or "-")
@@ -1204,6 +1243,23 @@ def measure(args: argparse.Namespace) -> int:
     }
     summary: dict[str, object] = {"case": case, "expected_result": expected}
 
+    if args.diagnostic_affinity:
+        initial_cpus = (
+            [0, 1] if args.diagnostic_affinity == "C" else [0]
+        )
+        metadata["diagnostic_affinity"] = {
+            "profile": args.diagnostic_affinity,
+            "initial_jvm_cpus": initial_cpus,
+            "measured_thread_cpu": 0,
+            "verification": "linux-per-thread-before-and-after",
+            "status": "PENDING",
+        }
+        metadata["host"]["affinity_policy"] = (
+            "taskset -c "
+            + ",".join(str(cpu) for cpu in initial_cpus)
+            + "; pin measured Linux TID to CPU 0"
+        )
+
     try:
         metadata["reference_eligible"] = (
             args.stage == "reference"
@@ -1251,6 +1307,12 @@ def measure(args: argparse.Namespace) -> int:
                 "-Dprotos.benchmarks.measure.diagnostic=true"
             )
 
+        if args.diagnostic_affinity:
+            timing_jvm_options.append(
+                "-Dprotos.benchmarks.measure.affinityProfile="
+                + args.diagnostic_affinity
+            )
+
         if args.diagnostic_jit:
             timing_jvm_options.extend([
                 "-Dpolyglot.engine.BackgroundCompilation=false",
@@ -1259,6 +1321,10 @@ def measure(args: argparse.Namespace) -> int:
                 "-Xlog:gc=info,safepoint=info",
                 "-Dprotos.benchmarks.measure.jitJfr=" + str(jit_jfr),
             ])
+
+        timing_cpu = (
+            "0,1" if args.diagnostic_affinity == "C" else cpu
+        )
 
         code, out = run_logged(
             java_command(
@@ -1275,7 +1341,7 @@ def measure(args: argparse.Namespace) -> int:
                     str(timing_policy["sample_calls"]),
                     "-",
                 ],
-                cpu,
+                timing_cpu,
             ),
             raw / "timing.log",
         )
@@ -1294,6 +1360,29 @@ def measure(args: argparse.Namespace) -> int:
                 raise InvalidMeasurement(
                     "DIAGNOSTIC_JIT_JFR_MISSING"
                 )
+
+        if args.diagnostic_affinity:
+            profile = args.diagnostic_affinity
+            initial = "0-1" if profile == "C" else "0"
+
+            markers = (
+                f"AFFINITY_PROFILE={profile}",
+                f"AFFINITY_INITIAL_MAIN={initial}",
+                "MEASURE_THREAD_AFFINITY=0",
+                "AFFINITY_SNAPSHOT phase=before aux=",
+                "AFFINITY_SNAPSHOT phase=after aux=",
+            )
+
+            if not all(
+                any(line.startswith(marker) for line in out.splitlines())
+                for marker in markers
+            ):
+                raise InvalidMeasurement(
+                    "DIAGNOSTIC_AFFINITY_INVALID",
+                    "missing or inconsistent thread-affinity proof",
+                )
+
+            metadata["diagnostic_affinity"]["status"] = "VERIFIED"
 
         timing = timing_summary(parsed)
 
@@ -1497,6 +1586,8 @@ def measure(args: argparse.Namespace) -> int:
             )
             if args.diagnostic_jit:
                 report["jit_capture"] = metadata["diagnostic_jit"]
+            if args.diagnostic_affinity:
+                report["affinity"] = metadata["diagnostic_affinity"]
             write_json(staging / "diagnostic.json", report)
 
         final = promote(staging, output / case / run_id)

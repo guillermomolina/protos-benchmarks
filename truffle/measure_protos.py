@@ -1080,6 +1080,14 @@ def measure(args: argparse.Namespace) -> int:
             "--diagnostic-jit uses a fixed JVM trace configuration"
         )
 
+    if args.diagnostic and any(
+        option.startswith("-Dprotos.benchmarks.measure.samplesFile=")
+        for option in args.jvm_option
+    ):
+        raise UsageError(
+            "diagnostic samplesFile is owned by the measurement driver"
+        )
+
     cases = load_cases()
 
     try:
@@ -1164,7 +1172,7 @@ def measure(args: argparse.Namespace) -> int:
     }
 
     if args.diagnostic:
-        result_key["diagnostic_capture"] = "thread-cpu-gc-ctx-v1"
+        result_key["diagnostic_capture"] = "thread-cpu-gc-ctx-v2-dedicated-file"
     if args.diagnostic_jit:
         result_key["diagnostic_jit"] = "jfr-sample-windows-v1"
     if args.diagnostic_affinity:
@@ -1211,6 +1219,9 @@ def measure(args: argparse.Namespace) -> int:
     raw = staging / "raw"
     raw.mkdir()
     jit_jfr = raw / "jit-timeline.jfr" if args.diagnostic_jit else None
+    diagnostic_samples = (
+        raw / "diagnostic-samples.log" if args.diagnostic else None
+    )
 
     cpu, siblings, allowed = choose_cpu(args.cpu)
     metadata: dict[str, object] = {
@@ -1303,9 +1314,11 @@ def measure(args: argparse.Namespace) -> int:
         # 2. Timing. Explicit diagnostics use a separate result identity.
         timing_jvm_options = list(args.jvm_option)
         if args.diagnostic:
-            timing_jvm_options.append(
-                "-Dprotos.benchmarks.measure.diagnostic=true"
-            )
+            timing_jvm_options.extend([
+                "-Dprotos.benchmarks.measure.diagnostic=true",
+                "-Dprotos.benchmarks.measure.samplesFile="
+                + str(diagnostic_samples),
+            ])
 
         if args.diagnostic_affinity:
             timing_jvm_options.append(
@@ -1345,7 +1358,31 @@ def measure(args: argparse.Namespace) -> int:
             ),
             raw / "timing.log",
         )
-        parsed = jvm_matrix.parse_output(out) if code == 0 else None
+        if code != 0:
+            parsed = None
+        elif args.diagnostic:
+            if (
+                diagnostic_samples is None
+                or not diagnostic_samples.is_file()
+                or diagnostic_samples.stat().st_size == 0
+            ):
+                raise InvalidMeasurement(
+                    "DIAGNOSTIC_SAMPLES_MISSING",
+                    "dedicated diagnostic samples file absent or empty",
+                )
+
+            try:
+                samples_text = diagnostic_samples.read_text(
+                    encoding="utf-8"
+                )
+            except (OSError, UnicodeError) as exc:
+                raise InvalidMeasurement(
+                    "DIAGNOSTIC_SAMPLES_INVALID", str(exc)
+                ) from exc
+
+            parsed = jvm_matrix.parse_output(samples_text)
+        else:
+            parsed = jvm_matrix.parse_output(out)
 
         if parsed is None or parsed["result"] != expected:
             raise InvalidMeasurement("TIMING_RUN_FAILED", str(raw / "timing.log"))
@@ -1504,10 +1541,18 @@ def measure(args: argparse.Namespace) -> int:
         metadata["measurement_valid"] = True
         summary["measurement_valid"] = True
         if args.diagnostic:
-            metadata["diagnostic_capture"] = "thread-cpu-gc-ctx-v1"
+            metadata["diagnostic_capture"] = (
+                "thread-cpu-gc-ctx-v2-dedicated-file"
+            )
+            metadata["diagnostic_samples"] = {
+                "file": "raw/diagnostic-samples.log",
+                "sha256": sha256_file(diagnostic_samples),
+                "separate_from_jvm_stdout": True,
+            }
             summary["diagnostic"] = {
                 "classification": "DIAGNOSTIC_ONLY",
                 "report": "diagnostic.json",
+                "samples_file": "raw/diagnostic-samples.log",
             }
 
         if args.diagnostic_jit:
@@ -1561,7 +1606,7 @@ def measure(args: argparse.Namespace) -> int:
 
             try:
                 report = measure_diagnostics.analyze(
-                    raw / "timing.log", expected
+                    diagnostic_samples, expected
                 )
             except (ValueError, OSError) as exc:
                 raise InvalidMeasurement(
@@ -1582,7 +1627,10 @@ def measure(args: argparse.Namespace) -> int:
                 )
 
             report["source"]["path"] = str(
-                (output / case / run_id / "raw" / "timing.log").resolve()
+                (
+                    output / case / run_id / "raw"
+                    / "diagnostic-samples.log"
+                ).resolve()
             )
             if args.diagnostic_jit:
                 report["jit_capture"] = metadata["diagnostic_jit"]

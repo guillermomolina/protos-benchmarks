@@ -151,6 +151,39 @@ class Fakes:
                         f"AFFINITY_SNAPSHOT phase=before aux=3 expected={initial}",
                         f"AFFINITY_SNAPSHOT phase=after aux=3 expected={initial}",
                     ])
+            samples_prefix = (
+                "sample phase=",
+                "thread_cpu phase=",
+                "ctx_switch phase=",
+                "gc_sample phase=",
+            )
+
+            for option in command:
+                prefix = "-Dprotos.benchmarks.measure.samplesFile="
+                if not option.startswith(prefix):
+                    continue
+
+                destination = Path(option[len(prefix):])
+                records = [
+                    "setup_ns=1000",
+                    f"sample_calls={calls}",
+                    f"warmup_iterations={warmup}",
+                    f"steady_iterations={steady}",
+                    *(
+                        line for line in lines
+                        if line.startswith(samples_prefix)
+                    ),
+                    f"result={self.result}",
+                ]
+                destination.write_text(
+                    "\n".join(records) + "\n",
+                    encoding="utf-8",
+                )
+                lines = [
+                    line for line in lines
+                    if not line.startswith(samples_prefix)
+                ]
+
             lines.append(f"result={self.result}")
             out = "\n".join(lines) + "\n"
 
@@ -681,7 +714,8 @@ class DriverTest(unittest.TestCase):
 
         self.assertFalse(metadata["reference_eligible"])
         self.assertEqual(
-            metadata["diagnostic_capture"], "thread-cpu-gc-ctx-v1"
+            metadata["diagnostic_capture"],
+            "thread-cpu-gc-ctx-v2-dedicated-file"
         )
         self.assertEqual(
             report["classification"], "DIAGNOSTIC_ONLY"
@@ -701,7 +735,7 @@ class DriverTest(unittest.TestCase):
         self.assertEqual(report["jit_maturity"], "NOT_PROVEN")
         self.assertEqual(
             report["source"]["path"],
-            str((result / "raw" / "timing.log").resolve()),
+            str((result / "raw" / "diagnostic-samples.log").resolve()),
         )
 
         correctness = [
@@ -730,13 +764,16 @@ class DriverTest(unittest.TestCase):
         def without_cpu(command, log):
             code, out = original(command, log)
 
-            if "measure" in command:
-                out = "".join(
-                    line
-                    for line in out.splitlines(keepends=True)
-                    if not line.startswith("thread_cpu ")
-                )
-                log.write_text(out)
+            for option in command:
+                prefix = "-Dprotos.benchmarks.measure.samplesFile="
+                if option.startswith(prefix):
+                    path = Path(option[len(prefix):])
+                    contents = path.read_text()
+                    path.write_text("".join(
+                        line
+                        for line in contents.splitlines(keepends=True)
+                        if not line.startswith("thread_cpu ")
+                    ))
 
             return code, out
 
@@ -751,11 +788,13 @@ class DriverTest(unittest.TestCase):
         record = Path(lines["INVALID_RECORD"])
         self.assertTrue(record.is_dir())
 
-        timing = (record / "raw" / "timing.log").read_text()
+        samples = (
+            record / "raw" / "diagnostic-samples.log"
+        ).read_text()
 
-        self.assertIn("sample phase=steady", timing)
-        self.assertIn("result=1", timing)
-        self.assertNotIn("thread_cpu phase=", timing)
+        self.assertIn("sample phase=steady", samples)
+        self.assertIn("result=1", samples)
+        self.assertNotIn("thread_cpu phase=", samples)
 
     def test_diagnostic_rejects_missing_gc_or_context_samples(self):
         original = self.fakes.run_logged
@@ -764,13 +803,18 @@ class DriverTest(unittest.TestCase):
             with self.subTest(prefix=prefix):
                 def incomplete(command, log):
                     code, out = original(command, log)
-                    if "measure" in command:
-                        out = "".join(
-                            line
-                            for line in out.splitlines(keepends=True)
-                            if not line.startswith(prefix)
-                        )
-                        log.write_text(out)
+
+                    for option in command:
+                        key = "-Dprotos.benchmarks.measure.samplesFile="
+                        if option.startswith(key):
+                            path = Path(option[len(key):])
+                            contents = path.read_text()
+                            path.write_text("".join(
+                                line
+                                for line in contents.splitlines(keepends=True)
+                                if not line.startswith(prefix)
+                            ))
+
                     return code, out
 
                 mp.run_logged = incomplete
@@ -778,12 +822,76 @@ class DriverTest(unittest.TestCase):
 
                 self.assertEqual(code, mp.EXIT_INVALID)
                 self.assertEqual(
-                    lines["REASON"],
-                    "DIAGNOSTIC_CAPTURE_INCOMPLETE",
+                    lines["REASON"], "DIAGNOSTIC_CAPTURE_INCOMPLETE"
                 )
                 self.assertTrue(
                     Path(lines["INVALID_RECORD"]).is_dir()
                 )
+
+    def test_dedicated_samples_ignore_printcompilation_prefix(self):
+        original = self.fakes.run_logged
+
+        def noisy_stdout(command, log):
+            code, out = original(command, log)
+
+            if "measure" in command:
+                out = (
+                    "2944 sample phase=warmup iteration=1 "
+                    "elapsed_ns=13615571\n" + out
+                )
+                log.write_text(out)
+
+            return code, out
+
+        mp.run_logged = noisy_stdout
+
+        code, lines = self.run_driver("--diagnostic")
+        self.assertEqual(code, 0)
+
+        result = Path(lines["RESULT"])
+        console = (result / "raw" / "timing.log").read_text()
+        samples = (
+            result / "raw" / "diagnostic-samples.log"
+        ).read_text()
+        report = json.loads(
+            (result / "diagnostic.json").read_text()
+        )
+
+        self.assertIn(
+            "2944 sample phase=warmup iteration=1", console
+        )
+        self.assertNotIn(
+            "2944 sample phase=warmup iteration=1", samples
+        )
+        self.assertIn(
+            "sample phase=warmup iteration=1 elapsed_ns=100",
+            samples,
+        )
+        self.assertEqual(report["phases"]["warmup"]["samples"], 2)
+
+    def test_missing_dedicated_samples_invalidates_run(self):
+        original = self.fakes.run_logged
+
+        def missing_file(command, log):
+            code, out = original(command, log)
+
+            for option in command:
+                prefix = "-Dprotos.benchmarks.measure.samplesFile="
+                if option.startswith(prefix):
+                    Path(option[len(prefix):]).unlink()
+
+            return code, out
+
+        mp.run_logged = missing_file
+        code, lines = self.run_driver("--diagnostic")
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertEqual(
+            lines["REASON"], "DIAGNOSTIC_SAMPLES_MISSING"
+        )
+        self.assertTrue(
+            Path(lines["INVALID_RECORD"]).is_dir()
+        )
 
     def test_jit_capture_requires_diagnostic(self):
         code, _ = self.run_driver("--diagnostic-jit")

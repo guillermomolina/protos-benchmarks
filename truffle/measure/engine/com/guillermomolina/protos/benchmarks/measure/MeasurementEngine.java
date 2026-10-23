@@ -140,7 +140,7 @@ public final class MeasurementEngine {
             }
 
             try {
-                runDiagnostic(arguments, invocation);
+                runDiagnostic(arguments, invocation, setupNs);
             } finally {
                 if (profile != null) {
                     verifyDiagnosticThreads("after", profile, measuredTid);
@@ -187,44 +187,78 @@ public final class MeasurementEngine {
      * Diagnostic-only execution. Never called by ordinary reference timing.
      * Supporting counter reads and output happen outside the wall interval.
      */
+    /**
+     * Diagnostic-only measurement. Structured samples are written to a
+     * dedicated file descriptor, never to PrintCompilation's stdout.
+     */
     private static void runDiagnostic(
-            Arguments arguments, Invocation invocation) throws Exception {
-        DiagnosticSampler sampler = new DiagnosticSampler();
-        DiagnosticJfr jit = DiagnosticJfr.startIfRequested();
+            Arguments arguments,
+            Invocation invocation,
+            long setupNs) throws Exception {
+        String name = System.getProperty(
+                "protos.benchmarks.measure.samplesFile");
 
-        try {
-            DiagnosticSnapshot before = sampler.before();
-            DiagnosticSampleEvent event =
-                    beginSample(jit, "cold", 1, 1);
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException(
+                    "diagnostic samplesFile is required");
+        }
 
-            long started = System.nanoTime();
-            long cpuStarted = sampler.cpuNow();
-            String expected = invocation.invoke();
-            long cpuElapsed = sampler.cpuNow() - cpuStarted;
-            long elapsed = System.nanoTime() - started;
+        Path destination = Path.of(name).toAbsolutePath().normalize();
 
-            endSample(event);
-            DiagnosticSnapshot after = sampler.after();
+        try (var records = Files.newBufferedWriter(
+                destination,
+                java.nio.charset.StandardCharsets.UTF_8,
+                java.nio.file.StandardOpenOption.CREATE_NEW,
+                java.nio.file.StandardOpenOption.WRITE)) {
 
-            sample("cold", 1, elapsed);
-            sampler.report("cold", 1, before, after, cpuElapsed);
+            diagnosticLine(records, "setup_ns=" + setupNs);
+            diagnosticLine(
+                    records, "sample_calls=" + arguments.sampleCalls());
+            diagnosticLine(
+                    records,
+                    "warmup_iterations=" + arguments.warmupIterations());
+            diagnosticLine(
+                    records,
+                    "steady_iterations=" + arguments.steadyIterations());
 
-            for (int i = 1; i <= arguments.warmupIterations(); i++) {
-                diagnosticRepeated(
-                        invocation, expected, arguments.sampleCalls(),
-                        "warmup", i, sampler, jit);
-            }
+            DiagnosticSampler sampler = new DiagnosticSampler();
+            DiagnosticJfr jit = DiagnosticJfr.startIfRequested();
 
-            for (int i = 1; i <= arguments.steadyIterations(); i++) {
-                diagnosticRepeated(
-                        invocation, expected, arguments.sampleCalls(),
-                        "steady", i, sampler, jit);
-            }
+            try {
+                DiagnosticSnapshot before = sampler.before();
+                DiagnosticSampleEvent event =
+                        beginSample(jit, "cold", 1, 1);
 
-            System.out.println("result=" + expected);
-        } finally {
-            if (jit != null) {
-                jit.finish();
+                long started = System.nanoTime();
+                long cpuStarted = sampler.cpuNow();
+                String expected = invocation.invoke();
+                long cpuElapsed = sampler.cpuNow() - cpuStarted;
+                long elapsed = System.nanoTime() - started;
+
+                endSample(event);
+                DiagnosticSnapshot after = sampler.after();
+
+                diagnosticSample(records, "cold", 1, elapsed);
+                sampler.report(
+                        records, "cold", 1, before, after, cpuElapsed);
+
+                for (int i = 1; i <= arguments.warmupIterations(); i++) {
+                    diagnosticRepeated(
+                            invocation, expected, arguments.sampleCalls(),
+                            "warmup", i, sampler, jit, records);
+                }
+
+                for (int i = 1; i <= arguments.steadyIterations(); i++) {
+                    diagnosticRepeated(
+                            invocation, expected, arguments.sampleCalls(),
+                            "steady", i, sampler, jit, records);
+                }
+
+                diagnosticLine(records, "result=" + expected);
+            } finally {
+                if (jit != null) {
+                    jit.finish();
+                }
             }
         }
     }
@@ -236,7 +270,8 @@ public final class MeasurementEngine {
             String phase,
             int iteration,
             DiagnosticSampler sampler,
-            DiagnosticJfr jit) throws Exception {
+            DiagnosticJfr jit,
+            java.io.BufferedWriter records) throws Exception {
         DiagnosticSnapshot before = sampler.before();
         DiagnosticSampleEvent event =
                 beginSample(jit, phase, iteration, calls);
@@ -250,8 +285,28 @@ public final class MeasurementEngine {
         endSample(event);
         DiagnosticSnapshot after = sampler.after();
 
-        sample(phase, iteration, elapsed);
-        sampler.report(phase, iteration, before, after, cpuElapsed);
+        diagnosticSample(records, phase, iteration, elapsed);
+        sampler.report(
+                records, phase, iteration, before, after, cpuElapsed);
+    }
+
+    private static void diagnosticLine(
+            java.io.BufferedWriter records,
+            String value) throws IOException {
+        records.write(value);
+        records.newLine();
+    }
+
+    private static void diagnosticSample(
+            java.io.BufferedWriter records,
+            String phase,
+            int iteration,
+            long elapsedNs) throws IOException {
+        diagnosticLine(
+                records,
+                "sample phase=" + phase
+                        + " iteration=" + iteration
+                        + " elapsed_ns=" + elapsedNs);
     }
 
     private static DiagnosticSampleEvent beginSample(
@@ -400,19 +455,22 @@ public final class MeasurementEngine {
         }
 
         void report(
+                java.io.BufferedWriter records,
                 String phase,
                 int iteration,
                 DiagnosticSnapshot before,
                 DiagnosticSnapshot after,
-                long cpuElapsedNs) {
-            System.out.println(
+                long cpuElapsedNs) throws IOException {
+            diagnosticLine(
+                    records,
                     "thread_cpu phase=" + phase
                             + " iteration=" + iteration
                             + " elapsed_ns=" + cpuElapsedNs);
 
             if (before.voluntary >= 0 && after.voluntary >= 0
                     && before.involuntary >= 0 && after.involuntary >= 0) {
-                System.out.println(
+                diagnosticLine(
+                        records,
                         "ctx_switch phase=" + phase
                                 + " iteration=" + iteration
                                 + " voluntary="
@@ -423,7 +481,8 @@ public final class MeasurementEngine {
 
             if (before.gcCount >= 0 && after.gcCount >= 0
                     && before.gcTimeMs >= 0 && after.gcTimeMs >= 0) {
-                System.out.println(
+                diagnosticLine(
+                        records,
                         "gc_sample phase=" + phase
                                 + " iteration=" + iteration
                                 + " count_delta="

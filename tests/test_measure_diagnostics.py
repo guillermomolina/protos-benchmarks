@@ -80,6 +80,50 @@ class MeasurementDiagnosticsTest(unittest.TestCase):
             report["correctness"]["prior_gate_verified"]
         )
 
+    def test_gc_samples_aggregated(self):
+        gc_lines = "".join(
+            f"gc_sample phase=steady iteration={i} "
+            f"count_delta={int(i == 9)} "
+            f"time_ms_delta={6 if i == 9 else 0}\n"
+            for i in range(1, 11)
+        )
+        self.write(
+            self.sample_log().replace("result=1", gc_lines + "result=1")
+        )
+        report = analyze(self.log, "1")
+        steady = report["phases"]["steady"]
+
+        self.assertTrue(steady["gc_samples_complete"])
+        self.assertEqual(steady["gc_count_delta_total"], 1)
+        self.assertEqual(steady["gc_time_ms_delta_total"], 6)
+        self.assertFalse(
+            report["phases"]["warmup"]["gc_samples_complete"]
+        )
+
+    def test_duplicate_gc_sample_rejected(self):
+        duplicate = (
+            "gc_sample phase=steady iteration=1 "
+            "count_delta=0 time_ms_delta=0\n"
+        )
+        self.write(
+            self.sample_log().replace(
+                "result=1", duplicate + duplicate + "result=1"
+            )
+        )
+        with self.assertRaisesRegex(ValueError, 'Duplicate GC sample'):
+            analyze(self.log, "1")
+
+    def test_malformed_gc_sample_rejected(self):
+        self.write(
+            self.sample_log().replace(
+                "result=1",
+                "gc_sample phase=steady iteration=1 "
+                "count_delta=-1 time_ms_delta=0\nresult=1",
+            )
+        )
+        with self.assertRaisesRegex(ValueError, 'Malformed GC sample'):
+            analyze(self.log, "1")
+
     def test_wrong_result_rejected(self):
         self.write(
             self.sample_log().replace("result=1", "result=2")

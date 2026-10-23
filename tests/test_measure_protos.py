@@ -116,6 +116,21 @@ class Fakes:
             if jfr != "-":
                 Path(jfr).write_bytes(b"jfr")
                 lines.append("jfr_scope=steady")
+            if "-Dprotos.benchmarks.measure.diagnostic=true" in command:
+                lines.insert(0, "diagnostic_mode=ENABLED")
+                for phase, count in (
+                    ("cold", 1),
+                    ("warmup", int(warmup)),
+                    ("steady", int(steady)),
+                ):
+                    for iteration in range(1, count + 1):
+                        lines.extend([
+                            f"thread_cpu phase={phase} iteration={iteration} elapsed_ns=50",
+                            f"ctx_switch phase={phase} iteration={iteration} "
+                            "voluntary=0 nonvoluntary=0",
+                            f"gc_sample phase={phase} iteration={iteration} "
+                            "count_delta=0 time_ms_delta=0",
+                        ])
             lines.append(f"result={self.result}")
             out = "\n".join(lines) + "\n"
 
@@ -631,6 +646,124 @@ class DriverTest(unittest.TestCase):
         self.assertFalse(metadata["reference_eligible"])
         timing = [c for c in self.fakes.java_calls if "measure" in c][0]
         self.assertIn("-Xlog:gc", timing)
+
+    def test_explicit_diagnostic_capture_is_non_reference(self):
+        code, lines = self.run_driver(
+            "--diagnostic", "--stage", "reference"
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(lines["REFERENCE_ELIGIBLE"], "NO")
+        self.assertEqual(lines["STEADY_STATE_ADMISSION"], "N/A")
+
+        result = Path(lines["RESULT"])
+        metadata = json.loads((result / "metadata.json").read_text())
+        report = json.loads((result / "diagnostic.json").read_text())
+
+        self.assertFalse(metadata["reference_eligible"])
+        self.assertEqual(
+            metadata["diagnostic_capture"], "thread-cpu-gc-ctx-v1"
+        )
+        self.assertEqual(
+            report["classification"], "DIAGNOSTIC_ONLY"
+        )
+        self.assertTrue(
+            report["correctness"]["prior_gate_verified"]
+        )
+        self.assertTrue(
+            report["phases"]["steady"]["thread_cpu_complete"]
+        )
+        self.assertTrue(
+            report["phases"]["steady"]["context_switches_complete"]
+        )
+        self.assertTrue(
+            report["phases"]["steady"]["gc_samples_complete"]
+        )
+        self.assertEqual(report["jit_maturity"], "NOT_PROVEN")
+        self.assertEqual(
+            report["source"]["path"],
+            str((result / "raw" / "timing.log").resolve()),
+        )
+
+        correctness = [
+            call for call in self.fakes.java_calls
+            if "correctness" in call
+        ][0]
+        timing = [
+            call for call in self.fakes.java_calls
+            if "measure" in call
+        ][0]
+        option = "-Dprotos.benchmarks.measure.diagnostic=true"
+
+        self.assertNotIn(option, correctness)
+        self.assertIn(option, timing)
+
+    def test_diagnostic_rejects_jfr_combination(self):
+        code, lines = self.run_driver(
+            "--diagnostic", "--profile", "jfr"
+        )
+        self.assertEqual(code, mp.EXIT_USAGE)
+        self.assertEqual(self.fakes.java_calls, [])
+
+    def test_diagnostic_rejects_missing_cpu_samples(self):
+        original = self.fakes.run_logged
+
+        def without_cpu(command, log):
+            code, out = original(command, log)
+
+            if "measure" in command:
+                out = "".join(
+                    line
+                    for line in out.splitlines(keepends=True)
+                    if not line.startswith("thread_cpu ")
+                )
+                log.write_text(out)
+
+            return code, out
+
+        mp.run_logged = without_cpu
+        code, lines = self.run_driver("--diagnostic")
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertEqual(
+            lines["REASON"], "DIAGNOSTIC_CAPTURE_INCOMPLETE"
+        )
+
+        record = Path(lines["INVALID_RECORD"])
+        self.assertTrue(record.is_dir())
+
+        timing = (record / "raw" / "timing.log").read_text()
+
+        self.assertIn("sample phase=steady", timing)
+        self.assertIn("result=1", timing)
+        self.assertNotIn("thread_cpu phase=", timing)
+
+    def test_diagnostic_rejects_missing_gc_or_context_samples(self):
+        original = self.fakes.run_logged
+
+        for prefix in ("gc_sample ", "ctx_switch "):
+            with self.subTest(prefix=prefix):
+                def incomplete(command, log):
+                    code, out = original(command, log)
+                    if "measure" in command:
+                        out = "".join(
+                            line
+                            for line in out.splitlines(keepends=True)
+                            if not line.startswith(prefix)
+                        )
+                        log.write_text(out)
+                    return code, out
+
+                mp.run_logged = incomplete
+                code, lines = self.run_driver("--diagnostic")
+
+                self.assertEqual(code, mp.EXIT_INVALID)
+                self.assertEqual(
+                    lines["REASON"],
+                    "DIAGNOSTIC_CAPTURE_INCOMPLETE",
+                )
+                self.assertTrue(
+                    Path(lines["INVALID_RECORD"]).is_dir()
+                )
 
     def test_peer_language_needs_no_product(self):
         argv = ["--language", "js", "--workload", WORKLOAD, "--stage", "smoke", "--output", str(self.output)]

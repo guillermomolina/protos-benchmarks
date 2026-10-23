@@ -974,6 +974,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--stage", default="reference", choices=STAGES)
     parser.add_argument("--profile", default="none", choices=PROFILES)
     parser.add_argument("--cpu", type=int)
+    parser.add_argument(
+        "--diagnostic",
+        action="store_true",
+        help="collect per-sample JVM diagnostics; never reference-eligible",
+    )
     parser.add_argument("--warmup", type=int, help="diagnostic override")
     parser.add_argument("--steady", type=int, help="diagnostic override")
     parser.add_argument("--sample-calls", type=int, help="diagnostic override")
@@ -1025,6 +1030,9 @@ def main(argv: list[str] | None = None) -> int:
 def measure(args: argparse.Namespace) -> int:
     if args.output is None or args.workload is None:
         raise UsageError("--output and --workload are required")
+
+    if args.diagnostic and args.profile != "none":
+        raise UsageError("--diagnostic requires --profile none")
 
     cases = load_cases()
 
@@ -1082,6 +1090,11 @@ def measure(args: argparse.Namespace) -> int:
         )
 
     files = producer_files(cases, surface_def, args.workload, source_language)
+    if args.diagnostic:
+        files = sorted(set([
+            *files,
+            (TRUFFLE / "measure_diagnostics.py").resolve(),
+        ]))
     harness_before = harness_identity(files)
 
     result_key = {
@@ -1099,8 +1112,13 @@ def measure(args: argparse.Namespace) -> int:
         "diagnostic_jvm_options": list(args.jvm_option),
     }
 
+    if args.diagnostic:
+        result_key["diagnostic_capture"] = "thread-cpu-gc-ctx-v1"
+
     prepare_output(output)
     case = case_id(language, surface, args.workload, args.stage, args.profile)
+    if args.diagnostic:
+        case += "--diagnostic"
     existing = find_existing(output, case, result_key)
 
     emit("PRODUCT_DIRECTORY", product_dir or "-")
@@ -1168,6 +1186,7 @@ def measure(args: argparse.Namespace) -> int:
             args.stage == "reference"
             and timing_policy["source"] == "case-policy"
             and not args.jvm_option
+            and not args.diagnostic
             and (product_before is None or bool(product_before["clean"]))
         )
 
@@ -1202,14 +1221,19 @@ def measure(args: argparse.Namespace) -> int:
                 "CORRECTNESS_FAILED", f"expected {expected}, got {actual!r}"
             )
 
-        # 2. Timing, without instrumentation unless diagnostic options
-        # were requested explicitly.
+        # 2. Timing. Explicit diagnostics use a separate result identity.
+        timing_jvm_options = list(args.jvm_option)
+        if args.diagnostic:
+            timing_jvm_options.append(
+                "-Dprotos.benchmarks.measure.diagnostic=true"
+            )
+
         code, out = run_logged(
             java_command(
                 runtime_cp,
                 main_class,
                 system_properties,
-                list(args.jvm_option),
+                timing_jvm_options,
                 [
                     "measure",
                     core_arg,
@@ -1230,7 +1254,16 @@ def measure(args: argparse.Namespace) -> int:
 
         timing = timing_summary(parsed)
 
-        if args.stage == "reference":
+        if args.diagnostic:
+            if "diagnostic_mode=ENABLED" not in out:
+                raise InvalidMeasurement(
+                    "DIAGNOSTIC_CAPTURE_MISSING"
+                )
+            admission = {
+                "status": "N/A",
+                "reason": "diagnostic-instrumentation",
+            }
+        elif args.stage == "reference":
             scope = timing_policy["admission_scope"]
             admission = jvm_matrix.reference_admission(
                 timing["warmup_ns"], timing["steady_ns"]
@@ -1251,7 +1284,11 @@ def measure(args: argparse.Namespace) -> int:
         emit("STEADY_P50_NS_PER_CALL", f"{timing['steady_amortized_p50_ns_per_call']:.3f}")
         emit("STEADY_STATE_ADMISSION", admission["status"])
 
-        if args.stage == "reference" and admission["status"] != "PASS":
+        if (
+            args.stage == "reference"
+            and not args.diagnostic
+            and admission["status"] != "PASS"
+        ):
             raise InvalidMeasurement("NOT_STEADY_STATE_ADMITTED")
 
         # 3. Optional profile: same checkout, adapter, workload and case.
@@ -1334,10 +1371,51 @@ def measure(args: argparse.Namespace) -> int:
         metadata["measurement_finished"] = finished.isoformat()
         metadata["measurement_valid"] = True
         summary["measurement_valid"] = True
+        if args.diagnostic:
+            metadata["diagnostic_capture"] = "thread-cpu-gc-ctx-v1"
+            summary["diagnostic"] = {
+                "classification": "DIAGNOSTIC_ONLY",
+                "report": "diagnostic.json",
+            }
+
         write_json(staging / "summary.json", summary)
         write_json(staging / "metadata.json", metadata)
+
+        if args.diagnostic:
+            import measure_diagnostics
+
+            try:
+                report = measure_diagnostics.analyze(
+                    raw / "timing.log", expected
+                )
+            except (ValueError, OSError) as exc:
+                raise InvalidMeasurement(
+                    "DIAGNOSTIC_ANALYSIS_FAILED", str(exc)
+                ) from exc
+
+            if (
+                not report["correctness"]["prior_gate_verified"]
+                or not all(
+                    report["phases"][phase]["thread_cpu_complete"]
+                    and report["phases"][phase]["context_switches_complete"]
+                    and report["phases"][phase]["gc_samples_complete"]
+                    for phase in ("cold", "warmup", "steady")
+                )
+            ):
+                raise InvalidMeasurement(
+                    "DIAGNOSTIC_CAPTURE_INCOMPLETE"
+                )
+
+            report["source"]["path"] = str(
+                (output / case / run_id / "raw" / "timing.log").resolve()
+            )
+            write_json(staging / "diagnostic.json", report)
+
         final = promote(staging, output / case / run_id)
         emit("MEASUREMENT_VALID", "YES")
+        if args.diagnostic:
+            emit("DIAGNOSTIC_REPORT", final / "diagnostic.json")
+            emit("REFERENCE_ELIGIBLE", "NO")
         emit("RESULT", final)
         return EXIT_OK
 

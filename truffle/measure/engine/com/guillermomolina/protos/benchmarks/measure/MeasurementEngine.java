@@ -5,7 +5,13 @@
  */
 package com.guillermomolina.protos.benchmarks.measure;
 
+import java.io.IOException;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Revision-independent timing engine shared by every measurement surface.
@@ -119,6 +125,15 @@ public final class MeasurementEngine {
         System.out.println("sample_calls=" + arguments.sampleCalls());
         System.out.println("setup_ns=" + setupNs);
 
+        if (Boolean.getBoolean("protos.benchmarks.measure.diagnostic")) {
+            if (arguments.jfrDestination() != null) {
+                throw new IllegalArgumentException(
+                        "diagnostic capture cannot share the JFR timing run");
+            }
+            runDiagnostic(arguments, invocation);
+            return;
+        }
+
         long started = System.nanoTime();
         String expected = invocation.invoke();
         long elapsed = System.nanoTime() - started;
@@ -150,6 +165,188 @@ public final class MeasurementEngine {
         }
 
         System.out.println("result=" + expected);
+    }
+
+
+    /**
+     * Diagnostic-only execution. Never called by ordinary reference timing.
+     * Supporting counter reads and output happen outside the wall interval.
+     */
+    private static void runDiagnostic(
+            Arguments arguments, Invocation invocation) throws Exception {
+        DiagnosticSampler sampler = new DiagnosticSampler();
+
+        DiagnosticSnapshot before = sampler.before();
+        long started = System.nanoTime();
+        long cpuStarted = sampler.cpuNow();
+        String expected = invocation.invoke();
+        long cpuElapsed = sampler.cpuNow() - cpuStarted;
+        long elapsed = System.nanoTime() - started;
+        DiagnosticSnapshot after = sampler.after();
+
+        sample("cold", 1, elapsed);
+        sampler.report("cold", 1, before, after, cpuElapsed);
+
+        for (int i = 1; i <= arguments.warmupIterations(); i++) {
+            diagnosticRepeated(
+                    invocation, expected, arguments.sampleCalls(),
+                    "warmup", i, sampler);
+        }
+
+        for (int i = 1; i <= arguments.steadyIterations(); i++) {
+            diagnosticRepeated(
+                    invocation, expected, arguments.sampleCalls(),
+                    "steady", i, sampler);
+        }
+
+        System.out.println("result=" + expected);
+    }
+
+    private static void diagnosticRepeated(
+            Invocation invocation,
+            String expected,
+            int calls,
+            String phase,
+            int iteration,
+            DiagnosticSampler sampler) throws Exception {
+        DiagnosticSnapshot before = sampler.before();
+        long started = System.nanoTime();
+        long cpuStarted = sampler.cpuNow();
+        invokeRepeated(invocation, expected, calls);
+        long cpuElapsed = sampler.cpuNow() - cpuStarted;
+        long elapsed = System.nanoTime() - started;
+        DiagnosticSnapshot after = sampler.after();
+
+        sample(phase, iteration, elapsed);
+        sampler.report(phase, iteration, before, after, cpuElapsed);
+    }
+
+    private record DiagnosticSnapshot(
+            long voluntary,
+            long involuntary,
+            long gcCount,
+            long gcTimeMs) {}
+
+    private static final class DiagnosticSampler {
+        private final ThreadMXBean cpu =
+                ManagementFactory.getThreadMXBean();
+
+        private final List<GarbageCollectorMXBean> collectors =
+                ManagementFactory.getGarbageCollectorMXBeans();
+
+        DiagnosticSampler() {
+            if (!cpu.isCurrentThreadCpuTimeSupported()) {
+                throw new IllegalStateException(
+                        "current-thread CPU timing is unsupported");
+            }
+            if (!cpu.isThreadCpuTimeEnabled()) {
+                cpu.setThreadCpuTimeEnabled(true);
+            }
+
+            System.out.println("diagnostic_mode=ENABLED");
+            System.out.println(
+                    "diagnostic_thread_id="
+                            + Thread.currentThread().threadId());
+        }
+
+        DiagnosticSnapshot before() {
+            long[] switches = readSwitches();
+            long[] gc = readGc();
+            return new DiagnosticSnapshot(
+                    switches[0], switches[1], gc[0], gc[1]);
+        }
+
+        DiagnosticSnapshot after() {
+            return before();
+        }
+
+        long cpuNow() {
+            return cpu.getCurrentThreadCpuTime();
+        }
+
+        void report(
+                String phase,
+                int iteration,
+                DiagnosticSnapshot before,
+                DiagnosticSnapshot after,
+                long cpuElapsedNs) {
+            System.out.println(
+                    "thread_cpu phase=" + phase
+                            + " iteration=" + iteration
+                            + " elapsed_ns=" + cpuElapsedNs);
+
+            if (before.voluntary >= 0 && after.voluntary >= 0
+                    && before.involuntary >= 0 && after.involuntary >= 0) {
+                System.out.println(
+                        "ctx_switch phase=" + phase
+                                + " iteration=" + iteration
+                                + " voluntary="
+                                + (after.voluntary - before.voluntary)
+                                + " nonvoluntary="
+                                + (after.involuntary - before.involuntary));
+            }
+
+            if (before.gcCount >= 0 && after.gcCount >= 0
+                    && before.gcTimeMs >= 0 && after.gcTimeMs >= 0) {
+                System.out.println(
+                        "gc_sample phase=" + phase
+                                + " iteration=" + iteration
+                                + " count_delta="
+                                + (after.gcCount - before.gcCount)
+                                + " time_ms_delta="
+                                + (after.gcTimeMs - before.gcTimeMs));
+            }
+        }
+
+        private long[] readGc() {
+            long count = 0;
+            long millis = 0;
+
+            for (GarbageCollectorMXBean collector : collectors) {
+                long c = collector.getCollectionCount();
+                long t = collector.getCollectionTime();
+
+                if (c < 0 || t < 0) {
+                    return new long[] {-1, -1};
+                }
+
+                count += c;
+                millis += t;
+            }
+
+            return new long[] {count, millis};
+        }
+
+        private static long[] readSwitches() {
+            Path status = Path.of("/proc/thread-self/status");
+
+            if (!Files.isReadable(status)) {
+                return new long[] {-1, -1};
+            }
+
+            long voluntary = -1;
+            long involuntary = -1;
+
+            try {
+                for (String line : Files.readAllLines(status)) {
+                    if (line.startsWith("voluntary_ctxt_switches:")) {
+                        voluntary = parseCounter(line);
+                    } else if (line.startsWith(
+                            "nonvoluntary_ctxt_switches:")) {
+                        involuntary = parseCounter(line);
+                    }
+                }
+            } catch (IOException | NumberFormatException e) {
+                return new long[] {-1, -1};
+            }
+
+            return new long[] {voluntary, involuntary};
+        }
+
+        private static long parseCounter(String line) {
+            return Long.parseLong(
+                    line.substring(line.indexOf(':') + 1).trim());
+        }
     }
 
     private static void invokeRepeated(

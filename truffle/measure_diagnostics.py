@@ -25,6 +25,10 @@ SWITCH = re.compile(
     r"^ctx_switch phase=(cold|warmup|steady) "
     r"iteration=(\d+) voluntary=(\d+) nonvoluntary=(\d+)$"
 )
+GC_SAMPLE = re.compile(
+    r"^gc_sample phase=(cold|warmup|steady) "
+    r"iteration=(\d+) count_delta=(\d+) time_ms_delta=(\d+)$"
+)
 TRUFFLE = re.compile(
     r"\[engine\]\s+opt done.*?\bid=\d+\s+"
     r"(.*?)\s+\|Tier\s+(\d+)\|"
@@ -45,9 +49,18 @@ def summarize(items, calls):
     def median(values):
         return statistics.median(values) / calls if values else None
 
+    gc_complete = bool(items) and all(
+        "gc_count_delta" in item and "gc_time_ms_delta" in item
+        for item in items
+    )
+
     result = {
         "samples": len(items),
         "wall_p50_ns_per_call": median(wall),
+        "context_switches_complete": switches_complete,
+        "gc_samples_complete": gc_complete,
+        "gc_count_delta_total": None,
+        "gc_time_ms_delta_total": None,
         "thread_cpu_complete": cpu_complete,
         "thread_cpu_p50_ns_per_call": None,
         "cpu_first5_p50_ns_per_call": None,
@@ -82,6 +95,14 @@ def summarize(items, calls):
         )
         result["involuntary_switches"] = sum(
             item["nonvoluntary"] for item in items
+        )
+
+    if gc_complete:
+        result["gc_count_delta_total"] = sum(
+            item["gc_count_delta"] for item in items
+        )
+        result["gc_time_ms_delta_total"] = sum(
+            item["gc_time_ms_delta"] for item in items
         )
 
     return result
@@ -138,6 +159,23 @@ def analyze(path: Path, expected: str):
             item["voluntary"] = int(voluntary)
             item["nonvoluntary"] = int(involuntary)
             continue
+
+        match = GC_SAMPLE.match(line)
+        if match:
+            phase, number, count_delta, time_delta = match.groups()
+            item = samples.setdefault((phase, int(number)), {})
+
+            if "gc_count_delta" in item:
+                raise ValueError(
+                    f"Duplicate GC sample: {phase}:{number}"
+                )
+
+            item["gc_count_delta"] = int(count_delta)
+            item["gc_time_ms_delta"] = int(time_delta)
+            continue
+
+        if line.startswith("gc_sample "):
+            raise ValueError(f"Malformed GC sample: {line}")
 
         if "[engine]" in line and "opt done" in line:
             match = TRUFFLE.search(line)
@@ -279,6 +317,9 @@ def analyze(path: Path, expected: str):
             "Mixed output order does not prove event/sample timing.",
             "Wall minus thread CPU is not scheduler-only time.",
             "Standalone logs may lack prior correctness metadata.",
+            "GC deltas are observations around each sample, "
+            "not proof that GC occurred inside its wall interval.",
+            "Diagnostic wall timing includes Thread CPU clock reads.",
         ],
     }
 

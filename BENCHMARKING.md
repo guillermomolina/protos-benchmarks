@@ -1323,6 +1323,44 @@ aggregated across workloads.
 measurements. The harness is a measuring instrument and a Protos revision is
 data: advancing Protos never requires editing harness source.
 
+### Current host-side Podman execution
+
+The supported host-side entry point is `make -C truffle podman-measure`.
+Build its standalone image from `truffle/Containerfile` with:
+
+```sh
+make -C truffle podman-build
+```
+
+The image provides GraalVM Community 25.4.4.1.1, JDK 25.0.4.1.1,
+Maven 3.9.9, and Python 3.12. The host needs Podman and Make but does
+not need Java, Maven, or a VS Code Dev Container.
+
+The harness checkout is mounted at `/workspaces/protos-benchmarks`.
+For Protos, the selected product checkout is mounted separately at
+`/workspaces/protos`. By default it is the sibling `protos-1` checkout;
+`PROTOS_CHECKOUT` can select a different absolute path. The Maven cache
+persists at `.work/runner-m2` between containers.
+
+Example diagnostic correctness smoke:
+
+```sh
+make -C truffle podman-measure LANGUAGE=protos WORKLOAD=primitive-return-literal STAGE=smoke PROFILE=none CPU=0 PODMAN_OUTPUT=results/local/podman-smoke/protos
+```
+
+`LANGUAGE=js` and `LANGUAGE=python` use the peer executable-value surface
+and do not mount the product checkout. `ALLOW_DIRTY_PRODUCT=1` allows a
+diagnostic Protos run with dirty sources, never a reference-eligible run.
+`STAGE=smoke` does not establish steady-state admission, regardless of
+the reported timing. `PODMAN_IMAGE` and `PODMAN_STANDALONE_IMAGE` override
+the runtime and build image tags respectively.
+
+The original direct Python invocation below remains valid where the
+pinned JVM toolchain is already configured. Earlier Docker-specific
+benchmark and IGV evidence elsewhere in this document remains historical.
+
+### Direct execution in a preconfigured JVM environment
+
     python3 truffle/measure_protos.py \
         --dir ../protos \
         --surface canonical \

@@ -20,12 +20,14 @@ RETENTION_PROFILE ?= perf023
 SURFACE ?= canonical
 STAGE ?= reference
 PROFILE ?= none
+CPU ?=
 OUTPUT ?=
 
 measure:
-	python3 measure_protos.py --dir "$(PROTOS_CHECKOUT)" --language "$(LANGUAGE)" \
+	python3 measure_protos.py $(if $(filter protos,$(LANGUAGE)),--dir "$(PROTOS_CHECKOUT)",) --language "$(LANGUAGE)" \
 		$(if $(filter protos,$(LANGUAGE)),--surface "$(SURFACE)",) \
 		--workload "$(WORKLOAD)" --stage "$(STAGE)" --profile "$(PROFILE)" \
+		$(if $(strip $(CPU)),--cpu "$(CPU)",) \
 		--output "$(OUTPUT)"
 
 # Cross-Truffle compiled-graph structural parity (no timing). capture runs
@@ -158,3 +160,39 @@ verify-retained-results:
 
 clean:
 	mvn -q clean
+
+# Host-side Podman runner: no host Java, Maven or VS Code Dev Container needed.
+.PHONY: podman-measure
+
+PODMAN_IMAGE ?= localhost/protos-bench-runner:graal25.4.4.1.1-standalone
+PODMAN_PRODUCT ?= $(if $(filter /workspaces/protos,$(PROTOS_CHECKOUT)),$(abspath ../../protos-1),$(abspath $(PROTOS_CHECKOUT)))
+PODMAN_OUTPUT ?= results/local/podman-measure
+PODMAN_MAVEN_CACHE := $(abspath ../.work/runner-m2)
+
+podman-measure:
+	@case "$(PODMAN_OUTPUT)" in results/*) ;; *) echo "PODMAN_OUTPUT must be relative to results/" >&2; false;; esac
+	@mkdir -p "$(PODMAN_MAVEN_CACHE)"
+	podman run --rm --pull=never --userns=keep-id \
+	--volume "$(abspath ..):/workspaces/protos-benchmarks:rw" \
+	--volume "$(PODMAN_MAVEN_CACHE):/home/vscode/.m2:rw" \
+	$(if $(filter protos,$(LANGUAGE)),--volume "$(PODMAN_PRODUCT):/workspaces/protos:rw",) \
+	--workdir /workspaces/protos-benchmarks \
+	--entrypoint /usr/bin/python3 \
+	"$(PODMAN_IMAGE)" \
+	truffle/measure_protos.py \
+	--language "$(LANGUAGE)" \
+	$(if $(filter protos,$(LANGUAGE)),--dir /workspaces/protos --surface "$(SURFACE)",) \
+	--workload "$(WORKLOAD)" \
+	--stage "$(STAGE)" \
+	--profile "$(PROFILE)" \
+	$(if $(strip $(CPU)),--cpu "$(CPU)",) \
+	$(if $(filter 1,$(ALLOW_DIRTY_PRODUCT)),--allow-dirty-product,) \
+	--output "/workspaces/protos-benchmarks/$(PODMAN_OUTPUT)"
+
+# Standalone benchmark image; independent of VS Code Dev Containers.
+.PHONY: podman-build
+
+PODMAN_STANDALONE_IMAGE ?= localhost/protos-bench-runner:graal25.4.4.1.1-standalone
+
+podman-build:
+	podman build --pull=missing --file "Containerfile" --tag "$(PODMAN_STANDALONE_IMAGE)" .

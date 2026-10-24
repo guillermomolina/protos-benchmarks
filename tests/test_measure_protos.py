@@ -239,6 +239,123 @@ class DriverTest(unittest.TestCase):
     def metadata(self, lines: dict[str, str]) -> dict:
         return json.loads((Path(lines["RESULT"]) / "metadata.json").read_text())
 
+    def test_peer_classpath_recovers_missing_maven_jars(self):
+        version = "test-graalvm"
+        peer_root = mp.EMBEDDED_CACHE / "peer-classpath" / version
+        peer_root.mkdir(parents=True)
+
+        (peer_root / "pom.xml").write_text("<project/>")
+        cp_file = peer_root / "classpath.txt"
+        cp_file.write_text(str(self.tmp / "missing.jar"))
+
+        jar = self.tmp / "maven-cache" / "polyglot.jar"
+        jar.parent.mkdir(parents=True)
+        jar.write_bytes(b"fake-jar")
+
+        calls = []
+
+        def fake_maven(command, **kwargs):
+            calls.append(command)
+            option = next(
+                item for item in command
+                if item.startswith("-Dmdep.outputFile=")
+            )
+            destination = Path(option.split("=", 1)[1])
+            destination.write_text(str(jar))
+            return subprocess.CompletedProcess(command, 0)
+
+        with (
+            mock.patch.object(
+                mp.jvm_runtime,
+                "harness_graalvm_version",
+                return_value=version,
+            ),
+            mock.patch.object(
+                mp.jvm_runtime,
+                "peer_pom",
+                return_value="<project/>",
+            ),
+            mock.patch.object(
+                mp.subprocess,
+                "run",
+                side_effect=fake_maven,
+            ),
+        ):
+            self.assertEqual(
+                mp.peer_classpath(), (version, str(jar))
+            )
+            self.assertEqual(
+                mp.peer_classpath(), (version, str(jar))
+            )
+
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(cp_file.read_text(), str(jar))
+
+    def test_peer_classpath_retries_after_changed_pom_maven_failure(self):
+        version = "test-graalvm-refresh"
+        peer_root = mp.EMBEDDED_CACHE / "peer-classpath" / version
+        peer_root.mkdir(parents=True)
+
+        pom = peer_root / "pom.xml"
+        pom.write_text("<old/>")
+
+        old_jar = self.tmp / "old.jar"
+        old_jar.write_bytes(b"old")
+
+        cp_file = peer_root / "classpath.txt"
+        cp_file.write_text(str(old_jar))
+
+        new_jar = self.tmp / "new.jar"
+        new_jar.write_bytes(b"new")
+
+        calls = []
+
+        def fake_maven(command, **kwargs):
+            calls.append(command)
+
+            if len(calls) == 1:
+                raise subprocess.CalledProcessError(1, command)
+
+            option = next(
+                item for item in command
+                if item.startswith("-Dmdep.outputFile=")
+            )
+            destination = Path(option.split("=", 1)[1])
+            destination.write_text(str(new_jar))
+            return subprocess.CompletedProcess(command, 0)
+
+        with (
+            mock.patch.object(
+                mp.jvm_runtime,
+                "harness_graalvm_version",
+                return_value=version,
+            ),
+            mock.patch.object(
+                mp.jvm_runtime,
+                "peer_pom",
+                return_value="<project/>",
+            ),
+            mock.patch.object(
+                mp.subprocess,
+                "run",
+                side_effect=fake_maven,
+            ),
+        ):
+            with self.assertRaises(subprocess.CalledProcessError):
+                mp.peer_classpath()
+
+            self.assertEqual(pom.read_text(), "<old/>")
+            self.assertEqual(cp_file.read_text(), str(old_jar))
+
+            self.assertEqual(
+                mp.peer_classpath(),
+                (version, str(new_jar)),
+            )
+
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(pom.read_text(), "<project/>")
+        self.assertEqual(cp_file.read_text(), str(new_jar))
+
     # A, B
     def test_measures_clean_checkout_without_modifying_it(self):
         before = sh(self.product, "status", "--porcelain", "--untracked-files=all")

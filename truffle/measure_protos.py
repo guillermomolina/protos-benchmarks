@@ -39,6 +39,7 @@ import shutil
 import statistics
 import subprocess
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -521,6 +522,14 @@ def build_product(repo: Path, log: Path) -> tuple[Path, str]:
     return classes, dependency_cp
 
 
+def dependency_classpath_ready(value: str) -> bool:
+    """All classpath entries must exist in the current execution environment."""
+    entries = value.split(os.pathsep)
+    return bool(value) and all(
+        entry and Path(entry).exists() for entry in entries
+    )
+
+
 def peer_classpath() -> tuple[str, str]:
     """Dependency classpath of the harness-pinned GraalJS/GraalPy peers."""
     version = jvm_runtime.harness_graalvm_version()
@@ -529,30 +538,55 @@ def peer_classpath() -> tuple[str, str]:
 
     pom = peer_root / "pom.xml"
     expected = jvm_runtime.peer_pom(version)
-
-    if not pom.is_file() or pom.read_text(encoding="utf-8") != expected:
-        pom.write_text(expected, encoding="utf-8")
+    pom_changed = (
+        not pom.is_file()
+        or pom.read_text(encoding="utf-8") != expected
+    )
 
     cp_file = peer_root / "classpath.txt"
+    dependency_cp = (
+        cp_file.read_text(encoding="utf-8").strip()
+        if cp_file.is_file()
+        else ""
+    )
 
-    if not cp_file.is_file():
-        subprocess.run(
-            [
-                "mvn",
-                "-q",
-                "-f",
-                str(pom),
-                "dependency:build-classpath",
-                f"-Dmdep.outputFile={cp_file}",
-            ],
-            cwd=ROOT,
-            check=True,
-        )
+    if pom_changed or not dependency_classpath_ready(dependency_cp):
+        with tempfile.TemporaryDirectory(
+            prefix="peer-classpath-",
+            dir=peer_root,
+        ) as staging:
+            staged_pom = Path(staging) / "pom.xml"
+            staged_pom.write_text(expected, encoding="utf-8")
+            built = Path(staging) / "classpath.txt"
+            subprocess.run(
+                [
+                    "mvn",
+                    "-q",
+                    "-f",
+                    str(staged_pom),
+                    "dependency:build-classpath",
+                    f"-Dmdep.outputFile={built}",
+                ],
+                cwd=ROOT,
+                check=True,
+            )
 
-    dependency_cp = cp_file.read_text(encoding="utf-8").strip()
+            if not built.is_file():
+                raise InvalidMeasurement(
+                    "PEER_CLASSPATH_MISSING", str(built)
+                )
 
-    if not dependency_cp:
-        raise InvalidMeasurement("PEER_CLASSPATH_EMPTY", str(cp_file))
+            resolved = built.read_text(encoding="utf-8").strip()
+
+            if not dependency_classpath_ready(resolved):
+                raise InvalidMeasurement(
+                    "PEER_CLASSPATH_UNRESOLVED", str(built)
+                )
+
+            built.replace(cp_file)
+            if pom_changed:
+                staged_pom.replace(pom)
+            dependency_cp = resolved
 
     return version, dependency_cp
 

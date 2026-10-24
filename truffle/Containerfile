@@ -18,48 +18,36 @@ FROM ghcr.io/graalvm/graalvm-community:25i4-25.0.4.1.1-ol10@sha256:a7b4810d7c755
 USER root
 
 RUN microdnf install -y \
-        findutils \
-        diffutils \
-        git \
-        gzip \
-        shadow-utils \
-        tar \
-        unzip \
-        xz \
-        procps \
-        time \
-        sudo \
-    && microdnf clean all
+    findutils \
+    diffutils \
+    git \
+    gzip \
+    shadow-utils \
+    tar \
+    unzip \
+    xz \
+    procps \
+    time \
+    python3 \
+    util-linux-core
 
 RUN microdnf install -y \
-        --enablerepo=ol10_codeready_builder \
-        maven \
-        maven-unbound \
-    && microdnf clean all
+    --enablerepo=ol10_codeready_builder \
+    maven \
+    maven-unbound
+
+RUN microdnf clean all
 
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-ARG GH_VERSION=2.100.0
-ARG GH_LINUX_AMD64_SHA256=e4d4bb4498e8d007abe545b6568926793ace1b6447da598294a610018cb164be
+RUN java -version 2>&1 | grep -F "GraalVM CE 25.4.4.1.1"
+RUN mvn -version | grep -F "Apache Maven 3.9.9"
+RUN python3 -c "import sys; assert sys.version_info[:2] == (3, 12)"
+RUN command -v taskset
 
-RUN curl --fail --location --silent --show-error \
-        "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" \
-        --output /tmp/gh.tar.gz \
-    && echo "${GH_LINUX_AMD64_SHA256}  /tmp/gh.tar.gz" | sha256sum --check --strict - \
-    && tar --extract --gzip \
-        --file /tmp/gh.tar.gz \
-        --directory /opt \
-    && ln --symbolic "/opt/gh_${GH_VERSION}_linux_amd64/bin/gh" /usr/local/bin/gh \
-    && gh --version \
-    && rm /tmp/gh.tar.gz
-
-RUN useradd --create-home --shell /bin/bash vscode \
-    && echo "vscode ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/vscode \
-    && chmod 0440 /etc/sudoers.d/vscode
+RUN useradd --create-home --shell /bin/bash vscode
 
 USER vscode
-
-RUN curl -fsSL https://claude.ai/install.sh | bash
 
 WORKDIR /workspaces/protos-benchmarks
 

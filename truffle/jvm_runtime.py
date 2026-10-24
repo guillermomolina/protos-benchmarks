@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TRUFFLE = ROOT / "truffle"
 WORK = ROOT / ".work" / "jvm-runtime"
 
-DEFAULT_PROTOS_CHECKOUT = Path("/workspaces/protos")
+DEFAULT_PROTOS_CHECKOUT = ROOT.parent / "protos"
 
 PACKAGE = "com.guillermomolina.protos.benchmarks.truffle"
 PACKAGE_PATH = PACKAGE.replace(".", "/")

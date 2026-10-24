@@ -126,8 +126,25 @@ class PolicyTest(unittest.TestCase):
             self.assertEqual((workload,), workload_catalog.select_workloads(workload))
             self.assertEqual([workload], mg.select_workloads(self.policy, workload))
             self.assertNotIn(workload, ladder)
+            expected_policy = {
+                "reference": {
+                    "jfr": {"sample_calls": 1_000_000},
+                    "timing": {
+                        "warmup_iterations": (
+                            150 if workload == "primitive-while-zero" else 50
+                        ),
+                        "steady_iterations": 10,
+                        "sample_calls": (
+                            1_000_000
+                            if workload == "primitive-while-zero"
+                            else 10_000
+                        ),
+                        "admission_scope": "steady-only",
+                    },
+                },
+            }
             self.assertEqual(
-                cases["policy"]["workloads"]["primitive-method-call"],
+                expected_policy,
                 cases["policy"]["workloads"][workload],
             )
             for language in mg.LANGUAGES:

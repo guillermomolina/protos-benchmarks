@@ -6,6 +6,32 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Changed
 
+- Added cold structural graph capture and analysis with explicit
+  Tier 1/Tier 2 selection, compiled-root inventories, per-root pairing,
+  graph evidence verification and derived structural reports. Missing
+  compilation tiers and ambiguous roots remain explicitly unavailable.
+- Added independent diagnostic `bytecode-capture` for executed Bytecode
+  DSL instruction histograms, retaining raw JVM output, SHA-256 integrity,
+  producer identity and diagnostic-only execution metadata. These captures
+  never contribute timing samples or reference results.
+- Added Bytecode DSL V2 size instrumentation using actual Truffle
+  instruction lengths. Physical root identities permit exact joins between
+  instruction histograms and bytecode-size observations within the same
+  diagnostic JVM. Uncached and cached interpreter states and changing
+  snapshots remain distinct; physical identities are never equated with
+  compiler-tier identities.
+- Added strict structural attribution and integrity checks for retained
+  bytecode evidence. Diagnostic logs are reparsed before reporting,
+  incompatible producers are rejected, and missing bytecode sizes are
+  never represented as zero.
+- Added explicit preparation for peer runtimes, the exact-version Truffle
+  annotation processor and the Protos product build. Instrument compilation
+  is offline and content-addressed; network access is restricted to
+  explicit preparation, while diagnostic capture preserves the existing
+  isolated execution policy.
+- Extended host, product, graph, bytecode and structural-report regression
+  coverage without changing the timing engine, canonical workloads or
+  retained benchmark results.
 - Added automatic readable `machine_id` identification from the CPU
   model and a short hash of the real Linux host hostname. Timing
   metadata, summaries and command output expose this identifier.

@@ -28,6 +28,8 @@ TIER ?= 2
 COMPILATION_ROOT ?= primary
 WARMUP_CALLS ?= 0
 INVOCATIONS ?= 2000
+BYTECODE_CALLS ?= 100
+BYTECODE_VERSION ?=
 FIRST_THRESHOLD ?= 100
 LAST_THRESHOLD ?=
 JVM_OPTION ?=
@@ -47,7 +49,7 @@ ARGS = --case "$(CASE)" --language "$(LANGUAGE)" --stage "$(STAGE)" \
        $(if $(strip $(CPU)),--cpu "$(CPU)",) \
        $(if $(strip $(OUTPUT)),--output "$(OUTPUT)",)
 
-.PHONY: help validate correctness measure smoke graphs-capture graphs-analyze graphs-summarize graphs-verify image-status image-build peer-prepare cold-capture cold-analyze cold-summarize
+.PHONY: help validate correctness measure smoke graphs-capture graphs-analyze graphs-summarize graphs-verify image-status image-build peer-prepare cold-capture cold-analyze cold-summarize bytecode-capture structural-report bytecode-prepare product-prepare
 
 help:
 	@$(PYTHON) $(HARNESS) --help
@@ -76,8 +78,16 @@ graphs-summarize:
 graphs-verify:
 	@$(PYTHON) $(HARNESS) graphs-verify $(ARGS)
 
+bytecode-prepare:
+	@$(PYTHON) $(HARNESS) bytecode-prepare \
+	    --image "$(PODMAN_IMAGE)" \
+	    $(if $(strip $(BYTECODE_VERSION)),--bytecode-version "$(BYTECODE_VERSION)",)
+
 peer-prepare:
 	@$(PYTHON) $(HARNESS) peer-prepare $(ARGS)
+
+product-prepare:
+	@$(PYTHON) $(HARNESS) product-prepare --product "$(PROTOS_REPO)" --image "$(PODMAN_IMAGE)" $(if $(strip $(PROTOS_VERSION)),--protos-version "$(PROTOS_VERSION)",)
 
 image-status:
 	@$(PYTHON) $(HARNESS) image-status --image "$(PODMAN_IMAGE)"
@@ -92,6 +102,9 @@ COLD_ARGS = --tier "$(TIER)" --root "$(COMPILATION_ROOT)" \
             $(if $(strip $(LAST_THRESHOLD)),--last-threshold "$(LAST_THRESHOLD)",) \
             $(if $(strip $(JVM_OPTION)),--jvm-option "$(JVM_OPTION)",)
 
+bytecode-capture:
+	@$(PYTHON) $(HARNESS) bytecode-capture $(ARGS) --bytecode-calls "$(BYTECODE_CALLS)"
+
 cold-capture:
 	@$(PYTHON) $(HARNESS) cold-capture $(ARGS) $(COLD_ARGS)
 
@@ -100,3 +113,11 @@ cold-analyze:
 
 cold-summarize:
 	@$(PYTHON) $(HARNESS) cold-summarize $(ARGS) $(COLD_ARGS)
+
+STRUCTURAL_TIER1_DIR ?=
+STRUCTURAL_TIER2_DIR ?=
+
+structural-report:
+	@$(PYTHON) $(HARNESS) structural-report $(ARGS) \
+	    $(if $(strip $(STRUCTURAL_TIER1_DIR)),--tier1-dir "$(STRUCTURAL_TIER1_DIR)",) \
+	    $(if $(strip $(STRUCTURAL_TIER2_DIR)),--tier2-dir "$(STRUCTURAL_TIER2_DIR)",)

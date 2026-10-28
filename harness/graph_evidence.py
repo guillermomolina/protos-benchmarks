@@ -429,6 +429,507 @@ def select_tier_compilation(
     }
 
 
+
+def observed_compilation_roots(
+    parsed: dict[str, Any],
+    requested_tier: int,
+) -> dict[str, Any]:
+    """Inventory every observed compiled CallTarget independently.
+
+    Coverage is limited to compilation-trace targets. An interpreted root
+    that never compiles cannot be discovered from this trace alone.
+    """
+    if requested_tier not in (1, 2):
+        raise EvidenceError("INVALID_REQUESTED_TIER")
+
+    if parsed.get("option_rejections"):
+        raise EvidenceError("OPTION_REJECTED")
+
+    if parsed.get("unknown_lifecycle_events"):
+        raise EvidenceError("UNKNOWN_LIFECYCLE_EVENT")
+
+    targets = target_lifecycles(parsed)
+
+    normalized_counts: dict[str, int] = {}
+
+    for target in targets.values():
+        label = normalize_label(target["label"])
+        normalized_counts[label] = normalized_counts.get(label, 0) + 1
+
+    roots = []
+
+    for target_key, lifecycle in sorted(
+        targets.items(),
+        key=lambda item: (
+            normalize_label(item[1]["label"]),
+            item[0],
+        ),
+    ):
+        label = lifecycle["label"]
+        normalized = normalize_label(label)
+
+        candidates = [
+            compilation
+            for compilation in lifecycle["compilations"]
+            if compilation["tier"] == requested_tier
+        ]
+
+        entry: dict[str, Any] = {
+            "target": target_key,
+            "label": label,
+            "normalized_label": normalized,
+            "requested_tier": requested_tier,
+            "observed_tiers": sorted({
+                compilation["tier"]
+                for compilation in lifecycle["compilations"]
+            }),
+            "compilation_ids": [
+                compilation["comp_id"]
+                for compilation in lifecycle["compilations"]
+            ],
+            "cross_run_identity": (
+                "AMBIGUOUS"
+                if normalized_counts[normalized] > 1
+                else "UNIQUE"
+            ),
+            "status": "UNAVAILABLE",
+            "reason": None,
+            "selected": None,
+        }
+
+        if not candidates:
+            entry["reason"] = "REQUESTED_TIER_NOT_OBSERVED"
+
+        elif len(candidates) != 1:
+            entry["reason"] = "TIER_COMPILATION_AMBIGUOUS"
+
+        elif lifecycle["invalidated_after_final"]:
+            entry["reason"] = "ROOT_INVALIDATED_AFTER_COMPILATION"
+
+        elif lifecycle["failed_after_final"]:
+            entry["reason"] = "ROOT_FAILED_AFTER_COMPILATION"
+
+        else:
+            compilation = candidates[0]
+
+            required = (
+                "comp_id",
+                "compilation_time_ms",
+                "ir_after_truffle_tier",
+                "ir_final",
+                "machine_code_bytes",
+            )
+
+            missing = [
+                name
+                for name in required
+                if compilation.get(name) is None
+            ]
+
+            if missing:
+                entry["reason"] = "COMPILATION_METRICS_MISSING"
+                entry["missing_metrics"] = missing
+
+            else:
+                entry["status"] = "AVAILABLE"
+                entry["selected"] = {
+                    **compilation,
+                    "root": label,
+                    "target": target_key,
+                    "requested_tier": requested_tier,
+                    "observed_tier": compilation["tier"],
+                    "other_compilation_ids": [
+                        item["comp_id"]
+                        for item in lifecycle["compilations"]
+                        if item["comp_id"] != compilation["comp_id"]
+                    ],
+                    "evidence_kind": "single-compilation",
+                }
+
+        roots.append(entry)
+
+    return {
+        "schema": 1,
+        "scope": "observed-compiled-call-targets-only",
+        "requested_tier": requested_tier,
+        "status": (
+            "AVAILABLE" if roots else "UNAVAILABLE"
+        ),
+        "reason": (
+            None if roots else "NO_COMPILED_ROOTS_REPORTED"
+        ),
+        "roots": roots,
+        "available": sum(
+            item["status"] == "AVAILABLE"
+            for item in roots
+        ),
+        "unavailable": sum(
+            item["status"] == "UNAVAILABLE"
+            for item in roots
+        ),
+        "interpreted_roots_coverage": "NOT_ESTABLISHED",
+    }
+
+
+
+def cold_producer_identity(metadata: dict[str, Any]) -> dict[str, Any]:
+    """Identity relevant to cross-tier structural comparability."""
+    product = metadata.get("product_before") or {}
+    harness = metadata.get("harness") or {}
+    java = metadata.get("java") or {}
+
+    return {
+        "language": metadata.get("language"),
+        "workload": metadata.get("workload"),
+        "surface": metadata.get("surface"),
+        "expected_result": metadata.get("expected_result"),
+        "phase": metadata.get("selected_phase"),
+        "product_revision": product.get("revision"),
+        "product_source_state_sha256": product.get(
+            "source_state_sha256"
+        ),
+        "product_version": product.get("version"),
+        "peer_runtime": metadata.get("peer_runtime"),
+        "harness_git_head": harness.get("git_head"),
+        "harness_source_sha256": harness.get("source_sha256"),
+        "java_runtime_version": java.get("java.runtime.version"),
+        "java_vm_version": java.get("java.vm.version"),
+    }
+
+
+def pair_compiled_root_tiers(
+    tier1_capture: dict[str, Any] | None,
+    tier1_summary: dict[str, Any] | None,
+    tier2_capture: dict[str, Any] | None,
+    tier2_summary: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Pair only uniquely identified, producer-compatible compiled roots.
+
+    Never interpret a missing tier, BGV or graph analysis as a zero count.
+    """
+    captures = {
+        1: tier1_capture,
+        2: tier2_capture,
+    }
+    summaries = {
+        1: tier1_summary,
+        2: tier2_summary,
+    }
+
+    identities = {
+        tier: (
+            cold_producer_identity(capture)
+            if capture is not None
+            else None
+        )
+        for tier, capture in captures.items()
+    }
+
+    compatible = (
+        identities[1] is not None
+        and identities[2] is not None
+        and identities[1] == identities[2]
+    )
+
+    indexed: dict[int, dict[str, dict[str, Any]]] = {
+        1: {},
+        2: {},
+    }
+
+    for tier in (1, 2):
+        capture = captures[tier] or {}
+        summary = summaries[tier] or {}
+
+        def slot(label: str) -> dict[str, Any]:
+            normalized = normalize_label(label)
+            return indexed[tier].setdefault(
+                normalized,
+                {
+                    "inventory": [],
+                    "unavailable": [],
+                    "units": [],
+                },
+            )
+
+        for entry in (
+            capture.get("root_inventory") or {}
+        ).get("roots", []):
+            slot(entry["label"])["inventory"].append(entry)
+
+        for entry in capture.get("unavailable_roots", []):
+            slot(entry["label"])["unavailable"].append(entry)
+
+        for unit in summary.get("units", []):
+            slot(unit["label"])["units"].append(unit)
+
+    normalized_roots = sorted(
+        set(indexed[1]) | set(indexed[2])
+    )
+
+    def tier_observation(
+        tier: int,
+        normalized: str,
+    ) -> dict[str, Any]:
+        capture = captures[tier]
+        summary = summaries[tier]
+
+        if capture is None:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "CAPTURE_NOT_AVAILABLE",
+            }
+
+        if not capture.get("capture_valid"):
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "CAPTURE_INVALID",
+                "detail": capture.get("invalid_reason"),
+            }
+
+        if capture.get("requested_root") != "all":
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "CAPTURE_NOT_ALL_ROOTS",
+            }
+
+        if capture.get("requested_tier") != tier:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "CAPTURE_TIER_MISMATCH",
+            }
+
+        if (
+            (capture.get("correctness") or {}).get("result")
+            != "PASS"
+        ):
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "CORRECTNESS_NOT_VERIFIED",
+            }
+
+        items = indexed[tier].get(normalized)
+
+        if items is None:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "ROOT_NOT_OBSERVED",
+            }
+
+        inventory = items["inventory"]
+        units = items["units"]
+        unavailable = items["unavailable"]
+
+        if (
+            len(inventory) > 1
+            or len(units) > 1
+            or any(
+                entry.get("cross_run_identity") == "AMBIGUOUS"
+                for entry in inventory
+            )
+        ):
+            return {
+                "status": "AMBIGUOUS",
+                "reason": "ROOT_IDENTITY_AMBIGUOUS",
+                "observed_targets": [
+                    entry.get("target")
+                    for entry in inventory
+                ],
+            }
+
+        if unavailable:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": unavailable[0].get(
+                    "reason", "ROOT_EVIDENCE_UNAVAILABLE"
+                ),
+            }
+
+        if inventory and inventory[0]["status"] != "AVAILABLE":
+            return {
+                "status": "UNAVAILABLE",
+                "reason": inventory[0].get(
+                    "reason", "ROOT_NOT_COMPILED"
+                ),
+            }
+
+        if summary is None:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "GRAPH_SUMMARY_NOT_AVAILABLE",
+            }
+
+        if summary.get("mode") != "cold-all-compiled-roots":
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "GRAPH_SUMMARY_MODE_MISMATCH",
+            }
+
+        if (
+            summary.get("requested_tier") != tier
+            or summary.get("language") != capture.get("language")
+            or summary.get("workload") != capture.get("workload")
+            or summary.get("phase") != capture.get("selected_phase")
+        ):
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "GRAPH_SUMMARY_IDENTITY_MISMATCH",
+            }
+
+        if len(units) != 1:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "ROOT_GRAPH_NOT_AVAILABLE",
+            }
+
+        unit = units[0]
+
+        if unit.get("tier") != tier:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "ROOT_GRAPH_TIER_MISMATCH",
+            }
+
+        graph = unit.get("graph") or {}
+        count = graph.get("node_count")
+        histogram = graph.get("node_class_histogram")
+
+        if (
+            type(count) is not int
+            or count < 0
+            or not isinstance(histogram, dict)
+        ):
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "GRAPH_METRICS_MISSING",
+            }
+
+        if (
+            any(
+                type(value) is not int or value < 0
+                for value in histogram.values()
+            )
+            or sum(histogram.values()) != count
+        ):
+            raise EvidenceError(
+                "GRAPH_HISTOGRAM_INCONSISTENT",
+                normalized,
+            )
+
+        if inventory:
+            recorded_target = inventory[0].get("target")
+            if (
+                recorded_target is not None
+                and unit.get("target") != recorded_target
+            ):
+                return {
+                    "status": "UNAVAILABLE",
+                    "reason": "ROOT_TARGET_MISMATCH",
+                }
+
+        matching_compilations = [
+            item
+            for item in capture.get(
+                "selected_compilations", []
+            )
+            if (
+                item.get("comp_id") == unit.get("comp_id")
+                and normalize_label(
+                    item.get("root", "")
+                ) == normalized
+            )
+        ]
+
+        if len(matching_compilations) != 1:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "ROOT_COMPILATION_METADATA_NOT_UNIQUE",
+            }
+
+        machine_bytes = matching_compilations[0].get(
+            "machine_code_bytes"
+        )
+
+        if type(machine_bytes) is not int or machine_bytes < 0:
+            return {
+                "status": "UNAVAILABLE",
+                "reason": "MACHINE_CODE_SIZE_NOT_AVAILABLE",
+            }
+
+        return {
+            "status": "AVAILABLE",
+            "root": unit["label"],
+            "normalized_root": normalized,
+            "target": unit.get("target"),
+            "tier": tier,
+            "comp_id": unit.get("comp_id"),
+            "node_count": count,
+            "node_class_histogram": histogram,
+            "machine_code_bytes": machine_bytes,
+            "bgv": unit.get("bgv"),
+            "bgv_sha256": unit.get("bgv_sha256"),
+            "analysis": unit.get("analysis"),
+            "analysis_sha256": unit.get("analysis_sha256"),
+        }
+
+    rows = []
+
+    for normalized in normalized_roots:
+        first = tier_observation(1, normalized)
+        second = tier_observation(2, normalized)
+
+        if not compatible:
+            pair_status = "PRODUCER_IDENTITY_MISMATCH"
+        elif (
+            first["status"] == "AMBIGUOUS"
+            or second["status"] == "AMBIGUOUS"
+        ):
+            pair_status = "ROOT_IDENTITY_AMBIGUOUS"
+        elif (
+            first["status"] != "AVAILABLE"
+            or second["status"] != "AVAILABLE"
+        ):
+            pair_status = "INCOMPLETE"
+        else:
+            pair_status = "PAIRED"
+
+        rows.append({
+            "normalized_root": normalized,
+            "pair_status": pair_status,
+            "tier_1": first,
+            "tier_2": second,
+            "node_count_delta_t2_minus_t1": (
+                second["node_count"] - first["node_count"]
+                if pair_status == "PAIRED"
+                else None
+            ),
+        })
+
+    if not compatible:
+        status = "INCOMPATIBLE"
+    elif rows and all(
+        row["pair_status"] == "PAIRED"
+        for row in rows
+    ):
+        status = "COMPLETE"
+    else:
+        status = "PARTIAL"
+
+    return {
+        "schema": 1,
+        "mode": "cold-compiled-root-tier-pair",
+        "scope": "observed-compiled-call-targets-only",
+        "status": status,
+        "producer_identity_compatible": compatible,
+        "producer_identities": identities,
+        "pairing_basis": (
+            "normalized-label-unique-within-each-capture"
+        ),
+        "roots": rows,
+        "interpreted_roots_coverage": "NOT_ESTABLISHED",
+        "timing_evidence": "NONE",
+    }
+
+
 def normalize_label(label: str) -> str:
     """Removes per-process object identity (``@4ae9cfc1``, `` at 2cbc655a>``)
     so that the same root can be compared across processes."""
@@ -661,6 +1162,177 @@ def stabilize(runs: list[dict[str, Any]]) -> dict[str, Any]:
 
 # ---------------------------------------------------------------------------
 # BGV-derived graphs (IgvUtility filter JSON)
+
+
+
+def parse_bytecode_histogram(output: str) -> dict[str, Any]:
+    """Parse GraalVM's diagnostic Bytecode DSL instruction histogram.
+
+    Grouping is expected to be language,root. Counts describe executed
+    interpreter instructions, never static bytecode size or JIT Tier 1/2
+    graph nodes. Missing instrumentation is explicit, not a zero count.
+    """
+    header = re.compile(
+        r"^(?:\[engine\]\s+)?\[bc\] Instruction histogram for:\s*(.+?)\s*$"
+    )
+    row_pattern = re.compile(
+        r"^\s*(\d+)\s*\|\s*(\d+(?:\.\d+)?)\s*\|\s*(.*?)\s*$"
+    )
+    instruction_pattern = re.compile(
+        r"^[0-9a-fA-F]+\s+(.+?)\s*$"
+    )
+    total_pattern = re.compile(
+        r"^Total executed instructions:\s*(\d+)\s*$"
+    )
+
+    groups: dict[tuple[str, str, str], dict[str, Any]] = {}
+    interpreter = None
+    language = None
+    root = None
+    block_sum = 0
+    block_total_seen = False
+    declared_total = 0
+    saw_header = False
+
+    def finish_block() -> None:
+        if interpreter is not None and not block_total_seen:
+            raise EvidenceError(
+                "BYTECODE_HISTOGRAM_TOTAL_MISSING",
+                interpreter,
+            )
+
+    for original_line in output.splitlines():
+        line = original_line.strip()
+
+        match = header.match(line)
+        if match:
+            finish_block()
+            interpreter = match.group(1)
+            language = None
+            root = None
+            block_sum = 0
+            block_total_seen = False
+            saw_header = True
+            continue
+
+        if interpreter is None:
+            continue
+
+        if line.startswith("[bc]"):
+            line = line[4:].strip()
+
+        total = total_pattern.match(line)
+        if total:
+            count = int(total.group(1))
+            if block_total_seen or count != block_sum:
+                raise EvidenceError(
+                    "BYTECODE_HISTOGRAM_TOTAL_MISMATCH",
+                    {
+                        "interpreter": interpreter,
+                        "reported": count,
+                        "operations": block_sum,
+                    },
+                )
+            declared_total += count
+            block_total_seen = True
+            continue
+
+        match = row_pattern.match(line)
+        if not match:
+            continue
+
+        count = int(match.group(1))
+        label = match.group(3).strip()
+
+        if label.startswith("▶"):
+            group_name = label[1:].strip()
+            if group_name.startswith("Language:"):
+                language = group_name.partition(":")[2].strip()
+                root = None
+            elif group_name.startswith("Root:"):
+                root = group_name.partition(":")[2].strip()
+            elif re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]*", group_name):
+                language = group_name
+                root = None
+            else:
+                raise EvidenceError(
+                    "BYTECODE_HISTOGRAM_UNKNOWN_GROUP",
+                    group_name,
+                )
+            continue
+
+        instruction = instruction_pattern.match(label)
+        if instruction is None:
+            continue
+
+        if not language or not root or block_total_seen:
+            raise EvidenceError(
+                "BYTECODE_HISTOGRAM_ROOT_MISSING",
+                label,
+            )
+
+        operation = instruction.group(1).strip()
+        if not operation:
+            raise EvidenceError(
+                "BYTECODE_HISTOGRAM_OPERATION_MISSING",
+                label,
+            )
+
+        key = (interpreter, language, root)
+        group = groups.setdefault(
+            key,
+            {
+                "interpreter": interpreter,
+                "language": language,
+                "root": root,
+                "normalized_root": normalize_label(root),
+                "operation_counts": {},
+                "executed_instructions": 0,
+            },
+        )
+        counts = group["operation_counts"]
+        counts[operation] = counts.get(operation, 0) + count
+        group["executed_instructions"] += count
+        block_sum += count
+
+    finish_block()
+
+    if not saw_header:
+        return {
+            "schema": 1,
+            "status": "UNAVAILABLE",
+            "reason": "BYTECODE_DSL_HISTOGRAM_NOT_REPORTED",
+            "groups": [],
+            "total_executed_instructions": None,
+        }
+
+    if not groups:
+        raise EvidenceError(
+            "BYTECODE_HISTOGRAM_NO_ROOT_OPERATIONS"
+        )
+
+    ordered = sorted(
+        groups.values(),
+        key=lambda item: (
+            item["language"],
+            item["normalized_root"],
+            item["root"],
+            item["interpreter"],
+        ),
+    )
+
+    for group in ordered:
+        group["operation_counts"] = dict(
+            sorted(group["operation_counts"].items())
+        )
+
+    return {
+        "schema": 1,
+        "status": "AVAILABLE",
+        "kind": "executed-bytecode-dsl-operations",
+        "groups": ordered,
+        "total_executed_instructions": declared_total,
+    }
 
 
 def dump_comp_id(name: str) -> int | None:
@@ -1011,3 +1683,157 @@ def first_divergent(rungs: list[dict[str, Any]]) -> dict[str, Any] | None:
                 "signals": rung["protos_signals"],
             }
     return None
+
+
+
+def parse_bytecode_size_trace(output: str) -> dict[str, Any]:
+    """Parse exact per-root Bytecode DSL sizes from diagnostic JVM output.
+
+    Each record is tied to an observed physical root instance, bytecode
+    interpreter tier, and instruction snapshot. Separate snapshots are not
+    collapsed when quickening changes the bytecode representation.
+
+    No observed records means unavailable evidence, never zero bytecode.
+    """
+    import base64
+    import binascii
+
+    marker = "BENCH_BYTECODE_SIZE_V2"
+    observations = []
+    seen = set()
+    instance_identities = {}
+    physical_handles = {}
+
+    for line in output.splitlines():
+        if not line.startswith(marker + "\t"):
+            continue
+
+        fields = line.split("\t")
+
+        if len(fields) != 9:
+            raise EvidenceError(
+                "INVALID_BYTECODE_SIZE_RECORD", line
+            )
+
+        (
+            _,
+            encoded_name,
+            instance_text,
+            tier,
+            count_text,
+            bytes_text,
+            first_text,
+            last_text,
+            encoded_physical,
+        ) = fields
+
+        try:
+            root_name = base64.b64decode(
+                encoded_name, validate=True
+            ).decode("utf-8")
+
+            physical_root_label = base64.b64decode(
+                encoded_physical, validate=True
+            ).decode("utf-8")
+
+            root_instance = int(instance_text)
+            instruction_count = int(count_text)
+            bytecode_bytes = int(bytes_text)
+            first_bci = int(first_text)
+            last_end_bci = int(last_text)
+
+        except (
+            UnicodeDecodeError,
+            binascii.Error,
+            ValueError,
+        ) as error:
+            raise EvidenceError(
+                "INVALID_BYTECODE_SIZE_RECORD", line
+            ) from error
+
+        if (
+            not root_name
+            or not re.fullmatch(
+                r"[^@\s]+@[0-9a-fA-F]+",
+                physical_root_label,
+            )
+            or root_instance < 1
+            or tier not in {"UNCACHED", "CACHED"}
+            or instruction_count < 1
+            or bytecode_bytes < 1
+            or first_bci < 0
+            or last_end_bci <= first_bci
+            or last_end_bci - first_bci != bytecode_bytes
+        ):
+            raise EvidenceError(
+                "INCONSISTENT_BYTECODE_SIZE", line
+            )
+
+        identity_signature = (
+            root_name,
+            physical_root_label,
+        )
+
+        previous = instance_identities.get(root_instance)
+
+        if previous is not None and previous != identity_signature:
+            raise EvidenceError(
+                "INCONSISTENT_BYTECODE_ROOT_IDENTITY",
+                line,
+            )
+
+        previous_instance = physical_handles.get(
+            physical_root_label
+        )
+
+        if (
+            previous_instance is not None
+            and previous_instance != root_instance
+        ):
+            raise EvidenceError(
+                "BYTECODE_PHYSICAL_ROOT_COLLISION",
+                line,
+            )
+
+        instance_identities[root_instance] = identity_signature
+        physical_handles[physical_root_label] = root_instance
+
+        observation = {
+            "root_name": root_name,
+            "root_instance": root_instance,
+            "physical_root_label": physical_root_label,
+            "bytecode_tier": tier,
+            "instruction_count": instruction_count,
+            "bytecode_bytes": bytecode_bytes,
+            "first_bci": first_bci,
+            "last_end_bci": last_end_bci,
+        }
+
+        identity = (
+            physical_root_label,
+            root_instance,
+            tier,
+            instruction_count,
+            bytecode_bytes,
+            first_bci,
+            last_end_bci,
+        )
+
+        if identity not in seen:
+            observations.append(observation)
+            seen.add(identity)
+
+    if not observations:
+        return {
+            "status": "UNAVAILABLE",
+            "reason": "NO_BYTECODE_SIZE_RECORDS",
+            "observations": [],
+        }
+
+    return {
+        "status": "AVAILABLE",
+        "source": "TRUFFLE_INSTRUCTION_LENGTH",
+        "unit": "bytes",
+        "scope": "OBSERVED_INSTRUMENTED_ROOTS",
+        "observations": observations,
+    }

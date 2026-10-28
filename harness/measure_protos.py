@@ -1155,6 +1155,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="explicitly prepare peer dependencies with network access",
     )
     parser.add_argument(
+        "--prepare-product",
+        action="store_true",
+        help="explicitly prepare Protos build dependencies with network access",
+    )
+    parser.add_argument(
         "--verify-producer",
         type=Path,
         metavar="RUN_DIR",
@@ -1162,6 +1167,89 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     return parser.parse_args(argv)
 
+
+
+
+def prepare_product(args: argparse.Namespace) -> int:
+    """Prepare Protos Maven build and classpath without samples."""
+    if args.language != "protos" or args.dir is None:
+        raise UsageError(
+            "PRODUCT_PREPARE_OPTIONS: requires Protos --dir"
+        )
+
+    if (
+        args.workload is not None
+        or args.output is not None
+        or args.correctness_only
+        or args.remeasure
+        or args.diagnostic
+        or args.diagnostic_jit
+        or args.jvm_option
+        or args.prepare_peer
+    ):
+        raise UsageError(
+            "PRODUCT_PREPARE_OPTIONS: preparation does not "
+            "accept workload, output or measurement options"
+        )
+
+    repository = args.dir.expanduser().resolve()
+    before = product_identity(repository)
+
+    if not before["clean"]:
+        raise UsageError(
+            "PRODUCT_PREPARE_DIRTY: Protos checkout must be clean"
+        )
+
+    if (
+        args.version is not None
+        and args.version != before["version"]
+    ):
+        raise UsageError(
+            "PRODUCT_PREPARE_VERSION_MISMATCH"
+        )
+
+    preparation = (
+        EMBEDDED_CACHE
+        / "product-preparation"
+        / str(before["revision"])
+    )
+
+    preparation.mkdir(parents=True, exist_ok=True)
+    log = preparation / "product-build.log"
+
+    try:
+        classes, dependency_cp = build_product(repository, log)
+    except InvalidMeasurement as exc:
+        emit("PRODUCT_PREPARED", "NO")
+        emit("INVALID_REASON", exc.reason)
+        emit("PRODUCT_BUILD_LOG", log)
+        return EXIT_INVALID
+
+    after = product_identity(repository)
+    changed = compare_product(before, after)
+
+    if changed or not after["clean"]:
+        emit("PRODUCT_PREPARED", "NO")
+        emit("INVALID_REASON", "PRODUCT_CHANGED_DURING_PREPARATION")
+        emit("CHANGED_FIELDS", ",".join(changed))
+        emit("PRODUCT_BUILD_LOG", log)
+        return EXIT_INVALID
+
+    if not dependency_classpath_ready(dependency_cp):
+        emit("PRODUCT_PREPARED", "NO")
+        emit("INVALID_REASON", "PRODUCT_CLASSPATH_UNRESOLVED")
+        emit("PRODUCT_BUILD_LOG", log)
+        return EXIT_INVALID
+
+    emit("PRODUCT_PREPARED", "YES")
+    emit("PRODUCT_REVISION", before["revision"])
+    emit("PRODUCT_VERSION", before["version"])
+    emit("PRODUCT_CLASSES", classes)
+    emit("CLASSPATH_ENTRIES", len(dependency_cp.split(os.pathsep)))
+    emit("PRODUCT_BUILD_LOG", log)
+    emit("MEASUREMENTS_EXECUTED", "NO")
+
+    return EXIT_OK
 
 
 def prepare_peer(args: argparse.Namespace) -> int:
@@ -1214,6 +1302,9 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.prepare_peer:
             return prepare_peer(args)
+
+        if args.prepare_product:
+            return prepare_product(args)
 
         return measure(args)
     except UsageError as exc:

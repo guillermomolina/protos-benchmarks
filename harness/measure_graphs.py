@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import hashlib
 import json
 import os
 import shutil
@@ -47,6 +48,7 @@ from pathlib import Path
 from typing import Any
 
 import graph_evidence as ge
+import bytecode_size_runtime as bsr
 import measure_protos as mp
 import workload_catalog
 
@@ -620,6 +622,15 @@ def unit_graphs(directory: Path, run: dict[str, Any], phase: str) -> list[dict[s
                 **{k: unit[k] for k in ("role", "label", "via", "edge", "tier", "comp_id", "src",
                                         "superseded_comp_ids", "ir_after_truffle_tier",
                                         "expansion_truffle_tier", "inlined", "attribution")},
+                **{
+                    key: unit[key]
+                    for key in (
+                        "target",
+                        "normalized_label",
+                        "cross_run_identity",
+                    )
+                    if key in unit
+                },
                 "bgv": str(packed.relative_to(directory)),
                 "bgv_sha256": next(
                     item["sha256"] for item in run["dump_inventory"] if item["name"] == name
@@ -867,6 +878,347 @@ def verify(args: argparse.Namespace) -> int:
     return mp.EXIT_OK if cases and not working_mismatch else mp.EXIT_INVALID
 
 
+
+def bytecode_histogram_options() -> list[str]:
+    """Options for a dedicated diagnostic JVM, never a timing JVM."""
+    return [
+        "-Dpolyglot.engine.AllowExperimentalOptions=true",
+        "-Dpolyglot.engine.BytecodeHistogram=language,root",
+    ]
+
+
+def run_bytecode_diagnostic(
+    runtime: dict[str, Any],
+    source: Path,
+    expected: str,
+    calls: int,
+    cpu: int,
+    log: Path,
+) -> dict[str, Any]:
+    """Collect per-root executed opcodes without admitting timing."""
+    if type(calls) is not int or not 1 <= calls <= 1000000:
+        raise mp.UsageError("Invalid bytecode diagnostic call count")
+
+    instrument = None
+    unavailable_reason = None
+    runtime_cp = runtime["runtime_cp"]
+    jvm_options = bytecode_histogram_options()
+
+    try:
+        instrument = bsr.compile_instrument(runtime_cp)
+    except bsr.InstrumentError as error:
+        reason = str(error)
+
+        if reason.startswith("TRUFFLE_API_VERSION_UNRESOLVED"):
+            unavailable_reason = reason
+        else:
+            raise mp.InvalidMeasurement(
+                "BYTECODE_SIZE_INSTRUMENT_FAILED",
+                reason,
+            ) from error
+
+    if instrument is not None:
+        runtime_cp = os.pathsep.join([
+            str(instrument["classes"]),
+            runtime_cp,
+        ])
+        jvm_options = [
+            *jvm_options,
+            "-Dpolyglot.bench-bytecode-size=true",
+        ]
+
+    command = mp.java_command(
+        runtime_cp,
+        runtime["main_class"],
+        runtime["system_properties"],
+        jvm_options,
+        [
+            "measure",
+            runtime["core_arg"],
+            str(source),
+            "0",
+            "1",
+            str(calls),
+            "-",
+        ],
+        cpu,
+    )
+
+    code, output = mp.run_logged(command, log)
+    actual = mp.output_result(output)
+
+    if code != 0 or actual != expected:
+        raise mp.InvalidMeasurement(
+            "BYTECODE_DIAGNOSTIC_FAILED",
+            f"exit_code={code}, expected={expected}, actual={actual!r}",
+        )
+
+    histogram = ge.parse_bytecode_histogram(output)
+
+    if instrument is None:
+        size_evidence = {
+            "status": "UNAVAILABLE",
+            "reason": (
+                unavailable_reason
+                or "BYTECODE_INSTRUMENT_NOT_AVAILABLE"
+            ),
+            "observations": [],
+        }
+        instrument_evidence = {
+            "status": "UNAVAILABLE",
+            "reason": unavailable_reason,
+        }
+    else:
+        size_evidence = ge.parse_bytecode_size_trace(output)
+        instrument_evidence = {
+            "status": "AVAILABLE",
+            "version": instrument["version"],
+            "cache_key": instrument["cache_key"],
+            "processor_sha256": instrument["processor_sha256"],
+            "source_sha256": bsr.sha256_file(bsr.SOURCE),
+        }
+
+    return {
+        "status": histogram["status"],
+        "histogram": histogram,
+        "size": size_evidence,
+        "size_instrument": instrument_evidence,
+        "raw_log": "raw/bytecode-histogram.log",
+        "raw_log_sha256": mp.sha256_file(log),
+        "jvm_options": jvm_options,
+        "calls": calls,
+        "execution": "dedicated-fresh-jvm",
+        "timing_evidence": "NONE",
+    }
+
+
+def bytecode_capture(args: argparse.Namespace) -> int:
+    """Capture all reported Bytecode DSL roots independently."""
+    policy = load_policy()
+    cases = mp.load_cases()
+
+    if args.workload not in workload_catalog.workload_ids():
+        raise mp.UsageError(f"Unknown workload: {args.workload}")
+
+    if args.language not in LANGUAGES:
+        raise mp.UsageError(f"Unknown language: {args.language}")
+
+    if not 1 <= args.calls <= 1000000:
+        raise mp.UsageError("Invalid diagnostic call count")
+
+    product_dir = (
+        args.dir.expanduser().resolve()
+        if args.dir is not None
+        else None
+    )
+
+    if args.language == "protos" and product_dir is None:
+        raise mp.UsageError("Protos requires --dir")
+
+    if args.language != "protos":
+        product_dir = None
+
+    product_before = (
+        mp.product_identity(product_dir)
+        if product_dir is not None
+        else None
+    )
+
+    if product_before is not None:
+        if not product_before["clean"]:
+            raise mp.UsageError("Protos checkout must be clean")
+
+        if (
+            args.version is not None
+            and args.version != product_before["version"]
+        ):
+            raise mp.UsageError(
+                "Requested Protos version differs from checkout"
+            )
+
+    output = args.output.expanduser().resolve()
+    prepare_output(output)
+
+    destination = case_dir(
+        output, args.workload, args.language
+    )
+
+    if destination.exists():
+        raise mp.UsageError(
+            f"Evidence already exists: {destination}"
+        )
+
+    language_policy = policy["languages"][args.language]
+    surface = language_policy["surface"]
+    surface_def = mp.surface_definition(cases, surface)
+
+    workload_source = workload_catalog.source_for(
+        args.workload, args.language
+    )
+
+    expected_result = workload_catalog.expected_result(
+        args.workload
+    )
+
+    files = sorted(
+        set(
+            mp.producer_files(
+                cases,
+                surface_def,
+                args.workload,
+                args.language,
+            )
+        )
+        | {
+            item.resolve()
+            for item in GRAPH_PRODUCER_FILES
+        }
+    )
+
+    files.extend([
+        bsr.SOURCE.resolve(),
+        Path(bsr.__file__).resolve(),
+    ])
+    files = sorted(set(files))
+
+    harness_before = mp.harness_identity(files)
+    java = mp.java_identity()
+    cpu, siblings, allowed = mp.choose_cpu(args.cpu)
+
+    staging_root = output / ".staging"
+    staging_root.mkdir(parents=True, exist_ok=True)
+
+    staging = Path(
+        tempfile.mkdtemp(
+            prefix="bytecode-",
+            dir=staging_root,
+        )
+    )
+
+    raw = staging / "raw"
+    raw.mkdir()
+
+    metadata: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "mode": "bytecode-diagnostic",
+        "capture_valid": False,
+        "capture_started": mp.utc_now().isoformat(),
+        "language": args.language,
+        "workload": args.workload,
+        "surface": surface,
+        "expected_result": expected_result,
+        "source_sha256": mp.sha256_file(workload_source),
+        "product_before": product_before,
+        "harness": harness_before,
+        "java": java,
+        "host": mp.host_identity(cpu, siblings, allowed),
+        "capture_key": {
+            "mode": "executed-bytecode-histogram-v1",
+            "language": args.language,
+            "workload": args.workload,
+            "surface": surface,
+            "source_sha256": mp.sha256_file(workload_source),
+            "producer_source_sha256": harness_before["source_sha256"],
+            "product_revision": (
+                product_before["revision"]
+                if product_before is not None else None
+            ),
+            "product_source_state_sha256": (
+                product_before["source_state_sha256"]
+                if product_before is not None else None
+            ),
+            "requested_version": args.version,
+            "java_runtime_version": java.get("java.runtime.version"),
+            "calls": args.calls,
+            "jvm_options": bytecode_histogram_options(),
+        },
+        "timing_evidence": "NONE",
+        "graph_evidence": "NONE",
+        "reference_eligible": False,
+    }
+
+    try:
+        runtime = mp.prepare_surface_runtime(
+            cases,
+            surface,
+            surface_def,
+            args.language,
+            product_dir,
+            product_before,
+            metadata,
+            raw,
+            requested_peer_version=(
+                args.version if args.language != "protos" else None
+            ),
+        )
+
+        if args.language != "protos":
+            metadata["capture_key"]["peer_runtime"] = (
+                metadata["peer_runtime"]
+            )
+
+        metadata["bytecode"] = run_bytecode_diagnostic(
+            runtime,
+            workload_source,
+            expected_result,
+            args.calls,
+            cpu,
+            raw / "bytecode-histogram.log",
+        )
+        metadata["capture_key"]["jvm_options"] = metadata['bytecode']["jvm_options"]
+
+        if product_dir is not None:
+            product_after = mp.product_identity(product_dir)
+            metadata["product_after"] = product_after
+
+            changed = mp.compare_product(
+                product_before, product_after
+            )
+
+            if changed:
+                raise mp.InvalidMeasurement(
+                    "PRODUCT_CHANGED_DURING_CAPTURE",
+                    ",".join(changed),
+                )
+
+        after_hashes = mp.producer_hashes(files)
+        metadata["harness_after_source_sha256"] = after_hashes
+
+        if after_hashes != harness_before["source_sha256"]:
+            raise mp.InvalidMeasurement(
+                "HARNESS_CHANGED_DURING_CAPTURE"
+            )
+
+        metadata["capture_valid"] = True
+
+    except (mp.InvalidMeasurement, ge.EvidenceError) as exc:
+        metadata["capture_valid"] = False
+        metadata["invalid_reason"] = exc.reason
+        metadata["invalid_detail"] = exc.detail
+
+    metadata["capture_finished"] = mp.utc_now().isoformat()
+    mp.write_json(staging / "capture.json", metadata)
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    staging.rename(destination)
+
+    mp.emit(
+        "BYTECODE_CAPTURE_VALID",
+        "YES" if metadata["capture_valid"] else "NO",
+    )
+    mp.emit("BYTECODE_CAPTURE", destination)
+
+    if not metadata["capture_valid"]:
+        mp.emit("INVALID_REASON", metadata["invalid_reason"])
+        return mp.EXIT_INVALID
+
+    mp.emit(
+        "BYTECODE_HISTOGRAM",
+        metadata["bytecode"]["status"],
+    )
+    return mp.EXIT_OK
+
+
 def cold_capture(args: argparse.Namespace) -> int:
     """One selected compilation in a fresh JVM, never a timing reference."""
     policy = load_policy()
@@ -1067,63 +1419,157 @@ def cold_capture(args: argparse.Namespace) -> int:
                 parsed, policy, language_policy, str(source)
             )
 
-        selected = ge.select_tier_compilation(
-            parsed,
-            args.tier,
-            args.root,
-            resolution,
-        )
+
+        root_identity = {}
+        unavailable_roots = []
+
+        if args.root == "all":
+            inventory = ge.observed_compilation_roots(
+                parsed, args.tier
+            )
+
+            metadata["root_inventory"] = {
+                "scope": inventory["scope"],
+                "requested_tier": inventory["requested_tier"],
+                "interpreted_roots_coverage": inventory[
+                    "interpreted_roots_coverage"
+                ],
+                "roots": [
+                    {
+                        key: value
+                        for key, value in entry.items()
+                        if key != "selected"
+                    }
+                    for entry in inventory["roots"]
+                ],
+            }
+
+            unavailable_roots = [
+                {
+                    key: value
+                    for key, value in entry.items()
+                    if key != "selected"
+                }
+                for entry in inventory["roots"]
+                if entry["status"] != "AVAILABLE"
+            ]
+
+            selections = [
+                entry["selected"]
+                for entry in inventory["roots"]
+                if entry["status"] == "AVAILABLE"
+            ]
+
+            root_identity = {
+                entry["target"]: entry["cross_run_identity"]
+                for entry in inventory["roots"]
+            }
+
+        else:
+            selected = ge.select_tier_compilation(
+                parsed,
+                args.tier,
+                args.root,
+                resolution,
+            )
+            selections = [selected]
 
         bgv_names = sorted(
             path.name for path in dumps.glob("*.bgv")
         )
-        matched = ge.dumps_for(
-            selected["comp_id"], bgv_names
-        )
 
-        if len(matched) != 1:
-            raise ge.EvidenceError(
-                "BGV_NOT_UNIQUE_FOR_COMPILATION",
-                {
-                    "comp_id": selected["comp_id"],
-                    "matching_bgv": matched,
-                },
+        units = []
+        retained_selections = []
+
+        for selected in selections:
+            matched = ge.dumps_for(
+                selected["comp_id"], bgv_names
             )
 
-        unit = {
-            "role": (
-                "primary" if args.root == "primary"
-                else "selected"
-            ),
-            "target": selected["target"],
-            "label": selected["label"],
-            "via": None,
-            "edge": None,
-            "tier": selected["tier"],
-            "comp_id": selected["comp_id"],
-            "src": selected.get("src"),
-            "superseded_comp_ids": [],
-            "other_compilation_ids": selected["other_compilation_ids"],
-            "ir_after_truffle_tier": selected["ir_after_truffle_tier"],
-            "ir_final": selected["ir_final"],
-            "compilation_time_ms": selected["compilation_time_ms"],
-            "truffle_compilation_ms": selected["truffle_compilation_ms"],
-            "graal_compilation_ms": selected["graal_compilation_ms"],
-            "machine_code_bytes": selected["machine_code_bytes"],
-            "ast_nodes": selected["ast_nodes"],
-            "inlined": [
-                item["label"]
-                for item in selected.get("inline_tree") or []
-                if item["verb"] == "Inlined"
-            ],
-            "expansion_truffle_tier": (
-                selected.get("expansion") or {}
-            ).get("root"),
-            "attribution": ge.expansion_attribution(
-                parsed, selected["comp_id"]
-            ),
-            "bgv": matched,
-        }
+            if len(matched) != 1:
+                if args.root != "all":
+                    raise ge.EvidenceError(
+                        "BGV_NOT_UNIQUE_FOR_COMPILATION",
+                        {
+                            "comp_id": selected["comp_id"],
+                            "matching_bgv": matched,
+                        },
+                    )
+
+                unavailable_roots.append({
+                    "target": selected["target"],
+                    "label": selected["label"],
+                    "normalized_label": ge.normalize_label(
+                        selected["label"]
+                    ),
+                    "requested_tier": args.tier,
+                    "status": "UNAVAILABLE",
+                    "reason": "BGV_NOT_UNIQUE_FOR_COMPILATION",
+                    "matching_bgv": matched,
+                })
+                continue
+
+            unit = {
+                "role": (
+                    "primary" if args.root == "primary"
+                    else "selected"
+                ),
+                "target": selected["target"],
+                "label": selected["label"],
+                "via": None,
+                "edge": None,
+                "tier": selected["tier"],
+                "comp_id": selected["comp_id"],
+                "src": selected.get("src"),
+                "superseded_comp_ids": [],
+                "other_compilation_ids": selected["other_compilation_ids"],
+                "ir_after_truffle_tier": selected["ir_after_truffle_tier"],
+                "ir_final": selected["ir_final"],
+                "compilation_time_ms": selected["compilation_time_ms"],
+                "truffle_compilation_ms": selected["truffle_compilation_ms"],
+                "graal_compilation_ms": selected["graal_compilation_ms"],
+                "machine_code_bytes": selected["machine_code_bytes"],
+                "ast_nodes": selected["ast_nodes"],
+                "inlined": [
+                    item["label"]
+                    for item in selected.get("inline_tree") or []
+                    if item["verb"] == "Inlined"
+                ],
+                "expansion_truffle_tier": (
+                    selected.get("expansion") or {}
+                ).get("root"),
+                "attribution": ge.expansion_attribution(
+                    parsed, selected["comp_id"]
+                ),
+                "bgv": matched,
+            }
+
+
+            unit["normalized_label"] = ge.normalize_label(
+                selected["label"]
+            )
+            unit["target"] = selected["target"]
+            unit["cross_run_identity"] = root_identity.get(
+                selected["target"], "UNIQUE"
+            )
+
+            units.append(unit)
+            retained_selections.append({
+                **selected,
+                "bgv": matched[0],
+            })
+
+        metadata["unavailable_roots"] = unavailable_roots
+
+        if not units:
+            raise ge.EvidenceError(
+                "NO_REQUESTED_TIER_BGV_AVAILABLE",
+                {
+                    "tier": args.tier,
+                    "root": args.root,
+                    "unavailable": unavailable_roots,
+                },
+            )
 
         run = {
             "budget": args.invocations,
@@ -1131,7 +1577,7 @@ def cold_capture(args: argparse.Namespace) -> int:
             "result": expected,
             "exit_code": code,
             "trace_log_sha256": mp.sha256_file(trace_log),
-            "resolution": {"units": [unit]},
+            "resolution": {"units": units},
             "compilation_count": len(parsed["compilations"]),
             "failure_count": len(parsed["failures"]),
             "invalidation_count": len(parsed["invalidations"]),
@@ -1158,16 +1604,34 @@ def cold_capture(args: argparse.Namespace) -> int:
             if key_ != "workdir"
         }]
 
-        metadata["selected_compilation"] = {
-            "root": selected["root"],
-            "tier": selected["observed_tier"],
-            "comp_id": selected["comp_id"],
-            "compilation_time_ms": selected["compilation_time_ms"],
-            "ir_initial": selected["ir_after_truffle_tier"],
-            "ir_final": selected["ir_final"],
-            "machine_code_bytes": selected["machine_code_bytes"],
-            "bgv": matched[0],
-        }
+
+        if args.root == "all":
+            metadata["selected_compilations"] = [
+                {
+                    "root": item["root"],
+                    "normalized_root": ge.normalize_label(
+                        item["root"]
+                    ),
+                    "tier": item["observed_tier"],
+                    "comp_id": item["comp_id"],
+                    "ir_initial": item["ir_after_truffle_tier"],
+                    "ir_final": item["ir_final"],
+                    "machine_code_bytes": item["machine_code_bytes"],
+                    "bgv": item["bgv"],
+                }
+                for item in retained_selections
+            ]
+        else:
+            metadata["selected_compilation"] = {
+                "root": selected["root"],
+                "tier": selected["observed_tier"],
+                "comp_id": selected["comp_id"],
+                "compilation_time_ms": selected["compilation_time_ms"],
+                "ir_initial": selected["ir_after_truffle_tier"],
+                "ir_final": selected["ir_final"],
+                "machine_code_bytes": selected["machine_code_bytes"],
+                "bgv": matched[0],
+            }
 
         product_after = mp.product_identity(product_dir)
         metadata["product_after"] = product_after
@@ -1214,6 +1678,17 @@ def cold_capture(args: argparse.Namespace) -> int:
     mp.emit("COLD_CAPTURE", destination)
 
     if metadata["capture_valid"]:
+        if args.root == "all":
+            mp.emit(
+                "COMPILED_ROOTS_CAPTURED",
+                len(metadata["selected_compilations"]),
+            )
+            mp.emit(
+                "COMPILED_ROOTS_UNAVAILABLE",
+                len(metadata["unavailable_roots"]),
+            )
+            return mp.EXIT_OK
+
         mp.emit(
             "OBSERVED_TIER",
             metadata["selected_compilation"]["tier"],
@@ -1256,6 +1731,36 @@ def cold_summarize(args: argparse.Namespace) -> int:
                 metadata["selected_phase"],
             )
 
+            if metadata.get("requested_root") == "all":
+                summary = {
+                    "schema": 1,
+                    "mode": "cold-all-compiled-roots",
+                    "scope": "observed-compiled-call-targets-only",
+                    "language": metadata["language"],
+                    "workload": metadata["workload"],
+                    "requested_tier": metadata["requested_tier"],
+                    "phase": metadata["selected_phase"],
+                    "units": units,
+                    "unavailable_roots": metadata.get(
+                        "unavailable_roots", []
+                    ),
+                    "root_inventory": metadata.get(
+                        "root_inventory"
+                    ),
+                    "interpreted_roots_coverage": "NOT_ESTABLISHED",
+                    "invocation_sequence": metadata[
+                        "invocation_sequence"
+                    ],
+                    "timing_evidence": "NONE",
+                }
+
+                mp.write_json(
+                    directory / "cold-summary.json",
+                    summary,
+                )
+                completed += 1
+                continue
+
             if len(units) != 1:
                 raise ge.EvidenceError(
                     "COLD_ROOT_COUNT_INVALID"
@@ -1293,6 +1798,1543 @@ def cold_summarize(args: argparse.Namespace) -> int:
     mp.emit("COLD_SUMMARY_FAILURES", failures)
 
     return mp.EXIT_OK if failures == 0 else mp.EXIT_INVALID
+
+
+
+def structural_artifact(
+    directory: Path,
+    relative: str,
+) -> Path:
+    """Resolve one retained artifact without escaping its capture."""
+    if not isinstance(relative, str) or not relative:
+        raise ge.EvidenceError("INVALID_ARTIFACT_PATH")
+
+    path = (directory / relative).resolve()
+
+    if not path.is_relative_to(directory.resolve()):
+        raise ge.EvidenceError("ARTIFACT_OUTSIDE_CAPTURE")
+
+    if not path.is_file():
+        raise ge.EvidenceError("ARTIFACT_NOT_FOUND", relative)
+
+    return path
+
+
+def structural_bgv_digest(path: Path) -> str:
+    """Hash the original BGV bytes retained inside its gzip file."""
+    digest = hashlib.sha256()
+
+    with gzip.open(path, "rb") as stream:
+        while True:
+            block = stream.read(1024 * 1024)
+            if not block:
+                break
+            digest.update(block)
+
+    return digest.hexdigest()
+
+
+def read_structural_input(
+    directory: Path,
+    workload: str,
+    language: str,
+    tier: int,
+) -> tuple[dict | None, dict | None, dict]:
+    """Load and verify existing capture evidence, without modifying it."""
+    capture_path = directory / "capture.json"
+    summary_path = directory / "cold-summary.json"
+
+    details = {
+        "capture": str(capture_path),
+        "summary": str(summary_path),
+        "status": "MISSING",
+        "reason": "CAPTURE_NOT_FOUND",
+    }
+
+    if not capture_path.is_file():
+        return None, None, details
+
+    try:
+        capture = json.loads(
+            capture_path.read_text(encoding="utf-8")
+        )
+    except (OSError, ValueError) as exc:
+        return None, None, {
+            **details,
+            "status": "INVALID",
+            "reason": "CAPTURE_NOT_READABLE",
+            "detail": str(exc),
+        }
+
+    if not isinstance(capture, dict):
+        return None, None, {
+            **details,
+            "status": "INVALID",
+            "reason": "CAPTURE_NOT_OBJECT",
+        }
+
+    expected = {
+        "mode": "cold-compilation",
+        "workload": workload,
+        "language": language,
+        "requested_tier": tier,
+        "requested_root": "all",
+    }
+
+    for field, value in expected.items():
+        if capture.get(field) != value:
+            return capture, None, {
+                **details,
+                "status": "INVALID",
+                "reason": "CAPTURE_IDENTITY_MISMATCH",
+                "field": field,
+            }
+
+    if not capture.get("capture_valid"):
+        return capture, None, {
+            **details,
+            "status": "INVALID",
+            "reason": capture.get(
+                "invalid_reason", "CAPTURE_INVALID"
+            ),
+        }
+
+    if (
+        capture.get("harness_after_source_sha256")
+        != (capture.get("harness") or {}).get(
+            "source_sha256"
+        )
+    ):
+        return capture, None, {
+            **details,
+            "status": "INVALID",
+            "reason": "CAPTURE_PRODUCER_CHANGED",
+        }
+
+    if not summary_path.is_file():
+        return capture, None, {
+            **details,
+            "status": "UNAVAILABLE",
+            "reason": "SUMMARY_NOT_FOUND",
+        }
+
+    try:
+        summary = json.loads(
+            summary_path.read_text(encoding="utf-8")
+        )
+    except (OSError, ValueError) as exc:
+        return capture, None, {
+            **details,
+            "status": "INVALID",
+            "reason": "SUMMARY_NOT_READABLE",
+            "detail": str(exc),
+        }
+
+    if not isinstance(summary, dict):
+        return capture, None, {
+            **details,
+            "status": "INVALID",
+            "reason": "SUMMARY_NOT_OBJECT",
+        }
+
+    if (
+        summary.get("mode") != "cold-all-compiled-roots"
+        or summary.get("workload") != workload
+        or summary.get("language") != language
+        or summary.get("requested_tier") != tier
+        or summary.get("phase") != capture.get(
+            "selected_phase"
+        )
+    ):
+        return capture, None, {
+            **details,
+            "status": "INVALID",
+            "reason": "SUMMARY_IDENTITY_MISMATCH",
+        }
+
+    units = summary.get("units")
+
+    if not isinstance(units, list):
+        return capture, None, {
+            **details,
+            "status": "INVALID",
+            "reason": "SUMMARY_UNITS_NOT_LIST",
+        }
+
+    try:
+        for unit in units:
+            if not isinstance(unit, dict):
+                raise ge.EvidenceError(
+                    "SUMMARY_UNIT_NOT_OBJECT"
+                )
+
+            bgv = structural_artifact(
+                directory, unit.get("bgv")
+            )
+            analysis = structural_artifact(
+                directory, unit.get("analysis")
+            )
+
+            if (
+                not bgv.name.endswith(".bgv.gz")
+                or not analysis.name.endswith(
+                    ".filter.json.gz"
+                )
+            ):
+                raise ge.EvidenceError(
+                    "UNEXPECTED_ARTIFACT_FORMAT"
+                )
+
+            expected_bgv = unit.get("bgv_sha256")
+
+            if (
+                not isinstance(expected_bgv, str)
+                or structural_bgv_digest(bgv)
+                != expected_bgv
+            ):
+                raise ge.EvidenceError(
+                    "BGV_SHA256_MISMATCH"
+                )
+
+            expected_analysis = unit.get(
+                "analysis_sha256"
+            )
+
+            if (
+                not isinstance(expected_analysis, str)
+                or mp.sha256_file(analysis)
+                != expected_analysis
+            ):
+                raise ge.EvidenceError(
+                    "ANALYSIS_SHA256_MISMATCH"
+                )
+
+            actual_graph = ge.select_unit_graph(
+                json.loads(read_gzip_text(analysis)),
+                summary["phase"],
+            )
+
+            if actual_graph != unit.get("graph"):
+                raise ge.EvidenceError(
+                    "SUMMARY_GRAPH_DIFFERS_FROM_ANALYSIS"
+                )
+
+    except (
+        ge.EvidenceError,
+        OSError,
+        ValueError,
+        KeyError,
+        TypeError,
+        EOFError,
+    ) as exc:
+        reason = (
+            exc.reason
+            if isinstance(exc, ge.EvidenceError)
+            else "RETAINED_ARTIFACT_INVALID"
+        )
+        return capture, None, {
+            **details,
+            "status": "INVALID",
+            "reason": reason,
+            "detail": str(exc),
+        }
+
+    return capture, summary, {
+        **details,
+        "status": "AVAILABLE",
+        "reason": None,
+        "capture_sha256": mp.sha256_file(
+            capture_path
+        ),
+        "summary_sha256": mp.sha256_file(
+            summary_path
+        ),
+        "verified_graphs": len(units),
+    }
+
+
+
+def compatible_bytecode_harness_hashes(
+    graph_hashes: object,
+    bytecode_hashes: object,
+    *,
+    require_size_instrument: bool = False,
+) -> bool:
+    """Verify common producer files and allow only diagnostic extras.
+
+    Graph capture never needs the diagnostic Java instrument or its
+    offline compiler. All shared producer hashes must still match.
+    """
+    if (
+        not isinstance(graph_hashes, dict)
+        or not isinstance(bytecode_hashes, dict)
+        or not graph_hashes
+        or not bytecode_hashes
+    ):
+        return False
+
+    graph_files = set(graph_hashes)
+    bytecode_files = set(bytecode_hashes)
+
+    allowed_extras = {
+        "harness/bytecode_size_runtime.py",
+        "harness/instruments/BytecodeSizeInstrument.java",
+    }
+
+    if graph_files - bytecode_files:
+        return False
+
+    extras = bytecode_files - graph_files
+
+    if not extras.issubset(allowed_extras):
+        return False
+
+    if (
+        require_size_instrument
+        and not allowed_extras.issubset(bytecode_files)
+    ):
+        return False
+
+    return all(
+        isinstance(graph_hashes[name], str)
+        and graph_hashes[name]
+        and graph_hashes[name] == bytecode_hashes[name]
+        for name in graph_files
+    )
+
+
+def read_structural_bytecode(
+    directory: Path,
+    workload: str,
+    language: str,
+    graph_captures: tuple[dict | None, dict | None],
+) -> dict[str, Any]:
+    """Verify a retained Bytecode DSL diagnostic without executing it."""
+    capture_path = directory / "capture.json"
+
+    result: dict[str, Any] = {
+        "status": "UNAVAILABLE",
+        "reason": "BYTECODE_CAPTURE_NOT_FOUND",
+        "capture": str(capture_path),
+        "groups": [],
+        "total_executed_instructions": None,
+        "size_evidence": {
+            "status": "UNAVAILABLE",
+            "reason": "BYTECODE_SIZE_NOT_CAPTURED",
+            "observations": [],
+        },
+        "timing_evidence": "NONE",
+    }
+
+    if not capture_path.is_file():
+        return result
+
+    try:
+        capture = json.loads(
+            capture_path.read_text(encoding="utf-8")
+        )
+    except (OSError, ValueError) as exc:
+        return {
+            **result,
+            "status": "INVALID",
+            "reason": "BYTECODE_CAPTURE_NOT_READABLE",
+            "detail": str(exc),
+        }
+
+    if not isinstance(capture, dict):
+        return {
+            **result,
+            "status": "INVALID",
+            "reason": "BYTECODE_CAPTURE_NOT_OBJECT",
+        }
+
+    if (
+        capture.get("mode") != "bytecode-diagnostic"
+        or capture.get("workload") != workload
+        or capture.get("language") != language
+    ):
+        return {
+            **result,
+            "status": "INVALID",
+            "reason": "BYTECODE_CAPTURE_IDENTITY_MISMATCH",
+        }
+
+    if not capture.get("capture_valid"):
+        return {
+            **result,
+            "status": "INVALID",
+            "reason": capture.get(
+                "invalid_reason",
+                "BYTECODE_CAPTURE_INVALID",
+            ),
+        }
+
+    diagnostic = capture.get("bytecode")
+
+    if not isinstance(diagnostic, dict):
+        return {
+            **result,
+            "status": "INVALID",
+            "reason": "BYTECODE_DIAGNOSTIC_NOT_FOUND",
+        }
+
+    stored_histogram = diagnostic.get("histogram")
+
+    if not isinstance(stored_histogram, dict):
+        return {
+            **result,
+            "status": "INVALID",
+            "reason": "BYTECODE_HISTOGRAM_NOT_OBJECT",
+        }
+
+    try:
+        raw = structural_artifact(
+            directory,
+            diagnostic.get("raw_log"),
+        )
+
+        actual_sha256 = mp.sha256_file(raw)
+
+        if actual_sha256 != diagnostic.get(
+            "raw_log_sha256"
+        ):
+            raise ge.EvidenceError(
+                "BYTECODE_RAW_LOG_SHA256_MISMATCH"
+            )
+
+        raw_text = raw.read_text(encoding="utf-8")
+        parsed_histogram = ge.parse_bytecode_histogram(
+            raw_text
+        )
+
+        if parsed_histogram != stored_histogram:
+            raise ge.EvidenceError(
+                "BYTECODE_HISTOGRAM_DIFFERS_FROM_RAW_LOG"
+            )
+
+        if diagnostic.get("status") != (
+            parsed_histogram.get("status")
+        ):
+            raise ge.EvidenceError(
+                "BYTECODE_DIAGNOSTIC_STATUS_MISMATCH"
+            )
+
+        # Sizes and execution histograms are independent measurements
+        # in the same retained diagnostic log.
+        parsed_size = ge.parse_bytecode_size_trace(
+            raw_text
+        )
+        stored_size = diagnostic.get("size")
+
+        if stored_size is None:
+            if parsed_size.get("status") == "AVAILABLE":
+                raise ge.EvidenceError(
+                    "BYTECODE_SIZE_MISSING_FROM_CAPTURE"
+                )
+
+            size_evidence = {
+                "status": "UNAVAILABLE",
+                "reason": "BYTECODE_SIZE_NOT_CAPTURED",
+                "observations": [],
+            }
+
+        elif not isinstance(stored_size, dict):
+            raise ge.EvidenceError(
+                "BYTECODE_SIZE_NOT_OBJECT"
+            )
+
+        elif stored_size.get("status") == "AVAILABLE":
+            if parsed_size != stored_size:
+                raise ge.EvidenceError(
+                    "BYTECODE_SIZE_DIFFERS_FROM_RAW_LOG"
+                )
+
+            instrument = diagnostic.get(
+                "size_instrument"
+            )
+
+            if (
+                not isinstance(instrument, dict)
+                or instrument.get("status") != "AVAILABLE"
+            ):
+                raise ge.EvidenceError(
+                    "BYTECODE_SIZE_INSTRUMENT_IDENTITY_MISSING"
+                )
+
+            size_evidence = parsed_size
+
+        elif stored_size.get("status") == "UNAVAILABLE":
+            if (
+                parsed_size.get("status") != "UNAVAILABLE"
+                or stored_size.get("observations") != []
+            ):
+                raise ge.EvidenceError(
+                    "BYTECODE_SIZE_UNAVAILABLE_CONFLICT"
+                )
+
+            size_evidence = stored_size
+
+        else:
+            raise ge.EvidenceError(
+                "BYTECODE_SIZE_STATUS_INVALID"
+            )
+
+    except (
+        ge.EvidenceError,
+        OSError,
+        ValueError,
+        TypeError,
+    ) as exc:
+        return {
+            **result,
+            "status": "INVALID",
+            "reason": (
+                exc.reason
+                if isinstance(exc, ge.EvidenceError)
+                else "BYTECODE_RAW_EVIDENCE_INVALID"
+            ),
+            "detail": str(exc),
+        }
+
+    groups = parsed_histogram.get("groups")
+
+    if not isinstance(groups, list):
+        return {
+            **result,
+            "status": "INVALID",
+            "reason": "BYTECODE_GROUPS_NOT_LIST",
+        }
+
+    result.update({
+        "capture_sha256": mp.sha256_file(
+            capture_path
+        ),
+        "raw_log": str(raw),
+        "raw_log_sha256": actual_sha256,
+        "size_evidence": size_evidence,
+        "size_instrument": diagnostic.get(
+            "size_instrument"
+        ),
+        "groups": groups,
+        "total_executed_instructions": (
+            parsed_histogram.get(
+                "total_executed_instructions"
+            )
+        ),
+        "diagnostic_calls": diagnostic.get("calls"),
+        "capture_status": (
+            parsed_histogram.get("status")
+        ),
+    })
+
+    if parsed_histogram.get("status") != "AVAILABLE":
+        return {
+            **result,
+            "status": "UNAVAILABLE",
+            "reason": parsed_histogram.get(
+                "reason",
+                "BYTECODE_HISTOGRAM_UNAVAILABLE",
+            ),
+        }
+
+    available_graphs = [
+        graph for graph in graph_captures
+        if isinstance(graph, dict)
+        and graph.get("capture_valid")
+    ]
+
+    if not available_graphs:
+        return {
+            **result,
+            "status": "UNATTRIBUTABLE",
+            "reason": "NO_VALID_GRAPH_PRODUCER",
+        }
+
+    for graph in available_graphs:
+        if (
+            graph.get("language") != language
+            or graph.get("workload") != workload
+            or graph.get("surface")
+            != capture.get("surface")
+            or graph.get("expected_result")
+            != capture.get("expected_result")
+        ):
+            return {
+                **result,
+                "status": "INCOMPATIBLE",
+                "reason": "WORKLOAD_PRODUCER_MISMATCH",
+            }
+
+        graph_harness = (
+            graph.get("harness") or {}
+        ).get("source_sha256")
+
+        bytecode_harness = (
+            capture.get("harness") or {}
+        ).get("source_sha256")
+
+        if not compatible_bytecode_harness_hashes(
+            graph_harness,
+            bytecode_harness,
+            require_size_instrument=(
+                size_evidence.get("status") == "AVAILABLE"
+            ),
+        ):
+            return {
+                **result,
+                "status": "INCOMPATIBLE",
+                "reason": "HARNESS_PRODUCER_MISMATCH",
+            }
+
+        graph_java = (
+            graph.get("java") or {}
+        ).get("java.runtime.version")
+
+        bytecode_java = (
+            capture.get("java") or {}
+        ).get("java.runtime.version")
+
+        if (
+            not graph_java
+            or graph_java != bytecode_java
+        ):
+            return {
+                **result,
+                "status": "INCOMPATIBLE",
+                "reason": "JAVA_RUNTIME_MISMATCH",
+            }
+
+        if language == "protos":
+            first_product = (
+                graph.get("product_before") or {}
+            )
+            second_product = (
+                capture.get("product_before") or {}
+            )
+
+            for field in (
+                "revision",
+                "source_state_sha256",
+            ):
+                if (
+                    not first_product.get(field)
+                    or first_product.get(field)
+                    != second_product.get(field)
+                ):
+                    return {
+                        **result,
+                        "status": "INCOMPATIBLE",
+                        "reason": (
+                            "PROTOS_PRODUCER_MISMATCH"
+                        ),
+                    }
+
+        else:
+            if graph.get("peer_runtime") != (
+                capture.get("peer_runtime")
+            ):
+                return {
+                    **result,
+                    "status": "INCOMPATIBLE",
+                    "reason": "PEER_RUNTIME_MISMATCH",
+                }
+
+    return {
+        **result,
+        "status": "AVAILABLE",
+        "reason": None,
+    }
+
+
+def attribute_bytecode_groups(
+    pairing: dict[str, Any],
+    bytecode: dict[str, Any],
+) -> dict[str, Any]:
+    """Associate only unique normalized Bytecode roots."""
+    outcome: dict[str, Any] = {
+        "status": "UNAVAILABLE",
+        "reason": None,
+        "per_compiled_root": [],
+        "unattributed_groups": bytecode.get(
+            "groups", []
+        ),
+        "bytecode_size_bytes": None,
+        "bytecode_size_status": (
+            "NOT_MEASURED_BY_EXECUTION_HISTOGRAM"
+        ),
+    }
+
+    if bytecode.get("status") != "AVAILABLE":
+        return {
+            **outcome,
+            "reason": bytecode.get(
+                "reason", "BYTECODE_EVIDENCE_UNAVAILABLE"
+            ),
+        }
+
+    if pairing.get(
+        "producer_identity_compatible"
+    ) is not True:
+        return {
+            **outcome,
+            "reason": "GRAPH_TIERS_NOT_COMPATIBLE",
+        }
+
+    roots = pairing.get("roots")
+
+    if not isinstance(roots, list):
+        return {
+            **outcome,
+            "reason": "PAIRED_ROOT_INVENTORY_UNAVAILABLE",
+        }
+
+    groups = bytecode["groups"]
+
+    grouped: dict[str, list[dict]] = {}
+
+    for group in groups:
+        if not isinstance(group, dict):
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "BYTECODE_GROUP_NOT_OBJECT",
+            }
+
+        normalized = group.get(
+            "normalized_root"
+        )
+
+        if not isinstance(normalized, str):
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "BYTECODE_ROOT_IDENTITY_MISSING",
+            }
+
+        grouped.setdefault(
+            normalized, []
+        ).append(group)
+
+    root_names = []
+
+    for row in roots:
+        if not isinstance(row, dict):
+            root_names.append(None)
+            continue
+
+        normalized = (
+            row.get("normalized_root")
+            or row.get("normalized_label")
+        )
+
+        if normalized is None:
+            original = (
+                row.get("root")
+                or row.get("label")
+            )
+            if isinstance(original, str):
+                normalized = ge.normalize_label(
+                    original
+                )
+
+        root_names.append(normalized)
+
+    entries = []
+    used = set()
+
+    for normalized in root_names:
+        matching = (
+            grouped.get(normalized, [])
+            if isinstance(normalized, str)
+            else []
+        )
+
+        if not isinstance(normalized, str):
+            entries.append({
+                "normalized_root": None,
+                "status": "UNAVAILABLE",
+                "reason": "COMPILED_ROOT_IDENTITY_MISSING",
+                "groups": [],
+            })
+            continue
+
+        if root_names.count(normalized) != 1:
+            entries.append({
+                "normalized_root": normalized,
+                "status": "AMBIGUOUS",
+                "reason": (
+                    "COMPILED_ROOT_IDENTITY_COLLISION"
+                ),
+                "groups": [],
+            })
+            continue
+
+        if len(matching) > 1:
+            entries.append({
+                "normalized_root": normalized,
+                "status": "AMBIGUOUS",
+                "reason": (
+                    "BYTECODE_ROOT_IDENTITY_COLLISION"
+                ),
+                "groups": [],
+            })
+            continue
+
+        if not matching:
+            entries.append({
+                "normalized_root": normalized,
+                "status": "UNAVAILABLE",
+                "reason": "BYTECODE_ROOT_NOT_OBSERVED",
+                "groups": [],
+            })
+            continue
+
+        used.add(id(matching[0]))
+
+        entries.append({
+            "normalized_root": normalized,
+            "status": "AVAILABLE",
+            "reason": None,
+            "groups": matching,
+        })
+
+    unavailable = [
+        group for group in groups
+        if id(group) not in used
+    ]
+
+    return {
+        **outcome,
+        "status": (
+            "COMPLETE"
+            if entries
+            and all(
+                entry["status"] == "AVAILABLE"
+                for entry in entries
+            )
+            else "PARTIAL"
+        ),
+        "reason": None,
+        "per_compiled_root": entries,
+        "unattributed_groups": unavailable,
+    }
+
+
+
+
+def attribute_physical_bytecode_roots(
+    bytecode: dict[str, Any],
+) -> dict[str, Any]:
+    """Join histogram counts and exact sizes within one diagnostic JVM.
+
+    Physical @hex identities must never be carried across JVM processes
+    or interpreted as equivalent to compiler Tier 1 / Tier 2 identities.
+    """
+    evidence = bytecode.get("size_evidence")
+
+    outcome: dict[str, Any] = {
+        "status": "UNAVAILABLE",
+        "reason": None,
+        "attribution_basis": (
+            "EXACT_PHYSICAL_ROOT_LABEL_WITHIN_DIAGNOSTIC_JVM"
+        ),
+        "compiler_tier_equivalence": "NONE",
+        "compiled_root_identity": "NOT_ESTABLISHED",
+        "per_histogram_root": [],
+        "unattributed_size_observations": [],
+    }
+
+    if bytecode.get("capture_status") != "AVAILABLE":
+        return {
+            **outcome,
+            "reason": "BYTECODE_HISTOGRAM_NOT_VERIFIED",
+        }
+
+    if not isinstance(evidence, dict):
+        return {
+            **outcome,
+            "reason": "BYTECODE_SIZE_EVIDENCE_MISSING",
+        }
+
+    if evidence.get("status") != "AVAILABLE":
+        return {
+            **outcome,
+            "reason": evidence.get(
+                "reason",
+                "BYTECODE_SIZE_UNAVAILABLE",
+            ),
+        }
+
+    groups = bytecode.get("groups")
+    observations = evidence.get("observations")
+
+    if not isinstance(groups, list) or not isinstance(
+        observations, list
+    ):
+        return {
+            **outcome,
+            "status": "INVALID",
+            "reason": "INVALID_PHYSICAL_ROOT_EVIDENCE",
+        }
+
+    if not groups or not observations:
+        return {
+            **outcome,
+            "reason": "PHYSICAL_ROOT_EVIDENCE_EMPTY",
+        }
+
+    histogram = {}
+
+    for group in groups:
+        if not isinstance(group, dict):
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "BYTECODE_HISTOGRAM_GROUP_INVALID",
+            }
+
+        label = group.get("root")
+
+        if not isinstance(label, str) or not label:
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "HISTOGRAM_PHYSICAL_ROOT_MISSING",
+            }
+
+        if label in histogram:
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "DUPLICATE_HISTOGRAM_PHYSICAL_ROOT",
+            }
+
+        histogram[label] = group
+
+    sizes = {}
+    instances = {}
+
+    for observation in observations:
+        if not isinstance(observation, dict):
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "BYTECODE_SIZE_OBSERVATION_INVALID",
+            }
+
+        label = observation.get("physical_root_label")
+        instance = observation.get("root_instance")
+
+        if (
+            not isinstance(label, str)
+            or not label
+            or type(instance) is not int
+            or instance < 1
+        ):
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "BYTECODE_SIZE_PHYSICAL_IDENTITY_MISSING",
+            }
+
+        if label in instances and instances[label] != instance:
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "BYTECODE_SIZE_PHYSICAL_IDENTITY_COLLISION",
+            }
+
+        instances[label] = instance
+        sizes.setdefault(label, []).append(observation)
+
+    entries = []
+
+    for label, group in histogram.items():
+        snapshots = sizes.get(label, [])
+        states = {}
+
+        for state in ("UNCACHED", "CACHED"):
+            selected = [
+                item for item in snapshots
+                if item.get("bytecode_tier") == state
+            ]
+
+            if not selected:
+                states[state] = {
+                    "status": "UNAVAILABLE",
+                    "reason": "BYTECODE_STATE_NOT_OBSERVED",
+                    "bytecode_bytes": None,
+                    "instruction_count": None,
+                    "snapshots": [],
+                }
+                continue
+
+            signatures = {
+                (
+                    item.get("instruction_count"),
+                    item.get("bytecode_bytes"),
+                    item.get("first_bci"),
+                    item.get("last_end_bci"),
+                )
+                for item in selected
+            }
+
+            stable = len(signatures) == 1
+
+            states[state] = {
+                "status": "AVAILABLE" if stable else "VARIABLE",
+                "reason": (
+                    None if stable else "BYTECODE_SNAPSHOTS_DIFFER"
+                ),
+                "bytecode_bytes": (
+                    selected[0]["bytecode_bytes"] if stable else None
+                ),
+                "instruction_count": (
+                    selected[0]["instruction_count"] if stable else None
+                ),
+                "snapshots": selected,
+            }
+
+        entries.append({
+            "physical_root_label": label,
+            "status": (
+                "MATCHED" if snapshots else "UNAVAILABLE"
+            ),
+            "reason": (
+                None if snapshots else "BYTECODE_SIZE_ROOT_NOT_OBSERVED"
+            ),
+            "root_instance": instances.get(label),
+            "histogram_group": group,
+            "interpreter_states": states,
+            "size_observations": snapshots,
+        })
+
+    unused = [
+        item for item in observations
+        if item["physical_root_label"] not in histogram
+    ]
+
+    complete = (
+        bool(entries)
+        and all(entry["status"] == "MATCHED" for entry in entries)
+        and not unused
+    )
+
+    return {
+        **outcome,
+        "status": "COMPLETE" if complete else "PARTIAL",
+        "reason": None,
+        "matched_roots": sum(
+            entry["status"] == "MATCHED" for entry in entries
+        ),
+        "histogram_roots": len(entries),
+        "size_roots": len(sizes),
+        "per_histogram_root": entries,
+        "unattributed_size_observations": unused,
+    }
+
+
+def attribute_bytecode_sizes(
+    pairing: dict[str, Any],
+    bytecode: dict[str, Any],
+) -> dict[str, Any]:
+    """Attribute verified bytecode snapshots to unique compiled roots.
+
+    This is a normalized-name correlation, not proof that every
+    interpreted root has a corresponding compiled root. Interpreter
+    states UNCACHED/CACHED are independent of compiler tiers 1/2.
+    """
+    evidence = bytecode.get("size_evidence")
+
+    observations = (
+        evidence.get("observations", [])
+        if isinstance(evidence, dict)
+        else []
+    )
+
+    outcome: dict[str, Any] = {
+        "status": "UNAVAILABLE",
+        "reason": None,
+        "source": "TRUFFLE_INSTRUCTION_LENGTH",
+        "unit": "bytes",
+        "scope": "OBSERVED_INSTRUMENTED_ROOTS",
+        "attribution_basis": "NORMALIZED_ROOT_NAME_ONLY",
+        "compiler_tier_equivalence": "NONE",
+        "interpreted_roots_coverage": "NOT_ESTABLISHED",
+        "per_compiled_root": [],
+        "unattributed_observations": (
+            observations
+            if isinstance(observations, list)
+            else []
+        ),
+    }
+
+    if bytecode.get("status") != "AVAILABLE":
+        return {
+            **outcome,
+            "reason": bytecode.get(
+                "reason",
+                "BYTECODE_EVIDENCE_UNAVAILABLE",
+            ),
+        }
+
+    if not isinstance(evidence, dict):
+        return {
+            **outcome,
+            "reason": "BYTECODE_SIZE_EVIDENCE_MISSING",
+        }
+
+    if evidence.get("status") != "AVAILABLE":
+        return {
+            **outcome,
+            "reason": evidence.get(
+                "reason",
+                "BYTECODE_SIZE_UNAVAILABLE",
+            ),
+        }
+
+    if (
+        evidence.get("unit") != "bytes"
+        or not isinstance(observations, list)
+        or not observations
+    ):
+        return {
+            **outcome,
+            "status": "INVALID",
+            "reason": "INVALID_BYTECODE_SIZE_EVIDENCE",
+        }
+
+    if pairing.get("producer_identity_compatible") is not True:
+        return {
+            **outcome,
+            "reason": "GRAPH_TIERS_NOT_COMPATIBLE",
+        }
+
+    roots = pairing.get("roots")
+
+    if not isinstance(roots, list):
+        return {
+            **outcome,
+            "reason": "PAIRED_ROOT_INVENTORY_UNAVAILABLE",
+        }
+
+    grouped: dict[str, list[dict]] = {}
+
+    for observation in observations:
+        if not isinstance(observation, dict):
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "BYTECODE_SIZE_OBSERVATION_NOT_OBJECT",
+            }
+
+        name = observation.get("root_name")
+        instance = observation.get("root_instance")
+        state = observation.get("bytecode_tier")
+        size = observation.get("bytecode_bytes")
+        count = observation.get("instruction_count")
+        first = observation.get("first_bci")
+        last = observation.get("last_end_bci")
+
+        if (
+            not isinstance(name, str)
+            or not name
+            or type(instance) is not int
+            or instance < 1
+            or state not in ("UNCACHED", "CACHED")
+            or type(size) is not int
+            or size < 1
+            or type(count) is not int
+            or count < 1
+            or type(first) is not int
+            or type(last) is not int
+            or first < 0
+            or last - first != size
+        ):
+            return {
+                **outcome,
+                "status": "INVALID",
+                "reason": "INVALID_BYTECODE_SIZE_OBSERVATION",
+            }
+
+        normalized = ge.normalize_label(name)
+        grouped.setdefault(normalized, []).append(observation)
+
+    root_names = []
+
+    for row in roots:
+        normalized = None
+
+        if isinstance(row, dict):
+            normalized = (
+                row.get("normalized_root")
+                or row.get("normalized_label")
+            )
+
+            if normalized is None:
+                original = row.get("root") or row.get("label")
+
+                if isinstance(original, str):
+                    normalized = ge.normalize_label(original)
+
+        root_names.append(
+            normalized if isinstance(normalized, str) else None
+        )
+
+    entries = []
+    used = set()
+
+    for normalized in root_names:
+        matching = (
+            grouped.get(normalized, [])
+            if normalized is not None
+            else []
+        )
+
+        if normalized is None:
+            entries.append({
+                "normalized_root": None,
+                "status": "UNAVAILABLE",
+                "reason": "COMPILED_ROOT_IDENTITY_MISSING",
+                "root_instance": None,
+                "interpreter_states": {},
+            })
+            continue
+
+        if root_names.count(normalized) != 1:
+            entries.append({
+                "normalized_root": normalized,
+                "status": "AMBIGUOUS",
+                "reason": "COMPILED_ROOT_IDENTITY_COLLISION",
+                "root_instance": None,
+                "interpreter_states": {},
+            })
+            continue
+
+        if not matching:
+            entries.append({
+                "normalized_root": normalized,
+                "status": "UNAVAILABLE",
+                "reason": "BYTECODE_SIZE_ROOT_NOT_OBSERVED",
+                "root_instance": None,
+                "interpreter_states": {},
+            })
+            continue
+
+        instances = {
+            item["root_instance"]
+            for item in matching
+        }
+
+        if len(instances) != 1:
+            entries.append({
+                "normalized_root": normalized,
+                "status": "AMBIGUOUS",
+                "reason": "BYTECODE_SIZE_PHYSICAL_ROOT_AMBIGUOUS",
+                "root_instance": None,
+                "observed_root_instances": sorted(instances),
+                "interpreter_states": {},
+            })
+            continue
+
+        states = {}
+
+        for state in ("UNCACHED", "CACHED"):
+            snapshots = [
+                item for item in matching
+                if item["bytecode_tier"] == state
+            ]
+
+            if not snapshots:
+                states[state] = {
+                    "status": "UNAVAILABLE",
+                    "reason": "BYTECODE_STATE_NOT_OBSERVED",
+                    "bytecode_bytes": None,
+                    "instruction_count": None,
+                    "snapshots": [],
+                }
+                continue
+
+            signatures = {
+                (
+                    item["instruction_count"],
+                    item["bytecode_bytes"],
+                    item["first_bci"],
+                    item["last_end_bci"],
+                )
+                for item in snapshots
+            }
+
+            if len(signatures) != 1:
+                states[state] = {
+                    "status": "VARIABLE",
+                    "reason": "BYTECODE_SNAPSHOTS_DIFFER",
+                    "bytecode_bytes": None,
+                    "instruction_count": None,
+                    "snapshots": snapshots,
+                }
+                continue
+
+            states[state] = {
+                "status": "AVAILABLE",
+                "reason": None,
+                "bytecode_bytes": snapshots[0]["bytecode_bytes"],
+                "instruction_count": snapshots[0]["instruction_count"],
+                "snapshots": snapshots,
+            }
+
+        for item in matching:
+            used.add(id(item))
+
+        if any(
+            value["status"] == "VARIABLE"
+            for value in states.values()
+        ):
+            entry_status = "VARIABLE"
+        elif all(
+            value["status"] == "AVAILABLE"
+            for value in states.values()
+        ):
+            entry_status = "AVAILABLE"
+        else:
+            entry_status = "PARTIAL"
+
+        entries.append({
+            "normalized_root": normalized,
+            "status": entry_status,
+            "reason": (
+                None
+                if entry_status == "AVAILABLE"
+                else "INTERPRETER_STATES_NOT_BOTH_STABLE"
+            ),
+            "root_instance": next(iter(instances)),
+            "interpreter_states": states,
+        })
+
+    return {
+        **outcome,
+        "status": (
+            "COMPLETE"
+            if entries
+            and all(
+                entry["status"] == "AVAILABLE"
+                for entry in entries
+            )
+            else "PARTIAL"
+        ),
+        "reason": None,
+        "per_compiled_root": entries,
+        "unattributed_observations": [
+            item for item in observations
+            if id(item) not in used
+        ],
+    }
+
+
+def structural_report(
+    args: argparse.Namespace,
+) -> int:
+    """Pair retained Tier 1 and Tier 2 evidence by compiled root."""
+    tier1 = args.tier1.expanduser().resolve()
+    tier2 = args.tier2.expanduser().resolve()
+    bytecode = args.bytecode.expanduser().resolve()
+    output = args.output.expanduser().resolve()
+
+    if (
+        tier1 == tier2
+        or bytecode == tier1
+        or bytecode == tier2
+        or output == bytecode
+        or output.is_relative_to(bytecode)
+        or bytecode.is_relative_to(output)
+        or output == tier1
+        or output == tier2
+        or output.is_relative_to(tier1)
+        or output.is_relative_to(tier2)
+        or tier1.is_relative_to(output)
+        or tier2.is_relative_to(output)
+    ):
+        raise mp.UsageError(
+            "Structural report inputs and output overlap"
+        )
+
+    if args.workload != "all":
+        select_workloads(load_policy(), args.workload)
+
+    if args.language not in (*LANGUAGES, "all"):
+        raise mp.UsageError(
+            f"Unknown language: {args.language}"
+        )
+
+    keys = set()
+
+    for source in (tier1, tier2, bytecode):
+        if not source.is_dir():
+            continue
+
+        for capture_path in source.glob(
+            "*/*/capture.json"
+        ):
+            keys.add((
+                capture_path.parent.parent.name,
+                capture_path.parent.name,
+            ))
+
+    if args.workload != "all":
+        keys = {
+            key for key in keys
+            if key[0] == args.workload
+        }
+
+    if args.language != "all":
+        keys = {
+            key for key in keys
+            if key[1] == args.language
+        }
+
+    if not keys:
+        mp.emit(
+            "STRUCTURAL_REPORT",
+            "NO_EXISTING_CAPTURE_INPUTS",
+        )
+        return mp.EXIT_INVALID
+
+    prepare_output(output)
+
+    generated = 0
+    reused = 0
+    incomplete = 0
+    conflicts = 0
+
+    for workload, language in sorted(keys):
+        first_dir = tier1 / workload / language
+        second_dir = tier2 / workload / language
+
+        first, first_summary, first_info = (
+            read_structural_input(
+                first_dir, workload, language, 1
+            )
+        )
+        second, second_summary, second_info = (
+            read_structural_input(
+                second_dir, workload, language, 2
+            )
+        )
+
+        try:
+            pairing = ge.pair_compiled_root_tiers(
+                first,
+                first_summary,
+                second,
+                second_summary,
+            )
+        except ge.EvidenceError as exc:
+            pairing = {
+                "status": "INVALID",
+                "reason": exc.reason,
+                "detail": exc.detail,
+            }
+
+        bytecode_info = read_structural_bytecode(
+            bytecode / workload / language,
+            workload,
+            language,
+            (first, second),
+        )
+
+        bytecode_attribution = (
+            attribute_bytecode_groups(
+                pairing,
+                bytecode_info,
+            )
+        )
+
+        bytecode_size_attribution = (
+            attribute_bytecode_sizes(
+                pairing,
+                bytecode_info,
+            )
+        )
+
+        status = (
+            "COMPLETE"
+            if (
+                first_info["status"] == "AVAILABLE"
+                and second_info["status"] == "AVAILABLE"
+                and pairing.get("status") == "COMPLETE"
+            )
+            else "INCOMPLETE"
+        )
+
+        report = {
+            "schema": 1,
+            "mode": "cold-structural-report",
+            "workload": workload,
+            "language": language,
+            "scope": (
+                "observed-compiled-call-targets-only"
+            ),
+            "interpreted_roots_coverage": (
+                "NOT_ESTABLISHED"
+            ),
+            "status": status,
+            "tier_1": first_info,
+            "tier_2": second_info,
+            "pairing": pairing,
+            "bytecode_dsl": {
+                "physical_root_attribution": (
+                    attribute_physical_bytecode_roots(
+                        bytecode_info
+                    )
+                ),
+                "evidence": bytecode_info,
+                "attribution": bytecode_attribution,
+                "size_attribution": bytecode_size_attribution,
+            },
+            "timing_evidence": "NONE",
+        }
+
+        destination = (
+            output / workload / language
+            / "structural-report.json"
+        )
+
+        if destination.is_file():
+            try:
+                existing = json.loads(
+                    destination.read_text(
+                        encoding="utf-8"
+                    )
+                )
+            except (OSError, ValueError):
+                existing = None
+
+            if existing == report:
+                reused += 1
+            else:
+                conflicts += 1
+                mp.emit(
+                    "STRUCTURAL_REPORT_CONFLICT",
+                    destination,
+                )
+            continue
+
+        mp.write_json(destination, report)
+        generated += 1
+
+        if status != "COMPLETE":
+            incomplete += 1
+
+    mp.emit("STRUCTURAL_REPORT_CREATED", generated)
+    mp.emit("STRUCTURAL_REPORT_REUSED", reused)
+    mp.emit("STRUCTURAL_REPORT_INCOMPLETE", incomplete)
+    mp.emit("STRUCTURAL_REPORT_CONFLICTS", conflicts)
+
+    return (
+        mp.EXIT_OK
+        if incomplete == 0 and conflicts == 0
+        else mp.EXIT_INVALID
+    )
 
 
 def cold_jvm_options(
@@ -1406,6 +3448,29 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     cold.add_argument("--jvm-option", action="append", default=[])
     cold.add_argument("--cpu", type=int)
 
+    bytecode = sub.add_parser(
+        "bytecode",
+        help="dedicated-JVM Bytecode DSL histogram",
+    )
+    bytecode.add_argument("--dir", type=Path)
+    bytecode.add_argument("--output", type=Path, required=True)
+    bytecode.add_argument("--language", choices=LANGUAGES, required=True)
+    bytecode.add_argument("--workload", required=True)
+    bytecode.add_argument("--version")
+    bytecode.add_argument("--calls", type=int, default=100)
+    bytecode.add_argument("--cpu", type=int)
+
+    structural = sub.add_parser(
+        "structural-report",
+        help="pair existing per-root Tier 1 and Tier 2 evidence",
+    )
+    structural.add_argument("--tier1", type=Path, required=True)
+    structural.add_argument("--tier2", type=Path, required=True)
+    structural.add_argument("--bytecode", type=Path, required=True)
+    structural.add_argument("--output", type=Path, required=True)
+    structural.add_argument("--workload", default="all")
+    structural.add_argument("--language", default="all")
+
     cold_summary = sub.add_parser(
         "cold-summarize",
         help="node counts of one selected compilation per capture",
@@ -1429,10 +3494,14 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
 
     try:
+        if args.command == "bytecode":
+            return bytecode_capture(args)
         if args.command == "cold":
             return cold_capture(args)
         if args.command == "cold-summarize":
             return cold_summarize(args)
+        if args.command == "structural-report":
+            return structural_report(args)
         if args.command == "capture":
             return capture(args)
         if args.command == "analyze":

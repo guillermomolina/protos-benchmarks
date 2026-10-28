@@ -436,6 +436,67 @@ class MakefileContractTest(unittest.TestCase):
             self.assertIn(target, content)
 
 
+
+class BytecodeHostContractTest(unittest.TestCase):
+    def test_bytecode_capture_uses_existing_runner(self):
+        args = h.parse_args([
+            "bytecode-capture",
+            "--case", "factorial",
+            "--language", "protos",
+            "--bytecode-calls", "123",
+        ])
+
+        with (
+            mock.patch.object(
+                h, "podman_binary", return_value="podman"
+            ),
+            mock.patch.object(h, "require_image"),
+            mock.patch.object(
+                h,
+                "product_directory",
+                return_value=pathlib.Path("/fake/product"),
+            ),
+            mock.patch.object(
+                h, "run_container", return_value=0
+            ) as run,
+        ):
+            self.assertEqual(h.run_bytecode(args), 0)
+
+        command = run.call_args.args[3]
+        self.assertEqual(command[1], "bytecode")
+        self.assertIn("--calls", command)
+        self.assertIn("123", command)
+        self.assertNotIn("--tier", command)
+
+    def test_peer_diagnostic_needs_no_product(self):
+        args = h.parse_args([
+            "bytecode-capture",
+            "--case", "factorial",
+            "--language", "js",
+            "--js-version", "25.4.4.1.1",
+        ])
+
+        with (
+            mock.patch.object(
+                h, "podman_binary", return_value="podman"
+            ),
+            mock.patch.object(h, "require_image"),
+            mock.patch.object(
+                h, "product_directory",
+                side_effect=AssertionError("Unexpected product"),
+            ),
+            mock.patch.object(
+                h, "run_container", return_value=0
+            ) as run,
+        ):
+            self.assertEqual(h.run_bytecode(args), 0)
+
+        self.assertIsNone(run.call_args.args[2])
+        command = run.call_args.args[3]
+        self.assertIn("--version", command)
+        self.assertIn("25.4.4.1.1", command)
+
+
 class ColdHostContractTest(unittest.TestCase):
     def test_cold_capture_is_routed_through_podman(self):
         args = h.parse_args([
@@ -514,5 +575,200 @@ class ColdHostContractTest(unittest.TestCase):
             self.assertIn("measure_graphs.py", command[1])
 
 
+
+class StructuralReportHostContractTest(unittest.TestCase):
+    def test_structural_report_runs_on_host_without_runner(self):
+        args = h.parse_args([
+            "structural-report",
+            "--case", "factorial",
+            "--language", "protos",
+        ])
+
+        result = subprocess.CompletedProcess([], 0)
+
+        with (
+            mock.patch.object(
+                h.subprocess,
+                "run",
+                return_value=result,
+            ) as run,
+            mock.patch.object(
+                h,
+                "podman_binary",
+                side_effect=AssertionError(
+                    "Podman must not be used"
+                ),
+            ),
+            mock.patch.object(
+                h,
+                "run_container",
+                side_effect=AssertionError(
+                    "The runner must not be used"
+                ),
+            ),
+        ):
+            code = h.run_structural_report(args)
+
+        self.assertEqual(code, 0)
+
+        command = run.call_args.args[0]
+
+        self.assertIn("measure_graphs.py", command[1])
+        self.assertIn("structural-report", command)
+        self.assertIn("--tier1", command)
+        self.assertIn("--tier2", command)
+        self.assertIn("--output", command)
+        self.assertIn("factorial", command)
+        self.assertIn("protos", command)
+
+
+
+
+class ProductPreparationHostTest(unittest.TestCase):
+    def test_product_prepare_uses_network_only_for_preparation(self):
+        args = h.parse_args([
+            "product-prepare",
+            "--product", "/fake/protos",
+        ])
+
+        with (
+            mock.patch.object(
+                h, "podman_binary", return_value="podman"
+            ),
+            mock.patch.object(h, "require_image"),
+            mock.patch.object(
+                h, "product_directory",
+                return_value=pathlib.Path("/fake/protos"),
+            ),
+            mock.patch.object(
+                h, "run_container", return_value=0
+            ) as run,
+        ):
+            code = h.run_product_prepare(args)
+
+        self.assertEqual(code, 0)
+        arguments = run.call_args.args[3]
+
+        self.assertIn("--prepare-product", arguments)
+        self.assertIn("--dir", arguments)
+        self.assertNotIn("--workload", arguments)
+        self.assertNotIn("--output", arguments)
+        self.assertTrue(run.call_args.kwargs["allow_network"])
+
+    def test_product_prepare_preserves_requested_version(self):
+        args = h.parse_args([
+            "product-prepare",
+            "--protos-version", "0.3.400",
+        ])
+
+        with (
+            mock.patch.object(
+                h, "podman_binary", return_value="podman"
+            ),
+            mock.patch.object(h, "require_image"),
+            mock.patch.object(
+                h, "product_directory",
+                return_value=pathlib.Path("/fake/protos"),
+            ),
+            mock.patch.object(
+                h, "run_container", return_value=0
+            ) as run,
+        ):
+            h.run_product_prepare(args)
+
+        arguments = run.call_args.args[3]
+        self.assertIn("--version", arguments)
+        self.assertIn("0.3.400", arguments)
+
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+
+class BytecodePreparationHostContractTest(unittest.TestCase):
+
+    def test_preparation_routes_through_existing_runner(self):
+        args = h.parse_args([
+            "bytecode-prepare",
+            "--bytecode-version",
+            "25.4.4.1.1",
+        ])
+
+        with (
+            mock.patch.object(
+                h, "podman_binary", return_value="podman"
+            ),
+            mock.patch.object(h, "require_image"),
+            mock.patch.object(
+                h, "run_container", return_value=0
+            ) as run,
+        ):
+            self.assertEqual(
+                h.run_bytecode_prepare(args), 0
+            )
+
+        self.assertEqual(run.call_count, 2)
+
+        prepare = run.call_args_list[0]
+        check = run.call_args_list[1]
+
+        self.assertEqual(
+            prepare.args[3][1],
+            "prepare",
+        )
+        self.assertTrue(
+            prepare.kwargs["allow_network"]
+        )
+
+        self.assertEqual(
+            check.args[3][1],
+            "check",
+        )
+        self.assertFalse(
+            check.kwargs["allow_network"]
+        )
+
+        self.assertIsNone(prepare.args[2])
+        self.assertIsNone(check.args[2])
+
+    def test_failed_preparation_does_not_attempt_check(self):
+        args = h.parse_args([
+            "bytecode-prepare",
+            "--bytecode-version",
+            "25.4.4.1.1",
+        ])
+
+        with (
+            mock.patch.object(
+                h, "podman_binary", return_value="podman"
+            ),
+            mock.patch.object(h, "require_image"),
+            mock.patch.object(
+                h, "run_container", return_value=7
+            ) as run,
+        ):
+            self.assertEqual(
+                h.run_bytecode_prepare(args), 7
+            )
+
+        run.assert_called_once()
+        self.assertTrue(
+            run.call_args.kwargs["allow_network"]
+        )
+
+    def test_invalid_version_does_not_start_runner(self):
+        args = h.parse_args([
+            "bytecode-prepare",
+            "--bytecode-version",
+            "../invalid",
+        ])
+
+        with mock.patch.object(
+            h, "run_container"
+        ) as run:
+            with self.assertRaises(h.HarnessError):
+                h.run_bytecode_prepare(args)
+
+        run.assert_not_called()

@@ -1821,5 +1821,77 @@ class StaticArchitectureTest(unittest.TestCase):
             self.assertNotRegex(text, r"PERF\d{3}", path)
 
 
+
+class ProductPreparationContractTest(unittest.TestCase):
+    def test_preparation_reuses_existing_product_builder(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            repo = make_product(base, "protos", "0.3.400")
+            cache = base / "cache"
+
+            args = mp.parse_args([
+                "--prepare-product",
+                "--dir", str(repo),
+                "--language", "protos",
+            ])
+
+            def fake_build(product, log):
+                self.assertEqual(product, repo)
+                log.parent.mkdir(parents=True, exist_ok=True)
+                log.write_text("prepared\\n", encoding="utf-8")
+
+                classes = repo / "target" / "classes"
+                classes.mkdir(parents=True, exist_ok=True)
+                dependency = base / "dependency.jar"
+                dependency.write_bytes(b"fixture")
+
+                return classes, str(dependency)
+
+            with (
+                mock.patch.object(mp, "EMBEDDED_CACHE", cache),
+                mock.patch.object(
+                    mp, "build_product",
+                    side_effect=fake_build,
+                ) as build,
+                contextlib.redirect_stdout(io.StringIO()) as output,
+            ):
+                code = mp.prepare_product(args)
+
+            self.assertEqual(code, mp.EXIT_OK)
+            build.assert_called_once()
+            self.assertIn(
+                "PRODUCT_PREPARED=YES",
+                output.getvalue(),
+            )
+            self.assertIn(
+                "MEASUREMENTS_EXECUTED=NO",
+                output.getvalue(),
+            )
+
+    def test_dirty_product_is_not_prepared(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repo = make_product(
+                Path(directory), "protos", "0.3.400"
+            )
+
+            core = repo / "protos/lib/core/core.protos"
+            core.write_text("modified\\n", encoding="utf-8")
+
+            args = mp.parse_args([
+                "--prepare-product",
+                "--dir", str(repo),
+            ])
+
+            with mock.patch.object(mp, "build_product") as build:
+                with self.assertRaisesRegex(
+                    mp.UsageError,
+                    "PRODUCT_PREPARE_DIRTY",
+                ):
+                    mp.prepare_product(args)
+
+            build.assert_not_called()
+
+
+
 if __name__ == "__main__":
     unittest.main()

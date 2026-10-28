@@ -39,11 +39,15 @@ COMMANDS = (
     "graphs-summarize",
     "graphs-verify",
     "cold-capture",
+    "bytecode-capture",
     "cold-analyze",
     "cold-summarize",
+    "structural-report",
     "image-status",
     "image-build",
     "peer-prepare",
+    "product-prepare",
+    "bytecode-prepare",
 )
 
 
@@ -368,6 +372,111 @@ def run_measurement(args, command):
 
 
 
+def run_bytecode_prepare(args):
+    """Explicit online processor preparation in the existing runner.
+
+    The host never invokes Maven. The prepared artifact is retained in
+    the runner Maven cache and checked again with network disabled.
+    """
+    import xml.etree.ElementTree as ET
+
+    version = args.bytecode_version
+
+    if version is None:
+        pom = ET.parse(HARNESS_DIR / "pom.xml").getroot()
+
+        namespace = ""
+        if pom.tag.startswith("{"):
+            namespace = pom.tag.split("}", 1)[0] + "}"
+
+        properties = pom.find(
+            f"{namespace}properties"
+        )
+
+        if properties is None:
+            raise HarnessError(
+                "BYTECODE_GRAALVM_VERSION_UNAVAILABLE"
+            )
+
+        version = properties.findtext(
+            f"{namespace}graal.languages.version",
+            "",
+        ).strip()
+
+    if not re.fullmatch(
+        r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}",
+        version or "",
+    ):
+        raise HarnessError(
+            f"Invalid bytecode processor version: {version!r}"
+        )
+
+    binary = podman_binary()
+    require_image(binary, args.image)
+
+    prepare_arguments = [
+        "harness/bytecode_size_runtime.py",
+        "prepare",
+        "--version",
+        version,
+    ]
+
+    code = run_container(
+        binary,
+        args.image,
+        None,
+        prepare_arguments,
+        allow_network=True,
+    )
+
+    if code:
+        return code
+
+    check_arguments = [
+        "harness/bytecode_size_runtime.py",
+        "check",
+        "--version",
+        version,
+    ]
+
+    return run_container(
+        binary,
+        args.image,
+        None,
+        check_arguments,
+        allow_network=False,
+    )
+
+
+
+def run_product_prepare(args):
+    """Prepare Protos dependencies outside all measurement JVMs."""
+    binary = podman_binary()
+    require_image(binary, args.image)
+
+    product = product_directory(args.product)
+
+    arguments = [
+        "harness/measure_protos.py",
+        "--prepare-product",
+        "--language", "protos",
+        "--dir", CONTAINER_PRODUCT,
+    ]
+
+    if args.protos_version is not None:
+        arguments.extend([
+            "--version", args.protos_version,
+        ])
+
+    return run_container(
+        binary,
+        args.image,
+        product,
+        arguments,
+        allow_network=True,
+    )
+
+
 def run_peer_prepare(args):
     """Explicit peer preparation; no benchmark execution."""
     if args.language == "protos":
@@ -410,6 +519,60 @@ def run_peer_prepare(args):
             return code
 
     return 0
+
+
+
+def run_bytecode(args):
+    """Host launcher for the separate Bytecode DSL diagnostic."""
+    if not args.case or args.case == "all":
+        raise HarnessError("Select exactly one CASE")
+
+    selected_cases(args.case)
+
+    if args.language == "all":
+        raise HarnessError("Select exactly one LANGUAGE")
+
+    if not 1 <= args.bytecode_calls <= 1000000:
+        raise HarnessError("Invalid BYTECODE_CALLS")
+
+    binary = podman_binary()
+    require_image(binary, args.image)
+
+    product = (
+        product_directory(args.product)
+        if args.language == "protos"
+        else None
+    )
+
+    output = output_path(args.output, "bytecode")
+
+    arguments = [
+        "harness/measure_graphs.py",
+        "bytecode",
+        "--output", container_output(output),
+        "--language", args.language,
+        "--workload", args.case,
+        "--calls", str(args.bytecode_calls),
+    ]
+
+    if args.language == "protos":
+        arguments.extend(["--dir", CONTAINER_PRODUCT])
+
+    version = {
+        "protos": args.protos_version,
+        "js": args.js_version,
+        "python": args.python_version,
+    }[args.language]
+
+    if version is not None:
+        arguments.extend(["--version", version])
+
+    if args.cpu is not None:
+        arguments.extend(["--cpu", str(args.cpu)])
+
+    return run_container(
+        binary, args.image, product, arguments
+    )
 
 
 def run_cold(args):
@@ -490,6 +653,49 @@ def run_cold(args):
     ).returncode
 
 
+
+def run_structural_report(args):
+    """Generate a derived report without running a guest JVM."""
+    bytecode = output_path(
+        args.bytecode_dir, "bytecode"
+    )
+    tier1 = output_path(
+        args.tier1_dir, "cold/tier-1/all"
+    )
+    tier2 = output_path(
+        args.tier2_dir, "cold/tier-2/all"
+    )
+    destination = output_path(
+        args.output, "structural"
+    )
+
+    for source in (tier1, tier2, bytecode):
+        if (
+            destination == source
+            or destination.is_relative_to(source)
+            or source.is_relative_to(destination)
+        ):
+            raise HarnessError(
+                "Structural report output overlaps capture inputs"
+            )
+
+    return subprocess.run(
+        [
+            sys.executable,
+            str(HARNESS_DIR / "measure_graphs.py"),
+            "structural-report",
+            "--tier1", str(tier1),
+            "--tier2", str(tier2),
+            "--bytecode", str(bytecode),
+            "--output", str(destination),
+            "--workload", args.case or "all",
+            "--language", args.language,
+        ],
+        cwd=ROOT,
+        check=False,
+    ).returncode
+
+
 def run_graphs(args):
     output = output_path(args.output, "graphs")
 
@@ -564,6 +770,7 @@ def parse_args(argv=None):
         help="cold: first guest call; hot: warmed steady samples; "
         "both: report both observations from the same run",
     )
+    parser.add_argument("--bytecode-version")
     parser.add_argument("--protos-version")
     parser.add_argument("--js-version")
     parser.add_argument("--python-version")
@@ -574,10 +781,14 @@ def parse_args(argv=None):
         "--product",
         default=str(ROOT.parent / "protos"),
     )
+    parser.add_argument("--bytecode-dir")
+    parser.add_argument("--tier1-dir")
+    parser.add_argument("--tier2-dir")
     parser.add_argument("--tier", type=int, choices=(1, 2), default=2)
     parser.add_argument("--root", default="primary")
     parser.add_argument("--warmup-calls", type=int, default=0)
     parser.add_argument("--invocations", type=int, default=2000)
+    parser.add_argument("--bytecode-calls", type=int, default=100)
     parser.add_argument("--first-threshold", type=int, default=100)
     parser.add_argument("--last-threshold", type=int)
     parser.add_argument("--jvm-option", action="append", default=[])
@@ -624,8 +835,20 @@ def main(argv=None):
         if args.command == "peer-prepare":
             return run_peer_prepare(args)
 
+        if args.command == "product-prepare":
+            return run_product_prepare(args)
+
+        if args.command == "bytecode-prepare":
+            return run_bytecode_prepare(args)
+
+        if args.command == "structural-report":
+            return run_structural_report(args)
+
         if args.command in ("correctness", "measure", "smoke"):
             return run_measurement(args, args.command)
+
+        if args.command == "bytecode-capture":
+            return run_bytecode(args)
 
         if args.command.startswith("cold-"):
             return run_cold(args)

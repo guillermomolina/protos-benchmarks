@@ -6,14 +6,29 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Changed
 
+- Completed independent Protos/GraalJS/GraalPy version selection: Protos
+  selectors are checked against the actual checkout, peer dependencies
+  are selected by version, and result identity includes the selected
+  implementation version. Added explicit online `peer-prepare` for peers;
+  timing keeps Maven offline and Podman networking disabled.
+- Added `cold|hot|both` temperature selection. A capture stores both
+  cold first-guest-invocation and hot steady-state phases and allows
+  compatible cross-temperature reuse without timing twice.
+- Selected reference hot timing as the minimum observed steady per-call
+  sample, without requiring convergence or rejecting unstable samples.
+  Retained raw samples, correctness gates and explicit non-reference
+  diagnostic handling; removed obsolete convergence helpers/tests.
+- Strengthened exact result reuse with immutable local container image
+  ID, Java and host/CPU identity, producer Git revision and source hashes
+  (including the host entry point), in addition to case and policy.
 - Reorganized the single active GraalVM benchmark harness from `truffle/` into root `benchmark.py`, `cases/`, `harness/` and `harness/policy/`, updating the Makefile, tests, IGV tooling and current documentation without changing the 17 workload definitions or retained peer baselines.
-- Tightened existing-result reuse to require matching harness Git revision and producer source hashes; IGV analyzer image publication is now explicitly manual. Full cold/hot and implementation-version-aware selection remain future work.
-- Consolidated the active Protos/GraalJS/GraalPy benchmark entry point in `truffle/harness.py` and the root `Makefile`, with explicit host-side Podman image management and no implicit image builds or pulls during measurement.
-- Kept the canonical Protos and executable-value peer adapters as the only measurement surfaces; moved shared timing statistics and identity helpers into `truffle/measurement_support.py` and removed obsolete JVM runners, dynamic/prepared adapters, PERF-specific harnesses, Docker infrastructure, and historic compatibility entry points.
-- Located the active Graal compiler trace and IGV analyzer under `truffle/`, retained current graph analysis, and removed historical graph-cache promotion machinery.
+- Tightened existing-result reuse to require matching harness Git revision and producer source hashes; IGV analyzer image publication is now explicitly manual.
+- Consolidated the active Protos/GraalJS/GraalPy benchmark entry point in root `benchmark.py` and the `Makefile`, with explicit host-side Podman image management and no implicit image builds or pulls during measurement.
+- Kept the canonical Protos and executable-value peer adapters as the only measurement surfaces; moved shared timing statistics and identity helpers into `harness/measurement_support.py` and removed obsolete JVM runners, dynamic/prepared adapters, PERF-specific harnesses, Docker infrastructure, and historic compatibility entry points.
+- Located the active Graal compiler trace and IGV analyzer under `harness/`, retained current graph analysis, and removed historical graph-cache promotion machinery.
 - Removed 4,333 tracked historical result artifacts while preserving the two GraalJS/GraalPy baseline files in `results/peer-baselines/`; local and untracked results are unaffected.
 - Replaced legacy multi-harness and PERF-specific documentation with the current single-harness workflow, keeping the repository's binding performance and reproducibility rules.
-- Retained correctness-first and exact-result-reuse behavior. Full cold/hot benchmarking and implementation-version-aware no-repeat selection remain separate follow-up work, not claims of this cleanup.
+- Retained correctness-first and exact-result-reuse behavior throughout the historical cleanup and layout consolidation.
 
 ### Fixed
 

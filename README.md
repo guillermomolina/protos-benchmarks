@@ -38,13 +38,20 @@ profiling, and graph capture/analysis through the explicit commands shown by
 `--language protos|js|python|all`, and the Protos checkout with `--product`.
 Outputs should be stored beneath the ignored `results/local/` directory.
 
-The GraalVM language dependency version is pinned in `harness/pom.xml`.
-Correctness must pass before any timing is accepted. Existing valid timing
-results may be reused unless remeasurement is explicitly requested.
+The harness accepts independent `--protos-version`, `--js-version`, and
+`--python-version` selectors. The Protos selector must match the actual
+checkout; GraalJS/GraalPy dependencies must be prepared explicitly with
+`peer-prepare` before offline measurement. Correctness must pass before
+timing is accepted.
 
-**Work in progress:** explicit cold-versus-hot selection and a complete
-implementation-version-aware no-repeat key are not yet finalized. The existing
-`smoke` and `reference` stages must not be confused with cold and hot runs.
+Use `--temperature cold|hot|both` independently of `--stage smoke|reference`.
+Cold is the first guest invocation after context initialization, not JVM
+startup; hot selects the minimum observed per-call time among the steady
+samples, without a convergence gate. Both phases and all raw samples are
+captured together. Existing valid results are reused when the exact
+implementation version, source/producer, immutable container image, Java,
+host/CPU, case and measurement policy identities match, unless
+remeasurement is explicitly requested.
 
 See [BENCHMARKING.md](BENCHMARKING.md) for the current methodology and
 `AGENTS.work/` for the binding measurement and reproducibility rules.

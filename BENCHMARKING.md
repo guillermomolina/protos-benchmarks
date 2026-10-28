@@ -26,13 +26,15 @@ retired `dynamic` and `prepared` Protos adapters are not selectable.
 
 ## Source, runtime and host identity
 
-Reference evidence must identify the exact source state and Git revision of
-the selected Protos checkout and benchmark producer. The driver records the
-Protos project version, relevant GraalVM/JDK identity, host CPU and affinity,
-measurement policy and producer source hashes. A dirty product checkout is
-not eligible for reference timing unless explicitly allowed for diagnostics.
-Versions of Protos, GraalJS, and GraalPy must be considered separately when
-constructing the final version-aware result key.
+Reference evidence identifies the exact source state and Git revision of
+the selected Protos checkout and benchmark producer. Independent Protos,
+GraalJS and GraalPy version selectors feed the exact result identity; the
+Protos version must match its real checkout. The key also includes the
+immutable local Podman image ID (not only the image tag), Java identity,
+host/CPU identity, workload, measurement policy, benchmark Git revision
+and producer source hashes, including `benchmark.py`. A dirty product
+checkout is not eligible for reference timing unless explicitly allowed
+for diagnostics.
 
 ## Correctness before timing
 
@@ -43,25 +45,34 @@ Raw output, failure reasons and measurement metadata are retained for review.
 
 ## Timing, warmup and instrumentation
 
-`harness/policy/cases.json` defines the smoke/reference timing policies,
-warmup counts, steady samples, admission rules and JFR options. Smoke verifies
-the path cheaply; it is not accepted as reference performance evidence.
-Warmup and steady-state samples remain distinguishable. Reference admission
-checks stability and rejects invalid measurements rather than silently
-publishing them. Optional JFR and compilation diagnostics can perturb timing
-and must not be mistaken for uninstrumented reference measurements.
+`harness/policy/cases.json` defines the smoke/reference timing policy,
+fixed warmup and steady sample counts, and JFR options. Smoke checks the
+path cheaply; it is not accepted as reference performance evidence.
+Warmup and steady samples remain distinguishable. For hot reference
+timing, the selected value is the minimum observed elapsed time divided
+by calls per sample among the steady samples. This selection neither waits
+for convergence nor rejects a run for lack of timing stability; all raw
+samples remain available for interpretation. Wrong results or invalid
+evidence still fail the correctness and validity checks. Optional JFR
+and compilation diagnostics can perturb timing and are separate from
+uninstrumented reference measurements.
 
-**Cold and hot are distinct measurements**, not synonyms for the `smoke` and
-`reference` stages. A complete implementation must define their JVM and
-warmup boundaries explicitly. The cold/hot selection and exact
-version-discriminated reuse matrix are still being finalized.
+Cold and hot are distinct phases, not the `smoke` and `reference` stages:
+`--temperature cold|hot|both` selects the requested reported phase. Cold
+is the first guest invocation after Polyglot context setup; it is not
+process/JVM startup. Hot uses the separate steady samples after the fixed
+warmup. A single timing capture contains both phases, so a compatible
+validated run can be reused for either phase without repeating timing.
 
 ## Container and result boundaries
 
-`benchmark.py` is the single Linux-host entry point. It invokes Podman
-without automatically pulling or building images. Use `make help` to inspect
-its current commands; `make validate` checks the catalog and policies without
-launching a JVM. Image preparation is always explicit.
+`benchmark.py` is the single Linux-host entry point. Measurement uses
+Podman with networking disabled and Maven in offline mode; it never pulls
+or builds an image automatically. `peer-prepare` is an explicit separate
+operation that may use the network to resolve a chosen GraalJS or GraalPy
+version before measurement. Use `make help` for commands and `make validate`
+to check the catalog/policies without launching a JVM. Image preparation
+and any image pull remain explicit operations.
 
 The active measurement driver keeps run records under the selected output
 directory. Results with an exact compatible existing identity are reused

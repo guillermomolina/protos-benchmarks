@@ -176,7 +176,6 @@ class PolicyTest(unittest.TestCase):
                             if workload == "primitive-while-zero"
                             else 10_000
                         ),
-                        "admission_scope": "steady-only",
                     },
                 },
             }

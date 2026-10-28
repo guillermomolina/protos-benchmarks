@@ -18,8 +18,12 @@ HARNESS := benchmark.py
 
 CASE ?= primitive-return-literal
 LANGUAGE ?= all
+PROTOS_VERSION ?=
+GRAALJS_VERSION ?=
+GRAALPY_VERSION ?=
 STAGE ?= reference
 PROFILE ?= none
+TEMPERATURE ?= hot
 TIER ?= 2
 COMPILATION_ROOT ?= primary
 WARMUP_CALLS ?= 0
@@ -35,11 +39,15 @@ PODMAN_IMAGE ?= localhost/protos-bench-runner:graal25.4.4.1.1-standalone
 
 ARGS = --case "$(CASE)" --language "$(LANGUAGE)" --stage "$(STAGE)" \
        --profile "$(PROFILE)" --surface "$(SURFACE)" \
+       --temperature "$(TEMPERATURE)" \
        --product "$(PROTOS_REPO)" --image "$(PODMAN_IMAGE)" \
+       $(if $(strip $(PROTOS_VERSION)),--protos-version "$(PROTOS_VERSION)",) \
+       $(if $(strip $(GRAALJS_VERSION)),--js-version "$(GRAALJS_VERSION)",) \
+       $(if $(strip $(GRAALPY_VERSION)),--python-version "$(GRAALPY_VERSION)",) \
        $(if $(strip $(CPU)),--cpu "$(CPU)",) \
        $(if $(strip $(OUTPUT)),--output "$(OUTPUT)",)
 
-.PHONY: help validate correctness measure smoke graphs-capture graphs-analyze graphs-summarize graphs-verify image-status image-build cold-capture cold-analyze cold-summarize
+.PHONY: help validate correctness measure smoke graphs-capture graphs-analyze graphs-summarize graphs-verify image-status image-build peer-prepare cold-capture cold-analyze cold-summarize
 
 help:
 	@$(PYTHON) $(HARNESS) --help
@@ -67,6 +75,9 @@ graphs-summarize:
 
 graphs-verify:
 	@$(PYTHON) $(HARNESS) graphs-verify $(ARGS)
+
+peer-prepare:
+	@$(PYTHON) $(HARNESS) peer-prepare $(ARGS)
 
 image-status:
 	@$(PYTHON) $(HARNESS) image-status --image "$(PODMAN_IMAGE)"

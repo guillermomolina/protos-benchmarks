@@ -33,8 +33,10 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import math
 import os
 import platform
+import re
 import shutil
 import statistics
 import subprocess
@@ -52,13 +54,12 @@ HARNESS_DIR = ROOT / "harness"
 CASES = HARNESS_DIR / "policy" / "cases.json"
 EMBEDDED_CACHE = ROOT / ".work" / "embedded"
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 OUTPUT_MARKER = ".measure-protos-output"
 STAGING = ".staging"
 STAGES = ("reference", "smoke")
 PROFILES = ("none", "jfr")
 PEER_LANGUAGES = ("js", "python")
-ADMISSION_SCOPES = ("warmup-and-steady", "steady-only")
 
 # The only Git subcommands this driver may run. None of them changes a
 # working tree, an index or a ref; in particular checkout, reset, clone,
@@ -231,12 +232,7 @@ def resolve_policy(
     }
 
     if kind == "timing":
-        scope = merged.get("admission_scope", "warmup-and-steady")
-
-        if scope not in ADMISSION_SCOPES:
-            raise UsageError(f"invalid timing policy admission_scope={scope!r}")
-
-        result["admission_scope"] = scope
+        result["selection"] = "minimum-observed-steady-v1"
 
     return result
 
@@ -359,6 +355,7 @@ def producer_files(
         HARNESS_DIR / "measurement_support.py",
         HARNESS_DIR / "workload_catalog.py",
         ROOT / "cases" / "catalog.json",
+        ROOT / "benchmark.py",
         CASES,
         *(HARNESS_DIR / item for item in cases["engine_sources"]),
         *(HARNESS_DIR / item for item in surface_def["sources"]),
@@ -529,9 +526,14 @@ def dependency_classpath_ready(value: str) -> bool:
     )
 
 
-def peer_classpath() -> tuple[str, str]:
-    """Dependency classpath of the harness-pinned GraalJS/GraalPy peers."""
-    version = jvm_runtime.harness_graalvm_version()
+def peer_classpath(
+    requested_version: str | None = None,
+    *, offline: bool = True,
+) -> tuple[str, str]:
+    """Offline classpath for the selected GraalJS/GraalPy version."""
+    version = requested_version or jvm_runtime.harness_graalvm_version()
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", version):
+        raise UsageError(f"invalid peer version: {version!r}")
     peer_root = EMBEDDED_CACHE / "peer-classpath" / version
     peer_root.mkdir(parents=True, exist_ok=True)
 
@@ -560,6 +562,7 @@ def peer_classpath() -> tuple[str, str]:
             subprocess.run(
                 [
                     "mvn",
+                    * (["-o"] if offline else []),
                     "-q",
                     "-f",
                     str(staged_pom),
@@ -714,6 +717,7 @@ def prepare_surface_runtime(
     product_before: dict[str, object] | None,
     metadata: dict[str, object],
     raw: Path,
+    requested_peer_version: str | None = None,
 ) -> dict[str, object]:
     """Builds/resolves the exact runtime classpath for one surface and
     compiles its adapter. Records cache and runtime identity in ``metadata``.
@@ -740,7 +744,11 @@ def prepare_surface_runtime(
         system_properties: list[str] = []
         core_arg = str(product_before["core_root"])
     else:
-        peer_version, dependency_cp = peer_classpath()
+        peer_version, dependency_cp = (
+            peer_classpath(requested_peer_version)
+            if requested_peer_version is not None
+            else peer_classpath()
+        )
         classes = None
         compile_cp = dependency_cp
         owner = f"peer-{peer_version}"
@@ -862,6 +870,7 @@ def timing_summary(parsed: dict[str, object]) -> dict[str, object]:
         "steady_min_ns": min(steady),
         "steady_max_ns": max(steady),
         "steady_amortized_p50_ns_per_call": p50 / sample_calls,
+        "steady_amortized_min_ns_per_call": min(steady) / sample_calls,
     }
 
 
@@ -894,6 +903,42 @@ def prepare_output(output: Path) -> None:
 
 def case_id(language: str, surface: str, workload: str, stage: str, profile: str) -> str:
     return f"{language}-{surface}--{workload}--{stage}-{profile}"
+
+
+def temperature_values(timing: object) -> tuple[int, float] | None:
+    """Validate both captured phases before admitting result reuse."""
+    if not isinstance(timing, dict):
+        return None
+
+    cold = timing.get("cold_ns")
+    hot = timing.get("steady_amortized_min_ns_per_call")
+
+    if type(cold) is not int or cold < 0:
+        return None
+
+    if type(hot) not in (int, float):
+        return None
+
+    if not math.isfinite(float(hot)) or hot < 0:
+        return None
+
+    return cold, float(hot)
+
+
+def emit_temperature(timing: object, temperature: str) -> None:
+    values = temperature_values(timing)
+
+    if values is None:
+        raise UsageError("measurement has incomplete temperature data")
+
+    cold, hot = values
+    emit("TEMPERATURE", temperature)
+
+    if temperature in ("cold", "both"):
+        emit("COLD_FIRST_CALL_NS", cold)
+
+    if temperature in ("hot", "both"):
+        emit("HOT_STEADY_MIN_NS_PER_CALL", f"{hot:.9f}")
 
 
 def find_existing(
@@ -930,6 +975,22 @@ def find_existing(
             and recorded_producer.get("source_sha256")
             == producer["source_sha256"]
         ):
+            if result_key.get("operation") != "correctness-only":
+                summary_file = run_dir / "summary.json"
+
+                try:
+                    summary = json.loads(
+                        summary_file.read_text(encoding="utf-8")
+                    )
+                except (OSError, ValueError):
+                    continue
+
+                if (
+                    not isinstance(summary, dict)
+                    or temperature_values(summary.get("timing")) is None
+                ):
+                    continue
+
             return run_dir
 
     return None
@@ -1005,6 +1066,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument("--dir", type=Path, help="Protos checkout to measure")
+    parser.add_argument(
+        "--version",
+        help="expected Protos version or selected GraalJS/GraalPy version",
+    )
     parser.add_argument("--output", type=Path, help="result directory")
     parser.add_argument(
         "--language",
@@ -1019,6 +1084,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--workload")
     parser.add_argument("--stage", default="reference", choices=STAGES)
     parser.add_argument("--profile", default="none", choices=PROFILES)
+    parser.add_argument(
+        "--temperature",
+        choices=("cold", "hot", "both"),
+        default="hot",
+    )
     parser.add_argument("--correctness-only", action="store_true")
     parser.add_argument("--cpu", type=int)
     parser.add_argument(
@@ -1047,6 +1117,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "recorded; never reference-eligible)",
     )
     parser.add_argument(
+        "--container-image-id",
+        help="immutable Podman image ID verified by the host launcher",
+    )
+    parser.add_argument(
         "--remeasure",
         action="store_true",
         help="measure again even if an equivalent valid result exists; "
@@ -1058,6 +1132,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="allow a dirty Protos checkout (never reference-eligible)",
     )
     parser.add_argument(
+        "--prepare-peer",
+        action="store_true",
+        help="explicitly prepare peer dependencies with network access",
+    )
+    parser.add_argument(
         "--verify-producer",
         type=Path,
         metavar="RUN_DIR",
@@ -1066,12 +1145,57 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+
+def prepare_peer(args: argparse.Namespace) -> int:
+    """Resolve peer dependencies without timing or correctness runs."""
+    if args.language not in PEER_LANGUAGES:
+        raise UsageError(
+            "PEER_PREPARE_LANGUAGE: use js or python"
+        )
+
+    if (
+        args.workload is not None
+        or args.output is not None
+        or args.dir is not None
+        or args.correctness_only
+        or args.remeasure
+    ):
+        raise UsageError(
+            "PEER_PREPARE_OPTIONS: preparation accepts language "
+            "and optional version"
+        )
+
+    try:
+        version, classpath = peer_classpath(
+            args.version,
+            offline=False,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise UsageError(
+            "PEER_PREPARATION_FAILED: Maven dependency resolution failed"
+        ) from exc
+    except FileNotFoundError as exc:
+        raise UsageError(
+            "PEER_PREPARATION_FAILED: Maven unavailable"
+        ) from exc
+
+    emit("PEER_VERSION_PREPARED", "YES")
+    emit("LANGUAGE", args.language)
+    emit("IMPLEMENTATION_VERSION", version)
+    emit("CLASSPATH_ENTRIES", len(classpath.split(os.pathsep)))
+
+    return EXIT_OK
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
 
     try:
         if args.verify_producer is not None:
             return verify_producer(args.verify_producer.resolve())
+
+        if args.prepare_peer:
+            return prepare_peer(args)
 
         return measure(args)
     except UsageError as exc:
@@ -1088,6 +1212,22 @@ def measure(args: argparse.Namespace) -> int:
     if args.output is None or args.workload is None:
         raise UsageError("--output and --workload are required")
 
+    if (
+        args.container_image_id is not None
+        and not re.fullmatch(
+            r"sha256:[0-9a-f]{64}",
+            args.container_image_id,
+        )
+    ):
+        raise UsageError(
+            "--container-image-id must be a SHA-256 image identity"
+        )
+
+    if args.correctness_only and args.temperature != "hot":
+        raise UsageError(
+            "--temperature requires a timed measurement"
+        )
+
     if args.correctness_only and (
         args.profile != "none"
         or args.diagnostic
@@ -1098,6 +1238,12 @@ def measure(args: argparse.Namespace) -> int:
         raise UsageError(
             "--correctness-only cannot be combined with profiling or diagnostics"
         )
+
+    if args.version is not None and not re.fullmatch(
+        r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}",
+        args.version,
+    ):
+        raise UsageError(f"invalid implementation version: {args.version!r}")
 
     if args.diagnostic and args.profile != "none":
         raise UsageError("--diagnostic requires --profile none")
@@ -1194,6 +1340,19 @@ def measure(args: argparse.Namespace) -> int:
     # Product identity immediately before the batch.
     product_before = product_identity(product_dir) if product_dir is not None else None
 
+    if language == "protos":
+        assert product_before is not None
+        implementation_version = str(product_before["version"])
+        if args.version is not None and args.version != implementation_version:
+            raise UsageError(
+                f"requested Protos version {args.version!r} does not match "
+                f"checkout version {implementation_version!r}"
+            )
+    else:
+        implementation_version = (
+            args.version or jvm_runtime.harness_graalvm_version()
+        )
+
     if product_before is not None and not product_before["clean"] and not args.allow_dirty_product:
         raise UsageError(
             "Protos checkout is dirty; accepted reference evidence requires a "
@@ -1214,8 +1373,15 @@ def measure(args: argparse.Namespace) -> int:
         ]))
     harness_before = harness_identity(files)
 
+    # Resolve the execution identity before result reuse. A changed JVM,
+    # container image, host, affinity or CPU cannot reuse older timing.
+    cpu, siblings, allowed = choose_cpu(args.cpu)
+    runtime_java = java_identity()
+    runtime_host = host_identity(cpu, siblings, allowed)
+
     result_key = {
         "language": language,
+        "implementation_version": implementation_version,
         "surface": surface,
         "workload": args.workload,
         "stage": args.stage,
@@ -1227,6 +1393,9 @@ def measure(args: argparse.Namespace) -> int:
         "timing_policy": timing_policy,
         "jfr_policy": jfr_policy,
         "diagnostic_jvm_options": list(args.jvm_option),
+        "container_image_id": args.container_image_id,
+        "java_identity": runtime_java,
+        "host_identity": runtime_host,
     }
 
     if args.correctness_only:
@@ -1264,6 +1433,7 @@ def measure(args: argparse.Namespace) -> int:
         emit("PROTOS_CLEAN", "YES" if product_before["clean"] else "NO")
 
     emit("LANGUAGE", language)
+    emit("IMPLEMENTATION_VERSION", implementation_version)
     emit("SURFACE", surface)
     emit("WORKLOAD", args.workload)
     emit("STAGE", args.stage)
@@ -1273,6 +1443,15 @@ def measure(args: argparse.Namespace) -> int:
 
     if existing is not None and not args.remeasure:
         emit("RESULT_ALREADY_EXISTS", "YES")
+
+        if not args.correctness_only:
+            existing_summary = json.loads(
+                (existing / "summary.json").read_text(encoding="utf-8")
+            )
+            emit_temperature(
+                existing_summary["timing"], args.temperature
+            )
+
         emit("RESULT", existing)
         return EXIT_OK
 
@@ -1289,7 +1468,6 @@ def measure(args: argparse.Namespace) -> int:
         raw / "diagnostic-samples.log" if args.diagnostic else None
     )
 
-    cpu, siblings, allowed = choose_cpu(args.cpu)
     metadata: dict[str, object] = {
         "schema_version": SCHEMA_VERSION,
         "measurement_valid": False,
@@ -1303,6 +1481,7 @@ def measure(args: argparse.Namespace) -> int:
         "protos_version": product_before["version"] if product_before else None,
         "protos_clean": product_before["clean"] if product_before else None,
         "language": language,
+        "implementation_version": implementation_version,
         "surface": surface,
         "surface_timed_call": surface_def["timed_call"],
         "workload": args.workload,
@@ -1315,8 +1494,8 @@ def measure(args: argparse.Namespace) -> int:
         "harness": harness_before,
         "harness_git_head": harness_before["git_head"],
         "harness_dirty": harness_before["dirty"],
-        "java": java_identity(),
-        "host": host_identity(cpu, siblings, allowed),
+        "java": runtime_java,
+        "host": runtime_host,
     }
     summary: dict[str, object] = {"case": case, "expected_result": expected}
 
@@ -1347,8 +1526,19 @@ def measure(args: argparse.Namespace) -> int:
         )
 
         runtime = prepare_surface_runtime(
-            cases, surface, surface_def, language, product_dir, product_before, metadata, raw
+            cases, surface, surface_def, language, product_dir,
+            product_before, metadata, raw,
+            args.version if language in PEER_LANGUAGES else None,
         )
+
+        if language in PEER_LANGUAGES:
+            actual_peer_version = metadata["peer_runtime"]["graalvm_version"]
+            if actual_peer_version != implementation_version:
+                raise InvalidMeasurement(
+                    "PEER_VERSION_MISMATCH",
+                    f"{actual_peer_version!r} != {implementation_version!r}",
+                )
+
         runtime_cp = runtime["runtime_cp"]
         main_class = runtime["main_class"]
         system_properties = runtime["system_properties"]
@@ -1533,42 +1723,30 @@ def measure(args: argparse.Namespace) -> int:
 
         timing = timing_summary(parsed)
 
-        if args.diagnostic:
-            if "diagnostic_mode=ENABLED" not in out:
-                raise InvalidMeasurement(
-                    "DIAGNOSTIC_CAPTURE_MISSING"
-                )
-            admission = {
-                "status": "N/A",
-                "reason": "diagnostic-instrumentation",
-            }
-        elif args.stage == "reference":
-            scope = timing_policy["admission_scope"]
-            admission = jvm_matrix.reference_admission(
-                timing["warmup_ns"], timing["steady_ns"]
-            )
+        if args.diagnostic and "diagnostic_mode=ENABLED" not in out:
+            raise InvalidMeasurement("DIAGNOSTIC_CAPTURE_MISSING")
 
-            if scope == "steady-only":
-                admission["status"] = admission["steady"]["status"]
+        # A reference selects the lowest observed steady sample. No
+        # convergence, dispersion or extreme-sample admission is required.
+        # All original samples remain in the retained summary and raw log.
+        selected_min = timing["steady_min_ns"]
+        timing["selection"] = {
+            "method": "minimum-observed-steady-v1",
+            "phase": "steady",
+            "sample_index": timing["steady_ns"].index(selected_min) + 1,
+            "elapsed_ns": selected_min,
+            "sample_calls": timing["sample_calls"],
+            "ns_per_call": timing["steady_amortized_min_ns_per_call"],
+            "convergence_required": False,
+        }
 
-            admission["scope"] = scope
-        else:
-            admission = {"status": "N/A", "reason": "smoke-stage"}
-
-        # Retain complete phase diagnostics, including extreme samples,
-        # before admission can reject this reference. Both accepted and
-        # invalid runs persist this same summary.
-        timing["admission"] = admission
         summary["timing"] = timing
-        emit("STEADY_P50_NS_PER_CALL", f"{timing['steady_amortized_p50_ns_per_call']:.3f}")
-        emit("STEADY_STATE_ADMISSION", admission["status"])
 
-        if (
-            args.stage == "reference"
-            and not args.diagnostic
-            and admission["status"] != "PASS"
-        ):
-            raise InvalidMeasurement("NOT_STEADY_STATE_ADMITTED")
+        emit(
+            "STEADY_MIN_NS_PER_CALL",
+            f"{timing['steady_amortized_min_ns_per_call']:.9f}",
+        )
+        emit("CONVERGENCE_REQUIRED", "NO")
 
         # 3. Optional profile: same checkout, adapter, workload and case.
         if jfr_policy is not None:
@@ -1756,6 +1934,7 @@ def measure(args: argparse.Namespace) -> int:
         if args.diagnostic_jit:
             emit("DIAGNOSTIC_JFR", final / "raw" / "jit-timeline.jfr")
             emit("JIT_TIMELINE", final / "jit-timeline.json")
+        emit_temperature(timing, args.temperature)
         emit("RESULT", final)
         return EXIT_OK
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -41,6 +42,7 @@ COMMANDS = (
     "cold-summarize",
     "image-status",
     "image-build",
+    "peer-prepare",
 )
 
 
@@ -209,6 +211,30 @@ def require_image(binary, image):
         )
 
 
+def image_identity(binary, image):
+    """Resolve the immutable ID of an already-present local image."""
+    result = subprocess.run(
+        [
+            binary, "image", "inspect",
+            "--format", "{{.Id}}", image,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False,
+    )
+
+    raw = result.stdout.strip().removeprefix("sha256:")
+
+    if result.returncode or not re.fullmatch(r"[0-9a-f]{64}", raw):
+        raise HarnessError(
+            f"IMAGE_ID_UNAVAILABLE: {image}. "
+            "Cannot identify the local image; measurement refused."
+        )
+
+    return "sha256:" + raw
+
+
 def product_directory(value):
     path = Path(value).expanduser().resolve()
     if not (path / "pom.xml").is_file():
@@ -219,7 +245,7 @@ def product_directory(value):
     return path
 
 
-def run_container(binary, image, product, arguments):
+def run_container(binary, image, product, arguments, *, allow_network=False):
     require_image(binary, image)
 
     cache = ROOT / ".work" / "runner-m2"
@@ -230,7 +256,7 @@ def run_container(binary, image, product, arguments):
         "run",
         "--rm",
         "--pull=never",
-        "--network=none",
+        *([] if allow_network else ["--network=none"]),
         "--userns=keep-id",
         "--volume",
         f"{ROOT}:{CONTAINER_ROOT}:rw",
@@ -257,6 +283,11 @@ def run_container(binary, image, product, arguments):
 
 
 def run_measurement(args, command):
+    if command == "correctness" and args.temperature != "hot":
+        raise HarnessError(
+            "--temperature is only applicable to timed measurements"
+        )
+
     selector = args.case or (
         "primitive-return-literal" if command == "smoke" else "all"
     )
@@ -270,11 +301,18 @@ def run_measurement(args, command):
 
     binary = podman_binary()
     require_image(binary, args.image)
+    runtime_image_id = image_identity(binary, args.image)
 
     product = (
         product_directory(args.product)
         if "protos" in languages else None
     )
+
+    requested_versions = {
+        "protos": args.protos_version,
+        "js": args.js_version,
+        "python": args.python_version,
+    }
 
     for workload in workloads:
         for language in languages:
@@ -289,6 +327,8 @@ def run_measurement(args, command):
                 "none" if command in ("smoke", "correctness")
                 else args.profile,
                 "--output", container_output(output),
+                "--container-image-id", runtime_image_id,
+                "--temperature", args.temperature,
             ]
 
             if language == "protos":
@@ -296,6 +336,10 @@ def run_measurement(args, command):
                     "--dir", CONTAINER_PRODUCT,
                     "--surface", args.surface,
                 ])
+
+            requested_version = requested_versions[language]
+            if requested_version is not None:
+                arguments.extend(["--version", requested_version])
 
             if args.cpu is not None:
                 arguments.extend(["--cpu", str(args.cpu)])
@@ -311,6 +355,51 @@ def run_measurement(args, command):
             )
             if code:
                 return code
+
+    return 0
+
+
+
+def run_peer_prepare(args):
+    """Explicit peer preparation; no benchmark execution."""
+    if args.language == "protos":
+        raise HarnessError(
+            "PEER_PREPARE_LANGUAGE: select js, python or all"
+        )
+
+    languages = (
+        ("js", "python") if args.language == "all"
+        else (args.language,)
+    )
+
+    binary = podman_binary()
+    require_image(binary, args.image)
+
+    for language in languages:
+        arguments = [
+            "harness/measure_protos.py",
+            "--prepare-peer",
+            "--language", language,
+        ]
+
+        version = (
+            args.js_version if language == "js"
+            else args.python_version
+        )
+
+        if version:
+            arguments.extend(["--version", version])
+
+        code = run_container(
+            binary,
+            args.image,
+            None,
+            arguments,
+            allow_network=True,
+        )
+
+        if code:
+            return code
 
     return 0
 
@@ -460,6 +549,16 @@ def parse_args(argv=None):
         default="none",
     )
     parser.add_argument("--surface", default="canonical")
+    parser.add_argument(
+        "--temperature",
+        choices=("cold", "hot", "both"),
+        default="hot",
+        help="cold: first guest call; hot: warmed steady samples; "
+        "both: report both observations from the same run",
+    )
+    parser.add_argument("--protos-version")
+    parser.add_argument("--js-version")
+    parser.add_argument("--python-version")
     parser.add_argument("--cpu", type=int)
     parser.add_argument("--output")
     parser.add_argument("--remeasure", action="store_true")
@@ -513,6 +612,9 @@ def main(argv=None):
                 cwd=ROOT,
                 check=False,
             ).returncode
+
+        if args.command == "peer-prepare":
+            return run_peer_prepare(args)
 
         if args.command in ("correctness", "measure", "smoke"):
             return run_measurement(args, args.command)

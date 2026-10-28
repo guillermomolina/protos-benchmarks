@@ -36,6 +36,20 @@ and producer source hashes, including `benchmark.py`. A dirty product
 checkout is not eligible for reference timing unless explicitly allowed
 for diagnostics.
 
+For timing captures, `benchmark.py` forwards the actual Linux host
+hostname into the isolated measurement driver. This avoids treating
+changing Podman container hostnames as different machines.
+
+The harness automatically derives a readable `machine_id` from the
+CPU model and a short SHA-256 hash of the host hostname. It exposes
+this label in timing metadata, timing summaries and command output.
+No manual machine configuration is required.
+
+`machine_id` is a descriptive label, not an additional result-key
+dimension. The existing host/CPU identity governs exact timing reuse:
+measurements from different identified hosts are not interchangeable.
+Graph structural keys and metrics are not partitioned by this label.
+
 ## Correctness before timing
 
 Before measuring a workload, run the same adapter and implementation in

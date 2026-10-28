@@ -53,6 +53,13 @@ implementation version, source/producer, immutable container image, Java,
 host/CPU, case and measurement policy identities match, unless
 remeasurement is explicitly requested.
 
+For timing results, the harness automatically derives a readable
+`machine_id` from the CPU model and a short hash of the real Linux host
+hostname. The label is exposed in timing metadata and summaries.
+The existing host/CPU identity prevents incompatible timing reuse,
+while Podman container hostnames do not create artificial differences.
+Graph structural measurements are not partitioned by `machine_id`.
+
 See [BENCHMARKING.md](BENCHMARKING.md) for the current methodology and
 `AGENTS.work/` for the binding measurement and reproducibility rules.
 

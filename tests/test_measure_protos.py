@@ -713,6 +713,112 @@ class DriverTest(unittest.TestCase):
         self.assertNotEqual(second["RESULT"], first["RESULT"])
         self.assertGreater(len(self.fakes.java_calls), previous_calls)
 
+    def test_machine_id_is_stable_across_cpu_and_kernel_changes(self):
+        host = {
+            "hostname": "chaca",
+            "cpu_model": "AMD Ryzen 9 7950X 16-Core Processor",
+            "cpu": 2,
+            "kernel": "kernel-a",
+        }
+        first = mp.machine_id(host)
+
+        host["cpu"] = 8
+        host["kernel"] = "kernel-b"
+
+        self.assertEqual(mp.machine_id(host), first)
+        self.assertTrue(
+            first.startswith("amd-ryzen-9-7950x-16-core-")
+        )
+        self.assertEqual(len(first.rsplit("-", 1)[1]), 8)
+
+    def test_machine_id_distinguishes_identical_cpus_on_different_hosts(self):
+        home = {
+            "hostname": "home",
+            "cpu_model": "AMD Ryzen 9 7950X",
+        }
+        work = {
+            "hostname": "work",
+            "cpu_model": "AMD Ryzen 9 7950X",
+        }
+        self.assertNotEqual(mp.machine_id(home), mp.machine_id(work))
+
+    def test_machine_id_is_exposed_in_timing_results(self):
+        code, lines = self.run_driver(
+            "--host-hostname", "home-workstation"
+        )
+
+        self.assertEqual(code, 0)
+        identifier = lines["MACHINE_ID"]
+
+        metadata = self.metadata(lines)
+        summary = json.loads(
+            (Path(lines["RESULT"]) / "summary.json").read_text()
+        )
+
+        self.assertEqual(metadata["machine_id"], identifier)
+        self.assertEqual(summary["machine_id"], identifier)
+        self.assertEqual(
+            metadata["result_key"]["host_identity"]["hostname"],
+            "home-workstation",
+        )
+        self.assertNotIn("machine_id", metadata["result_key"])
+
+    def test_real_host_identity_reuses_result_across_container_hostnames(self):
+        with mock.patch.object(
+            mp.platform, "node", return_value="container-one"
+        ):
+            code, first = self.run_driver(
+                "--host-hostname", "home-workstation"
+            )
+
+        self.assertEqual(code, 0)
+        previous_calls = len(self.fakes.java_calls)
+
+        with mock.patch.object(
+            mp.platform, "node", return_value="container-two"
+        ):
+            code, second = self.run_driver(
+                "--host-hostname", "home-workstation"
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(second["RESULT_ALREADY_EXISTS"], "YES")
+        self.assertEqual(second["RESULT"], first["RESULT"])
+        self.assertEqual(len(self.fakes.java_calls), previous_calls)
+        self.assertEqual(
+            second["MACHINE_ID"], first["MACHINE_ID"]
+        )
+
+    def test_different_hostnames_do_not_reuse_timing(self):
+        code, first = self.run_driver(
+            "--host-hostname", "home-workstation"
+        )
+        self.assertEqual(code, 0)
+        previous_calls = len(self.fakes.java_calls)
+
+        code, second = self.run_driver(
+            "--host-hostname", "work-workstation"
+        )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(second["RESULT_ALREADY_EXISTS"], "NO")
+        self.assertNotEqual(second["RESULT"], first["RESULT"])
+        self.assertGreater(len(self.fakes.java_calls), previous_calls)
+        self.assertNotEqual(first["MACHINE_ID"], second["MACHINE_ID"])
+
+    def test_correctness_only_has_no_machine_label(self):
+        code, lines = self.run_driver(
+            "--correctness-only",
+            "--host-hostname", "home-workstation",
+        )
+
+        self.assertEqual(code, 0)
+        self.assertNotIn("MACHINE_ID", lines)
+
+        metadata = self.metadata(lines)
+        self.assertNotIn("machine_id", metadata)
+        self.assertNotIn("machine_id", metadata["result_key"])
+
     def test_existing_result_requires_matching_host_identity(self):
         with mock.patch.object(
             mp, "host_identity", return_value={"cpu": 1}

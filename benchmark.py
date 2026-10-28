@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import re
 import shutil
 import subprocess
@@ -303,6 +304,12 @@ def run_measurement(args, command):
     require_image(binary, args.image)
     runtime_image_id = image_identity(binary, args.image)
 
+    host_hostname = platform.node().strip()
+    if not host_hostname:
+        raise HarnessError(
+            "HOST_ID_UNAVAILABLE: cannot determine the host hostname"
+        )
+
     product = (
         product_directory(args.product)
         if "protos" in languages else None
@@ -328,6 +335,7 @@ def run_measurement(args, command):
                 else args.profile,
                 "--output", container_output(output),
                 "--container-image-id", runtime_image_id,
+                "--host-hostname", host_hostname,
                 "--temperature", args.temperature,
             ]
 

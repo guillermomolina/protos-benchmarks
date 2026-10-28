@@ -455,6 +455,20 @@ def host_identity(cpu: int, siblings: list[int], allowed: list[int]) -> dict[str
     }
 
 
+def machine_id(host: dict[str, object]) -> str:
+    """Readable stable host label derived from already collected identity."""
+    model = str(host.get("cpu_model") or "unknown-cpu").lower()
+    model = model.replace("(r)", "").replace("(tm)", "")
+    slug = re.sub(r"[^a-z0-9]+", "-", model).strip("-")
+    slug = re.sub(r"-(cpu|processor)$", "", slug)
+    slug = (slug[:64].rstrip("-") or "unknown-cpu")
+
+    hostname = str(host.get("hostname") or "unknown-host").lower()
+    suffix = hashlib.sha256(hostname.encode("utf-8")).hexdigest()[:8]
+
+    return f"{slug}-{suffix}"
+
+
 # ---------------------------------------------------------------------------
 # Classpaths and adapter compilation
 
@@ -1121,6 +1135,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="immutable Podman image ID verified by the host launcher",
     )
     parser.add_argument(
+        "--host-hostname",
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
         "--remeasure",
         action="store_true",
         help="measure again even if an equivalent valid result exists; "
@@ -1222,6 +1240,14 @@ def measure(args: argparse.Namespace) -> int:
         raise UsageError(
             "--container-image-id must be a SHA-256 image identity"
         )
+
+    if args.host_hostname is not None and (
+        not args.host_hostname.strip()
+        or len(args.host_hostname) > 255
+        or "\n" in args.host_hostname
+        or "\r" in args.host_hostname
+    ):
+        raise UsageError("invalid host hostname")
 
     if args.correctness_only and args.temperature != "hot":
         raise UsageError(
@@ -1379,6 +1405,13 @@ def measure(args: argparse.Namespace) -> int:
     runtime_java = java_identity()
     runtime_host = host_identity(cpu, siblings, allowed)
 
+    # Podman's container hostname is not the Linux host identity.
+    # The host launcher passes the stable host hostname explicitly.
+    if args.host_hostname is not None:
+        runtime_host["hostname"] = args.host_hostname
+
+    current_machine_id = machine_id(runtime_host)
+
     result_key = {
         "language": language,
         "implementation_version": implementation_version,
@@ -1438,6 +1471,8 @@ def measure(args: argparse.Namespace) -> int:
     emit("WORKLOAD", args.workload)
     emit("STAGE", args.stage)
     emit("PROFILE", args.profile)
+    if not args.correctness_only:
+        emit("MACHINE_ID", current_machine_id)
     emit("HARNESS_GIT_HEAD", harness_before["git_head"])
     emit("HARNESS_DIRTY", "YES" if harness_before["dirty"] else "NO")
 
@@ -1498,6 +1533,10 @@ def measure(args: argparse.Namespace) -> int:
         "host": runtime_host,
     }
     summary: dict[str, object] = {"case": case, "expected_result": expected}
+
+    if not args.correctness_only:
+        metadata["machine_id"] = current_machine_id
+        summary["machine_id"] = current_machine_id
 
     if args.diagnostic_affinity:
         initial_cpus = (

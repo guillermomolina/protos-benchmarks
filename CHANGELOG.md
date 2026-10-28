@@ -6,6 +6,13 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Changed
 
+- Added automatic readable `machine_id` identification from the CPU
+  model and a short hash of the real Linux host hostname. Timing
+  metadata, summaries and command output expose this identifier.
+  The host entry point forwards the real hostname to the isolated
+  driver, avoiding Podman container-hostname drift. Existing host/CPU
+  identity continues to govern exact timing reuse; graph structural
+  measurements remain independent of the machine label.
 - Completed independent Protos/GraalJS/GraalPy version selection: Protos
   selectors are checked against the actual checkout, peer dependencies
   are selected by version, and result identity includes the selected

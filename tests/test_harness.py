@@ -183,6 +183,38 @@ class PodmanContractTest(unittest.TestCase):
         self.assertIn("--container-image-id", command)
         self.assertIn("sha256:" + "a" * 64, command)
 
+    def test_host_hostname_is_forwarded_to_measurement(self):
+        args = h.parse_args([
+            "measure",
+            "--case", "factorial",
+            "--language", "js",
+        ])
+
+        with (
+            mock.patch.object(
+                h, "podman_binary", return_value="podman"
+            ),
+            mock.patch.object(h, "require_image"),
+            mock.patch.object(
+                h, "image_identity",
+                return_value="sha256:" + "a" * 64,
+            ),
+            mock.patch.object(
+                h.platform, "node", return_value="home-workstation"
+            ),
+            mock.patch.object(
+                h, "run_container", return_value=0
+            ) as run,
+        ):
+            code = h.run_measurement(args, "measure")
+
+        self.assertEqual(code, 0)
+        command = run.call_args.args[3]
+        self.assertEqual(
+            command[command.index("--host-hostname") + 1],
+            "home-workstation",
+        )
+
     def test_versions_are_routed_per_language(self):
         args = h.parse_args([
             "measure",

@@ -1763,6 +1763,62 @@ class StructuralReportCommandTest(unittest.TestCase):
 
 
 
+
+class PeerRuntimeCompatibilityTest(unittest.TestCase):
+    @staticmethod
+    def runtime(**overrides):
+        result = {
+            "graalvm_version": "25.4.4.1.1",
+            "dependency_classpath_sha256": "a" * 64,
+            "protos_graalvm_version": "25.4.4.1.1",
+        }
+        result.update(overrides)
+        return result
+
+    def test_identical_runtime_is_compatible(self):
+        runtime = self.runtime()
+        self.assertTrue(
+            mg.compatible_peer_runtime(runtime, runtime)
+        )
+
+    def test_unrelated_protos_version_is_ignored(self):
+        first = self.runtime()
+        second = self.runtime(protos_graalvm_version=None)
+
+        self.assertTrue(
+            mg.compatible_peer_runtime(first, second)
+        )
+
+    def test_different_peer_version_is_rejected(self):
+        self.assertFalse(
+            mg.compatible_peer_runtime(
+                self.runtime(),
+                self.runtime(graalvm_version="25.0.0"),
+            )
+        )
+
+    def test_different_classpath_is_rejected(self):
+        self.assertFalse(
+            mg.compatible_peer_runtime(
+                self.runtime(),
+                self.runtime(
+                    dependency_classpath_sha256="b" * 64
+                ),
+            )
+        )
+
+    def test_missing_peer_identity_is_rejected(self):
+        self.assertFalse(
+            mg.compatible_peer_runtime(
+                self.runtime(),
+                {"protos_graalvm_version": None},
+            )
+        )
+        self.assertFalse(
+            mg.compatible_peer_runtime(None, None)
+        )
+
+
 class StructuralBytecodeAttributionTest(unittest.TestCase):
     def sample_group(self, root):
         return {

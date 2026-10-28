@@ -2103,6 +2103,25 @@ def compatible_bytecode_harness_hashes(
     )
 
 
+def compatible_peer_runtime(first, second):
+    """Compare the actual peer runtime, not unrelated Protos metadata."""
+    fields = (
+        "graalvm_version",
+        "dependency_classpath_sha256",
+    )
+
+    return (
+        isinstance(first, dict)
+        and isinstance(second, dict)
+        and all(
+            isinstance(first.get(field), str)
+            and bool(first[field])
+            and first[field] == second.get(field)
+            for field in fields
+        )
+    )
+
+
 def read_structural_bytecode(
     directory: Path,
     workload: str,
@@ -2430,8 +2449,9 @@ def read_structural_bytecode(
                     }
 
         else:
-            if graph.get("peer_runtime") != (
-                capture.get("peer_runtime")
+            if not compatible_peer_runtime(
+                graph.get("peer_runtime"),
+                capture.get("peer_runtime"),
             ):
                 return {
                     **result,

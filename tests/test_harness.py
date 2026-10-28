@@ -14,9 +14,9 @@ import unittest
 from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "truffle"))
+sys.path.insert(0, str(ROOT))
 
-import harness as h
+import benchmark as h
 
 
 class CatalogTest(unittest.TestCase):
@@ -99,7 +99,7 @@ class PodmanContractTest(unittest.TestCase):
                     "podman",
                     h.DEFAULT_IMAGE,
                     None,
-                    ["truffle/measure_protos.py", "--help"],
+                    ["harness/measure_protos.py", "--help"],
                 )
 
             self.assertEqual(code, 0)
@@ -191,7 +191,7 @@ class MakefileContractTest(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("HARNESS := truffle/harness.py", content)
+        self.assertIn("HARNESS := benchmark.py", content)
         self.assertNotIn("include docker/Makefile", content)
 
         for target in (
@@ -243,7 +243,7 @@ class ColdHostContractTest(unittest.TestCase):
         self.assertEqual(run.call_count, 1)
 
         command = run.call_args.args[3]
-        self.assertIn("truffle/measure_graphs.py", command)
+        self.assertIn("harness/measure_graphs.py", command)
         self.assertIn("cold", command)
         self.assertIn("--tier", command)
         self.assertIn("1", command)

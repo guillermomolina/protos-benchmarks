@@ -6,14 +6,14 @@ available from Git history, not from active executable entry points.
 
 ## Workloads and observable equivalence
 
-`truffle/workloads/catalog.json` owns the case identifiers, expected results,
+`cases/catalog.json` owns the case identifiers, expected results,
 and Protos/GraalJS/GraalPy sources. All three implementations must preserve
 the declared observable result and comparable logical operations. Differences
 between Protos message sends, JavaScript prototypes, and Python's object
 model must not be disguised as identical runtime mechanisms. Comparisons of
 one operation or workload must not be presented as whole-language rankings.
 
-The active surface definitions reside in `truffle/measure/cases.json`:
+The active surface definitions reside in `harness/policy/cases.json`:
 
 | Implementation | Surface | Timed operation |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ Raw output, failure reasons and measurement metadata are retained for review.
 
 ## Timing, warmup and instrumentation
 
-`truffle/measure/cases.json` defines the smoke/reference timing policies,
+`harness/policy/cases.json` defines the smoke/reference timing policies,
 warmup counts, steady samples, admission rules and JFR options. Smoke verifies
 the path cheaply; it is not accepted as reference performance evidence.
 Warmup and steady-state samples remain distinguishable. Reference admission
@@ -58,7 +58,7 @@ version-discriminated reuse matrix are still being finalized.
 
 ## Container and result boundaries
 
-`truffle/harness.py` is the single Linux-host entry point. It invokes Podman
+`benchmark.py` is the single Linux-host entry point. It invokes Podman
 without automatically pulling or building images. Use `make help` to inspect
 its current commands; `make validate` checks the catalog and policies without
 launching a JVM. Image preparation is always explicit.
@@ -73,9 +73,9 @@ results for a different version or host.
 
 ## Graph evidence
 
-`truffle/measure/graphs.json` defines compilation graph policy. The optional
-graph pipeline uses `truffle/measure_graphs.py`,
-`truffle/graph_evidence.py`, and the host-side Podman IGV analyzer. Graph
+`harness/policy/graphs.json` defines compilation graph policy. The optional
+graph pipeline uses `harness/measure_graphs.py`,
+`harness/graph_evidence.py`, and the host-side Podman IGV analyzer. Graph
 instrumentation does not produce timing results and must be evaluated
 separately. Captures, analyses and derived summaries retain their producer
 identities so that different revisions cannot be silently compared as one.

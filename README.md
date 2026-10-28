@@ -3,11 +3,11 @@
 Single GraalVM benchmarking harness for
 [Protos](https://github.com/guillermomolina/protos), GraalJS, and GraalPy.
 
-The host entry point is `truffle/harness.py`; the root `Makefile` forwards to
-it. The workload catalog is `truffle/workloads/catalog.json` (currently 17
+The host entry point is `benchmark.py`; the root `Makefile` forwards to
+it. The workload catalog is `cases/catalog.json` (currently 17
 cases, with one source file per implementation and case). The current adapters
 are Protos `canonical` and GraalJS/GraalPy `executable-value`, configured in
-`truffle/measure/cases.json`.
+`harness/policy/cases.json`.
 
 The old Docker, runner, PERF-specific and A/B harnesses are not part of this
 working tree. Their history remains recoverable in Git.
@@ -29,7 +29,7 @@ make validate
 For the complete command-line options:
 
 ```sh
-python3 truffle/harness.py --help
+python3 benchmark.py --help
 ```
 
 The harness supports correctness, smoke/reference timing, optional JFR
@@ -38,7 +38,7 @@ profiling, and graph capture/analysis through the explicit commands shown by
 `--language protos|js|python|all`, and the Protos checkout with `--product`.
 Outputs should be stored beneath the ignored `results/local/` directory.
 
-The GraalVM language dependency version is pinned in `truffle/pom.xml`.
+The GraalVM language dependency version is pinned in `harness/pom.xml`.
 Correctness must pass before any timing is accepted. Existing valid timing
 results may be reused unless remeasurement is explicitly requested.
 

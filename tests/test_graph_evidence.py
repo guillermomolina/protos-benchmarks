@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-"""Generic compiled-graph evidence logic (truffle/graph_evidence.py)."""
+"""Generic compiled-graph evidence logic (harness/graph_evidence.py)."""
 
 from __future__ import annotations
 
@@ -23,13 +23,13 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "truffle"))
+sys.path.insert(0, str(ROOT / "harness"))
 
 import graph_evidence as ge  # noqa: E402
 
-POLICY = json.loads((ROOT / "truffle" / "measure" / "graphs.json").read_text())
+POLICY = json.loads((ROOT / "harness" / "policy" / "graphs.json").read_text())
 FW = "org.graalvm.polyglot.Value<InteropBoundFunction>.execute"
-JS_SRC = "/w/truffle/workloads/primitive-closure-call/primitive-closure-call.mjs"
+JS_SRC = "/w/cases/primitive-closure-call/primitive-closure-call.mjs"
 
 # Verbatim GraalVM 25.4.4.1.1 records (PERF032-F discovery run, GraalPy label
 # with spaces and the `opt inval.` verb).

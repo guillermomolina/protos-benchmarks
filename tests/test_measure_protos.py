@@ -24,7 +24,7 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "truffle"))
+sys.path.insert(0, str(ROOT / "harness"))
 
 import measure_protos as mp  # noqa: E402
 
@@ -471,9 +471,9 @@ class DriverTest(unittest.TestCase):
         actual_dirty = bool(sh(ROOT, "status", "--porcelain", "--untracked-files=all"))
         self.assertEqual(metadata["harness_dirty"], actual_dirty)
         hashes = metadata["harness"]["source_sha256"]
-        self.assertEqual(hashes["truffle/measure_protos.py"], mp.sha256_file(ROOT / "truffle/measure_protos.py"))
-        self.assertIn("truffle/measure/surfaces/canonical/ProtosCanonicalSurface.java", hashes)
-        self.assertIn("truffle/measure/cases.json", hashes)
+        self.assertEqual(hashes["harness/measure_protos.py"], mp.sha256_file(ROOT / "harness/measure_protos.py"))
+        self.assertIn("harness/measure/surfaces/canonical/ProtosCanonicalSurface.java", hashes)
+        self.assertIn("harness/policy/cases.json", hashes)
 
     # L
     def test_harness_change_invalidates_batch(self):
@@ -499,6 +499,46 @@ class DriverTest(unittest.TestCase):
         _, third = self.run_driver("--remeasure")
         self.assertNotEqual(third["RESULT"], first["RESULT"])
         self.assertTrue((Path(first["RESULT"]) / "metadata.json").is_file())
+
+    def test_existing_result_requires_matching_harness_source(self):
+        _, first = self.run_driver()
+        metadata_path = Path(first["RESULT"]) / "metadata.json"
+
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        metadata["harness"]["source_sha256"] = {
+            "obsolete/producer.py": "0" * 64
+        }
+        metadata_path.write_text(
+            json.dumps(metadata) + "\n",
+            encoding="utf-8",
+        )
+
+        previous_calls = len(self.fakes.java_calls)
+        code, second = self.run_driver()
+
+        self.assertEqual(code, 0)
+        self.assertEqual(second["RESULT_ALREADY_EXISTS"], "NO")
+        self.assertNotEqual(second["RESULT"], first["RESULT"])
+        self.assertGreater(len(self.fakes.java_calls), previous_calls)
+
+    def test_existing_result_requires_matching_harness_revision(self):
+        _, first = self.run_driver()
+        metadata_path = Path(first["RESULT"]) / "metadata.json"
+
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        metadata["harness"]["git_head"] = "0" * 40
+        metadata_path.write_text(
+            json.dumps(metadata) + "\n",
+            encoding="utf-8",
+        )
+
+        previous_calls = len(self.fakes.java_calls)
+        code, second = self.run_driver()
+
+        self.assertEqual(code, 0)
+        self.assertEqual(second["RESULT_ALREADY_EXISTS"], "NO")
+        self.assertNotEqual(second["RESULT"], first["RESULT"])
+        self.assertGreater(len(self.fakes.java_calls), previous_calls)
 
     def test_invalid_result_is_not_reused(self):
         self.fakes.result = "2"
@@ -1451,7 +1491,7 @@ class StaticArchitectureTest(unittest.TestCase):
         )
 
     def test_canonical_adapter_timed_path(self):
-        text = (ROOT / "truffle/measure/surfaces/canonical/ProtosCanonicalSurface.java").read_text()
+        text = (ROOT / "harness/measure/surfaces/canonical/ProtosCanonicalSurface.java").read_text()
         body = text.split("public static void main", 1)[1]
         self.assertIn('context.getBindings("protos").getMember("run")', body)
         self.assertIn("new PolyglotResultInvocation(run)", body)
@@ -1461,7 +1501,7 @@ class StaticArchitectureTest(unittest.TestCase):
     def test_shared_polyglot_result_verification(self):
         shared = (
             ROOT
-            / "truffle/measure/surfaces/shared/"
+            / "harness/measure/surfaces/shared/"
             "PolyglotResultInvocation.java"
         ).read_text()
 
@@ -1475,7 +1515,7 @@ class StaticArchitectureTest(unittest.TestCase):
             "peer/PeerExecutableSurface.java",
         ):
             adapter = (
-                ROOT / "truffle/measure/surfaces" / relative
+                ROOT / "harness/measure/surfaces" / relative
             ).read_text()
 
             self.assertIn(
@@ -1504,18 +1544,18 @@ class StaticArchitectureTest(unittest.TestCase):
         )
 
     def test_no_reflection_in_adapters(self):
-        for path in (ROOT / "truffle/measure").rglob("*.java"):
+        for path in (ROOT / "harness/measure").rglob("*.java"):
             text = path.read_text()
             for forbidden in ("java.lang.reflect", "Method.invoke", "MethodHandle", "getMethod("):
                 self.assertNotIn(forbidden, text, path)
 
     def test_driver_has_no_history_machinery(self):
-        text = (ROOT / "truffle/measure_protos.py").read_text()
+        text = (ROOT / "harness/measure_protos.py").read_text()
         for forbidden in ('"checkout"', '"clone"', '"reset"', '"worktree"', '"fetch"', "protos-ab"):
             self.assertNotIn(forbidden, text)
 
     def test_measurement_code_has_no_work_item_branch(self):
-        paths = [ROOT / "truffle/measure_protos.py", *(ROOT / "truffle/measure").rglob("*.java")]
+        paths = [ROOT / "harness/measure_protos.py", *(ROOT / "harness/measure").rglob("*.java")]
         for path in paths:
             text = path.read_text().upper()
             self.assertNotRegex(text, r"PERF\d{3}", path)

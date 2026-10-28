@@ -21,12 +21,6 @@ name: igv-analyzer-image
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - truffle/igv-analyzer/**
-      - .github/workflows/igv-analyzer-image.yml
 
 permissions:
   contents: read
@@ -58,7 +52,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: truffle/igv-analyzer/Containerfile
+          file: harness/igv-analyzer/Containerfile
           push: true
           tags: |
             ${{ env.IMAGE }}:graal-${{ env.ANALYZER_GRAAL_VERSION }}

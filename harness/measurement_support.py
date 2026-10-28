@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TRUFFLE = ROOT / "truffle"
+HARNESS_DIR = ROOT / "harness"
 
 STABILITY_WINDOW = 5
 STABILITY_MEDIAN_DRIFT_PCT = 15.0
@@ -83,7 +83,7 @@ def project_properties(repo: Path) -> tuple[str, str]:
 
 
 def harness_graalvm_version() -> str:
-    pom = TRUFFLE / "pom.xml"
+    pom = HARNESS_DIR / "pom.xml"
     root = ET.parse(pom).getroot()
     namespace = ""
 
@@ -94,7 +94,7 @@ def harness_graalvm_version() -> str:
 
     if properties is None:
         raise RuntimeError(
-            "truffle/pom.xml has no properties"
+            "harness/pom.xml has no properties"
         )
 
     version = properties.findtext(

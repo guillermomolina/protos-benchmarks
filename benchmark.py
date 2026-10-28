@@ -15,8 +15,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-TRUFFLE = ROOT / "truffle"
+ROOT = Path(__file__).resolve().parent
+HARNESS_DIR = ROOT / "harness"
 RESULTS = ROOT / "results"
 CONTAINER_ROOT = "/workspaces/protos-benchmarks"
 CONTAINER_PRODUCT = "/workspaces/protos"
@@ -49,7 +49,7 @@ class HarnessError(Exception):
 
 
 def load_catalog():
-    path = TRUFFLE / "workloads" / "catalog.json"
+    path = ROOT / "cases" / "catalog.json"
     data = json.loads(path.read_text(encoding="utf-8"))
 
     if data.get("schema") != 1:
@@ -83,7 +83,7 @@ def load_catalog():
             )
 
         for language, relative in sources.items():
-            path = TRUFFLE / relative
+            path = ROOT / "cases" / relative
             if not path.is_file():
                 raise HarnessError(
                     f"Missing {language} source for {identifier}: {relative}"
@@ -96,12 +96,12 @@ def validate():
     data = load_catalog()
 
     cases = json.loads(
-        (TRUFFLE / "measure" / "cases.json").read_text(
+        (HARNESS_DIR / "policy" / "cases.json").read_text(
             encoding="utf-8"
         )
     )
     graphs = json.loads(
-        (TRUFFLE / "measure" / "graphs.json").read_text(
+        (HARNESS_DIR / "policy" / "graphs.json").read_text(
             encoding="utf-8"
         )
     )
@@ -279,7 +279,7 @@ def run_measurement(args, command):
     for workload in workloads:
         for language in languages:
             arguments = [
-                "truffle/measure_protos.py",
+                "harness/measure_protos.py",
                 "--language", language,
                 "--workload", workload,
                 "--stage",
@@ -351,7 +351,7 @@ def run_cold(args):
         )
 
         arguments = [
-            "truffle/measure_graphs.py",
+            "harness/measure_graphs.py",
             "cold",
             "--dir", CONTAINER_PRODUCT,
             "--output", container_output(output),
@@ -384,7 +384,7 @@ def run_cold(args):
     return subprocess.run(
         [
             sys.executable,
-            str(TRUFFLE / "measure_graphs.py"),
+            str(HARNESS_DIR / "measure_graphs.py"),
             operation,
             "--output", str(output),
         ],
@@ -408,7 +408,7 @@ def run_graphs(args):
         product = product_directory(args.product)
 
         arguments = [
-            "truffle/measure_graphs.py",
+            "harness/measure_graphs.py",
             "capture",
             "--dir", CONTAINER_PRODUCT,
             "--output", container_output(output),
@@ -431,7 +431,7 @@ def run_graphs(args):
 
     command = [
         sys.executable,
-        str(TRUFFLE / "measure_graphs.py"),
+        str(HARNESS_DIR / "measure_graphs.py"),
         action,
         "--output",
         str(output),
@@ -506,9 +506,9 @@ def main(argv=None):
                 [
                     binary, "build",
                     "--pull=missing",
-                    "--file", str(TRUFFLE / "Containerfile"),
+                    "--file", str(HARNESS_DIR / "Containerfile"),
                     "--tag", args.image,
-                    str(TRUFFLE),
+                    str(HARNESS_DIR),
                 ],
                 cwd=ROOT,
                 check=False,

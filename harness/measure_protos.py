@@ -22,8 +22,8 @@ Flow for one batch:
       -> re-verify product and harness identity
       -> atomically promote a staging directory into the output
 
-Surfaces, workloads and measurement policy are data (``measure/cases.json``
-and ``workloads/catalog.json``). A new Protos revision never requires editing
+Surfaces, workloads and measurement policy are data (``harness/policy/cases.json``
+and ``cases/catalog.json``). A new Protos revision never requires editing
 this file or any adapter source.
 """
 
@@ -48,8 +48,8 @@ import measurement_support as jvm_runtime
 import workload_catalog
 
 ROOT = Path(__file__).resolve().parent.parent
-TRUFFLE = ROOT / "truffle"
-CASES = TRUFFLE / "measure" / "cases.json"
+HARNESS_DIR = ROOT / "harness"
+CASES = HARNESS_DIR / "policy" / "cases.json"
 EMBEDDED_CACHE = ROOT / ".work" / "embedded"
 
 SCHEMA_VERSION = 1
@@ -356,17 +356,17 @@ def producer_files(
 ) -> list[Path]:
     files = [
         Path(__file__).resolve(),
-        TRUFFLE / "measurement_support.py",
-        TRUFFLE / "workload_catalog.py",
-        TRUFFLE / "workloads" / "catalog.json",
+        HARNESS_DIR / "measurement_support.py",
+        HARNESS_DIR / "workload_catalog.py",
+        ROOT / "cases" / "catalog.json",
         CASES,
-        *(TRUFFLE / item for item in cases["engine_sources"]),
-        *(TRUFFLE / item for item in surface_def["sources"]),
+        *(HARNESS_DIR / item for item in cases["engine_sources"]),
+        *(HARNESS_DIR / item for item in surface_def["sources"]),
         workload_catalog.source_for(workload, language),
     ]
 
     if surface_def["classpath"] == "peer":
-        files.append(TRUFFLE / "pom.xml")
+        files.append(HARNESS_DIR / "pom.xml")
 
     return sorted(set(path.resolve() for path in files))
 
@@ -595,14 +595,14 @@ def adapter_sources(
     surface_def: dict[str, object],
 ) -> list[Path]:
     return [
-        TRUFFLE / item
+        HARNESS_DIR / item
         for item in [*cases["engine_sources"], *surface_def["sources"]]
     ]
 
 
 def adapter_source_sha256(sources: list[Path]) -> str:
     return sha256_json(
-        {str(path.relative_to(TRUFFLE)): sha256_file(path) for path in sources}
+        {str(path.relative_to(HARNESS_DIR)): sha256_file(path) for path in sources}
     )
 
 
@@ -886,7 +886,7 @@ def prepare_output(output: Path) -> None:
 
     if not marker.is_file():
         marker.write_text(
-            "Created by truffle/measure_protos.py. "
+            "Created by harness/measure_protos.py. "
             "Each <case>/<run-id>/metadata.json is authoritative.\n",
             encoding="utf-8",
         )
@@ -896,7 +896,12 @@ def case_id(language: str, surface: str, workload: str, stage: str, profile: str
     return f"{language}-{surface}--{workload}--{stage}-{profile}"
 
 
-def find_existing(output: Path, case: str, result_key: dict[str, object]) -> Path | None:
+def find_existing(
+    output: Path,
+    case: str,
+    result_key: dict[str, object],
+    producer: dict[str, object],
+) -> Path | None:
     case_dir = output / case
 
     if not case_dir.is_dir():
@@ -913,9 +918,17 @@ def find_existing(output: Path, case: str, result_key: dict[str, object]) -> Pat
         except json.JSONDecodeError:
             continue
 
+        recorded_producer = metadata.get("harness")
+
+        if not isinstance(recorded_producer, dict):
+            continue
+
         if (
             metadata.get("measurement_valid") is True
             and metadata.get("result_key") == result_key
+            and recorded_producer.get("git_head") == producer["git_head"]
+            and recorded_producer.get("source_sha256")
+            == producer["source_sha256"]
         ):
             return run_dir
 
@@ -1192,12 +1205,12 @@ def measure(args: argparse.Namespace) -> int:
     if args.diagnostic:
         files = sorted(set([
             *files,
-            (TRUFFLE / "measure_diagnostics.py").resolve(),
+            (HARNESS_DIR / "measure_diagnostics.py").resolve(),
         ]))
     if args.diagnostic_jit:
         files = sorted(set([
             *files,
-            (TRUFFLE / "jit_timeline.py").resolve(),
+            (HARNESS_DIR / "jit_timeline.py").resolve(),
         ]))
     harness_before = harness_identity(files)
 
@@ -1241,7 +1254,7 @@ def measure(args: argparse.Namespace) -> int:
         case += "-jit"
     if args.diagnostic_affinity:
         case += "--affinity-" + args.diagnostic_affinity.lower()
-    existing = find_existing(output, case, result_key)
+    existing = find_existing(output, case, result_key, harness_before)
 
     emit("PRODUCT_DIRECTORY", product_dir or "-")
 

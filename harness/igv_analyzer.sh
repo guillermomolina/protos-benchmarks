@@ -26,13 +26,13 @@ export PODMAN_USERNS="${PODMAN_USERNS:-keep-id}"
 usage() {
     cat <<'USAGE'
 Usage:
-  truffle/igv_analyzer.sh pull
-  truffle/igv_analyzer.sh inspect <file.bgv> [protos-root:<16 lowercase hex>]
-  truffle/igv_analyzer.sh list <igvutil-list-args...>
-  truffle/igv_analyzer.sh filter <igvutil-filter-args...>
-  truffle/igv_analyzer.sh flatten <igvutil-flatten-args...>
-  truffle/igv_analyzer.sh smoke [sample.bgv]
-  truffle/igv_analyzer.sh build          (maintainer only)
+  harness/igv_analyzer.sh pull
+  harness/igv_analyzer.sh inspect <file.bgv> [protos-root:<16 lowercase hex>]
+  harness/igv_analyzer.sh list <igvutil-list-args...>
+  harness/igv_analyzer.sh filter <igvutil-filter-args...>
+  harness/igv_analyzer.sh flatten <igvutil-flatten-args...>
+  harness/igv_analyzer.sh smoke [sample.bgv]
+  harness/igv_analyzer.sh build          (maintainer only)
 
 Normal use runs the prebuilt, versioned analyzer image. `pull` is the one-time
 setup step and the only command that contacts a registry. inspect, list,
@@ -47,7 +47,7 @@ USAGE
 require_image() {
     "$PODMAN" image inspect "$IMAGE" >/dev/null 2>&1 || {
         echo "IGV analyzer image not present locally: $IMAGE" >&2
-        echo "Run once: truffle/igv_analyzer.sh pull" >&2
+        echo "Run once: harness/igv_analyzer.sh pull" >&2
         exit 4
     }
 }
@@ -57,7 +57,7 @@ command=${1:-}
 case "$command" in
     build)
         exec "$PODMAN" build \
-            --file "$ROOT/truffle/igv-analyzer/Containerfile" \
+            --file "$ROOT/harness/igv-analyzer/Containerfile" \
             --tag "$IMAGE" \
             "$ROOT"
         ;;

@@ -14,14 +14,14 @@ Three steps, so that capture and BGV analysis can run on different hosts:
 
     capture    (needs the product/peer JVM; no Podman)
         correctness PASS on the measured surface
-          -> natural-warmup budgets from truffle/measure/graphs.json, one fresh
+          -> natural-warmup budgets from harness/policy/graphs.json, one fresh
              JVM per budget with TraceCompilation + TraceInlining +
              TraceNodeExpansion + Dump=Truffle:1
           -> stop at the first two consecutive budgets with an identical
              trace-side signature (tier, graph count, per-unit structure)
           -> retain gzipped trace logs and the selected units' BGVs (gzipped);
              every other BGV is recorded by name/size/sha256 and discarded
-    analyze    (needs Podman: truffle/igv_analyzer.sh, the published
+    analyze    (needs Podman: harness/igv_analyzer.sh, the published
                 Graal 25.4.4.1.1 IgvUtility image; no second analyzer)
         IgvUtility filter of each retained BGV -> gzipped JSON next to it
     verify     producer hashes of every case vs working tree / HEAD
@@ -30,7 +30,7 @@ Three steps, so that capture and BGV analysis can run on different hosts:
         confirmation, per-case evidence units and the rung matrix
 
 Policy (phase, options, budgets, root identity, ladder) is data in
-``truffle/measure/graphs.json``; graph logic is ``graph_evidence.py``.
+``harness/policy/graphs.json``; graph logic is ``graph_evidence.py``.
 """
 
 from __future__ import annotations
@@ -51,9 +51,9 @@ import measure_protos as mp
 import workload_catalog
 
 ROOT = mp.ROOT
-TRUFFLE = mp.TRUFFLE
-POLICY = TRUFFLE / "measure" / "graphs.json"
-ANALYZER = TRUFFLE / "igv_analyzer.sh"
+HARNESS_DIR = mp.HARNESS_DIR
+POLICY = HARNESS_DIR / "policy" / "graphs.json"
+ANALYZER = HARNESS_DIR / "igv_analyzer.sh"
 SCHEMA_VERSION = 1
 LANGUAGES = ("protos", "js", "python")
 OUTPUT_MARKER = ".measure-graphs-output"
@@ -66,10 +66,10 @@ EVIDENCE_UNIT_DEFINITION = (
 )
 
 GRAPH_PRODUCER_FILES = (
-    TRUFFLE / "measure_graphs.py",
-    TRUFFLE / "graph_evidence.py",
+    HARNESS_DIR / "measure_graphs.py",
+    HARNESS_DIR / "graph_evidence.py",
     POLICY,
-    TRUFFLE / "compiler_trace.py",
+    HARNESS_DIR / "compiler_trace.py",
     ANALYZER,
 )
 
@@ -178,7 +178,7 @@ def prepare_output(output: Path) -> None:
 
     output.mkdir(parents=True, exist_ok=True)
     marker.write_text(
-        "Created by truffle/measure_graphs.py. "
+        "Created by harness/measure_graphs.py. "
         "<workload>/<language>/capture.json and unit.json are authoritative.\n",
         encoding="utf-8",
     )
@@ -521,7 +521,7 @@ def require_analysis_container_runtime() -> None:
 
 
 def analyze(args: argparse.Namespace) -> int:
-    """IgvUtility ``filter`` (through truffle/igv_analyzer.sh only) of every
+    """IgvUtility ``filter`` (through harness/igv_analyzer.sh only) of every
     retained BGV that has no analysis yet."""
     output = args.output.expanduser().resolve()
     failures = 0
@@ -589,7 +589,7 @@ def analyzer_identity() -> dict[str, str]:
         "UNKNOWN",
     )
     return {
-        "script": "truffle/igv_analyzer.sh",
+        "script": "harness/igv_analyzer.sh",
         "script_sha256": mp.sha256_file(ANALYZER),
         "graal_version": version,
         "image": os.environ.get(

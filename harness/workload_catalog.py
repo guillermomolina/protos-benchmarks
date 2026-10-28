@@ -20,8 +20,8 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-TRUFFLE = Path(__file__).resolve().parent
-CATALOG = TRUFFLE / "workloads" / "catalog.json"
+CASES_ROOT = Path(__file__).resolve().parent.parent / "cases"
+CATALOG = CASES_ROOT / "catalog.json"
 LANGUAGES = ("protos", "js", "python")
 
 
@@ -37,7 +37,7 @@ def catalog() -> dict[str, dict[str, object]]:
         raise RuntimeError("workload catalog must contain workloads")
 
     result: dict[str, dict[str, object]] = {}
-    truffle_root = TRUFFLE.resolve()
+    cases_root = CASES_ROOT.resolve()
 
     for entry in raw:
         if not isinstance(entry, dict):
@@ -84,13 +84,13 @@ def catalog() -> dict[str, dict[str, object]]:
                     f"{name}: missing source for {language}"
                 )
 
-            path = (TRUFFLE / relative).resolve()
+            path = (CASES_ROOT / relative).resolve()
 
             try:
-                path.relative_to(truffle_root)
+                path.relative_to(cases_root)
             except ValueError as exc:
                 raise RuntimeError(
-                    f"{name}/{language} escapes truffle root: {path}"
+                    f"{name}/{language} escapes cases root: {path}"
                 ) from exc
 
             if not path.is_file():

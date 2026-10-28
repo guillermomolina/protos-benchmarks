@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-"""Graph-parity driver (truffle/measure_graphs.py) without JVM or Docker:
+"""Graph-parity driver (harness/measure_graphs.py) without JVM or Docker:
 policy/catalog consistency, analyze through a fake analyzer script, and
 summarize from synthetic retained captures to the rung matrix."""
 
@@ -31,7 +31,7 @@ from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "truffle"))
+sys.path.insert(0, str(ROOT / "harness"))
 
 import measure_graphs as mg  # noqa: E402
 import measure_protos as mp  # noqa: E402
@@ -400,14 +400,14 @@ class VerifyTest(unittest.TestCase):
     def test_producer_mismatch_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)
-            good = "truffle/graph_evidence.py"
+            good = "harness/graph_evidence.py"
             mp.write_json(output / "w" / "js" / "capture.json", {"harness": {"source_sha256": {
-                good: mp.sha256_file(ROOT / good), "truffle/measure_graphs.py": "0" * 64}}})
+                good: mp.sha256_file(ROOT / good), "harness/measure_graphs.py": "0" * 64}}})
             out = io.StringIO()
             with contextlib.redirect_stdout(out):
                 code = mg.main(["verify", "--output", str(output)])
             self.assertEqual(1, code)
-            self.assertIn("WORKING_TREE_MISMATCH=truffle/measure_graphs.py", out.getvalue())
+            self.assertIn("WORKING_TREE_MISMATCH=harness/measure_graphs.py", out.getvalue())
             self.assertNotIn(f"WORKING_TREE_MISMATCH={good}", out.getvalue())
 
 

@@ -14,7 +14,7 @@
 # the specific language governing rights and limitations under the License.
 
 PYTHON ?= python3
-HARNESS := truffle/harness.py
+HARNESS := benchmark.py
 
 CASE ?= primitive-return-literal
 LANGUAGE ?= all

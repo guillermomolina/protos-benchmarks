@@ -10,9 +10,9 @@ Semantic firewall there.
 Reproducibility and measurement-evidence requirements (revision pinning,
 host/runtime identity, container/CPU control, raw-measurement retention) are
 governed separately by `AGENTS.work/REPRODUCIBILITY.md`; apply both together
-for any retained benchmark result. Detailed benchmark-by-benchmark
-methodology, exact commands, and per-item result narratives live in
-`BENCHMARKING.md`; this file holds the binding rule, not the full write-up.
+for any retained benchmark result. The current single-harness
+methodology and available command entry points are documented in
+`BENCHMARKING.md`; this file holds the binding rules.
 
 ## Correctness before timing
 

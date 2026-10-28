@@ -21,7 +21,7 @@ import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "igv_analyzer.sh"
+SCRIPT = ROOT / "truffle" / "igv_analyzer.sh"
 GRAAL_VERSION = "25.4.4.1.1"
 DEFAULT_IMAGE = (
     "ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-"
@@ -31,8 +31,8 @@ SELECTOR = "protos-root:0123456789abcdef"
 
 # Records every invocation; `image inspect` succeeds when FAKE_IMAGE_PRESENT=1;
 # `run` prints FAKE_LIST_OUTPUT and exits with FAKE_RUN_STATUS.
-FAKE_DOCKER = """#!/usr/bin/env bash
-printf '%s\\n' "$*" >>"$FAKE_DOCKER_LOG"
+FAKE_PODMAN = """#!/usr/bin/env bash
+printf '%s\\n' "$*" >>"$FAKE_PODMAN_LOG"
 case "$1" in
     image)
         [ "${FAKE_IMAGE_PRESENT:-1}" = 1 ]
@@ -60,7 +60,7 @@ class IgvAnalyzerWrapperTest(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.dir = pathlib.Path(self.tmp.name)
         self.docker = self.dir / "docker"
-        self.docker.write_text(FAKE_DOCKER, encoding="utf-8")
+        self.docker.write_text(FAKE_PODMAN, encoding="utf-8")
         self.docker.chmod(0o755)
         self.log = self.dir / "docker.log"
         self.log.write_text("", encoding="utf-8")
@@ -74,8 +74,8 @@ class IgvAnalyzerWrapperTest(unittest.TestCase):
                     run_status=0):
         env = dict(os.environ)
         env.pop("PROTOS_IGV_ANALYZER_IMAGE", None)
-        env["DOCKER"] = str(self.docker)
-        env["FAKE_DOCKER_LOG"] = str(self.log)
+        env["PODMAN"] = str(self.docker)
+        env["FAKE_PODMAN_LOG"] = str(self.log)
         env["FAKE_IMAGE_PRESENT"] = "1" if image_present else "0"
         env["FAKE_RUN_STATUS"] = str(run_status)
         if listing is not None:
@@ -168,7 +168,7 @@ class IgvAnalyzerWrapperTest(unittest.TestCase):
                                   listing=LISTING_WITH_ROOT,
                                   image_present=False)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("scripts/igv_analyzer.sh pull", result.stderr)
+        self.assertIn("truffle/igv_analyzer.sh pull", result.stderr)
         self.assertEqual(self.calls(), [f"image inspect {DEFAULT_IMAGE}"])
 
     def test_selector_match_and_after_truffle_tier_pass(self):
@@ -245,8 +245,8 @@ class IgvAnalyzerWrapperTest(unittest.TestCase):
 
     def test_image_override_is_preserved(self):
         env_image = "example.invalid/analyzer:test"
-        env = dict(os.environ, DOCKER=str(self.docker),
-                   FAKE_DOCKER_LOG=str(self.log),
+        env = dict(os.environ, PODMAN=str(self.docker),
+                   FAKE_PODMAN_LOG=str(self.log),
                    PROTOS_IGV_ANALYZER_IMAGE=env_image)
         subprocess.run([str(SCRIPT), "pull"], cwd=self.dir, env=env,
                        check=True, stdout=subprocess.PIPE)
@@ -256,7 +256,7 @@ class IgvAnalyzerWrapperTest(unittest.TestCase):
 class IgvAnalyzerContractTest(unittest.TestCase):
     def test_dockerfile_pins_current_toolchain(self):
         dockerfile = (
-            ROOT / "docker" / "igv-analyzer" / "Dockerfile"
+            ROOT / "truffle" / "igv-analyzer" / "Containerfile"
         ).read_text(encoding="utf-8")
 
         self.assertIn(
@@ -280,7 +280,7 @@ class IgvAnalyzerContractTest(unittest.TestCase):
 
     def test_dockerfile_selftests_real_upstream_bgv(self):
         dockerfile = (
-            ROOT / "docker" / "igv-analyzer" / "Dockerfile"
+            ROOT / "truffle" / "igv-analyzer" / "Containerfile"
         ).read_text(encoding="utf-8")
         self.assertIn("-name 'bigv-3.0.bgv'", dockerfile)
         self.assertIn("IgvUtility list fixture.bgv", dockerfile)
@@ -299,8 +299,8 @@ class IgvAnalyzerContractTest(unittest.TestCase):
         self.assertIn("workflow_dispatch:", workflow)
         self.assertIn("packages: write", workflow)
         self.assertIn("contents: read", workflow)
-        self.assertIn("docker/igv-analyzer/**", workflow)
-        self.assertIn("file: docker/igv-analyzer/Dockerfile", workflow)
+        self.assertIn("truffle/igv-analyzer/**", workflow)
+        self.assertIn("file: truffle/igv-analyzer/Containerfile", workflow)
         self.assertIn(
             "IMAGE: ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer",
             workflow,
@@ -309,32 +309,20 @@ class IgvAnalyzerContractTest(unittest.TestCase):
         self.assertNotIn("latest", workflow)
         self.assertNotIn("igv-analyzer24", workflow)
 
-    def test_default_and_historical_analyzers_are_explicit(self):
-        current_docker = ROOT / "docker" / "igv-analyzer"
-        historical_docker = ROOT / "docker" / "igv-analyzer24"
-        historical_script = ROOT / "scripts" / "igv_analyzer24.sh"
-
-        self.assertTrue(current_docker.is_dir())
+    def test_current_analyzer_is_in_truffle(self):
         self.assertTrue(SCRIPT.is_file())
-        self.assertTrue(historical_docker.is_dir())
-        self.assertTrue(historical_script.is_file())
+        self.assertTrue(
+            (ROOT / "truffle" / "igv-analyzer" / "Containerfile").is_file()
+        )
+        content = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("PODMAN=${PODMAN:-podman}", content)
+        self.assertNotIn("DOCKER", content)
 
-        current_text = SCRIPT.read_text(encoding="utf-8")
-        historical_text = historical_script.read_text(encoding="utf-8")
-
-        self.assertIn(f"graal-$ANALYZER_GRAAL_VERSION", current_text)
-        self.assertNotIn("graal-24.0.0", current_text)
-        self.assertNotIn("25.3.4.1", current_text)
-        self.assertIn("graal-24.0.0", historical_text)
-        self.assertIn("protos-benchmarks/igv-analyzer24:graal-24.0.0",
-                      historical_text)
 
     def test_analyzer_contract_has_no_machine_local_checkout_path(self):
         paths = (
-            ROOT / "docker" / "igv-analyzer" / "Dockerfile",
-            ROOT / "docker" / "igv-analyzer24" / "Dockerfile",
-            ROOT / "scripts" / "igv_analyzer.sh",
-            ROOT / "scripts" / "igv_analyzer24.sh",
+            ROOT / "truffle" / "igv-analyzer" / "Containerfile",
+            ROOT / "truffle" / "igv_analyzer.sh",
             ROOT / ".github" / "workflows" / "igv-analyzer-image.yml",
             ROOT / "BENCHMARKING.md",
         )

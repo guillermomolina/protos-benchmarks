@@ -1,54 +1,60 @@
 # Protos Benchmarks
 
-Reproducible performance benchmarking infrastructure for
-[Protos](https://github.com/guillermomolina/protos).
+Single GraalVM benchmarking harness for
+[Protos](https://github.com/guillermomolina/protos), GraalJS, and GraalPy.
 
-The repository contains several benchmark harnesses and retained experimental
-infrastructure rather than one benchmark implementation.
+The host entry point is `truffle/harness.py`; the root `Makefile` forwards to
+it. The workload catalog is `truffle/workloads/catalog.json` (currently 17
+cases, with one source file per implementation and case). The current adapters
+are Protos `canonical` and GraalJS/GraalPy `executable-value`, configured in
+`truffle/measure/cases.json`.
 
-## Harnesses
+The old Docker, runner, PERF-specific and A/B harnesses are not part of this
+working tree. Their history remains recoverable in Git.
 
-- [`truffle/`](truffle/) — reusable cross-Truffle benchmark harness for Protos,
-  GraalJS, and GraalPy.
-- [`docker/`](docker/) — historical container-based benchmark infrastructure
-  and compatibility entry points used by earlier PERF work.
-- [`runner/`](runner/), [`scripts/`](scripts/), [`config/`](config/),
-  [`workloads/`](workloads/), and [`results/`](results/) — retained shared and
-  historical benchmark infrastructure.
+## Running on the Linux host
 
-The root `Makefile` preserves the existing targets and delegates newer harnesses
-to their owning directories.
+Podman is the container runtime. The harness never implicitly pulls or builds
+an image during measurement. Image preparation is an explicit operation.
+Podman must be installed on the host; the measurement JVM and toolchain run
+inside the pinned runner image.
 
-## Current host-side Podman runner
-
-The cross-Truffle harness runs directly from a Linux host using Podman.
-Its standalone image provides Java, Maven, and the benchmark JVMs, so no
-VS Code Dev Container or host-installed JDK is required.
-
-Build the pinned image:
+Inspect the available commands and validate the catalog without a container:
 
 ```sh
-make -C truffle podman-build
+make help
+make validate
 ```
 
-Run a correctness smoke for the canonical Protos surface:
+For the complete command-line options:
 
 ```sh
-make -C truffle podman-measure LANGUAGE=protos WORKLOAD=primitive-return-literal STAGE=smoke PROFILE=none CPU=0 PODMAN_OUTPUT=results/local/podman-smoke/protos
+python3 truffle/harness.py --help
 ```
 
-Set `LANGUAGE=js` or `LANGUAGE=python` for the GraalJS and GraalPy peer
-surfaces. For Protos, the default product checkout is the sibling
-`protos-1` directory; an absolute `PROTOS_CHECKOUT` selects another checkout.
+The harness supports correctness, smoke/reference timing, optional JFR
+profiling, and graph capture/analysis through the explicit commands shown by
+`make help`. Select one case with `--case`, an implementation with
+`--language protos|js|python|all`, and the Protos checkout with `--product`.
+Outputs should be stored beneath the ignored `results/local/` directory.
 
-The image pins GraalVM CE 25.4.4.1.1 / JDK 25.0.4.1.1 and Maven 3.9.9.
-Maven dependencies persist in `.work/runner-m2`; outputs stay under
-`results/`. A dirty Protos checkout requires `ALLOW_DIRTY_PRODUCT=1`, and
-such a run is not reference-eligible. Smoke runs validate correctness and
-infrastructure, not steady-state performance.
+The GraalVM language dependency version is pinned in `truffle/pom.xml`.
+Correctness must pass before any timing is accepted. Existing valid timing
+results may be reused unless remeasurement is explicitly requested.
 
-See [BENCHMARKING.md](BENCHMARKING.md) for benchmark methodology and
-equivalence requirements.
+**Work in progress:** explicit cold-versus-hot selection and a complete
+implementation-version-aware no-repeat key are not yet finalized. The existing
+`smoke` and `reference` stages must not be confused with cold and hot runs.
+
+See [BENCHMARKING.md](BENCHMARKING.md) for the current methodology and
+`AGENTS.work/` for the binding measurement and reproducibility rules.
+
+## Retained evidence
+
+`results/peer-baselines/` preserves the current GraalJS and GraalPy baseline
+archive and its manifest. Historical PERF and graph experiment outputs have
+been removed from the working tree; their committed history remains available
+in Git. Local and newly generated results are not affected by that cleanup.
 
 ## License
 

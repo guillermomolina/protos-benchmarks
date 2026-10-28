@@ -43,8 +43,8 @@ import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-import jvm_matrix
-import jvm_runtime
+import measurement_support as jvm_matrix
+import measurement_support as jvm_runtime
 import workload_catalog
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -356,8 +356,7 @@ def producer_files(
 ) -> list[Path]:
     files = [
         Path(__file__).resolve(),
-        TRUFFLE / "jvm_matrix.py",
-        TRUFFLE / "jvm_runtime.py",
+        TRUFFLE / "measurement_support.py",
         TRUFFLE / "workload_catalog.py",
         TRUFFLE / "workloads" / "catalog.json",
         CASES,
@@ -1001,12 +1000,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--surface",
-        help="Protos surface (dynamic, prepared, canonical); "
-        "peers always use executable-value",
+        help="Protos uses canonical; "
+        "GraalJS and GraalPy use executable-value",
     )
     parser.add_argument("--workload")
     parser.add_argument("--stage", default="reference", choices=STAGES)
     parser.add_argument("--profile", default="none", choices=PROFILES)
+    parser.add_argument("--correctness-only", action="store_true")
     parser.add_argument("--cpu", type=int)
     parser.add_argument(
         "--diagnostic",
@@ -1074,6 +1074,17 @@ def main(argv: list[str] | None = None) -> int:
 def measure(args: argparse.Namespace) -> int:
     if args.output is None or args.workload is None:
         raise UsageError("--output and --workload are required")
+
+    if args.correctness_only and (
+        args.profile != "none"
+        or args.diagnostic
+        or args.diagnostic_jit
+        or args.diagnostic_affinity
+        or args.jvm_option
+    ):
+        raise UsageError(
+            "--correctness-only cannot be combined with profiling or diagnostics"
+        )
 
     if args.diagnostic and args.profile != "none":
         raise UsageError("--diagnostic requires --profile none")
@@ -1205,6 +1216,9 @@ def measure(args: argparse.Namespace) -> int:
         "diagnostic_jvm_options": list(args.jvm_option),
     }
 
+    if args.correctness_only:
+        result_key["operation"] = "correctness-only"
+
     if surface in ("canonical", "executable-value"):
         result_key["verification_protocol"] = "polyglot-typed-v1"
 
@@ -1219,6 +1233,8 @@ def measure(args: argparse.Namespace) -> int:
 
     prepare_output(output)
     case = case_id(language, surface, args.workload, args.stage, args.profile)
+    if args.correctness_only:
+        case += "--correctness"
     if args.diagnostic:
         case += "--diagnostic"
     if args.diagnostic_jit:
@@ -1347,6 +1363,50 @@ def measure(args: argparse.Namespace) -> int:
             raise InvalidMeasurement(
                 "CORRECTNESS_FAILED", f"expected {expected}, got {actual!r}"
             )
+
+        if args.correctness_only:
+            metadata["measurement_kind"] = "correctness-only"
+            metadata["reference_eligible"] = False
+            metadata["timing_performed"] = False
+            summary["correctness"] = metadata["correctness"]
+
+            if product_dir is not None:
+                product_after = product_identity(product_dir)
+                metadata["product_after"] = product_after
+                changed = compare_product(product_before, product_after)
+
+                if language == "protos":
+                    classes_after = jvm_runtime.sha256_tree(classes)
+                    if classes_after != metadata["product_classes_sha256"]:
+                        changed.append("product_classes_sha256")
+
+                if changed:
+                    raise InvalidMeasurement(
+                        "PRODUCT_CHANGED_DURING_CORRECTNESS",
+                        ",".join(changed),
+                    )
+
+            harness_after = producer_hashes(files)
+            metadata["harness_after_source_sha256"] = harness_after
+
+            if harness_after != harness_before["source_sha256"]:
+                raise InvalidMeasurement(
+                    "HARNESS_CHANGED_DURING_CORRECTNESS"
+                )
+
+            metadata["measurement_finished"] = utc_now().isoformat()
+            metadata["measurement_valid"] = True
+            summary["measurement_valid"] = True
+
+            write_json(staging / "summary.json", summary)
+            write_json(staging / "metadata.json", metadata)
+
+            final = promote(staging, output / case / run_id)
+            emit("TIMING_PERFORMED", "NO")
+            emit("MEASUREMENT_VALID", "YES")
+            emit("REFERENCE_ELIGIBLE", "NO")
+            emit("RESULT", final)
+            return EXIT_OK
 
         # 2. Timing. Explicit diagnostics use a separate result identity.
         timing_jvm_options = list(args.jvm_option)

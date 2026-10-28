@@ -12,7 +12,7 @@ steady prepared ``Value.execute()`` operation. It never produces timing.
 
 Three steps, so that capture and BGV analysis can run on different hosts:
 
-    capture    (needs the product/peer JVM; no Docker)
+    capture    (needs the product/peer JVM; no Podman)
         correctness PASS on the measured surface
           -> natural-warmup budgets from truffle/measure/graphs.json, one fresh
              JVM per budget with TraceCompilation + TraceInlining +
@@ -21,7 +21,7 @@ Three steps, so that capture and BGV analysis can run on different hosts:
              trace-side signature (tier, graph count, per-unit structure)
           -> retain gzipped trace logs and the selected units' BGVs (gzipped);
              every other BGV is recorded by name/size/sha256 and discarded
-    analyze    (needs Docker: scripts/igv_analyzer.sh, the published
+    analyze    (needs Podman: truffle/igv_analyzer.sh, the published
                 Graal 25.4.4.1.1 IgvUtility image; no second analyzer)
         IgvUtility filter of each retained BGV -> gzipped JSON next to it
     verify     producer hashes of every case vs working tree / HEAD
@@ -46,7 +46,6 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-import graph_cache
 import graph_evidence as ge
 import measure_protos as mp
 import workload_catalog
@@ -54,7 +53,7 @@ import workload_catalog
 ROOT = mp.ROOT
 TRUFFLE = mp.TRUFFLE
 POLICY = TRUFFLE / "measure" / "graphs.json"
-ANALYZER = ROOT / "scripts" / "igv_analyzer.sh"
+ANALYZER = TRUFFLE / "igv_analyzer.sh"
 SCHEMA_VERSION = 1
 LANGUAGES = ("protos", "js", "python")
 OUTPUT_MARKER = ".measure-graphs-output"
@@ -69,9 +68,8 @@ EVIDENCE_UNIT_DEFINITION = (
 GRAPH_PRODUCER_FILES = (
     TRUFFLE / "measure_graphs.py",
     TRUFFLE / "graph_evidence.py",
-    TRUFFLE / "graph_cache.py",
     POLICY,
-    ROOT / "runner" / "compiler_trace.py",
+    TRUFFLE / "compiler_trace.py",
     ANALYZER,
 )
 
@@ -227,16 +225,6 @@ def capture_case(
     )
 
     existing = destination / "capture.json"
-    existing_ref = destination / graph_cache.REFERENCE_NAME
-
-    if existing_ref.is_file() and not args.remeasure:
-        referenced_dir, referenced, _ = graph_cache.resolve_reference(
-            ROOT, existing_ref
-        )
-        reference = json.loads(existing_ref.read_text(encoding="utf-8"))
-        if reference["cache_key"] == key:
-            mp.emit("CASE", f"{workload}/{language} EXISTS HISTORICAL")
-            return referenced
 
     if existing.is_file() and not args.remeasure:
         previous = json.loads(existing.read_text(encoding="utf-8"))
@@ -248,47 +236,6 @@ def capture_case(
         raise mp.UsageError(
             f"case destination already contains different evidence: {destination}"
         )
-
-    if args.stage == "reference" and not args.remeasure:
-        candidates = [
-            path for path in args.historical_captures
-            if path.parent.name == language
-            and path.parent.parent.name == workload
-        ]
-        if candidates:
-            adapter_hash = mp.adapter_source_sha256(
-                mp.adapter_sources(cases, surface_def)
-            )
-            cpu, siblings, allowed = mp.choose_cpu(args.cpu)
-            current_host = mp.host_identity(cpu, siblings, allowed)
-            peer_hash = None
-            if language != "protos":
-                if not hasattr(args, "peer_classpath_hash"):
-                    _, peer_cp = mp.peer_classpath()
-                    args.peer_classpath_hash = mp.sha256_bytes(
-                        peer_cp.encode("utf-8")
-                    )
-                peer_hash = args.peer_classpath_hash
-
-            found = graph_cache.find(
-                ROOT, output, candidates, key, adapter_hash,
-                current_host, peer_hash,
-            )
-            if found is not None:
-                historical_dir, historical, historical_unit = found
-                historical_dir = graph_cache.publishable_source(
-                    ROOT, historical_dir, historical, historical_unit
-                )
-                destination.mkdir(parents=True, exist_ok=True)
-                reference = graph_cache.make_reference(
-                    ROOT, historical_dir, historical, key
-                )
-                mp.write_json(existing_ref, reference)
-                mp.emit(
-                    "CASE",
-                    f"{workload}/{language} REUSED {reference['source']}",
-                )
-                return historical
 
     staging = output / ".staging" / f"{workload}--{language}"
     shutil.rmtree(staging, ignore_errors=True)
@@ -529,10 +476,6 @@ def capture(args: argparse.Namespace) -> int:
     cases = mp.load_cases()
     output = args.output.expanduser().resolve()
     prepare_output(output)
-    args.historical_captures = (
-        graph_cache.historical_candidates(ROOT)
-        if args.stage == "reference" and not args.remeasure else []
-    )
     invalid = 0
 
     for workload in select_workloads(policy, args.workload):
@@ -549,50 +492,36 @@ def capture(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
-# analyze (Docker host)
+# analyze (Podman host)
 
 
 def iter_cases(output: Path):
     for directory in sorted(output.glob("*/*")):
         if not directory.is_dir():
             continue
-        capture_file = directory / "capture.json"
-        reference_file = directory / graph_cache.REFERENCE_NAME
-        if capture_file.is_file() and reference_file.is_file():
-            raise mp.UsageError(f"ambiguous case evidence: {directory}")
-        if capture_file.is_file():
-            yield directory, json.loads(capture_file.read_text(encoding="utf-8"))
-        elif reference_file.is_file():
-            source, metadata, _ = graph_cache.resolve_reference(
-                ROOT, reference_file
-            )
-            yield source, metadata
 
+        capture_file = directory / "capture.json"
+
+        if capture_file.is_file():
+            yield directory, json.loads(
+                capture_file.read_text(encoding="utf-8")
+            )
 
 
 def require_analysis_container_runtime() -> None:
-    """Fail with actionable guidance before invoking the IGV analyzer."""
-    configured = os.environ.get("DOCKER", "").strip()
+    """Require host-side Podman without installing or pulling anything."""
+    binary = os.environ.get("PODMAN", "").strip() or "podman"
 
-    if configured:
-        available = shutil.which(configured)
-        requested = f"DOCKER={configured}"
-    else:
-        available = shutil.which("podman") or shutil.which("docker")
-        requested = "podman or docker"
-
-    if available is None:
+    if shutil.which(binary) is None:
         raise mp.UsageError(
-            f"CONTAINER_RUNTIME_NOT_FOUND: {requested} is unavailable. "
-            "Run graph analysis outside the devcontainer, on the host "
-            "with Docker or Podman installed and access to the results "
-            "directory. Capture, summarize and verify do not require "
-            "a container runtime."
+            f"CONTAINER_RUNTIME_NOT_FOUND: {binary} is unavailable. "
+            "Run graph analysis on the Linux host with Podman installed. "
+            "Capture, summarize and verify do not need Podman."
         )
 
 
 def analyze(args: argparse.Namespace) -> int:
-    """IgvUtility ``filter`` (through scripts/igv_analyzer.sh only) of every
+    """IgvUtility ``filter`` (through truffle/igv_analyzer.sh only) of every
     retained BGV that has no analysis yet."""
     output = args.output.expanduser().resolve()
     failures = 0
@@ -660,7 +589,7 @@ def analyzer_identity() -> dict[str, str]:
         "UNKNOWN",
     )
     return {
-        "script": "scripts/igv_analyzer.sh",
+        "script": "truffle/igv_analyzer.sh",
         "script_sha256": mp.sha256_file(ANALYZER),
         "graal_version": version,
         "image": os.environ.get(
@@ -938,6 +867,514 @@ def verify(args: argparse.Namespace) -> int:
     return mp.EXIT_OK if cases and not working_mismatch else mp.EXIT_INVALID
 
 
+def cold_capture(args: argparse.Namespace) -> int:
+    """One selected compilation in a fresh JVM, never a timing reference."""
+    policy = load_policy()
+    cases = mp.load_cases()
+
+    if args.workload not in workload_catalog.workload_ids():
+        raise mp.UsageError(f"unknown workload: {args.workload}")
+
+    if args.language not in LANGUAGES:
+        raise mp.UsageError(f"unknown language: {args.language}")
+
+    product_dir = args.dir.expanduser().resolve()
+    output = args.output.expanduser().resolve()
+    prepare_output(output)
+
+    destination = case_dir(output, args.workload, args.language)
+
+    if destination.exists():
+        raise mp.UsageError(
+            f"cold capture already exists: {destination}. "
+            "Choose another output directory; existing evidence is preserved."
+        )
+
+    language_policy = policy["languages"][args.language]
+    surface = language_policy["surface"]
+    surface_def = mp.surface_definition(cases, surface)
+    source = workload_catalog.source_for(
+        args.workload, args.language
+    )
+    expected = workload_catalog.expected_result(args.workload)
+
+    product_before = mp.product_identity(product_dir)
+    if not product_before["clean"]:
+        raise mp.UsageError(
+            "cold compilation requires a clean Protos checkout"
+        )
+
+    files = sorted(
+        set(mp.producer_files(
+            cases, surface_def, args.workload, args.language
+        ))
+        | {path.resolve() for path in GRAPH_PRODUCER_FILES}
+    )
+
+    harness_before = mp.harness_identity(files)
+    java = mp.java_identity()
+    cpu, siblings, allowed = mp.choose_cpu(args.cpu)
+
+    staging_root = output / ".staging"
+    staging_root.mkdir(parents=True, exist_ok=True)
+
+    staging = Path(tempfile.mkdtemp(
+        prefix="cold-capture-", dir=staging_root
+    ))
+    raw = staging / "raw"
+    raw.mkdir()
+
+    key = {
+        **graph_capture_key(
+            policy,
+            product_before,
+            args.language,
+            surface,
+            args.workload,
+            "smoke",
+            java,
+        ),
+        "capture_mode": "cold-single-compilation-v1",
+        "requested_tier": args.tier,
+        "requested_root": args.root,
+        "warmup_calls": args.warmup_calls,
+        "invocations": args.invocations,
+        "first_tier_threshold": args.first_threshold,
+        "last_tier_threshold": args.last_threshold,
+        "extra_jvm_options": list(args.jvm_option),
+    }
+
+    metadata: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "mode": "cold-compilation",
+        "capture_valid": False,
+        "capture_key": key,
+        "capture_started": mp.utc_now().isoformat(),
+        "language": args.language,
+        "workload": args.workload,
+        "surface": surface,
+        "expected_result": expected,
+        "protos_revision": product_before["revision"],
+        "product_before": product_before,
+        "harness": harness_before,
+        "java": java,
+        "host": mp.host_identity(cpu, siblings, allowed),
+        "selected_phase": policy["selected_phase"],
+        "requested_tier": args.tier,
+        "requested_root": args.root,
+        "timing_evidence": "NONE",
+        "timing_explanation": (
+            "Compilation instrumentation changes execution cost; "
+            "sample timings are not benchmark measurements."
+        ),
+    }
+
+    try:
+        runtime = mp.prepare_surface_runtime(
+            cases,
+            surface,
+            surface_def,
+            args.language,
+            product_dir,
+            product_before,
+            metadata,
+            raw,
+        )
+
+        correctness_command = mp.java_command(
+            runtime["runtime_cp"],
+            runtime["main_class"],
+            runtime["system_properties"],
+            [],
+            [
+                "correctness",
+                runtime["core_arg"],
+                str(source),
+            ],
+            None,
+        )
+
+        correctness_code, correctness_output = mp.run_logged(
+            correctness_command,
+            raw / "correctness.log",
+        )
+
+        actual = (
+            mp.output_result(correctness_output)
+            if correctness_code == 0 else None
+        )
+
+        metadata["correctness"] = {
+            "result": "PASS" if actual == expected else "FAIL",
+            "actual": actual,
+            "exit_code": correctness_code,
+        }
+
+        if actual != expected:
+            raise mp.InvalidMeasurement(
+                "CORRECTNESS_FAILED",
+                f"expected {expected}, got {actual!r}",
+            )
+
+        workdir = raw / "cold-jvm"
+        dumps = workdir / "dumps"
+        dumps.mkdir(parents=True)
+
+        options = cold_jvm_options(
+            policy,
+            args.tier,
+            args.first_threshold,
+            args.last_threshold,
+            dumps,
+            tuple(args.jvm_option),
+        )
+
+        invocation_args, sequence = cold_invocation_arguments(
+            runtime["core_arg"],
+            source,
+            args.warmup_calls,
+            args.invocations,
+        )
+
+        metadata["invocation_sequence"] = sequence
+        metadata["graph_jvm_options"] = options
+        metadata["fresh_jvm"] = True
+        metadata["correctness_uses_separate_jvm"] = True
+
+        command = mp.java_command(
+            runtime["runtime_cp"],
+            runtime["main_class"],
+            runtime["system_properties"],
+            options,
+            invocation_args,
+            cpu,
+        )
+
+        trace_log = workdir / "trace.log"
+        code, output_text = mp.run_logged(command, trace_log)
+
+        if code != 0 or mp.output_result(output_text) != expected:
+            raise mp.InvalidMeasurement(
+                "COLD_JVM_RUN_FAILED",
+                f"exit_code={code}",
+            )
+
+        parsed = ge.parse_trace(output_text)
+
+        resolution = None
+        if args.root == "primary":
+            resolution = ge.resolve_units(
+                parsed, policy, language_policy, str(source)
+            )
+
+        selected = ge.select_tier_compilation(
+            parsed,
+            args.tier,
+            args.root,
+            resolution,
+        )
+
+        bgv_names = sorted(
+            path.name for path in dumps.glob("*.bgv")
+        )
+        matched = ge.dumps_for(
+            selected["comp_id"], bgv_names
+        )
+
+        if len(matched) != 1:
+            raise ge.EvidenceError(
+                "BGV_NOT_UNIQUE_FOR_COMPILATION",
+                {
+                    "comp_id": selected["comp_id"],
+                    "matching_bgv": matched,
+                },
+            )
+
+        unit = {
+            "role": (
+                "primary" if args.root == "primary"
+                else "selected"
+            ),
+            "target": selected["target"],
+            "label": selected["label"],
+            "via": None,
+            "edge": None,
+            "tier": selected["tier"],
+            "comp_id": selected["comp_id"],
+            "src": selected.get("src"),
+            "superseded_comp_ids": [],
+            "other_compilation_ids": selected["other_compilation_ids"],
+            "ir_after_truffle_tier": selected["ir_after_truffle_tier"],
+            "ir_final": selected["ir_final"],
+            "compilation_time_ms": selected["compilation_time_ms"],
+            "truffle_compilation_ms": selected["truffle_compilation_ms"],
+            "graal_compilation_ms": selected["graal_compilation_ms"],
+            "machine_code_bytes": selected["machine_code_bytes"],
+            "ast_nodes": selected["ast_nodes"],
+            "inlined": [
+                item["label"]
+                for item in selected.get("inline_tree") or []
+                if item["verb"] == "Inlined"
+            ],
+            "expansion_truffle_tier": (
+                selected.get("expansion") or {}
+            ).get("root"),
+            "attribution": ge.expansion_attribution(
+                parsed, selected["comp_id"]
+            ),
+            "bgv": matched,
+        }
+
+        run = {
+            "budget": args.invocations,
+            "calls": sequence["total_measured_invocations"],
+            "result": expected,
+            "exit_code": code,
+            "trace_log_sha256": mp.sha256_file(trace_log),
+            "resolution": {"units": [unit]},
+            "compilation_count": len(parsed["compilations"]),
+            "failure_count": len(parsed["failures"]),
+            "invalidation_count": len(parsed["invalidations"]),
+            "dump_inventory": [
+                {
+                    "name": name,
+                    "bytes": (dumps / name).stat().st_size,
+                    "sha256": mp.sha256_file(dumps / name),
+                }
+                for name in bgv_names
+            ],
+            "workdir": workdir,
+        }
+
+        retain_runs(
+            [run],
+            {"pair": [args.invocations]},
+            staging,
+        )
+
+        metadata["runs"] = [{
+            key_: value
+            for key_, value in run.items()
+            if key_ != "workdir"
+        }]
+
+        metadata["selected_compilation"] = {
+            "root": selected["root"],
+            "tier": selected["observed_tier"],
+            "comp_id": selected["comp_id"],
+            "compilation_time_ms": selected["compilation_time_ms"],
+            "ir_initial": selected["ir_after_truffle_tier"],
+            "ir_final": selected["ir_final"],
+            "machine_code_bytes": selected["machine_code_bytes"],
+            "bgv": matched[0],
+        }
+
+        product_after = mp.product_identity(product_dir)
+        metadata["product_after"] = product_after
+
+        changed = mp.compare_product(
+            product_before, product_after
+        )
+
+        if changed:
+            raise mp.InvalidMeasurement(
+                "PRODUCT_CHANGED_DURING_CAPTURE",
+                ",".join(changed),
+            )
+
+        harness_after = mp.producer_hashes(files)
+        metadata["harness_after_source_sha256"] = harness_after
+
+        if harness_after != harness_before["source_sha256"]:
+            raise mp.InvalidMeasurement(
+                "HARNESS_CHANGED_DURING_CAPTURE"
+            )
+
+        metadata["capture_valid"] = True
+
+    except (mp.InvalidMeasurement, ge.EvidenceError) as exc:
+        metadata["capture_valid"] = False
+        metadata["invalid_reason"] = exc.reason
+        detail = exc.detail
+        metadata["invalid_detail"] = (
+            detail if isinstance(detail, str)
+            else json.dumps(detail)
+        )
+
+    metadata["capture_finished"] = mp.utc_now().isoformat()
+    mp.write_json(staging / "capture.json", metadata)
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    staging.rename(destination)
+
+    mp.emit(
+        "COLD_CAPTURE_VALID",
+        "YES" if metadata["capture_valid"] else "NO",
+    )
+    mp.emit("COLD_CAPTURE", destination)
+
+    if metadata["capture_valid"]:
+        mp.emit(
+            "OBSERVED_TIER",
+            metadata["selected_compilation"]["tier"],
+        )
+        mp.emit(
+            "COMP_ID",
+            metadata["selected_compilation"]["comp_id"],
+        )
+        return mp.EXIT_OK
+
+    mp.emit("INVALID_REASON", metadata["invalid_reason"])
+    return mp.EXIT_INVALID
+
+
+def cold_summarize(args: argparse.Namespace) -> int:
+    """Summarize exactly one selected BGV phase per compilation."""
+    output = args.output.expanduser().resolve()
+    failures = 0
+    completed = 0
+
+    for directory, metadata in iter_cases(output):
+        if metadata.get("mode") != "cold-compilation":
+            continue
+
+        if not metadata.get("capture_valid"):
+            failures += 1
+            mp.emit("COLD_SUMMARY_INVALID", directory)
+            continue
+
+        try:
+            runs = metadata["runs"]
+            if len(runs) != 1:
+                raise ge.EvidenceError(
+                    "COLD_RUN_COUNT_INVALID"
+                )
+
+            units = unit_graphs(
+                directory,
+                runs[0],
+                metadata["selected_phase"],
+            )
+
+            if len(units) != 1:
+                raise ge.EvidenceError(
+                    "COLD_ROOT_COUNT_INVALID"
+                )
+
+            unit = units[0]
+            summary = {
+                "schema": 1,
+                "mode": "cold-single-compilation",
+                "language": metadata["language"],
+                "workload": metadata["workload"],
+                "root": unit["label"],
+                "tier": unit["tier"],
+                "comp_id": unit["comp_id"],
+                "phase": metadata["selected_phase"],
+                "compilation": metadata["selected_compilation"],
+                "invocation_sequence": metadata["invocation_sequence"],
+                "graph": unit["graph"],
+                "bgv": unit["bgv"],
+                "analysis": unit["analysis"],
+                "timing_evidence": "NONE",
+            }
+
+            mp.write_json(
+                directory / "cold-summary.json",
+                summary,
+            )
+            completed += 1
+
+        except (KeyError, IndexError, ge.EvidenceError) as exc:
+            failures += 1
+            mp.emit("COLD_SUMMARY_FAILED", str(exc))
+
+    mp.emit("COLD_SUMMARIZED", completed)
+    mp.emit("COLD_SUMMARY_FAILURES", failures)
+
+    return mp.EXIT_OK if failures == 0 else mp.EXIT_INVALID
+
+
+def cold_jvm_options(
+    policy: dict[str, Any],
+    tier: int,
+    first_threshold: int,
+    last_threshold: int,
+    dump_path: Path,
+    extras: tuple[str, ...] = (),
+) -> list[str]:
+    """Fixed Graal thresholds; the observed tier is checked separately."""
+    if tier not in (1, 2):
+        raise mp.UsageError("Tier must be 1 or 2")
+
+    if (
+        type(first_threshold) is not int
+        or type(last_threshold) is not int
+        or first_threshold < 1
+        or last_threshold <= first_threshold
+    ):
+        raise mp.UsageError("Invalid tier thresholds")
+
+    reserved = (
+        "-Dpolyglot.engine.MultiTier=",
+        "-Dpolyglot.engine.DynamicCompilationThresholds=",
+        "-Dpolyglot.engine.FirstTierCompilationThreshold=",
+        "-Dpolyglot.engine.LastTierCompilationThreshold=",
+        "-Dpolyglot.engine.FirstTierMinInvokeThreshold=",
+        "-Dpolyglot.engine.MinInvokeThreshold=",
+        "-Dpolyglot.engine.OSR=",
+        "-Dpolyglot.engine.TraceCompilation=",
+        "-Dpolyglot.engine.BackgroundCompilation=",
+        "-Djdk.graal.Dump",
+    )
+
+    for option in extras:
+        if not option.startswith(("-D", "-XX:")):
+            raise mp.UsageError(f"Invalid JVM option: {option}")
+        if option.startswith(reserved):
+            raise mp.UsageError(f"Reserved JVM option: {option}")
+
+    return [
+        *policy["jvm_options"],
+        "-Dpolyglot.engine.MultiTier=true",
+        "-Dpolyglot.engine.DynamicCompilationThresholds=false",
+        "-Dpolyglot.engine.FirstTierMinInvokeThreshold=1",
+        "-Dpolyglot.engine.MinInvokeThreshold=1",
+        "-Dpolyglot.engine.OSR=false",
+        f"-Dpolyglot.engine.FirstTierCompilationThreshold={first_threshold}",
+        f"-Dpolyglot.engine.LastTierCompilationThreshold={last_threshold}",
+        policy["dump_path_option"] + str(dump_path),
+        *extras,
+    ]
+
+
+def cold_invocation_arguments(
+    core_arg: str,
+    source: Path,
+    warmup_calls: int,
+    invocations: int,
+) -> tuple[list[str], dict[str, int | str]]:
+    """Explicit sequence following setup in one newly started JVM."""
+    if type(warmup_calls) is not int or warmup_calls < 0:
+        raise mp.UsageError("Invalid warmup calls")
+    if type(invocations) is not int or invocations < 1:
+        raise mp.UsageError("Invalid invocations")
+
+    arguments = [
+        "measure", core_arg, str(source),
+        str(warmup_calls), str(invocations), "1", "-",
+    ]
+    sequence = {
+        "process": "fresh-jvm",
+        "setup": "before-cold-call",
+        "cold_calls": 1,
+        "warmup_calls": warmup_calls,
+        "post_warmup_calls": invocations,
+        "total_measured_invocations": 1 + warmup_calls + invocations,
+    }
+    return arguments, sequence
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="measure_graphs.py", description=__doc__.split("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -952,7 +1389,30 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     cap.add_argument("--remeasure", action="store_true")
     cap.add_argument("--allow-dirty-product", action="store_true")
 
-    ana = sub.add_parser("analyze", help="IgvUtility filter of retained BGVs (Docker host)")
+    cold = sub.add_parser(
+        "cold",
+        help="fresh-JVM compilation capture of one root and tier",
+    )
+    cold.add_argument("--dir", type=Path, required=True)
+    cold.add_argument("--output", type=Path, required=True)
+    cold.add_argument("--language", choices=LANGUAGES, required=True)
+    cold.add_argument("--workload", required=True)
+    cold.add_argument("--tier", type=int, choices=(1, 2), required=True)
+    cold.add_argument("--root", default="primary")
+    cold.add_argument("--warmup-calls", type=int, default=0)
+    cold.add_argument("--invocations", type=int, default=2000)
+    cold.add_argument("--first-threshold", type=int, default=100)
+    cold.add_argument("--last-threshold", type=int, required=True)
+    cold.add_argument("--jvm-option", action="append", default=[])
+    cold.add_argument("--cpu", type=int)
+
+    cold_summary = sub.add_parser(
+        "cold-summarize",
+        help="node counts of one selected compilation per capture",
+    )
+    cold_summary.add_argument("--output", type=Path, required=True)
+
+    ana = sub.add_parser("analyze", help="IgvUtility filter of retained BGVs (Podman host)")
     ana.add_argument("--output", type=Path, required=True)
     ana.add_argument("--reanalyze", action="store_true")
 
@@ -969,6 +1429,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
 
     try:
+        if args.command == "cold":
+            return cold_capture(args)
+        if args.command == "cold-summarize":
+            return cold_summarize(args)
         if args.command == "capture":
             return capture(args)
         if args.command == "analyze":

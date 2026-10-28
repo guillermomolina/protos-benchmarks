@@ -25,7 +25,7 @@ on:
     branches:
       - main
     paths:
-      - docker/igv-analyzer/**
+      - truffle/igv-analyzer/**
       - .github/workflows/igv-analyzer-image.yml
 
 permissions:
@@ -58,7 +58,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: docker/igv-analyzer/Dockerfile
+          file: truffle/igv-analyzer/Containerfile
           push: true
           tags: |
             ${{ env.IMAGE }}:graal-${{ env.ANALYZER_GRAAL_VERSION }}

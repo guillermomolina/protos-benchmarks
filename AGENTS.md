@@ -75,9 +75,9 @@ nature:
   runtime/host/container identity, CPU affinity, and raw-measurement
   retention: `AGENTS.work/REPRODUCIBILITY.md`.
 
-`BENCHMARKING.md` holds the detailed benchmark-by-benchmark methodology, exact
-commands, and result narratives; the two files above hold the binding
-agent-facing rules, not the full write-up.
+`BENCHMARKING.md` documents the current single-harness methodology and
+command entry points. Historical PERF investigation narratives are
+recoverable in Git history; the two files above remain binding rules.
 
 There is currently no dedicated implementation or GitHub-coordination
 work-type file. Generic implementation discipline is covered by Universal

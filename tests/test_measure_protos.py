@@ -414,19 +414,6 @@ class DriverTest(unittest.TestCase):
             self.metadata(second)["harness"]["source_sha256"],
         )
 
-    # G
-    def test_surfaces_are_independent_cases(self):
-        for surface in ("dynamic", "prepared", "canonical"):
-            self.fakes.javac_calls.clear()
-            code, lines = self.run_driver(surface=surface)
-            self.assertEqual(code, 0, surface)
-            self.assertEqual(self.metadata(lines)["surface"], surface)
-            compiled = {path.name for path in self.fakes.javac_calls[0]}
-            others = {"dynamic", "prepared", "canonical"} - {surface}
-            for other in others:
-                own = Path(mp.load_cases()["surfaces"][other]["sources"][-1]).name
-                self.assertNotIn(own, compiled)
-
     # H
     def test_unsupported_surface_fails_without_fallback(self):
         self.fakes.unsupported.add("canonical")
@@ -1253,6 +1240,58 @@ class DriverTest(unittest.TestCase):
         self.assertIn("SURFACE=executable-value", buffer.getvalue())
         self.assertTrue(any("-Dprotos.benchmarks.peer.language=js" in c for c in self.fakes.java_calls))
 
+    def test_correctness_only_does_not_measure_time(self):
+        code, lines = self.run_driver("--correctness-only")
+
+        self.assertEqual(code, 0)
+        self.assertEqual(lines["CORRECTNESS"], "PASS")
+        self.assertEqual(lines["TIMING_PERFORMED"], "NO")
+
+        self.assertEqual(len(self.fakes.java_calls), 1)
+        self.assertIn("correctness", self.fakes.java_calls[0])
+        self.assertNotIn("measure", self.fakes.java_calls[0])
+
+        result = Path(lines["RESULT"])
+        metadata = self.metadata(lines)
+
+        self.assertEqual(
+            metadata["measurement_kind"], "correctness-only"
+        )
+        self.assertFalse(metadata["timing_performed"])
+        self.assertFalse(metadata["reference_eligible"])
+        self.assertTrue(metadata["measurement_valid"])
+        self.assertFalse((result / "raw/timing.log").exists())
+        self.assertFalse((result / "jfr").exists())
+
+    def test_correctness_only_rejects_wrong_result(self):
+        self.fakes.result = "incorrect"
+
+        code, lines = self.run_driver("--correctness-only")
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertEqual(lines["CORRECTNESS"], "FAIL")
+        self.assertEqual(lines["MEASUREMENT_VALID"], "NO")
+        self.assertEqual(len(self.fakes.java_calls), 1)
+
+        invalid = Path(lines["INVALID_RECORD"])
+        metadata = json.loads(
+            (invalid / "metadata.json").read_text()
+        )
+
+        self.assertFalse(metadata["measurement_valid"])
+        self.assertEqual(
+            metadata["invalid_reason"], "CORRECTNESS_FAILED"
+        )
+        self.assertFalse((invalid / "raw/timing.log").exists())
+
+    def test_correctness_only_rejects_profiling(self):
+        code, _ = self.run_driver(
+            "--correctness-only", "--profile", "jfr"
+        )
+        self.assertEqual(code, mp.EXIT_USAGE)
+        self.assertEqual(self.fakes.java_calls, [])
+
+
     def test_verify_producer(self):
         _, lines = self.run_driver()
         buffer = io.StringIO()
@@ -1406,19 +1445,9 @@ class StaticArchitectureTest(unittest.TestCase):
             },
         )
 
-        support = (
-            "measure/surfaces/protos/"
-            "ProtosSurfaceSupport.java"
-        )
-
-        self.assertNotIn(
-            support, surfaces["canonical"]["sources"]
-        )
-        self.assertIn(
-            support, surfaces["dynamic"]["sources"]
-        )
-        self.assertIn(
-            support, surfaces["prepared"]["sources"]
+        self.assertEqual(
+            set(surfaces),
+            {"canonical", "executable-value"},
         )
 
     def test_canonical_adapter_timed_path(self):

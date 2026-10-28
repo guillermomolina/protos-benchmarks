@@ -3,8 +3,8 @@
 These instructions apply to any retained benchmark result and to the harness
 work that produces one. They regulate evidence identity and collection, not
 benchmark methodology — see `AGENTS.work/PERFORMANCE.md` for correctness and
-measurement-class rules, and `BENCHMARKING.md` for the detailed per-item
-methodology and worked evidence.
+measurement-class rules, and `BENCHMARKING.md` for the current
+single-harness methodology.
 
 ## Revision and environment identity
 
@@ -22,7 +22,7 @@ derived views, not replacements for raw evidence.
 
 ## Container, CPU, and diagnostic boundaries
 
-Docker/container execution is an accepted reproducibility mechanism on Linux.
+Podman is the host-side container runtime for the current Linux harness. Image pulls and builds must be explicit, never incidental to measurement.
 Compared runtimes in a reference comparison SHOULD execute on the same host.
 Container creation/start latency is outside the language-startup timing
 boundary unless a benchmark explicitly states that container startup itself

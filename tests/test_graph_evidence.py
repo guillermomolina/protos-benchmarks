@@ -467,5 +467,56 @@ class ComparisonTest(unittest.TestCase):
         self.assertEqual(["PEER_EVIDENCE_MISSING"], rung["peer_reasons"])
 
 
+class ColdCompilationSelectionTest(unittest.TestCase):
+    def test_compilation_metrics(self):
+        header = (
+            "[engine] opt done engine=1 id=7 factorial "
+            "|Tier 1|Time 14(11+3)ms|AST 31|Inlined 0Y 2N"
+            "|IR 218/365|CodeSize 1386|CompId 42"
+        )
+        values = ge.compilation_metrics(header)
+        self.assertEqual(values["compilation_time_ms"], 14)
+        self.assertEqual(values["truffle_compilation_ms"], 11)
+        self.assertEqual(values["graal_compilation_ms"], 3)
+        self.assertEqual(values["ast_nodes"], 31)
+        self.assertEqual(values["machine_code_bytes"], 1386)
+        self.assertEqual(values["inlined_yes"], 0)
+        self.assertEqual(values["inlined_no"], 2)
+
+    def test_never_assumes_requested_tier(self):
+        item = {
+            "target": "root-7", "label": "factorial",
+            "comp_id": 42, "tier": 1, "seq": 1,
+            "ir_after_truffle_tier": 218,
+            "ir_final": 365,
+            "compilation_time_ms": 14,
+            "machine_code_bytes": 1386,
+        }
+        parsed = {
+            "compilations": [item],
+            "failures": [], "invalidations": [],
+            "option_rejections": [],
+            "unknown_lifecycle_events": [],
+        }
+        selected = ge.select_tier_compilation(
+            parsed, 1, "factorial"
+        )
+        self.assertEqual(selected["comp_id"], 42)
+        self.assertEqual(selected["observed_tier"], 1)
+
+        with self.assertRaisesRegex(
+            ge.EvidenceError, "REQUESTED_TIER_NOT_OBSERVED"
+        ):
+            ge.select_tier_compilation(parsed, 2, "factorial")
+
+        parsed["compilations"].append({
+            **item, "comp_id": 43, "seq": 2
+        })
+        with self.assertRaisesRegex(
+            ge.EvidenceError, "TIER_COMPILATION_AMBIGUOUS"
+        ):
+            ge.select_tier_compilation(parsed, 1, "factorial")
+
+
 if __name__ == "__main__":
     unittest.main()

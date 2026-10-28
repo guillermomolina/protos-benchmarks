@@ -29,32 +29,20 @@ entry, not new parsing code. Missing, ambiguous or unexpected evidence raises
 
 from __future__ import annotations
 
-import importlib.util
 import re
-import sys
 from collections import Counter
-from pathlib import Path
 from typing import Any, Iterable
 
-ROOT = Path(__file__).resolve().parent.parent
+import compiler_trace as trace
 
-
-def _load_compiler_trace() -> Any:
-    name = "compiler_trace"
-    module = sys.modules.get(name)
-
-    if module is None:
-        spec = importlib.util.spec_from_file_location(
-            name, ROOT / "runner" / "compiler_trace.py"
-        )
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[name] = module
-        spec.loader.exec_module(module)
-
-    return module
-
-
-trace = _load_compiler_trace()
+COMPILATION_TIME_RE = re.compile(
+    r"\|Time\s+(?P<total>\d+)\(\s*(?P<truffle>\d+)\s*\+\s*(?P<graal>\d+)\s*\)ms"
+)
+CODE_SIZE_RE = re.compile(r"\|CodeSize\s+(?P<bytes>\d+)")
+AST_NODES_RE = re.compile(r"\|AST\s+(?P<count>\d+)")
+INLINE_COUNTS_RE = re.compile(
+    r"\|Inlined\s+(?P<yes>\d+)Y\s+(?P<no>\d+)N"
+)
 
 EXPANSION_COLUMNS = ("count", "size", "cycles", "ifs", "loops", "invokes", "allocs")
 EXPANSION_RE = re.compile(
@@ -195,6 +183,38 @@ def _inline_tree(entries: list[dict[str, Any]], label: str) -> list[dict[str, An
     raise EvidenceError("INLINING_TRACE_UNTERMINATED", label)
 
 
+def compilation_metrics(header: str) -> dict[str, int | None]:
+    """Keep AST, Graal IR, compilation time and machine code distinct."""
+    timing = COMPILATION_TIME_RE.search(header)
+    code = CODE_SIZE_RE.search(header)
+    ast = AST_NODES_RE.search(header)
+    inline = INLINE_COUNTS_RE.search(header)
+
+    return {
+        "compilation_time_ms": (
+            int(timing.group("total")) if timing else None
+        ),
+        "truffle_compilation_ms": (
+            int(timing.group("truffle")) if timing else None
+        ),
+        "graal_compilation_ms": (
+            int(timing.group("graal")) if timing else None
+        ),
+        "machine_code_bytes": (
+            int(code.group("bytes")) if code else None
+        ),
+        "ast_nodes": (
+            int(ast.group("count")) if ast else None
+        ),
+        "inlined_yes": (
+            int(inline.group("yes")) if inline else None
+        ),
+        "inlined_no": (
+            int(inline.group("no")) if inline else None
+        ),
+    }
+
+
 def parse_trace(text: str) -> dict[str, Any]:
     """Ordered compilation lifecycle of one single-threaded
     (``BackgroundCompilation=false``) traced run.
@@ -238,6 +258,7 @@ def parse_trace(text: str) -> dict[str, Any]:
                     "src": fields.get("src"),
                     "ir_after_truffle_tier": int(ir.group("after")) if ir else None,
                     "ir_final": int(ir.group("final")) if ir else None,
+                    **compilation_metrics(record.header),
                     "inline_tree": _inline_tree(pending_inline, label),
                     "expansion": next(
                         (e for e in reversed(pending_expansion) if e["label"] == label),
@@ -312,6 +333,100 @@ def target_lifecycles(parsed: dict[str, Any]) -> dict[str, dict[str, Any]]:
         )
 
     return targets
+
+
+def select_tier_compilation(
+    parsed: dict[str, Any],
+    requested_tier: int,
+    root: str,
+    resolution: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Require exactly one observed compilation of the requested root/tier."""
+    if requested_tier not in (1, 2):
+        raise EvidenceError("INVALID_REQUESTED_TIER")
+
+    if parsed.get("option_rejections"):
+        raise EvidenceError("OPTION_REJECTED")
+
+    if parsed.get("unknown_lifecycle_events"):
+        raise EvidenceError("UNKNOWN_LIFECYCLE_EVENT")
+
+    targets = target_lifecycles(parsed)
+
+    if root == "primary":
+        if resolution is None:
+            raise EvidenceError("PRIMARY_RESOLUTION_REQUIRED")
+        candidates = [
+            unit["target"]
+            for unit in resolution["units"]
+            if unit["role"] == "primary"
+        ]
+    else:
+        candidates = [
+            key for key, item in targets.items()
+            if item["label"] == root
+            or normalize_label(item["label"]) == root
+        ]
+
+    if not candidates:
+        raise EvidenceError("ROOT_NOT_COMPILED", root)
+    if len(candidates) != 1:
+        raise EvidenceError("ROOT_AMBIGUOUS", root)
+
+    target = targets[candidates[0]]
+    observed = [
+        item for item in target["compilations"]
+        if item["tier"] == requested_tier
+    ]
+
+    if not observed:
+        raise EvidenceError(
+            "REQUESTED_TIER_NOT_OBSERVED",
+            f"{root}: Tier {requested_tier}",
+        )
+
+    if len(observed) != 1:
+        raise EvidenceError(
+            "TIER_COMPILATION_AMBIGUOUS",
+            [item["comp_id"] for item in observed],
+        )
+
+    item = observed[0]
+    required = (
+        "comp_id",
+        "compilation_time_ms",
+        "ir_after_truffle_tier",
+        "ir_final",
+        "machine_code_bytes",
+    )
+
+    missing = [
+        key for key in required
+        if item.get(key) is None
+    ]
+
+    if missing:
+        raise EvidenceError("COMPILATION_METRICS_MISSING", missing)
+
+    if target["invalidated_after_final"]:
+        raise EvidenceError(
+            "ROOT_INVALIDATED_AFTER_COMPILATION",
+            target["label"],
+        )
+
+    return {
+        **item,
+        "root": target["label"],
+        "target": target["target"],
+        "requested_tier": requested_tier,
+        "observed_tier": item["tier"],
+        "other_compilation_ids": [
+            entry["comp_id"]
+            for entry in target["compilations"]
+            if entry["comp_id"] != item["comp_id"]
+        ],
+        "evidence_kind": "single-compilation",
+    }
 
 
 def normalize_label(label: str) -> str:

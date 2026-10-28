@@ -4,6 +4,15 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- Consolidated the active Protos/GraalJS/GraalPy benchmark entry point in `truffle/harness.py` and the root `Makefile`, with explicit host-side Podman image management and no implicit image builds or pulls during measurement.
+- Kept the canonical Protos and executable-value peer adapters as the only measurement surfaces; moved shared timing statistics and identity helpers into `truffle/measurement_support.py` and removed obsolete JVM runners, dynamic/prepared adapters, PERF-specific harnesses, Docker infrastructure, and historic compatibility entry points.
+- Located the active Graal compiler trace and IGV analyzer under `truffle/`, retained current graph analysis, and removed historical graph-cache promotion machinery.
+- Removed 4,333 tracked historical result artifacts while preserving the two GraalJS/GraalPy baseline files in `results/peer-baselines/`; local and untracked results are unaffected.
+- Replaced legacy multi-harness and PERF-specific documentation with the current single-harness workflow, keeping the repository's binding performance and reproducibility rules.
+- Retained correctness-first and exact-result-reuse behavior. Full cold/hot benchmarking and implementation-version-aware no-repeat selection remain separate follow-up work, not claims of this cleanup.
+
 ### Fixed
 
 - Fixed the `measure_protos.py` reference timing policy for `primitive-return-literal` in `truffle/measure/cases.json`: 10,000 calls/sample (~1 ms) produced two alternating timing populations on the GraalJS/GraalPy executable-value peers (NOT_STABLE). An intermediate 100,000-call policy removed the alternation but left ~10 ms samples and 6M warmup calls, still short of final Protos tiering (Protos and GraalJS NOT_STABLE). The workload now uses 1,000,000 calls/sample, 60 warmup + 10 steady iterations and `steady-only` admission for every language and surface. Policy stays data-only; smoke policy, other workloads, admission thresholds and the driver are unchanged. Earlier 10,000- and 100,000-call results remain as evidence for those policies only; no performance claim.

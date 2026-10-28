@@ -13,69 +13,79 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-TRUFFLE_DIR := truffle
+PYTHON ?= python3
+HARNESS := truffle/harness.py
 
-WORKLOAD ?= all
-LANGUAGE ?= protos
-PROTOS_REPO ?= .work/protos-ab/0.3.128
+CASE ?= primitive-return-literal
+LANGUAGE ?= all
+STAGE ?= reference
+PROFILE ?= none
+TIER ?= 2
+COMPILATION_ROOT ?= primary
+WARMUP_CALLS ?= 0
+INVOCATIONS ?= 2000
+FIRST_THRESHOLD ?= 100
+LAST_THRESHOLD ?=
+JVM_OPTION ?=
+SURFACE ?= canonical
+CPU ?=
+OUTPUT ?=
+PROTOS_REPO ?= $(abspath ../protos)
+PODMAN_IMAGE ?= localhost/protos-bench-runner:graal25.4.4.1.1-standalone
 
-.PHONY: truffle-compile truffle-correctness truffle-jvm-smoke truffle-jvm-benchmark truffle-jvm-ab truffle-native-setup truffle-native-smoke truffle-native-benchmark truffle-clean truffle-prepare truffle-retain-results truffle-verify-retained-results
+ARGS = --case "$(CASE)" --language "$(LANGUAGE)" --stage "$(STAGE)" \
+       --profile "$(PROFILE)" --surface "$(SURFACE)" \
+       --product "$(PROTOS_REPO)" --image "$(PODMAN_IMAGE)" \
+       $(if $(strip $(CPU)),--cpu "$(CPU)",) \
+       $(if $(strip $(OUTPUT)),--output "$(OUTPUT)",)
 
-include docker/Makefile
+.PHONY: help validate correctness measure smoke graphs-capture graphs-analyze graphs-summarize graphs-verify image-status image-build cold-capture cold-analyze cold-summarize
 
-truffle-prepare:
-	$(MAKE) -C $(TRUFFLE_DIR) prepare
+help:
+	@$(PYTHON) $(HARNESS) --help
 
-truffle-compile:
-	$(MAKE) -C $(TRUFFLE_DIR) compile
+validate:
+	@$(PYTHON) $(HARNESS) validate
 
-truffle-correctness:
-	$(MAKE) -C $(TRUFFLE_DIR) correctness
+correctness:
+	@$(PYTHON) $(HARNESS) correctness $(ARGS)
 
-truffle-jvm-smoke:
-	$(MAKE) -C $(TRUFFLE_DIR) jvm-smoke
+measure:
+	@$(PYTHON) $(HARNESS) measure $(ARGS)
 
-truffle-jvm-benchmark:
-	$(MAKE) -C $(TRUFFLE_DIR) jvm-benchmark
+smoke:
+	@$(PYTHON) $(HARNESS) smoke $(ARGS)
 
+graphs-capture:
+	@$(PYTHON) $(HARNESS) graphs-capture $(ARGS)
 
-truffle-jvm-ab:
-	$(MAKE) -C $(TRUFFLE_DIR) jvm-ab
+graphs-analyze:
+	@$(PYTHON) $(HARNESS) graphs-analyze $(ARGS)
 
+graphs-summarize:
+	@$(PYTHON) $(HARNESS) graphs-summarize $(ARGS)
 
-truffle-jvm-jfr:
-	$(MAKE) -C $(TRUFFLE_DIR) jvm-jfr LANGUAGE=$(LANGUAGE) WORKLOAD=$(WORKLOAD) PROTOS_REPO=$(PROTOS_REPO)
+graphs-verify:
+	@$(PYTHON) $(HARNESS) graphs-verify $(ARGS)
 
-truffle-jvm-igv:
-	$(MAKE) -C $(TRUFFLE_DIR) jvm-igv LANGUAGE=$(LANGUAGE) WORKLOAD=$(WORKLOAD) PROTOS_REPO=$(PROTOS_REPO)
+image-status:
+	@$(PYTHON) $(HARNESS) image-status --image "$(PODMAN_IMAGE)"
 
-truffle-native-jfr:
-	$(MAKE) -C $(TRUFFLE_DIR) native-jfr
+image-build:
+	@$(PYTHON) $(HARNESS) image-build --image "$(PODMAN_IMAGE)"
 
-truffle-native-igv:
-	$(MAKE) -C $(TRUFFLE_DIR) native-igv
+COLD_ARGS = --tier "$(TIER)" --root "$(COMPILATION_ROOT)" \
+            --warmup-calls "$(WARMUP_CALLS)" \
+            --invocations "$(INVOCATIONS)" \
+            --first-threshold "$(FIRST_THRESHOLD)" \
+            $(if $(strip $(LAST_THRESHOLD)),--last-threshold "$(LAST_THRESHOLD)",) \
+            $(if $(strip $(JVM_OPTION)),--jvm-option "$(JVM_OPTION)",)
 
-truffle-native-setup:
-	$(MAKE) -C $(TRUFFLE_DIR) native-setup
+cold-capture:
+	@$(PYTHON) $(HARNESS) cold-capture $(ARGS) $(COLD_ARGS)
 
-truffle-native-smoke:
-	$(MAKE) -C $(TRUFFLE_DIR) native-smoke
+cold-analyze:
+	@$(PYTHON) $(HARNESS) cold-analyze $(ARGS) $(COLD_ARGS)
 
-truffle-native-benchmark:
-	$(MAKE) -C $(TRUFFLE_DIR) native-benchmark
-
-
-truffle-retain-results:
-	$(MAKE) -C $(TRUFFLE_DIR) retain-results \
-		WORK_ITEM="$(WORK_ITEM)" \
-		PRODUCER_REVISION="$(PRODUCER_REVISION)" \
-		RETAIN_WORKLOADS="$(RETAIN_WORKLOADS)" \
-		EXPECTED_RETAINED="$(EXPECTED_RETAINED)" \
-		RETENTION_PROFILE="$(or $(RETENTION_PROFILE),perf023)"
-
-truffle-verify-retained-results:
-	$(MAKE) -C $(TRUFFLE_DIR) verify-retained-results \
-		WORK_ITEM="$(WORK_ITEM)"
-
-truffle-clean:
-	$(MAKE) -C $(TRUFFLE_DIR) clean
+cold-summarize:
+	@$(PYTHON) $(HARNESS) cold-summarize $(ARGS) $(COLD_ARGS)

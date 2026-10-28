@@ -19,6 +19,7 @@ summarize from synthetic retained captures to the rung matrix."""
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import gzip
 import io
@@ -32,10 +33,46 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "truffle"))
 
-import graph_cache as gc  # noqa: E402
 import measure_graphs as mg  # noqa: E402
 import measure_protos as mp  # noqa: E402
 import workload_catalog  # noqa: E402
+
+
+class ColdPolicyTest(unittest.TestCase):
+    def test_explicit_tier_thresholds(self):
+        policy = mg.load_policy()
+        options = mg.cold_jvm_options(
+            policy, 1, 100, 1000000, Path("/tmp/graphs")
+        )
+        self.assertIn(
+            "-Dpolyglot.engine.DynamicCompilationThresholds=false",
+            options,
+        )
+        self.assertIn(
+            "-Dpolyglot.engine.FirstTierCompilationThreshold=100",
+            options,
+        )
+        self.assertIn(
+            "-Dpolyglot.engine.LastTierCompilationThreshold=1000000",
+            options,
+        )
+
+        with self.assertRaises(mp.UsageError):
+            mg.cold_jvm_options(
+                policy, 2, 100, 100, Path("/tmp/graphs")
+            )
+
+    def test_exact_invocation_sequence(self):
+        args, sequence = mg.cold_invocation_arguments(
+            "-", Path("/tmp/workload.mjs"), 25, 500
+        )
+        self.assertEqual(args[3:6], ["25", "500", "1"])
+        self.assertEqual(sequence["cold_calls"], 1)
+        self.assertEqual(sequence["warmup_calls"], 25)
+        self.assertEqual(sequence["post_warmup_calls"], 500)
+        self.assertEqual(
+            sequence["total_measured_invocations"], 526
+        )
 
 
 class PolicyTest(unittest.TestCase):
@@ -269,7 +306,7 @@ class AnalyzeSummarizeTest(unittest.TestCase):
 
         with (
             patch.object(mg.shutil, "which", return_value=None),
-            patch.dict(mg.os.environ, {"DOCKER": ""}),
+            patch.dict(mg.os.environ, {"PODMAN": ""}),
             contextlib.redirect_stderr(stderr),
         ):
             code, output = self.run_cmd(
@@ -278,7 +315,7 @@ class AnalyzeSummarizeTest(unittest.TestCase):
 
         self.assertEqual(mp.EXIT_USAGE, code)
         self.assertIn("CONTAINER_RUNTIME_NOT_FOUND", stderr.getvalue())
-        self.assertIn("outside the devcontainer", stderr.getvalue())
+        self.assertIn("Linux host with Podman installed", stderr.getvalue())
         self.assertNotIn("ANALYZED=", output)
 
     def test_analyze_without_pending_work_needs_no_runtime(self):
@@ -375,77 +412,304 @@ class VerifyTest(unittest.TestCase):
 
 
 
-class HistoricalCachePromotionTest(unittest.TestCase):
-    def test_local_evidence_promotion_preserves_original(self):
-        from unittest.mock import patch
 
+
+class ColdCaptureIntegrationTest(unittest.TestCase):
+    """Exercise cold capture with synthetic JVM traces and BGV files."""
+
+    def run_fake_capture(self, requested_tier):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+
+        output = Path(tmp.name) / "results"
+        expected = "1"
+
+        product = {
+            "clean": True,
+            "revision": "test-revision",
+            "source_state_sha256": "test-source-state",
+        }
+
+        compilation = {
+            "seq": 1,
+            "target": "engine:1/target:7",
+            "label": "run",
+            "tier": 1,
+            "comp_id": 42,
+            "src": None,
+            "ir_after_truffle_tier": 218,
+            "ir_final": 365,
+            "compilation_time_ms": 14,
+            "truffle_compilation_ms": 11,
+            "graal_compilation_ms": 3,
+            "machine_code_bytes": 1386,
+            "ast_nodes": 31,
+            "inline_tree": [],
+            "expansion": None,
+        }
+
+        parsed = {
+            "compilations": [compilation],
+            "failures": [],
+            "invalidations": [],
+            "option_rejections": [],
+            "unknown_lifecycle_events": [],
+        }
+
+        bgv_name = "TruffleHotSpotCompilation-42[run].bgv"
+
+        def fake_run_logged(command, log):
+            log.parent.mkdir(parents=True, exist_ok=True)
+
+            if "correctness" in command:
+                text = f"result={expected}\\n"
+            else:
+                dumps = log.parent / "dumps"
+                dumps.mkdir(exist_ok=True)
+                (dumps / bgv_name).write_bytes(b"synthetic-bgv")
+                text = f"result={expected}\\n"
+
+            text = text.replace(chr(92) + "n", "\n")
+            log.write_text(text, encoding="utf-8")
+            return 0, text
+
+        runtime = {
+            "runtime_cp": "/fake/classpath",
+            "main_class": "FakeMain",
+            "system_properties": [],
+            "core_arg": "-",
+            "classes": None,
+        }
+
+        args = argparse.Namespace(
+            dir=Path(tmp.name),
+            output=output,
+            language="js",
+            workload="primitive-return-literal",
+            tier=requested_tier,
+            root="run",
+            warmup_calls=25,
+            invocations=500,
+            first_threshold=100,
+            last_threshold=1000,
+            jvm_option=[],
+            cpu=None,
+        )
+
+        with (
+            patch.object(
+                mg.mp, "product_identity",
+                return_value=product,
+            ),
+            patch.object(
+                mg.mp, "harness_identity",
+                return_value={
+                    "git_head": "test",
+                    "dirty": True,
+                    "source_sha256": {},
+                },
+            ),
+            patch.object(
+                mg.mp, "producer_hashes",
+                return_value={},
+            ),
+            patch.object(
+                mg.mp, "java_identity",
+                return_value={"java.runtime.version": "25"},
+            ),
+            patch.object(
+                mg.mp, "choose_cpu",
+                return_value=(0, [0], [0]),
+            ),
+            patch.object(
+                mg.mp, "host_identity",
+                return_value={"cpu": 0},
+            ),
+            patch.object(
+                mg.mp, "prepare_surface_runtime",
+                return_value=runtime,
+            ),
+            patch.object(
+                mg.mp, "run_logged",
+                side_effect=fake_run_logged,
+            ),
+            patch.object(
+                mg.mp, "compare_product",
+                return_value=[],
+            ),
+            patch.object(
+                mg.mp.jvm_runtime,
+                "harness_graalvm_version",
+                return_value="25.4.4.1.1",
+            ),
+            patch.object(
+                mg.mp.jvm_runtime,
+                "peer_pom",
+                return_value="<project/>",
+            ),
+            patch.object(
+                mg.ge, "parse_trace",
+                return_value=parsed,
+            ),
+            patch.object(
+                mg.ge, "expansion_attribution",
+                return_value=[],
+            ),
+        ):
+            code = mg.cold_capture(args)
+
+        destination = (
+            output / "primitive-return-literal" / "js"
+        )
+
+        metadata = json.loads(
+            (destination / "capture.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        return code, metadata, destination, bgv_name
+
+    def test_selected_tier_retains_exactly_one_bgv(self):
+        code, metadata, destination, bgv_name = (
+            self.run_fake_capture(1)
+        )
+
+        self.assertEqual(code, mp.EXIT_OK)
+        self.assertTrue(metadata["capture_valid"])
+        self.assertTrue(metadata["fresh_jvm"])
+        self.assertTrue(
+            metadata["correctness_uses_separate_jvm"]
+        )
+        self.assertEqual(
+            metadata["selected_compilation"]["comp_id"], 42
+        )
+        self.assertEqual(
+            metadata["selected_compilation"]["tier"], 1
+        )
+        self.assertEqual(
+            metadata["invocation_sequence"]["warmup_calls"], 25
+        )
+        self.assertEqual(
+            metadata["invocation_sequence"]["post_warmup_calls"],
+            500,
+        )
+
+        runs = metadata["runs"]
+        self.assertEqual(len(runs), 1)
+        self.assertEqual(
+            len(runs[0]["resolution"]["units"]), 1
+        )
+        self.assertEqual(
+            len(runs[0]["retained_bgv"]), 1
+        )
+
+        retained = (
+            destination / runs[0]["retained_bgv"][0]
+        )
+        self.assertTrue(retained.is_file())
+        self.assertIn(bgv_name, retained.name)
+        self.assertEqual(metadata["timing_evidence"], "NONE")
+
+    def test_wrong_tier_is_invalid_not_relabeled(self):
+        code, metadata, destination, _ = (
+            self.run_fake_capture(2)
+        )
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertFalse(metadata["capture_valid"])
+        self.assertEqual(
+            metadata["invalid_reason"],
+            "REQUESTED_TIER_NOT_OBSERVED",
+        )
+        self.assertNotIn(
+            "selected_compilation", metadata
+        )
+        self.assertTrue(
+            (destination / "raw/cold-jvm/trace.log").is_file()
+        )
+
+    def test_existing_capture_is_not_overwritten(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            original = (
-                root / "results" / "local" / "old"
-                / "primitive-method-call" / "js"
+            output = Path(tmp)
+            mg.prepare_output(output)
+            destination = (
+                output / "primitive-return-literal" / "js"
             )
-            original.mkdir(parents=True)
+            destination.mkdir(parents=True)
+            sentinel = destination / "user-result.json"
+            sentinel.write_text("keep", encoding="utf-8")
 
-            capture = {
-                "workload": "primitive-method-call",
+            args = argparse.Namespace(
+                dir=Path(tmp),
+                output=output,
+                workload="primitive-return-literal",
+                language="js",
+            )
+
+            with self.assertRaises(mp.UsageError):
+                mg.cold_capture(args)
+
+            self.assertEqual(
+                sentinel.read_text(encoding="utf-8"),
+                "keep",
+            )
+
+    def test_cold_summary_uses_single_graph(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+
+            metadata = {
+                "mode": "cold-compilation",
+                "capture_valid": True,
                 "language": "js",
-                "protos_revision": "a" * 40,
-                "harness_git_head": "b" * 40,
+                "workload": "primitive-return-literal",
+                "selected_phase": "After TruffleTier",
+                "selected_compilation": {
+                    "tier": 1,
+                    "comp_id": 42,
+                },
+                "invocation_sequence": {
+                    "process": "fresh-jvm",
+                },
+                "runs": [{"budget": 500}],
             }
-            unit = {"evidence_valid": True}
 
-            mp.write_json(original / "capture.json", capture)
-            mp.write_json(original / "unit.json", unit)
+            units = [{
+                "label": "run",
+                "tier": 1,
+                "comp_id": 42,
+                "graph": {"node_count": 218},
+                "bgv": "selected.bgv.gz",
+                "analysis": "selected.filter.json.gz",
+            }]
 
-            original_capture_sha = mp.sha256_file(
-                original / "capture.json"
-            )
-            original_unit_sha = mp.sha256_file(
-                original / "unit.json"
-            )
-
-            with patch.object(
-                gc, "complete_evidence", return_value=True
+            with (
+                patch.object(
+                    mg, "iter_cases",
+                    return_value=[(directory, metadata)],
+                ),
+                patch.object(
+                    mg, "unit_graphs",
+                    return_value=units,
+                ),
             ):
-                imported = gc.publishable_source(
-                    root, original, capture, unit
+                code = mg.cold_summarize(
+                    argparse.Namespace(output=directory)
                 )
 
-                self.assertTrue(imported.is_dir())
-                self.assertTrue(
-                    imported.is_relative_to(
-                        root / "results" / "graph-cache-imported"
-                    )
-                )
-                self.assertTrue(
-                    (imported / "import-provenance.json").is_file()
-                )
-
-                self.assertEqual(
-                    original_capture_sha,
-                    mp.sha256_file(original / "capture.json"),
-                )
-                self.assertEqual(
-                    original_unit_sha,
-                    mp.sha256_file(original / "unit.json"),
-                )
-
-                self.assertEqual(
-                    imported,
-                    gc.publishable_source(
-                        root, original, capture, unit
-                    ),
-                )
-
-                (imported / "capture.json").write_text(
-                    "{}", encoding="utf-8"
-                )
-
-                with self.assertRaises(mp.UsageError):
-                    gc.publishable_source(
-                        root, original, capture, unit
-                    )
+            self.assertEqual(code, mp.EXIT_OK)
+            summary = json.loads(
+                (directory / "cold-summary.json").read_text()
+            )
+            self.assertEqual(summary["comp_id"], 42)
+            self.assertEqual(summary["tier"], 1)
+            self.assertEqual(
+                summary["graph"]["node_count"], 218
+            )
+            self.assertEqual(
+                summary["phase"], "After TruffleTier"
+            )
 
 
 if __name__ == "__main__":

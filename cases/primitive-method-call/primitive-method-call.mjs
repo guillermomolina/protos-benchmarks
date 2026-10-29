@@ -16,9 +16,7 @@
  */
 
 const receiver = {
-    identity(value) {
-        return value;
-    },
+    identity: (value) => value,
 };
 
 function run() {

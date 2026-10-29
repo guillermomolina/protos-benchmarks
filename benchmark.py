@@ -262,7 +262,7 @@ def run_container(binary, image, product, arguments, *, allow_network=False):
         "--rm",
         "--pull=never",
         *([] if allow_network else ["--network=none"]),
-        "--userns=keep-id",
+        "--userns=keep-id:uid=1000,gid=1000",
         "--volume",
         f"{ROOT}:{CONTAINER_ROOT}:rw",
         "--volume",

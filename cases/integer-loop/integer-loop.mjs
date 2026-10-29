@@ -20,7 +20,7 @@ function run() {
     let sink = 0;
 
     while (i < 1000) {
-        sink += i;
+        sink = sink + i;
         i += 1;
     }
 

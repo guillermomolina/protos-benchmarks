@@ -143,7 +143,7 @@ class PodmanContractTest(unittest.TestCase):
             self.assertEqual(command[:2], ["podman", "run"])
             self.assertIn("--pull=never", command)
             self.assertIn("--network=none", command)
-            self.assertIn("--userns=keep-id", command)
+            self.assertIn("--userns=keep-id:uid=1000,gid=1000", command)
             self.assertIn("--entrypoint", command)
             self.assertIn("/usr/bin/python3", command)
             self.assertNotIn("java", command)

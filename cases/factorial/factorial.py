@@ -2,10 +2,12 @@
 # Licensed under the Adaptive Public License 1.0.
 
 def factorial(n):
-    if n <= 1:
-        return 1
+    result = 1
 
-    return n * factorial(n - 1)
+    if n > 1:
+        result = n * factorial(n - 1)
+
+    return result
 
 def run():
     return factorial(20)

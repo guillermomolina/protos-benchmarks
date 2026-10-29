@@ -49,7 +49,7 @@ ARGS = --case "$(CASE)" --language "$(LANGUAGE)" --stage "$(STAGE)" \
        $(if $(strip $(CPU)),--cpu "$(CPU)",) \
        $(if $(strip $(OUTPUT)),--output "$(OUTPUT)",)
 
-.PHONY: help validate correctness measure smoke graphs-capture graphs-analyze graphs-summarize graphs-verify image-status image-build peer-prepare cold-capture cold-analyze cold-summarize bytecode-capture structural-report bytecode-prepare product-prepare
+.PHONY: help validate correctness measure smoke graphs-capture graphs-analyze graphs-summarize graphs-verify image-status image-build peer-prepare cold-capture cold-analyze cold-summarize bytecode-capture structural-report bytecode-prepare product-prepare runtime-prepare
 
 help:
 	@$(PYTHON) $(HARNESS) --help
@@ -88,6 +88,11 @@ peer-prepare:
 
 product-prepare:
 	@$(PYTHON) $(HARNESS) product-prepare --product "$(PROTOS_REPO)" --image "$(PODMAN_IMAGE)" $(if $(strip $(PROTOS_VERSION)),--protos-version "$(PROTOS_VERSION)",)
+
+runtime-prepare:
+	@$(MAKE) --no-print-directory image-status
+	@$(MAKE) --no-print-directory product-prepare
+	@$(MAKE) --no-print-directory peer-prepare LANGUAGE=all
 
 image-status:
 	@$(PYTHON) $(HARNESS) image-status --image "$(PODMAN_IMAGE)"

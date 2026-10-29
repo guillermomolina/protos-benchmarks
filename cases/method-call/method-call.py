@@ -14,11 +14,11 @@
 # the specific language governing rights and limitations under the License.
 
 class Receiver:
-    def identity(self, value):
-        return value
+    pass
 
 
 receiver = Receiver()
+receiver.identity = lambda value: value
 
 
 def run():
@@ -26,7 +26,7 @@ def run():
     sink = 0
 
     while i < 1000:
-        sink += receiver.identity(i)
+        sink = sink + receiver.identity(i)
         i += 1
 
     return sink

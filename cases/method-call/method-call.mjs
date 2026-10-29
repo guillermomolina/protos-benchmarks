@@ -16,9 +16,7 @@
  */
 
 const receiver = {
-    identity(value) {
-        return value;
-    },
+    identity: (value) => value,
 };
 
 function run() {
@@ -26,7 +24,7 @@ function run() {
     let sink = 0;
 
     while (i < 1000) {
-        sink += receiver.identity(i);
+        sink = sink + receiver.identity(i);
         i += 1;
     }
 

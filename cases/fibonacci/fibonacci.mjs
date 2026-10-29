@@ -4,11 +4,13 @@
  */
 
 function fibonacci(n) {
-    if (n < 2) {
-        return n;
+    let result = n;
+
+    if (n >= 2) {
+        result = fibonacci(n - 1) + fibonacci(n - 2);
     }
 
-    return fibonacci(n - 1) + fibonacci(n - 2);
+    return result;
 }
 
 function run() {

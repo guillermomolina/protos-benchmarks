@@ -14,11 +14,11 @@
 # the specific language governing rights and limitations under the License.
 
 class Receiver:
-    def identity(self, value):
-        return value
+    pass
 
 
 receiver = Receiver()
+receiver.identity = lambda value: value
 
 
 def run():

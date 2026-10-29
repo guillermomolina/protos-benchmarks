@@ -18,7 +18,7 @@ def run():
     sink = 0
 
     while i < 1000:
-        sink += i
+        sink = sink + i
         i += 1
 
     return sink

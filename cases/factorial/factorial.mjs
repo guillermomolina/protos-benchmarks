@@ -4,11 +4,13 @@
  */
 
 function factorial(n) {
-    if (n <= 1n) {
-        return 1n;
+    let result = 1n;
+
+    if (n > 1n) {
+        result = n * factorial(n - 1n);
     }
 
-    return n * factorial(n - 1n);
+    return result;
 }
 
 function run() {

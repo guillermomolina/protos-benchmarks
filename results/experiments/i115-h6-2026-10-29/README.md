@@ -36,3 +36,7 @@
 - cold-metadata.zip: compilation capture metadata and summaries.
 - structural-reports.zip: structural analysis reports.
 - SHA256SUMS: archive integrity checksums.
+
+## Post-hoc recovered graph summaries
+
+See [recovery/](recovery/) for eight recovered guest-root graph summaries and node-class histograms, covering Protos and GraalPy. Original captures and result CSVs remain unchanged. No raw BGVs or IGV exports are published.

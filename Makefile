@@ -105,7 +105,7 @@ COLD_ARGS = --tier "$(TIER)" --root "$(COMPILATION_ROOT)" \
             --invocations "$(INVOCATIONS)" \
             --first-threshold "$(FIRST_THRESHOLD)" \
             $(if $(strip $(LAST_THRESHOLD)),--last-threshold "$(LAST_THRESHOLD)",) \
-            $(if $(strip $(JVM_OPTION)),--jvm-option "$(JVM_OPTION)",)
+            $(if $(strip $(JVM_OPTION)),--jvm-option="$(JVM_OPTION)",)
 
 bytecode-capture:
 	@$(PYTHON) $(HARNESS) bytecode-capture $(ARGS) --bytecode-calls "$(BYTECODE_CALLS)"

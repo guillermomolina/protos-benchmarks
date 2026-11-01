@@ -772,3 +772,42 @@ class BytecodePreparationHostContractTest(unittest.TestCase):
                 h.run_bytecode_prepare(args)
 
         run.assert_not_called()
+
+
+class ColdJvmOptionForwardingTest(unittest.TestCase):
+    def test_dash_prefixed_option_reaches_container(self):
+        option = (
+            "-Dpolyglot.bench-bytecode-size."
+            "TraceCallTargets=true"
+        )
+
+        args = h.parse_args([
+            "cold-capture",
+            "--case", "fibonacci",
+            "--language", "protos",
+            f"--jvm-option={option}",
+        ])
+
+        self.assertEqual(args.jvm_option, [option])
+
+        with (
+            mock.patch.object(
+                h, "podman_binary", return_value="podman"
+            ),
+            mock.patch.object(h, "require_image"),
+            mock.patch.object(
+                h, "product_directory",
+                return_value=ROOT / "fake-product"
+            ),
+            mock.patch.object(
+                h, "run_container", return_value=0
+            ) as runner,
+        ):
+            self.assertEqual(h.run_cold(args), 0)
+
+        forwarded = runner.call_args.args[3]
+        self.assertEqual(
+            forwarded.count(f"--jvm-option={option}"),
+            1,
+        )
+        self.assertNotIn("--jvm-option", forwarded)

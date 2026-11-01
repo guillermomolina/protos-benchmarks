@@ -629,7 +629,7 @@ def run_cold(args):
             arguments.extend(["--cpu", str(args.cpu)])
 
         for option in args.jvm_option:
-            arguments.extend(["--jvm-option", option])
+            arguments.append(f"--jvm-option={option}")
 
         return run_container(
             binary, args.image, product, arguments

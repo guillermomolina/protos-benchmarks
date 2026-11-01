@@ -930,6 +930,153 @@ def pair_compiled_root_tiers(
     }
 
 
+def parse_call_target_identity_trace(output: str) -> dict[str, Any]:
+    """Read executed CallTarget IDs from the same diagnostic JVM."""
+    import base64
+    import binascii
+
+    marker = "BENCH_CALL_TARGET_ID_V1"
+    targets = {}
+
+    for line in output.splitlines():
+        if not line.startswith(marker):
+            continue
+
+        fields = line.split("\t")
+
+        if len(fields) != 4 or fields[0] != marker:
+            raise EvidenceError(
+                "CALL_TARGET_ID_RECORD_MALFORMED", line
+            )
+
+        try:
+            engine_id = int(fields[1])
+            target_id = int(fields[2])
+            label = base64.b64decode(
+                fields[3], validate=True
+            ).decode("utf-8")
+        except (
+            ValueError, UnicodeDecodeError, binascii.Error
+        ) as error:
+            raise EvidenceError(
+                "CALL_TARGET_ID_RECORD_MALFORMED", line
+            ) from error
+
+        match = re.match(
+            r"^(protos-root:[0-9a-f]{16})"
+            r"\[(TOP_LEVEL|CLOSURE)\|",
+            label,
+        )
+
+        if (
+            engine_id < 0 or target_id < 0
+            or match is None
+        ):
+            raise EvidenceError(
+                "CALL_TARGET_ID_RECORD_INVALID", line
+            )
+
+        target = f"{engine_id}:{target_id}"
+        record = {
+            "target": target,
+            "engine_id": engine_id,
+            "target_id": target_id,
+            "selector": match.group(1),
+            "kind": match.group(2),
+            "label": label,
+        }
+
+        previous = targets.get(target)
+
+        if previous is not None and previous != record:
+            raise EvidenceError(
+                "CALL_TARGET_ID_COLLISION", target
+            )
+
+        targets[target] = record
+
+    return {
+        "schema": 1,
+        "status": "AVAILABLE" if targets else "UNAVAILABLE",
+        "scope": "executed-protos-bytecode-roots",
+        "roots": [
+            targets[key] for key in sorted(
+                targets,
+                key=lambda key: tuple(
+                    int(part) for part in key.split(":")
+                ),
+            )
+        ],
+    }
+
+
+def parse_protos_root_catalog(output: str) -> dict[str, Any]:
+    """Retain stable source-backed root identities from a diagnostic JVM.
+
+    A catalogued semantic root is not necessarily a compiled CallTarget.
+    In particular, no engine:target id is invented for an uncompiled root.
+    """
+    pattern = re.compile(
+        r"^\[protos-root\] "
+        r"selector=(?P<selector>protos-root:[0-9a-f]{16}) "
+        r"kind=(?P<kind>TOP_LEVEL|CLOSURE) "
+        r"source=(?P<source>\S+) "
+        r"start=(?P<start>\d+) "
+        r"length=(?P<length>\d+)$"
+    )
+
+    roots = {}
+
+    for line in output.splitlines():
+        if not line.startswith("[protos-root] "):
+            continue
+
+        match = pattern.fullmatch(line)
+
+        if match is None:
+            raise EvidenceError(
+                "PROTOS_ROOT_CATALOG_MALFORMED", line
+            )
+
+        entry = match.groupdict()
+        entry["start"] = int(entry["start"])
+        entry["length"] = int(entry["length"])
+        entry["occurrences"] = 1
+
+        selector = entry["selector"]
+        previous = roots.get(selector)
+
+        if previous is None:
+            roots[selector] = entry
+        elif all(
+            previous[key] == entry[key]
+            for key in ("selector", "kind", "source", "start", "length")
+        ):
+            previous["occurrences"] += 1
+        else:
+            raise EvidenceError(
+                "PROTOS_ROOT_SELECTOR_COLLISION", selector
+            )
+
+    ordered = sorted(
+        roots.values(),
+        key=lambda entry: (
+            entry["source"],
+            entry["start"],
+            entry["length"],
+            entry["kind"],
+            entry["selector"],
+        ),
+    )
+
+    return {
+        "schema": 1,
+        "status": "AVAILABLE" if ordered else "UNAVAILABLE",
+        "scope": "all-catalogued-semantic-roots",
+        "roots": ordered,
+    }
+
+
 def normalize_label(label: str) -> str:
     """Removes per-process object identity (``@4ae9cfc1``, `` at 2cbc655a>``)
     so that the same root can be compared across processes."""

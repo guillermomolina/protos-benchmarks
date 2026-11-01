@@ -69,6 +69,18 @@ class BytecodeCaptureContractTest(unittest.TestCase):
             any("jdk.graal.Dump" in value for value in options)
         )
 
+    def test_stable_identity_only_for_protos_dsl(self):
+        option = mg.PROTOS_STABLE_ROOT_OPTION
+        self.assertIn(
+            option, mg.bytecode_histogram_options("protos")
+        )
+        self.assertNotIn(
+            option, mg.bytecode_histogram_options("python")
+        )
+        self.assertNotIn(
+            option, mg.bytecode_histogram_options("js")
+        )
+
     def test_missing_histogram_is_explicit_and_not_timing(self):
         runtime = {
             "runtime_cp": "fake",
@@ -509,6 +521,42 @@ class ColdPolicyTest(unittest.TestCase):
             mg.cold_jvm_options(
                 policy, 2, 100, 100, Path("/tmp/graphs")
             )
+
+    def test_stable_identity_only_for_protos_cold(self):
+        policy = mg.load_policy()
+        make = lambda language: mg.cold_jvm_options(
+            policy, 1, 100, 1000000,
+            Path("/tmp/graphs"),
+            language=language,
+        )
+        self.assertIn(
+            mg.PROTOS_STABLE_ROOT_OPTION, make("protos")
+        )
+        self.assertNotIn(
+            mg.PROTOS_STABLE_ROOT_OPTION, make("python")
+        )
+        self.assertNotIn(
+            mg.PROTOS_STABLE_ROOT_OPTION, make("js")
+        )
+
+    def test_cold_parser_accepts_dash_prefixed_jvm_option(self):
+        option = (
+            "-Dpolyglot.bench-bytecode-size."
+            "TraceCallTargets=true"
+        )
+
+        args = mg.parse_args([
+            "cold",
+            "--dir", str(ROOT),
+            "--output", str(ROOT / "results/local/test"),
+            "--language", "protos",
+            "--workload", "fibonacci",
+            "--tier", "1",
+            "--last-threshold", "1000000",
+            f"--jvm-option={option}",
+        ])
+
+        self.assertEqual(args.jvm_option, [option])
 
     def test_exact_invocation_sequence(self):
         args, sequence = mg.cold_invocation_arguments(

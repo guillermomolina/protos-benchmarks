@@ -94,7 +94,185 @@ def resolve(text, language="js", source=JS_SRC):
     return ge.resolve_units(ge.parse_trace(text), POLICY, POLICY["languages"][language], source)
 
 
+class StableProtosRootIdentityTest(unittest.TestCase):
+
+    def test_compilation_label_with_internal_pipes(self):
+        root = (
+            "protos-root:0123456789abcdef"
+            "[CLOSURE|file:///tmp/fibonacci.protos|30+100]"
+        )
+        output = "\n".join([
+            *inline(root, [("Inlined", root, 1)]),
+            *expansion(root, 35),
+            done(root, 2, 2, 10, 35),
+        ]) + "\n"
+
+        parsed = ge.parse_trace(output)
+        self.assertEqual([], parsed["unknown_lifecycle_events"])
+        self.assertEqual(root, parsed["compilations"][0]["label"])
+        self.assertEqual("1:2", parsed["compilations"][0]["target"])
+        self.assertEqual(
+            root,
+            parsed["compilations"][0]["inline_tree"][0]["label"],
+        )
+
+    def test_semantic_catalog_retains_uncompiled_roots(self):
+        line = (
+            "[protos-root] selector=protos-root:0123456789abcdef "
+            "kind=TOP_LEVEL source=file:///tmp/fibonacci.protos "
+            "start=0 length=240"
+        )
+        catalog = ge.parse_protos_root_catalog(line + "\n" + line)
+        self.assertEqual("AVAILABLE", catalog["status"])
+        self.assertEqual(1, len(catalog["roots"]))
+        self.assertEqual(2, catalog["roots"][0]["occurrences"])
+        self.assertEqual("TOP_LEVEL", catalog["roots"][0]["kind"])
+
+    def test_semantic_catalog_rejects_selector_collision(self):
+        first = (
+            "[protos-root] selector=protos-root:0123456789abcdef "
+            "kind=CLOSURE source=file:///x.protos start=1 length=5"
+        )
+        second = first.replace("start=1", "start=2")
+        with self.assertRaises(ge.EvidenceError) as caught:
+            ge.parse_protos_root_catalog(first + "\n" + second)
+        self.assertEqual(
+            "PROTOS_ROOT_SELECTOR_COLLISION",
+            caught.exception.reason,
+        )
+
+
+class CallTargetIdentityTest(unittest.TestCase):
+
+    def record(self, engine, target, label):
+        import base64
+        encoded = base64.b64encode(
+            label.encode("utf-8")
+        ).decode("ascii")
+        return (
+            f"BENCH_CALL_TARGET_ID_V1\t"
+            f"{engine}\t{target}\t{encoded}"
+        )
+
+    def test_executed_top_level_is_not_assumed_compiled(self):
+        top = (
+            "protos-root:c1c2d49165ed00c7"
+            "[TOP_LEVEL|truffle:source|1022+165]"
+        )
+        fib = (
+            "protos-root:9e63b5cbd94a66e6"
+            "[CLOSURE|truffle:source|1046+105]"
+        )
+        output = "\n".join([
+            self.record(1, 1, top),
+            self.record(1, 2, fib),
+        ])
+        parsed = ge.parse_call_target_identity_trace(output)
+        self.assertEqual("AVAILABLE", parsed["status"])
+        self.assertEqual(
+            ["1:1", "1:2"],
+            [root["target"] for root in parsed["roots"]],
+        )
+        self.assertEqual("TOP_LEVEL", parsed["roots"][0]["kind"])
+        self.assertEqual(
+            "protos-root:c1c2d49165ed00c7",
+            parsed["roots"][0]["selector"],
+        )
+
+    def test_conflicting_target_id_fails_closed(self):
+        a = (
+            "protos-root:c1c2d49165ed00c7"
+            "[TOP_LEVEL|truffle:source|0+10]"
+        )
+        b = (
+            "protos-root:9e63b5cbd94a66e6"
+            "[CLOSURE|truffle:source|1+8]"
+        )
+        output = "\n".join([
+            self.record(1, 1, a),
+            self.record(1, 1, b),
+        ])
+        with self.assertRaises(ge.EvidenceError) as caught:
+            ge.parse_call_target_identity_trace(output)
+        self.assertEqual(
+            "CALL_TARGET_ID_COLLISION",
+            caught.exception.reason,
+        )
+
+    def test_invalid_and_missing_records(self):
+        self.assertEqual(
+            "UNAVAILABLE",
+            ge.parse_call_target_identity_trace(
+                "result=6765\n"
+            )["status"],
+        )
+        with self.assertRaises(ge.EvidenceError):
+            ge.parse_call_target_identity_trace(
+                "BENCH_CALL_TARGET_ID_V1\tinvalid"
+            )
+
+
 class TraceParsingTest(unittest.TestCase):
+
+    def test_unpadded_protos_inline_events(self):
+        parent = (
+            "protos-root:4308b246ea11a3c5"
+            "[CLOSURE|truffle:source|1172+13]"
+        )
+        callee = (
+            "protos-root:9e63b5cbd94a66e6"
+            "[CLOSURE|truffle:source|1046+105]"
+        )
+
+        lines = [
+            f"[engine] Inline start {parent}|Frequency 1.00|Depth 0|Forced false",
+            f"[engine] Inlined {callee}|Frequency 1.00|Depth 1|Forced false",
+            f"[engine] Cutoff {parent}|Frequency 1.00|Depth 2|Forced false",
+            f"[engine] Inline done {parent}|Frequency 1.00|Depth 0|Forced false",
+            done(parent, 3, 2, 99, 7),
+        ]
+
+        parsed = ge.parse_trace("\n".join(lines) + "\n")
+        (compilation,) = parsed["compilations"]
+
+        self.assertEqual(parent, compilation["label"])
+        self.assertEqual([
+            {"verb": "Inlined", "label": callee, "depth": 1},
+            {"verb": "Cutoff", "label": parent, "depth": 2},
+        ], compilation["inline_tree"])
+
+
+    def test_stable_protos_inline_labels_with_pipes(self):
+        parent = (
+            "protos-root:4308b246ea11a3c5"
+            "[CLOSURE|truffle:source|1172+13]"
+        )
+        callee = (
+            "protos-root:9e63b5cbd94a66e6"
+            "[CLOSURE|truffle:source|1046+105]"
+        )
+
+        lines = [
+            *inline(parent, [
+                ("Inlined", callee, 1),
+                ("Cutoff", parent, 2),
+            ]),
+            done(parent, 3, 2, 99, 7),
+        ]
+
+        parsed = ge.parse_trace("\n".join(lines) + "\n")
+
+        self.assertEqual([], parsed["unknown_lifecycle_events"])
+        self.assertEqual(1, len(parsed["compilations"]))
+
+        compilation = parsed["compilations"][0]
+
+        self.assertEqual(parent, compilation["label"])
+        self.assertEqual([
+            {"verb": "Inlined", "label": callee, "depth": 1},
+            {"verb": "Cutoff", "label": parent, "depth": 2},
+        ], compilation["inline_tree"])
+
     def test_real_records_with_spaces_and_inval(self):
         parsed = ge.parse_trace(REAL)
         self.assertEqual([], parsed["unknown_lifecycle_events"])

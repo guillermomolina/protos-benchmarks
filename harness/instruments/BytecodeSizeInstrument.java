@@ -41,6 +41,13 @@ public final class BytecodeSizeInstrument extends TruffleInstrument {
             category = OptionCategory.INTERNAL)
     static final OptionKey<Boolean> ENABLED = new OptionKey<>(false);
 
+    @Option(
+            name = "TraceCallTargets",
+            help = "Record executed Protos root CallTarget engine and target IDs.",
+            category = OptionCategory.INTERNAL)
+    static final OptionKey<Boolean> TRACE_CALL_TARGETS =
+            new OptionKey<>(false);
+
     @Override
     protected OptionDescriptors getOptionDescriptors() {
         return new BytecodeSizeInstrumentOptionDescriptors();
@@ -52,12 +59,21 @@ public final class BytecodeSizeInstrument extends TruffleInstrument {
     private final Map<RootNode, String> lastSnapshots =
             new IdentityHashMap<>();
 
+    private final Map<RootNode, Boolean> observedTargets =
+            new IdentityHashMap<>();
+
+    private boolean sizesEnabled;
+    private boolean targetsEnabled;
+
     private int nextRootId = 1;
     private PrintWriter output;
 
     @Override
     protected void onCreate(Env env) {
-        if (!env.getOptions().get(ENABLED)) {
+        sizesEnabled = env.getOptions().get(ENABLED);
+        targetsEnabled = env.getOptions().get(TRACE_CALL_TARGETS);
+
+        if (!sizesEnabled && !targetsEnabled) {
             return;
         }
 
@@ -107,6 +123,14 @@ public final class BytecodeSizeInstrument extends TruffleInstrument {
                 .getRootNode();
 
         if (!(root instanceof BytecodeRootNode)) {
+            return;
+        }
+
+        if (targetsEnabled) {
+            observeCallTarget(root);
+        }
+
+        if (!sizesEnabled) {
             return;
         }
 
@@ -161,6 +185,13 @@ public final class BytecodeSizeInstrument extends TruffleInstrument {
 
         String name = root.getName();
 
+        // Diagnostic-only stable semantic identity for Protos.
+        // Other languages retain their existing root names.
+        String diagnosticName = root.toString();
+        if (diagnosticName.startsWith("protos-root:")) {
+            name = diagnosticName;
+        }
+
         if (name == null || name.isEmpty()) {
             name = root.getClass().getName();
         }
@@ -191,6 +222,53 @@ public final class BytecodeSizeInstrument extends TruffleInstrument {
             output.println(
                     "BENCH_BYTECODE_SIZE_V2\t" + snapshot);
             lastSnapshots.put(root, snapshot);
+        }
+    }
+
+    private void observeCallTarget(RootNode root) {
+        if (observedTargets.containsKey(root)) {
+            return;
+        }
+
+        String label = root.toString();
+
+        if (!label.startsWith("protos-root:")) {
+            return;
+        }
+
+        Object target = root.getCallTarget();
+
+        try {
+            Class<?> type = target.getClass();
+
+            Object engineValue = type
+                    .getMethod("engineId")
+                    .invoke(target);
+
+            long engineId = ((Number) engineValue).longValue();
+            long targetId = type.getField("id").getLong(target);
+
+            if (engineId < 0 || targetId < 0) {
+                throw new IllegalStateException(
+                        "Invalid CallTarget identity");
+            }
+
+            String encodedLabel = Base64.getEncoder()
+                    .encodeToString(label.getBytes(
+                            StandardCharsets.UTF_8));
+
+            output.println(
+                    "BENCH_CALL_TARGET_ID_V1\t"
+                    + engineId + "\t"
+                    + targetId + "\t"
+                    + encodedLabel);
+
+            observedTargets.put(root, Boolean.TRUE);
+
+        } catch (ReflectiveOperationException | SecurityException error) {
+            throw new IllegalStateException(
+                    "BENCH_CALL_TARGET_ID_ACCESS_FAILED",
+                    error);
         }
     }
 

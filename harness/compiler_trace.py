@@ -103,12 +103,14 @@ VERB_KINDS = {
 OPT_RE = re.compile(
     r"^\[engine\] opt (?P<verb>[A-Za-z.]+)\s+"
     r"(?:engine=(?P<engine>\d+)\s+id=(?P<id>\d+)\s+)?"
-    r"(?P<label>[^\s|][^|]*?)(?P<rest>\s*\|.*|\s*)$"
+    r"(?P<label>[^\s|].*?)(?P<rest>\s+\|.*|\s*)$"
 )
 INLINE_RE = re.compile(
-    r"^\[engine\] (?P<verb>Inline start|Inline done|Inlined|Cutoff|Removed|Expanded|Indirect|BailedOut)"
-    r"\s+(?P<label>[^\s|][^|]*?)\s*\|(?P<rest>.*)$"
+    r"^\[engine\] "
+    r"(?P<verb>Inline start|Inline done|Inlined|Cutoff|Removed|Expanded|Indirect|BailedOut)"
+    r"\s+(?P<label>[^\s|].*?)\s*\|(?P<rest>Frequency\s+.*)$"
 )
+
 PERF_WARN_RE = re.compile(r"^\[engine\] perf warn\s+(?P<label>\S+)\s*\|(?P<message>.*)$")
 ENGINE_WARNING_RE = re.compile(r"^\[engine\] WARNING: (?P<text>.*)$")
 DEPRECATED_OPTION_RE = re.compile(r"Option '(?P<option>[^']+)' is deprecated")

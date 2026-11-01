@@ -58,6 +58,12 @@ POLICY = HARNESS_DIR / "policy" / "graphs.json"
 ANALYZER = HARNESS_DIR / "igv_analyzer.sh"
 SCHEMA_VERSION = 1
 LANGUAGES = ("protos", "js", "python")
+PROTOS_STABLE_ROOT_OPTION = (
+    "-Dprotos.diagnostic.stableRootIdentity=true"
+)
+CALL_TARGET_TRACE_OPTION = (
+    "-Dpolyglot.bench-bytecode-size.TraceCallTargets=true"
+)
 OUTPUT_MARKER = ".measure-graphs-output"
 EVIDENCE_UNIT_DEFINITION = (
     "One (protos revision, harness producer, language, surface, workload) case: "
@@ -73,6 +79,8 @@ GRAPH_PRODUCER_FILES = (
     POLICY,
     HARNESS_DIR / "compiler_trace.py",
     ANALYZER,
+    bsr.SOURCE,
+    Path(bsr.__file__),
 )
 
 
@@ -879,12 +887,17 @@ def verify(args: argparse.Namespace) -> int:
 
 
 
-def bytecode_histogram_options() -> list[str]:
+def bytecode_histogram_options(
+    language: str | None = None,
+) -> list[str]:
     """Options for a dedicated diagnostic JVM, never a timing JVM."""
-    return [
+    options = [
         "-Dpolyglot.engine.AllowExperimentalOptions=true",
         "-Dpolyglot.engine.BytecodeHistogram=language,root",
     ]
+    if language == "protos":
+        options.append(PROTOS_STABLE_ROOT_OPTION)
+    return options
 
 
 def run_bytecode_diagnostic(
@@ -894,6 +907,7 @@ def run_bytecode_diagnostic(
     calls: int,
     cpu: int,
     log: Path,
+    language: str | None = None,
 ) -> dict[str, Any]:
     """Collect per-root executed opcodes without admitting timing."""
     if type(calls) is not int or not 1 <= calls <= 1000000:
@@ -902,7 +916,7 @@ def run_bytecode_diagnostic(
     instrument = None
     unavailable_reason = None
     runtime_cp = runtime["runtime_cp"]
-    jvm_options = bytecode_histogram_options()
+    jvm_options = bytecode_histogram_options(language)
 
     try:
         instrument = bsr.compile_instrument(runtime_cp)
@@ -954,6 +968,18 @@ def run_bytecode_diagnostic(
         )
 
     histogram = ge.parse_bytecode_histogram(output)
+    semantic_catalog = (
+        ge.parse_protos_root_catalog(output)
+        if language == "protos" else None
+    )
+
+    if (
+        language == "protos"
+        and semantic_catalog["status"] != "AVAILABLE"
+    ):
+        raise ge.EvidenceError(
+            "PROTOS_ROOT_CATALOG_NOT_EMITTED"
+        )
 
     if instrument is None:
         size_evidence = {
@@ -981,6 +1007,7 @@ def run_bytecode_diagnostic(
     return {
         "status": histogram["status"],
         "histogram": histogram,
+        "semantic_root_catalog": semantic_catalog,
         "size": size_evidence,
         "size_instrument": instrument_evidence,
         "raw_log": "raw/bytecode-histogram.log",
@@ -1130,7 +1157,9 @@ def bytecode_capture(args: argparse.Namespace) -> int:
             "requested_version": args.version,
             "java_runtime_version": java.get("java.runtime.version"),
             "calls": args.calls,
-            "jvm_options": bytecode_histogram_options(),
+            "jvm_options": bytecode_histogram_options(
+                args.language
+            ),
         },
         "timing_evidence": "NONE",
         "graph_evidence": "NONE",
@@ -1164,6 +1193,7 @@ def bytecode_capture(args: argparse.Namespace) -> int:
             args.calls,
             cpu,
             raw / "bytecode-histogram.log",
+            args.language,
         )
         metadata["capture_key"]["jvm_options"] = metadata['bytecode']["jvm_options"]
 
@@ -1223,6 +1253,13 @@ def cold_capture(args: argparse.Namespace) -> int:
     """One selected compilation in a fresh JVM, never a timing reference."""
     policy = load_policy()
     cases = mp.load_cases()
+
+    trace_targets = CALL_TARGET_TRACE_OPTION in args.jvm_option
+
+    if trace_targets and args.language != "protos":
+        raise mp.UsageError(
+            "CallTarget identity tracing is Protos-only"
+        )
 
     if args.workload not in workload_catalog.workload_ids():
         raise mp.UsageError(f"unknown workload: {args.workload}")
@@ -1368,6 +1405,34 @@ def cold_capture(args: argparse.Namespace) -> int:
                 f"expected {expected}, got {actual!r}",
             )
 
+        if trace_targets:
+            try:
+                instrument = bsr.compile_instrument(
+                    runtime["runtime_cp"]
+                )
+            except bsr.InstrumentError as error:
+                raise mp.InvalidMeasurement(
+                    "CALL_TARGET_INSTRUMENT_NOT_READY",
+                    str(error),
+                ) from error
+
+            runtime["runtime_cp"] = os.pathsep.join([
+                str(instrument["classes"]),
+                runtime["runtime_cp"],
+            ])
+
+            metadata["call_target_instrument"] = {
+                "mode": "DIAGNOSTIC_ONLY",
+                "cache_key": instrument["cache_key"],
+                "version": instrument["version"],
+                "source_sha256": bsr.sha256_file(
+                    bsr.SOURCE
+                ),
+                "processor_sha256": instrument[
+                    "processor_sha256"
+                ],
+            }
+
         workdir = raw / "cold-jvm"
         dumps = workdir / "dumps"
         dumps.mkdir(parents=True)
@@ -1379,6 +1444,7 @@ def cold_capture(args: argparse.Namespace) -> int:
             args.last_threshold,
             dumps,
             tuple(args.jvm_option),
+            args.language,
         )
 
         invocation_args, sequence = cold_invocation_arguments(
@@ -1412,6 +1478,53 @@ def cold_capture(args: argparse.Namespace) -> int:
             )
 
         parsed = ge.parse_trace(output_text)
+
+        if args.language == "protos":
+            catalog = ge.parse_protos_root_catalog(output_text)
+            if catalog["status"] != "AVAILABLE":
+                raise ge.EvidenceError(
+                    "PROTOS_ROOT_CATALOG_NOT_EMITTED"
+                )
+            metadata["semantic_root_catalog"] = catalog
+
+        if trace_targets:
+            identities = ge.parse_call_target_identity_trace(
+                output_text
+            )
+
+            if identities["status"] != "AVAILABLE":
+                raise ge.EvidenceError(
+                    "CALL_TARGET_IDENTITIES_NOT_EMITTED"
+                )
+
+            by_target = {
+                item["target"]: item
+                for item in identities["roots"]
+            }
+
+            for compilation in parsed["compilations"]:
+                label = compilation["label"]
+
+                if not label.startswith("protos-root:"):
+                    continue
+
+                matching = by_target.get(
+                    compilation["target"]
+                )
+
+                if matching is None:
+                    raise ge.EvidenceError(
+                        "COMPILED_ROOT_IDENTITY_NOT_OBSERVED",
+                        compilation["target"],
+                    )
+
+                if matching["label"] != label:
+                    raise ge.EvidenceError(
+                        "COMPILED_ROOT_IDENTITY_MISMATCH",
+                        compilation["target"],
+                    )
+
+            metadata["call_target_identities"] = identities
 
         resolution = None
         if args.root == "primary":
@@ -3364,6 +3477,7 @@ def cold_jvm_options(
     last_threshold: int,
     dump_path: Path,
     extras: tuple[str, ...] = (),
+    language: str | None = None,
 ) -> list[str]:
     """Fixed Graal thresholds; the observed tier is checked separately."""
     if tier not in (1, 2):
@@ -3388,6 +3502,7 @@ def cold_jvm_options(
         "-Dpolyglot.engine.TraceCompilation=",
         "-Dpolyglot.engine.BackgroundCompilation=",
         "-Djdk.graal.Dump",
+        "-Dprotos.diagnostic.stableRootIdentity=",
     )
 
     for option in extras:
@@ -3407,6 +3522,10 @@ def cold_jvm_options(
         f"-Dpolyglot.engine.LastTierCompilationThreshold={last_threshold}",
         policy["dump_path_option"] + str(dump_path),
         *extras,
+        *(
+            [PROTOS_STABLE_ROOT_OPTION]
+            if language == "protos" else []
+        ),
     ]
 
 

@@ -26,6 +26,7 @@ PROFILE ?= none
 TEMPERATURE ?= hot
 TIER ?= 2
 COMPILATION_ROOT ?= primary
+RETAIN_RECOMPILED_TIERS ?= 0
 WARMUP_CALLS ?= 0
 INVOCATIONS ?= 2000
 BYTECODE_CALLS ?= 100
@@ -105,7 +106,8 @@ COLD_ARGS = --tier "$(TIER)" --root "$(COMPILATION_ROOT)" \
             --invocations "$(INVOCATIONS)" \
             --first-threshold "$(FIRST_THRESHOLD)" \
             $(if $(strip $(LAST_THRESHOLD)),--last-threshold "$(LAST_THRESHOLD)",) \
-            $(if $(strip $(JVM_OPTION)),--jvm-option="$(JVM_OPTION)",)
+            $(if $(strip $(JVM_OPTION)),--jvm-option="$(JVM_OPTION)",) \
+            $(if $(filter 1,$(RETAIN_RECOMPILED_TIERS)),--retain-recompiled-tiers,)
 
 bytecode-capture:
 	@$(PYTHON) $(HARNESS) bytecode-capture $(ARGS) --bytecode-calls "$(BYTECODE_CALLS)"

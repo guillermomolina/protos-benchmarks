@@ -631,6 +631,9 @@ def run_cold(args):
         for option in args.jvm_option:
             arguments.append(f"--jvm-option={option}")
 
+        if args.retain_recompiled_tiers:
+            arguments.append("--retain-recompiled-tiers")
+
         return run_container(
             binary, args.image, product, arguments
         )
@@ -786,6 +789,10 @@ def parse_args(argv=None):
     parser.add_argument("--tier2-dir")
     parser.add_argument("--tier", type=int, choices=(1, 2), default=2)
     parser.add_argument("--root", default="primary")
+    parser.add_argument(
+        "--retain-recompiled-tiers",
+        action="store_true",
+    )
     parser.add_argument("--warmup-calls", type=int, default=0)
     parser.add_argument("--invocations", type=int, default=2000)
     parser.add_argument("--bytecode-calls", type=int, default=100)

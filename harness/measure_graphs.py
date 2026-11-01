@@ -468,12 +468,28 @@ def retain_runs(runs: list[dict[str, Any]], stabilization: dict[str, Any], stagi
         run["retained_bgv"] = []
 
         if run["budget"] in keep and run["resolution"]:
+            retained_names = []
+
             for unit in run["resolution"]["units"]:
                 for name in unit.get("bgv", []):
-                    packed = target / "bgv" / (name + ".gz")
-                    packed.parent.mkdir(exist_ok=True)
-                    gzip_file(workdir / "dumps" / name, packed)
-                    run["retained_bgv"].append(str(packed.relative_to(staging)))
+                    if name not in retained_names:
+                        retained_names.append(name)
+
+            for diagnostic in run.get(
+                "diagnostic_recompiled_tiers", []
+            ):
+                for compilation in diagnostic["compilations"]:
+                    name = compilation["bgv"]
+                    if name not in retained_names:
+                        retained_names.append(name)
+
+            for name in retained_names:
+                packed = target / "bgv" / (name + ".gz")
+                packed.parent.mkdir(exist_ok=True)
+                gzip_file(workdir / "dumps" / name, packed)
+                run["retained_bgv"].append(
+                    str(packed.relative_to(staging))
+                )
 
         shutil.rmtree(workdir)
 
@@ -650,6 +666,178 @@ def unit_graphs(directory: Path, run: dict[str, Any], phase: str) -> list[dict[s
         )
 
     return units
+
+
+def diagnostic_recompiled_graphs(
+    directory: Path,
+    run: dict[str, Any],
+    phase: str,
+) -> list[dict[str, Any]]:
+    """Analyze ambiguous tier recompilations as diagnostic evidence only.
+
+    These graphs are never added to resolution.units or stable totals.
+    Every original BGV is checked against its capture-time identity.
+    """
+    results = []
+    inventory = run.get("dump_inventory", [])
+    retained = run.get("retained_bgv", [])
+
+    for entry in run.get("diagnostic_recompiled_tiers", []):
+        if (
+            entry.get("reason") != "TIER_COMPILATION_AMBIGUOUS"
+            or entry.get("status") != "DIAGNOSTIC_ONLY"
+            or entry.get("stability")
+            != "LAST_OBSERVED_NOT_STABILITY_PROOF"
+        ):
+            raise ge.EvidenceError(
+                "DIAGNOSTIC_CLASSIFICATION_INVALID",
+                entry.get("target"),
+            )
+
+        recorded = entry["compilations"]
+        if len(recorded) < 2:
+            raise ge.EvidenceError(
+                "DIAGNOSTIC_COMPILATION_COUNT_INVALID",
+                entry["target"],
+            )
+
+        previous_seq = None
+        observed_ids = []
+        analyzed = []
+
+        for compilation in recorded:
+            comp_id = compilation["comp_id"]
+            seq = compilation["trace_sequence"]
+            name = compilation["bgv"]
+
+            if (
+                comp_id in observed_ids
+                or previous_seq is not None
+                and seq <= previous_seq
+            ):
+                raise ge.EvidenceError(
+                    "DIAGNOSTIC_COMPILATION_ORDER_INVALID",
+                    entry["target"],
+                )
+
+            previous_seq = seq
+            observed_ids.append(comp_id)
+
+            if (
+                not isinstance(name, str)
+                or Path(name).name != name
+                or ge.dumps_for(comp_id, [name]) != [name]
+            ):
+                raise ge.EvidenceError(
+                    "DIAGNOSTIC_BGV_IDENTITY_MISMATCH",
+                    {"comp_id": comp_id, "bgv": name},
+                )
+
+            matches = [
+                item
+                for item in inventory
+                if item["name"] == name
+            ]
+
+            if len(matches) != 1:
+                raise ge.EvidenceError(
+                    "DIAGNOSTIC_BGV_INVENTORY_NOT_UNIQUE",
+                    {"comp_id": comp_id, "matches": len(matches)},
+                )
+
+            item = matches[0]
+
+            if (
+                item["sha256"] != compilation["bgv_sha256"]
+                or item["bytes"] != compilation["bgv_bytes"]
+            ):
+                raise ge.EvidenceError(
+                    "DIAGNOSTIC_BGV_INVENTORY_MISMATCH",
+                    comp_id,
+                )
+
+            relative = (
+                f"budget-{run['budget']}/bgv/{name}.gz"
+            )
+
+            if retained.count(relative) != 1:
+                raise ge.EvidenceError(
+                    "DIAGNOSTIC_BGV_NOT_RETAINED",
+                    relative,
+                )
+
+            packed = directory / relative
+
+            if (
+                not packed.resolve().is_relative_to(
+                    directory.resolve()
+                )
+                or not packed.is_file()
+            ):
+                raise ge.EvidenceError(
+                    "DIAGNOSTIC_BGV_NOT_RETAINED",
+                    relative,
+                )
+
+            digest = structural_bgv_digest(packed)
+
+            if digest != compilation["bgv_sha256"]:
+                raise ge.EvidenceError(
+                    "DIAGNOSTIC_BGV_SHA256_MISMATCH",
+                    comp_id,
+                )
+
+            analysis = packed.with_name(
+                name[:-len(".bgv")] + ".filter.json.gz"
+            )
+
+            if not analysis.is_file():
+                raise ge.EvidenceError(
+                    "DIAGNOSTIC_BGV_NOT_ANALYZED",
+                    comp_id,
+                )
+
+            graph = ge.select_unit_graph(
+                json.loads(read_gzip_text(analysis)),
+                phase,
+            )
+
+            analyzed.append({
+                **compilation,
+                "bgv": relative,
+                "analysis": str(
+                    analysis.relative_to(directory)
+                ),
+                "analysis_sha256": mp.sha256_file(analysis),
+                "graph": graph,
+            })
+
+        if (
+            entry["last_observed_compilation_id"]
+            != observed_ids[-1]
+        ):
+            raise ge.EvidenceError(
+                "DIAGNOSTIC_LAST_COMPILATION_MISMATCH",
+                entry["target"],
+            )
+
+        results.append({
+            "target": entry["target"],
+            "label": entry["label"],
+            "normalized_label": entry["normalized_label"],
+            "cross_run_identity": entry[
+                "cross_run_identity"
+            ],
+            "requested_tier": entry["requested_tier"],
+            "reason": entry["reason"],
+            "status": "DIAGNOSTIC_ONLY",
+            "stability": "LAST_OBSERVED_NOT_STABILITY_PROOF",
+            "last_observed_compilation_id": observed_ids[-1],
+            "counted_in_selected_units": False,
+            "compilations": analyzed,
+        })
+
+    return results
 
 
 def structural_key(units: list[dict[str, Any]]) -> list[Any]:
@@ -1267,6 +1455,11 @@ def cold_capture(args: argparse.Namespace) -> int:
     if args.language not in LANGUAGES:
         raise mp.UsageError(f"unknown language: {args.language}")
 
+    if args.retain_recompiled_tiers and args.root != "all":
+        raise mp.UsageError(
+            "--retain-recompiled-tiers requires --root all"
+        )
+
     product_dir = args.dir.expanduser().resolve()
     output = args.output.expanduser().resolve()
     prepare_output(output)
@@ -1326,6 +1519,7 @@ def cold_capture(args: argparse.Namespace) -> int:
         "capture_mode": "cold-single-compilation-v1",
         "requested_tier": args.tier,
         "requested_root": args.root,
+        "retain_recompiled_tiers": args.retain_recompiled_tiers,
         "warmup_calls": args.warmup_calls,
         "invocations": args.invocations,
         "first_tier_threshold": args.first_threshold,
@@ -1351,6 +1545,7 @@ def cold_capture(args: argparse.Namespace) -> int:
         "selected_phase": policy["selected_phase"],
         "requested_tier": args.tier,
         "requested_root": args.root,
+        "retain_recompiled_tiers": args.retain_recompiled_tiers,
         "timing_evidence": "NONE",
         "timing_explanation": (
             "Compilation instrumentation changes execution cost; "
@@ -1535,6 +1730,7 @@ def cold_capture(args: argparse.Namespace) -> int:
 
         root_identity = {}
         unavailable_roots = []
+        diagnostic_recompiled_tiers = []
 
         if args.root == "all":
             inventory = ge.observed_compilation_roots(
@@ -1590,6 +1786,103 @@ def cold_capture(args: argparse.Namespace) -> int:
         bgv_names = sorted(
             path.name for path in dumps.glob("*.bgv")
         )
+
+        if args.retain_recompiled_tiers:
+            lifecycles = ge.target_lifecycles(parsed)
+
+            for entry in inventory["roots"]:
+                if entry["reason"] != "TIER_COMPILATION_AMBIGUOUS":
+                    continue
+
+                target = entry["target"]
+                observed = sorted(
+                    (
+                        compilation
+                        for compilation
+                        in lifecycles[target]["compilations"]
+                        if compilation["tier"] == args.tier
+                    ),
+                    key=lambda item: item["seq"],
+                )
+
+                if len(observed) < 2:
+                    raise ge.EvidenceError(
+                        "DIAGNOSTIC_COMPILATION_COUNT_INVALID",
+                        target,
+                    )
+
+                compilations = []
+
+                for index, compilation in enumerate(observed):
+                    comp_id = compilation["comp_id"]
+
+                    required = (
+                        "comp_id",
+                        "seq",
+                        "ir_after_truffle_tier",
+                        "ir_final",
+                        "machine_code_bytes",
+                    )
+
+                    missing = [
+                        key for key in required
+                        if compilation.get(key) is None
+                    ]
+
+                    if missing:
+                        raise ge.EvidenceError(
+                            "DIAGNOSTIC_COMPILATION_METRICS_MISSING",
+                            {"comp_id": comp_id, "fields": missing},
+                        )
+
+                    matched = ge.dumps_for(comp_id, bgv_names)
+
+                    if len(matched) != 1:
+                        raise ge.EvidenceError(
+                            "DIAGNOSTIC_BGV_NOT_UNIQUE_FOR_COMPILATION",
+                            {
+                                "target": target,
+                                "comp_id": comp_id,
+                                "matching_bgv": matched,
+                            },
+                        )
+
+                    name = matched[0]
+                    bgv = dumps / name
+
+                    compilations.append({
+                        "ordinal": index + 1,
+                        "comp_id": comp_id,
+                        "tier": compilation["tier"],
+                        "trace_sequence": compilation["seq"],
+                        "ir_after_truffle_tier": compilation[
+                            "ir_after_truffle_tier"
+                        ],
+                        "ir_final": compilation["ir_final"],
+                        "machine_code_bytes": compilation[
+                            "machine_code_bytes"
+                        ],
+                        "bgv": name,
+                        "bgv_sha256": mp.sha256_file(bgv),
+                        "bgv_bytes": bgv.stat().st_size,
+                    })
+
+                diagnostic_recompiled_tiers.append({
+                    "target": target,
+                    "label": entry["label"],
+                    "normalized_label": entry["normalized_label"],
+                    "cross_run_identity": entry[
+                        "cross_run_identity"
+                    ],
+                    "requested_tier": args.tier,
+                    "reason": entry["reason"],
+                    "status": "DIAGNOSTIC_ONLY",
+                    "stability": "LAST_OBSERVED_NOT_STABILITY_PROOF",
+                    "last_observed_compilation_id": observed[-1][
+                        "comp_id"
+                    ],
+                    "compilations": compilations,
+                })
 
         units = []
         retained_selections = []
@@ -1704,6 +1997,14 @@ def cold_capture(args: argparse.Namespace) -> int:
             ],
             "workdir": workdir,
         }
+
+        if args.retain_recompiled_tiers:
+            run["diagnostic_recompiled_tiers"] = (
+                diagnostic_recompiled_tiers
+            )
+            metadata["diagnostic_recompiled_tiers"] = (
+                diagnostic_recompiled_tiers
+            )
 
         retain_runs(
             [run],
@@ -1866,6 +2167,15 @@ def cold_summarize(args: argparse.Namespace) -> int:
                     ],
                     "timing_evidence": "NONE",
                 }
+
+                if metadata.get("retain_recompiled_tiers"):
+                    summary["diagnostic_recompiled_tiers"] = (
+                        diagnostic_recompiled_graphs(
+                            directory,
+                            runs[0],
+                            metadata["selected_phase"],
+                        )
+                    )
 
                 mp.write_json(
                     directory / "cold-summary.json",
@@ -3580,6 +3890,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     cold.add_argument("--workload", required=True)
     cold.add_argument("--tier", type=int, choices=(1, 2), required=True)
     cold.add_argument("--root", default="primary")
+    cold.add_argument(
+        "--retain-recompiled-tiers",
+        action="store_true",
+    )
     cold.add_argument("--warmup-calls", type=int, default=0)
     cold.add_argument("--invocations", type=int, default=2000)
     cold.add_argument("--first-threshold", type=int, default=100)

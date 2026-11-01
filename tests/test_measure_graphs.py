@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import gzip
+import hashlib
 import io
 import json
 import sys
@@ -891,6 +892,273 @@ class AnalyzeSummarizeTest(unittest.TestCase):
         self.assertIsNone(matrix["first_divergent_rung"])
 
 
+class RecompiledTierDiagnosticsTest(unittest.TestCase):
+    """Retained recompilations are measured but never admitted as stable."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+        self.output = Path(self.tmp.name) / "results"
+        self.directory = self.output / "fibonacci" / "protos"
+        self.directory.mkdir(parents=True)
+
+        analyzer = Path(self.tmp.name) / "igv_analyzer.sh"
+        analyzer.write_text(FAKE_ANALYZER, encoding="utf-8")
+        analyzer.chmod(0o755)
+
+        analyzer_patch = patch.object(
+            mg, "ANALYZER", analyzer
+        )
+        analyzer_patch.start()
+        self.addCleanup(analyzer_patch.stop)
+
+        runtime_patch = patch.object(
+            mg.shutil, "which", return_value="/usr/bin/podman"
+        )
+        runtime_patch.start()
+        self.addCleanup(runtime_patch.stop)
+
+        self.run = {
+            "budget": 2000,
+            "resolution": {
+                "units": [
+                    unit_record("selected", "run", 30)
+                ],
+            },
+            "retained_bgv": [],
+            "dump_inventory": [],
+        }
+
+        self.records = []
+
+        for index, (comp_id, classes) in enumerate((
+            (30, ["StartNode"]),
+            (10, ["StartNode", "InvokeWithExceptionNode"]),
+            (11, [
+                "StartNode",
+                "InvokeWithExceptionNode",
+                "FrameState",
+            ]),
+        )):
+            label = "run" if comp_id == 30 else "fibonacci"
+            name = (
+                f"TruffleHotSpotCompilation-{comp_id}"
+                f"[{label}].bgv"
+            )
+
+            payload = json.dumps(
+                igv_doc(classes)
+            ).encode("utf-8")
+
+            relative = f"budget-2000/bgv/{name}.gz"
+            packed = self.directory / relative
+            packed.parent.mkdir(parents=True, exist_ok=True)
+
+            with gzip.open(packed, "wb") as stream:
+                stream.write(payload)
+
+            digest = hashlib.sha256(payload).hexdigest()
+
+            self.run["retained_bgv"].append(relative)
+            self.run["dump_inventory"].append({
+                "name": name,
+                "bytes": len(payload),
+                "sha256": digest,
+            })
+
+            if comp_id in (10, 11):
+                self.records.append({
+                    "ordinal": len(self.records) + 1,
+                    "comp_id": comp_id,
+                    "tier": 2,
+                    "trace_sequence": 100 + comp_id,
+                    "ir_after_truffle_tier": len(classes),
+                    "ir_final": len(classes) + 10,
+                    "machine_code_bytes": 1000 + comp_id,
+                    "bgv": name,
+                    "bgv_sha256": digest,
+                    "bgv_bytes": len(payload),
+                })
+
+        self.group = {
+            "target": "1:2",
+            "label": "fibonacci",
+            "normalized_label": "fibonacci",
+            "cross_run_identity": "UNIQUE",
+            "requested_tier": 2,
+            "reason": "TIER_COMPILATION_AMBIGUOUS",
+            "status": "DIAGNOSTIC_ONLY",
+            "stability": "LAST_OBSERVED_NOT_STABILITY_PROOF",
+            "last_observed_compilation_id": 11,
+            "compilations": self.records,
+        }
+
+        self.run["diagnostic_recompiled_tiers"] = [
+            self.group
+        ]
+
+        self.metadata = {
+            "schema_version": 1,
+            "mode": "cold-compilation",
+            "capture_valid": True,
+            "retain_recompiled_tiers": True,
+            "requested_root": "all",
+            "requested_tier": 2,
+            "language": "protos",
+            "workload": "fibonacci",
+            "selected_phase": "After TruffleTier",
+            "invocation_sequence": {
+                "process": "fresh-jvm",
+            },
+            "unavailable_roots": [{
+                "target": "1:2",
+                "label": "fibonacci",
+                "status": "UNAVAILABLE",
+                "reason": "TIER_COMPILATION_AMBIGUOUS",
+            }],
+            "root_inventory": {
+                "scope": "observed-compiled-call-targets-only",
+                "roots": [],
+            },
+            "runs": [self.run],
+        }
+
+        mp.write_json(
+            self.directory / "capture.json",
+            self.metadata,
+        )
+
+    def analyze(self):
+        return mg.analyze(
+            argparse.Namespace(
+                output=self.output,
+                reanalyze=False,
+            )
+        )
+
+    def summarize(self):
+        return mg.cold_summarize(
+            argparse.Namespace(output=self.output)
+        )
+
+    def test_analyze_and_summarize_both_recompilations(self):
+        self.assertEqual(self.analyze(), mp.EXIT_OK)
+        self.assertEqual(self.summarize(), mp.EXIT_OK)
+
+        summary = json.loads(
+            (self.directory / "cold-summary.json").read_text()
+        )
+
+        self.assertEqual(len(summary["units"]), 1)
+        self.assertEqual(
+            summary["units"][0]["comp_id"], 30
+        )
+
+        diagnostics = summary[
+            "diagnostic_recompiled_tiers"
+        ]
+        self.assertEqual(len(diagnostics), 1)
+
+        entry = diagnostics[0]
+
+        self.assertEqual(
+            entry["last_observed_compilation_id"], 11
+        )
+        self.assertEqual(
+            entry["stability"],
+            "LAST_OBSERVED_NOT_STABILITY_PROOF",
+        )
+        self.assertFalse(
+            entry["counted_in_selected_units"]
+        )
+
+        self.assertEqual(
+            [item["comp_id"] for item in entry["compilations"]],
+            [10, 11],
+        )
+        self.assertEqual(
+            [
+                item["graph"]["node_count"]
+                for item in entry["compilations"]
+            ],
+            [2, 3],
+        )
+        self.assertEqual(
+            entry["compilations"][0]["graph"][
+                "node_class_histogram"
+            ]["InvokeWithExceptionNode"],
+            1,
+        )
+        self.assertEqual(
+            summary["unavailable_roots"][0]["reason"],
+            "TIER_COMPILATION_AMBIGUOUS",
+        )
+        self.assertEqual(summary["timing_evidence"], "NONE")
+
+    def test_missing_retained_bgv_is_rejected(self):
+        self.assertEqual(self.analyze(), mp.EXIT_OK)
+
+        relative = self.run["retained_bgv"][2]
+        (self.directory / relative).unlink()
+
+        self.assertEqual(self.summarize(), mp.EXIT_INVALID)
+        self.assertFalse(
+            (self.directory / "cold-summary.json").exists()
+        )
+
+    def test_modified_bgv_sha256_is_rejected(self):
+        self.assertEqual(self.analyze(), mp.EXIT_OK)
+
+        relative = self.run["retained_bgv"][2]
+        packed = self.directory / relative
+
+        with gzip.open(packed, "wb") as stream:
+            stream.write(b"tampered")
+
+        self.assertEqual(self.summarize(), mp.EXIT_INVALID)
+
+    def test_wrong_compilation_identity_is_rejected(self):
+        self.assertEqual(self.analyze(), mp.EXIT_OK)
+
+        self.records[0]["comp_id"] = 999
+        mp.write_json(
+            self.directory / "capture.json", self.metadata
+        )
+
+        self.assertEqual(self.summarize(), mp.EXIT_INVALID)
+
+    def test_duplicate_compilation_ids_are_rejected(self):
+        self.assertEqual(self.analyze(), mp.EXIT_OK)
+
+        self.records[1]["comp_id"] = 10
+        mp.write_json(
+            self.directory / "capture.json", self.metadata
+        )
+
+        self.assertEqual(self.summarize(), mp.EXIT_INVALID)
+
+    def test_diagnostics_are_opt_in(self):
+        self.assertEqual(self.analyze(), mp.EXIT_OK)
+
+        self.metadata["retain_recompiled_tiers"] = False
+        mp.write_json(
+            self.directory / "capture.json",
+            self.metadata,
+        )
+
+        self.assertEqual(self.summarize(), mp.EXIT_OK)
+
+        summary = json.loads(
+            (self.directory / "cold-summary.json").read_text()
+        )
+
+        self.assertNotIn(
+            "diagnostic_recompiled_tiers", summary
+        )
+        self.assertEqual(len(summary["units"]), 1)
+
+
 class VerifyTest(unittest.TestCase):
     def test_producer_mismatch_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -913,7 +1181,13 @@ class ColdCaptureIntegrationTest(unittest.TestCase):
     """Exercise cold capture with synthetic JVM traces and BGV files."""
 
     def run_fake_capture(
-        self, requested_tier, root="run", with_helper=False
+        self,
+        requested_tier,
+        root="run",
+        with_helper=False,
+        recompiled=False,
+        retain_recompiled_tiers=False,
+        omit_second_diagnostic_bgv=False,
     ):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
@@ -968,6 +1242,26 @@ class ColdCaptureIntegrationTest(unittest.TestCase):
                 "TruffleHotSpotCompilation-43[helper].bgv"
             )
 
+        diagnostic_names = []
+
+        if recompiled:
+            compilation["tier"] = 2
+
+            for index, comp_id in enumerate((50, 51)):
+                parsed["compilations"].append({
+                    **compilation,
+                    "seq": 3 + index,
+                    "target": "engine:1/target:9",
+                    "label": "fibonacci",
+                    "comp_id": comp_id,
+                    "ir_after_truffle_tier": 600 + index,
+                    "ir_final": 900 + index,
+                })
+                diagnostic_names.append(
+                    f"TruffleHotSpotCompilation-{comp_id}"
+                    "[fibonacci].bgv"
+                )
+
         def fake_run_logged(command, log):
             log.parent.mkdir(parents=True, exist_ok=True)
 
@@ -980,6 +1274,12 @@ class ColdCaptureIntegrationTest(unittest.TestCase):
                 if helper_bgv is not None:
                     (dumps / helper_bgv).write_bytes(
                         b"synthetic-helper-bgv"
+                    )
+                for index, name in enumerate(diagnostic_names):
+                    if omit_second_diagnostic_bgv and index == 1:
+                        continue
+                    (dumps / name).write_bytes(
+                        f"diagnostic-{index}".encode("utf-8")
                     )
                 text = f"result={expected}\\n"
 
@@ -1008,6 +1308,7 @@ class ColdCaptureIntegrationTest(unittest.TestCase):
             last_threshold=1000,
             jvm_option=[],
             cpu=None,
+            retain_recompiled_tiers=retain_recompiled_tiers,
         )
 
         with (
@@ -1118,6 +1419,109 @@ class ColdCaptureIntegrationTest(unittest.TestCase):
 
         self.assertEqual(
             metadata["timing_evidence"], "NONE"
+        )
+
+    def test_recompiled_tiers_retained_but_not_admitted(self):
+        code, metadata, directory, _ = self.run_fake_capture(
+            2,
+            root="all",
+            recompiled=True,
+            retain_recompiled_tiers=True,
+        )
+
+        self.assertEqual(code, mp.EXIT_OK)
+        self.assertTrue(metadata["capture_valid"])
+
+        run = metadata["runs"][0]
+
+        self.assertEqual(
+            [item["comp_id"]
+             for item in metadata["selected_compilations"]],
+            [42],
+        )
+        self.assertEqual(
+            [item["reason"]
+             for item in metadata["unavailable_roots"]],
+            ["TIER_COMPILATION_AMBIGUOUS"],
+        )
+        self.assertEqual(
+            len(run["resolution"]["units"]), 1
+        )
+        self.assertEqual(len(run["retained_bgv"]), 3)
+
+        diagnostics = run["diagnostic_recompiled_tiers"]
+        self.assertEqual(len(diagnostics), 1)
+
+        entry = diagnostics[0]
+        self.assertEqual(entry["status"], "DIAGNOSTIC_ONLY")
+        self.assertEqual(
+            entry["stability"],
+            "LAST_OBSERVED_NOT_STABILITY_PROOF",
+        )
+        self.assertEqual(
+            entry["last_observed_compilation_id"], 51
+        )
+        self.assertEqual(
+            [item["comp_id"] for item in entry["compilations"]],
+            [50, 51],
+        )
+        self.assertEqual(
+            [item["trace_sequence"]
+             for item in entry["compilations"]],
+            [3, 4],
+        )
+
+        for compilation in entry["compilations"]:
+            name = compilation["bgv"]
+            relative = f"budget-500/bgv/{name}.gz"
+            self.assertIn(relative, run["retained_bgv"])
+
+            with gzip.open(directory / relative, "rb") as stream:
+                raw = stream.read()
+
+            self.assertEqual(
+                hashlib.sha256(raw).hexdigest(),
+                compilation["bgv_sha256"],
+            )
+            self.assertEqual(
+                len(raw), compilation["bgv_bytes"]
+            )
+
+    def test_recompiled_tiers_default_does_not_retain(self):
+        code, metadata, directory, _ = self.run_fake_capture(
+            2,
+            root="all",
+            recompiled=True,
+            retain_recompiled_tiers=False,
+        )
+
+        self.assertEqual(code, mp.EXIT_OK)
+        self.assertTrue(metadata["capture_valid"])
+        self.assertEqual(
+            len(metadata["runs"][0]["retained_bgv"]), 1
+        )
+        self.assertNotIn(
+            "diagnostic_recompiled_tiers", metadata
+        )
+        self.assertEqual(
+            metadata["unavailable_roots"][0]["reason"],
+            "TIER_COMPILATION_AMBIGUOUS",
+        )
+
+    def test_recompiled_tiers_missing_bgv_fails_closed(self):
+        code, metadata, directory, _ = self.run_fake_capture(
+            2,
+            root="all",
+            recompiled=True,
+            retain_recompiled_tiers=True,
+            omit_second_diagnostic_bgv=True,
+        )
+
+        self.assertEqual(code, mp.EXIT_INVALID)
+        self.assertFalse(metadata["capture_valid"])
+        self.assertEqual(
+            metadata["invalid_reason"],
+            "DIAGNOSTIC_BGV_NOT_UNIQUE_FOR_COMPILATION",
         )
 
     def test_all_roots_missing_tier_is_recorded(self):
@@ -1298,6 +1702,8 @@ class ColdCaptureIntegrationTest(unittest.TestCase):
                 output=output,
                 workload="primitive-return-literal",
                 language="js",
+                jvm_option=[],
+                retain_recompiled_tiers=False,
             )
 
             with self.assertRaises(mp.UsageError):

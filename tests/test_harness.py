@@ -27,7 +27,7 @@ class CatalogTest(unittest.TestCase):
         for item in data["workloads"]:
             self.assertEqual(
                 set(item["sources"]),
-                {"protos", "js", "python"},
+                {"protos", "js", "python", "ruby"},
             )
 
     def test_validate_is_static(self):
@@ -43,11 +43,15 @@ class CatalogTest(unittest.TestCase):
     def test_language_and_workload_selection(self):
         self.assertEqual(
             h.selected_languages("all"),
-            ("protos", "js", "python"),
+            ("protos", "js", "python", "ruby"),
         )
         self.assertEqual(
             h.selected_languages("js"),
             ("js",),
+        )
+        self.assertEqual(
+            h.selected_languages("ruby"),
+            ("ruby",),
         )
         self.assertEqual(
             h.selected_cases("factorial"),
@@ -222,6 +226,7 @@ class PodmanContractTest(unittest.TestCase):
             "--protos-version", "0.3.1-SNAPSHOT",
             "--js-version", "25.4.4.1.1",
             "--python-version", "25.3.0",
+            "--ruby-version", "40.0.0",
         ])
 
         with (
@@ -244,19 +249,28 @@ class PodmanContractTest(unittest.TestCase):
             code = h.run_measurement(args, "measure")
 
         self.assertEqual(code, 0)
-        self.assertEqual(run.call_count, 3)
+        self.assertEqual(run.call_count, 4)
 
         expected_versions = {
             "protos": "0.3.1-SNAPSHOT",
             "js": "25.4.4.1.1",
             "python": "25.3.0",
+            "ruby": "40.0.0",
         }
 
+        seen_languages = set()
         for call in run.call_args_list:
             command = call.args[3]
             language = command[command.index("--language") + 1]
             version = command[command.index("--version") + 1]
+            self.assertNotIn(language, seen_languages)
+            seen_languages.add(language)
             self.assertEqual(version, expected_versions[language])
+            self.assertEqual(
+                call.args[1],
+                args.ruby_image if language == "ruby" else args.image,
+            )
+        self.assertEqual(seen_languages, set(expected_versions))
 
     def test_temperature_is_forwarded_to_measurement(self):
         args = h.parse_args([
@@ -363,12 +377,13 @@ class PodmanContractTest(unittest.TestCase):
         self.assertNotIn("--network=none", command)
         self.assertNotIn("build", command)
 
-    def test_peer_prepare_routes_both_versions(self):
+    def test_peer_prepare_routes_all_peer_versions(self):
         args = h.parse_args([
             "peer-prepare",
             "--language", "all",
             "--js-version", "25.4.4.1.1",
             "--python-version", "25.4.4.1.1",
+            "--ruby-version", "40.0.0",
         ])
 
         with (
@@ -383,22 +398,32 @@ class PodmanContractTest(unittest.TestCase):
             code = h.run_peer_prepare(args)
 
         self.assertEqual(code, 0)
-        self.assertEqual(run.call_count, 2)
+        self.assertEqual(run.call_count, 3)
 
-        for language, call in zip(
-            ("js", "python"), run.call_args_list
-        ):
+        expected_versions = {
+            "js": "25.4.4.1.1",
+            "python": "25.4.4.1.1",
+            "ruby": "40.0.0",
+        }
+        seen_languages = set()
+        for call in run.call_args_list:
             arguments = call.args[3]
             self.assertIn("--prepare-peer", arguments)
-            self.assertEqual(
-                arguments[arguments.index("--language") + 1],
-                language,
-            )
+            language = arguments[arguments.index("--language") + 1]
+            self.assertNotIn(language, seen_languages)
+            seen_languages.add(language)
             self.assertEqual(
                 arguments[arguments.index("--version") + 1],
-                "25.4.4.1.1",
+                expected_versions[language],
             )
-            self.assertTrue(call.kwargs["allow_network"])
+            self.assertEqual(
+                call.args[1],
+                args.ruby_image if language == "ruby" else args.image,
+            )
+            self.assertEqual(
+                call.kwargs["allow_network"], language != "ruby",
+            )
+        self.assertEqual(seen_languages, set(expected_versions))
 
     def test_peer_prepare_rejects_protos(self):
         args = h.parse_args([

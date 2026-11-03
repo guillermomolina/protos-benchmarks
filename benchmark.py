@@ -3,7 +3,7 @@
 # ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina.
 # See LICENSE.TXT at the repository root.
 
-"""Single host entry point for the Protos/GraalJS/GraalPy harness."""
+"""Single host entry point for the four-language GraalVM harness."""
 
 from __future__ import annotations
 
@@ -23,7 +23,8 @@ RESULTS = ROOT / "results"
 CONTAINER_ROOT = "/workspaces/protos-benchmarks"
 CONTAINER_PRODUCT = "/workspaces/protos"
 
-LANGUAGES = ("protos", "js", "python")
+LANGUAGES = ("protos", "js", "python", "ruby")
+DEFAULT_RUBY_IMAGE = "localhost/protos-bench-runner:ruby-40.0.0-graal25.3.4.1"
 DEFAULT_IMAGE = (
     "localhost/protos-bench-runner:"
     "graal25.4.4.1.1-standalone"
@@ -86,7 +87,7 @@ def load_catalog():
             raise HarnessError(f"Invalid sources: {identifier}")
         if set(sources) != set(LANGUAGES):
             raise HarnessError(
-                f"{identifier}: exactly protos, js and python required"
+                f"{identifier}: exactly protos, js, python and ruby required"
             )
 
         for language, relative in sources.items():
@@ -143,7 +144,7 @@ def validate():
 
     print(f"CATALOG_VALID=YES")
     print(f"WORKLOADS={len(ids)}")
-    print("LANGUAGES=protos,js,python")
+    print("LANGUAGES=protos,js,python,ruby")
     print("MEASUREMENT_POLICY=VALID")
     print("GRAPH_POLICY=VALID")
 
@@ -183,6 +184,11 @@ def output_path(requested, category):
 
 def container_output(path):
     return f"{CONTAINER_ROOT}/{path.relative_to(ROOT)}"
+
+
+def runtime_image(args, language):
+    """Only Ruby uses the independent GraalVM 25.3 container image."""
+    return args.ruby_image if language == "ruby" else args.image
 
 
 def podman_binary():
@@ -305,8 +311,6 @@ def run_measurement(args, command):
     )
 
     binary = podman_binary()
-    require_image(binary, args.image)
-    runtime_image_id = image_identity(binary, args.image)
 
     host_hostname = platform.node().strip()
     if not host_hostname:
@@ -323,10 +327,14 @@ def run_measurement(args, command):
         "protos": args.protos_version,
         "js": args.js_version,
         "python": args.python_version,
+        "ruby": args.ruby_version,
     }
 
     for workload in workloads:
         for language in languages:
+            selected_image = runtime_image(args, language)
+            require_image(binary, selected_image)
+            runtime_image_id = image_identity(binary, selected_image)
             arguments = [
                 "harness/measure_protos.py",
                 "--language", language,
@@ -363,7 +371,7 @@ def run_measurement(args, command):
                 arguments.append("--remeasure")
 
             code = run_container(
-                binary, args.image, product, arguments
+                binary, selected_image, product, arguments
             )
             if code:
                 return code
@@ -380,7 +388,15 @@ def run_bytecode_prepare(args):
     """
     import xml.etree.ElementTree as ET
 
+    if args.language == "ruby":
+        print("BYTECODE_DSL=NOT_APPLICABLE")
+        print("REASON=AST_RUNTIME_NO_BYTECODE_DSL")
+        return 0
+
     version = args.bytecode_version
+
+    if version is None and args.language == "ruby":
+        version = "25.3.4.1"
 
     if version is None:
         pom = ET.parse(HARNESS_DIR / "pom.xml").getroot()
@@ -412,7 +428,8 @@ def run_bytecode_prepare(args):
         )
 
     binary = podman_binary()
-    require_image(binary, args.image)
+    selected_image = runtime_image(args, "ruby" if args.language == "ruby" else "js")
+    require_image(binary, selected_image)
 
     prepare_arguments = [
         "harness/bytecode_size_runtime.py",
@@ -423,7 +440,7 @@ def run_bytecode_prepare(args):
 
     code = run_container(
         binary,
-        args.image,
+        selected_image,
         None,
         prepare_arguments,
         allow_network=True,
@@ -441,7 +458,7 @@ def run_bytecode_prepare(args):
 
     return run_container(
         binary,
-        args.image,
+        selected_image,
         None,
         check_arguments,
         allow_network=False,
@@ -481,38 +498,40 @@ def run_peer_prepare(args):
     """Explicit peer preparation; no benchmark execution."""
     if args.language == "protos":
         raise HarnessError(
-            "PEER_PREPARE_LANGUAGE: select js, python or all"
+            "PEER_PREPARE_LANGUAGE: select js, python, ruby or all"
         )
 
     languages = (
-        ("js", "python") if args.language == "all"
+        ("js", "python", "ruby") if args.language == "all"
         else (args.language,)
     )
 
     binary = podman_binary()
-    require_image(binary, args.image)
 
     for language in languages:
+        selected_image = runtime_image(args, language)
+        require_image(binary, selected_image)
         arguments = [
             "harness/measure_protos.py",
             "--prepare-peer",
             "--language", language,
         ]
 
-        version = (
-            args.js_version if language == "js"
-            else args.python_version
-        )
+        version = {
+            "js": args.js_version,
+            "python": args.python_version,
+            "ruby": args.ruby_version,
+        }[language]
 
         if version:
             arguments.extend(["--version", version])
 
         code = run_container(
             binary,
-            args.image,
+            selected_image,
             None,
             arguments,
-            allow_network=True,
+            allow_network=(language != "ruby"),
         )
 
         if code:
@@ -536,7 +555,8 @@ def run_bytecode(args):
         raise HarnessError("Invalid BYTECODE_CALLS")
 
     binary = podman_binary()
-    require_image(binary, args.image)
+    selected_image = runtime_image(args, args.language)
+    require_image(binary, selected_image)
 
     product = (
         product_directory(args.product)
@@ -562,6 +582,7 @@ def run_bytecode(args):
         "protos": args.protos_version,
         "js": args.js_version,
         "python": args.python_version,
+        "ruby": args.ruby_version,
     }[args.language]
 
     if version is not None:
@@ -571,7 +592,7 @@ def run_bytecode(args):
         arguments.extend(["--cpu", str(args.cpu)])
 
     return run_container(
-        binary, args.image, product, arguments
+        binary, selected_image, product, arguments
     )
 
 
@@ -601,8 +622,12 @@ def run_cold(args):
             )
 
         binary = podman_binary()
-        require_image(binary, args.image)
-        product = product_directory(args.product)
+        selected_image = runtime_image(args, args.language)
+        require_image(binary, selected_image)
+        product = (
+            product_directory(args.product)
+            if args.language != "ruby" else None
+        )
 
         last_threshold = (
             args.last_threshold
@@ -613,7 +638,6 @@ def run_cold(args):
         arguments = [
             "harness/measure_graphs.py",
             "cold",
-            "--dir", CONTAINER_PRODUCT,
             "--output", container_output(output),
             "--language", args.language,
             "--workload", args.case,
@@ -625,6 +649,9 @@ def run_cold(args):
             "--last-threshold", str(last_threshold),
         ]
 
+        if args.language != "ruby":
+            arguments.extend(["--dir", CONTAINER_PRODUCT])
+
         if args.cpu is not None:
             arguments.extend(["--cpu", str(args.cpu)])
 
@@ -634,8 +661,19 @@ def run_cold(args):
         if args.retain_recompiled_tiers:
             arguments.append("--retain-recompiled-tiers")
 
+        selected_version = {
+            "protos": args.protos_version,
+            "js": args.js_version,
+            "python": args.python_version,
+            "ruby": args.ruby_version,
+        }[args.language]
+        if selected_version is not None:
+            arguments.extend([
+                "--version", selected_version
+            ])
+
         return run_container(
-            binary, args.image, product, arguments
+            binary, selected_image, product, arguments
         )
 
     operation = (
@@ -710,28 +748,38 @@ def run_graphs(args):
             selected_cases(selector)
 
         binary = podman_binary()
-        require_image(binary, args.image)
-        product = product_directory(args.product)
-
-        arguments = [
-            "harness/measure_graphs.py",
-            "capture",
-            "--dir", CONTAINER_PRODUCT,
-            "--output", container_output(output),
-            "--language", args.language,
-            "--workload", selector,
-            "--stage", args.stage,
-        ]
-
-        if args.cpu is not None:
-            arguments.extend(["--cpu", str(args.cpu)])
-
-        if args.remeasure:
-            arguments.append("--remeasure")
-
-        return run_container(
-            binary, args.image, product, arguments
+        product = (
+            product_directory(args.product)
+            if any(lang != "ruby" for lang in selected_languages(args.language)) else None
         )
+
+        for language in selected_languages(args.language):
+            selected_image = runtime_image(args, language)
+            require_image(binary, selected_image)
+            arguments = [
+                "harness/measure_graphs.py",
+                "capture",
+                "--output", container_output(output),
+                "--language", language,
+                "--workload", selector,
+                "--stage", args.stage,
+            ]
+            if language != "ruby":
+                arguments.extend(["--dir", CONTAINER_PRODUCT])
+            if args.cpu is not None:
+                arguments.extend(["--cpu", str(args.cpu)])
+            if args.remeasure:
+                arguments.append("--remeasure")
+            if language == "ruby" and args.ruby_version is not None:
+                arguments.extend(["--ruby-version", args.ruby_version])
+            code = run_container(
+                binary, selected_image,
+                product if language != "ruby" else None,
+                arguments,
+            )
+            if code:
+                return code
+        return 0
 
     action = args.command.removeprefix("graphs-")
 
@@ -750,7 +798,7 @@ def run_graphs(args):
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
-        description="Protos/GraalJS/GraalPy Podman benchmark harness"
+        description="Protos/GraalJS/GraalPy/TruffleRuby Podman benchmark harness"
     )
     parser.add_argument("command", choices=COMMANDS)
     parser.add_argument("--case")
@@ -777,6 +825,7 @@ def parse_args(argv=None):
     parser.add_argument("--protos-version")
     parser.add_argument("--js-version")
     parser.add_argument("--python-version")
+    parser.add_argument("--ruby-version")
     parser.add_argument("--cpu", type=int)
     parser.add_argument("--output")
     parser.add_argument("--remeasure", action="store_true")
@@ -800,6 +849,7 @@ def parse_args(argv=None):
     parser.add_argument("--last-threshold", type=int)
     parser.add_argument("--jvm-option", action="append", default=[])
     parser.add_argument("--image", default=DEFAULT_IMAGE)
+    parser.add_argument("--ruby-image", default=DEFAULT_RUBY_IMAGE)
     return parser.parse_args(argv)
 
 
@@ -813,12 +863,15 @@ def main(argv=None):
 
         if args.command == "image-status":
             binary = podman_binary()
-            if image_present(binary, args.image):
+            selected_image = runtime_image(
+                args, "ruby" if args.language == "ruby" else "js"
+            )
+            if image_present(binary, selected_image):
                 print(f"IMAGE_AVAILABLE=YES")
-                print(f"IMAGE={args.image}")
+                print(f"IMAGE={selected_image}")
                 return 0
             print(f"IMAGE_AVAILABLE=NO")
-            print(f"IMAGE={args.image}")
+            print(f"IMAGE={selected_image}")
             print(
                 "Build explicitly with make image-build "
                 "when authorized."
@@ -827,12 +880,19 @@ def main(argv=None):
 
         if args.command == "image-build":
             binary = podman_binary()
+            is_ruby = args.language == "ruby"
+            selected_image = runtime_image(
+                args, "ruby" if is_ruby else "js"
+            )
+            containerfile = (
+                "Containerfile.ruby" if is_ruby else "Containerfile"
+            )
             return subprocess.run(
                 [
                     binary, "build",
                     "--pull=missing",
-                    "--file", str(HARNESS_DIR / "Containerfile"),
-                    "--tag", args.image,
+                    "--file", str(HARNESS_DIR / containerfile),
+                    "--tag", selected_image,
                     str(HARNESS_DIR),
                 ],
                 cwd=ROOT,

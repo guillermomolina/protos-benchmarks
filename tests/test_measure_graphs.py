@@ -1300,6 +1300,7 @@ class ColdCaptureIntegrationTest(unittest.TestCase):
             output=output,
             language="js",
             workload="primitive-return-literal",
+            version=None,
             tier=requested_tier,
             root=root,
             warmup_calls=25,

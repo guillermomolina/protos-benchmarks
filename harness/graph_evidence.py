@@ -1087,6 +1087,24 @@ def normalize_label(label: str) -> str:
 # Relevant compilation units
 
 
+
+def validate_primary_label(
+    language_policy: dict[str, Any],
+    label: str,
+) -> None:
+    """Require an evidence-backed guest root identity."""
+    pattern = language_policy.get("primary_label_pattern")
+
+    if not isinstance(pattern, str) or not pattern:
+        raise EvidenceError(
+            "PRIMARY_IDENTITY_UNVERIFIED", label
+        )
+
+    if not re.search(pattern, label):
+        raise EvidenceError(
+            "PRIMARY_IDENTITY_MISMATCH", label
+        )
+
 def resolve_units(
     parsed: dict[str, Any],
     policy: dict[str, Any],
@@ -1151,8 +1169,13 @@ def resolve_units(
 
     primary = targets[keys[0]]
 
-    if not re.search(language_policy["primary_label_pattern"], primary_label):
-        raise EvidenceError("PRIMARY_IDENTITY_MISMATCH", primary_label)
+    if language_policy.get("root_identity_mode") == "observed-framework-callee":
+        if language_policy.get("primary_label_pattern") is not None:
+            raise EvidenceError("PRIMARY_IDENTITY_POLICY_CONFLICT", primary_label)
+        # The unique framework depth-1 callee and the unique compiled target
+        # were proven above from the retained trace. Do not guess a label.
+    else:
+        validate_primary_label(language_policy, primary_label)
 
     if language_policy.get("primary_src_contains_source") and source not in str(
         primary["final"].get("src") or ""
@@ -1720,7 +1743,7 @@ def compare_rung(
     cases: dict[str, dict[str, Any] | None],
     protos_instability: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Peer reference (GraalJS/GraalPy) and Protos structural status of one rung.
+    """Peer reference (JS/Python/Ruby when available) and Protos status.
 
     ``cases[language]`` is a ``case_summary`` or None when that language has
     no valid stable evidence; ``protos_instability`` (``{"problems": [...],
@@ -1730,7 +1753,14 @@ def compare_rung(
     fixed tolerance: the peer band is the
     observed JS/Python range and the excess threshold is their spread.
     """
-    js, python, protos = cases.get("js"), cases.get("python"), cases.get("protos")
+    js = cases.get("js")
+    python = cases.get("python")
+    ruby = cases.get("ruby")
+    protos = cases.get("protos")
+    observed_peers = [
+        case for case in (js, python, ruby)
+        if case is not None
+    ]
     total = "relevant_graph_nodes_total_after_truffle_tier"
     result: dict[str, Any] = {
         "workload": workload,
@@ -1744,13 +1774,29 @@ def compare_rung(
         "final_compilation_state": None,
         "js_total": js[total] if js else None,
         "python_total": python[total] if python else None,
+        "ruby_total": ruby[total] if ruby else None,
+        "peer_reference_scope": (
+            "js-python-ruby" if ruby is not None
+            else "legacy-js-python"
+        ),
+        "peer_cohort_complete": (
+            js is not None
+            and python is not None
+            and ruby is not None
+        ),
         "graph_counts": {
             lang: (case["graph_count"] if case else None)
-            for lang, case in (("protos", protos), ("js", js), ("python", python))
+            for lang, case in (
+                ("protos", protos), ("js", js),
+                ("python", python), ("ruby", ruby)
+            )
         },
         "additional_units": {
             lang: ([u["label"] for u in case["additional_language_owned_compiled_units"]] if case else None)
-            for lang, case in (("protos", protos), ("js", js), ("python", python))
+            for lang, case in (
+                ("protos", protos), ("js", js),
+                ("python", python), ("ruby", ruby)
+            )
         },
         "peer_spread": None,
         "peer_band": None,
@@ -1765,14 +1811,24 @@ def compare_rung(
         result["peer_reasons"].append("PEER_EVIDENCE_MISSING")
         return result
 
-    if js["graph_count"] != python["graph_count"]:
-        result["peer_reasons"].append("PEER_TOPOLOGY_DISAGREES")
+    if len({
+        case["graph_count"] for case in observed_peers
+    }) != 1:
+        result["peer_reasons"].append(
+            "PEER_TOPOLOGY_DISAGREES"
+        )
 
     for family in QUALITATIVE_FAMILIES:
-        if (js["families"][family] > 0) != (python["families"][family] > 0):
-            result["peer_reasons"].append(f"PEER_{family.upper()}_PRESENCE_DISAGREES")
+        if len({
+            case["families"][family] > 0
+            for case in observed_peers
+        }) != 1:
+            result["peer_reasons"].append(
+                f"PEER_{family.upper()}_PRESENCE_DISAGREES"
+            )
 
-    low, high = sorted((js[total], python[total]))
+    low = min(case[total] for case in observed_peers)
+    high = max(case[total] for case in observed_peers)
     result["peer_band"] = [low, high]
     result["peer_spread"] = high - low
 
@@ -1799,21 +1855,32 @@ def compare_rung(
 
     signals = []
 
-    if protos["graph_count"] > js["graph_count"]:
+    if protos["graph_count"] > max(
+        case["graph_count"] for case in observed_peers
+    ):
         signals.append("ADDITIONAL_PROTOS_COMPILED_UNIT")
 
     if protos[total] - high > result["peer_spread"]:
         signals.append("NODE_EXCESS_BEYOND_PEER_SPREAD")
 
     for family in FAMILIES:
-        if protos["families"][family] > 0 and js["families"][family] == 0 and python["families"][family] == 0:
+        if (
+            protos["families"][family] > 0
+            and all(
+                case["families"][family] == 0
+                for case in observed_peers
+            )
+        ):
             signals.append(f"PROTOS_ONLY_{family.upper()}")
 
     result["protos_signals"] = signals
     result["peer_node_comparison"] = COMPARISON_PERFORMED
     result["protos_status"] = STRUCTURAL_EXCESS if signals else STRUCTURALLY_CONVERGED
     result["secondary_deltas_vs_peer_max"] = {
-        family: protos["families"][family] - max(js["families"][family], python["families"][family])
+        family: protos["families"][family] - max(
+            case["families"][family]
+            for case in observed_peers
+        )
         for family in FAMILIES
     }
     result["excess_over_peer_max"] = protos[total] - high

@@ -22,7 +22,7 @@ from pathlib import Path
 
 CASES_ROOT = Path(__file__).resolve().parent.parent / "cases"
 CATALOG = CASES_ROOT / "catalog.json"
-LANGUAGES = ("protos", "js", "python")
+LANGUAGES = ("protos", "js", "python", "ruby")
 
 
 @lru_cache(maxsize=1)

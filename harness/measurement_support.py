@@ -9,6 +9,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -133,6 +135,98 @@ def peer_pom(version: str) -> str:
 </project>
 """
 
+
+
+def ruby_runtime_spec() -> dict[str, str]:
+    path = HARNESS_DIR / "policy" / "runtimes.json"
+    spec = json.loads(path.read_text(encoding="utf-8"))
+    if spec.get("schema") != 1:
+        raise RuntimeError("Invalid runtime policy schema")
+    ruby = spec["ruby"]
+    if (
+        ruby["version"] != "40.0.0"
+        or ruby["graalvm_version"] != "25.3.4.1"
+        or ruby["truffle_version"] != "25.3.4.1"
+        or ruby["maven_coordinate"] != "dev.truffleruby:truffleruby"
+        or ruby["packaging"] != "pom"
+        or ruby["classpath_source"] != "image-baked"
+    ):
+        raise RuntimeError("RUBY_RUNTIME_POLICY_INCOMPATIBLE")
+    return ruby
+
+
+def ruby_peer_pom(version: str, graal: str) -> str:
+    spec = ruby_runtime_spec()
+    if version != spec["version"] or graal != spec["graalvm_version"]:
+        raise RuntimeError("RUBY_RUNTIME_POLICY_INCOMPATIBLE")
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.guillermomolina</groupId>
+  <artifactId>protos-benchmarks-ruby-peer</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.graalvm.polyglot</groupId>
+      <artifactId>polyglot</artifactId>
+      <version>{graal}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.truffleruby</groupId>
+      <artifactId>truffleruby</artifactId>
+      <version>{version}</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+</project>
+"""
+
+
+def peer_artifact_manifest(classpath: str) -> list[dict]:
+    artifacts = []
+    for entry in classpath.split(os.pathsep):
+        path = Path(entry).resolve()
+        if not path.is_file():
+            raise RuntimeError(f"PEER_ARTIFACT_MISSING: {path}")
+        artifacts.append({
+            "path": str(path),
+            "size_bytes": path.stat().st_size,
+            "sha256": sha256_file(path),
+        })
+    if not artifacts:
+        raise RuntimeError("PEER_ARTIFACT_MANIFEST_EMPTY")
+    return artifacts
+
+
+def verify_ruby_classpath(
+    classpath: str, version: str, graal: str
+) -> None:
+    paths = [
+        Path(entry).resolve().as_posix()
+        for entry in classpath.split(os.pathsep)
+    ]
+
+    required = (
+        f"/dev/truffleruby/internal/runtime/{version}/runtime-{version}.jar",
+        f"/dev/truffleruby/internal/resources/{version}/resources-{version}.jar",
+    )
+    for suffix in required:
+        if not any(p.endswith(suffix) for p in paths):
+            raise RuntimeError(
+                f"RUBY_DEPENDENCY_MISSING: {suffix}"
+            )
+
+    # The Ruby dependency must not bring another Truffle API
+    # or runtime into the pinned GraalVM classpath.
+    for path in paths:
+        marker = "/org/graalvm/truffle/"
+        if marker not in path:
+            continue
+        relative = path.split(marker, 1)[1].split("/")
+        if len(relative) < 3 or relative[1] != graal:
+            raise RuntimeError(
+                f"RUBY_TRUFFLE_VERSION_MISMATCH: {path}"
+            )
 
 def parse_cpu_list(value: str) -> set[int]:
     cpus: set[int] = set()

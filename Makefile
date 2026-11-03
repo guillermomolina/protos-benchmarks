@@ -21,6 +21,8 @@ LANGUAGE ?= all
 PROTOS_VERSION ?=
 GRAALJS_VERSION ?=
 GRAALPY_VERSION ?=
+TRUFFLERUBY_VERSION ?=
+PODMAN_RUBY_IMAGE ?= localhost/protos-bench-runner:ruby-40.0.0-graal25.3.4.1
 STAGE ?= reference
 PROFILE ?= none
 TEMPERATURE ?= hot
@@ -44,12 +46,15 @@ ARGS = --case "$(CASE)" --language "$(LANGUAGE)" --stage "$(STAGE)" \
        --profile "$(PROFILE)" --surface "$(SURFACE)" \
        --temperature "$(TEMPERATURE)" \
        --product "$(PROTOS_REPO)" --image "$(PODMAN_IMAGE)" \
+       --ruby-image "$(PODMAN_RUBY_IMAGE)" \
        $(if $(strip $(PROTOS_VERSION)),--protos-version "$(PROTOS_VERSION)",) \
        $(if $(strip $(GRAALJS_VERSION)),--js-version "$(GRAALJS_VERSION)",) \
        $(if $(strip $(GRAALPY_VERSION)),--python-version "$(GRAALPY_VERSION)",) \
+       $(if $(strip $(TRUFFLERUBY_VERSION)),--ruby-version "$(TRUFFLERUBY_VERSION)",) \
        $(if $(strip $(CPU)),--cpu "$(CPU)",) \
        $(if $(strip $(OUTPUT)),--output "$(OUTPUT)",)
 
+.PHONY: image-build-ruby image-status-ruby
 .PHONY: help validate correctness measure smoke graphs-capture graphs-analyze graphs-summarize graphs-verify image-status image-build peer-prepare cold-capture cold-analyze cold-summarize bytecode-capture structural-report bytecode-prepare product-prepare runtime-prepare
 
 help:
@@ -81,7 +86,8 @@ graphs-verify:
 
 bytecode-prepare:
 	@$(PYTHON) $(HARNESS) bytecode-prepare \
-	    --image "$(PODMAN_IMAGE)" \
+	    --image "$(PODMAN_IMAGE)" --ruby-image "$(PODMAN_RUBY_IMAGE)" \
+	    --language "$(LANGUAGE)" \
 	    $(if $(strip $(BYTECODE_VERSION)),--bytecode-version "$(BYTECODE_VERSION)",)
 
 peer-prepare:
@@ -96,10 +102,18 @@ runtime-prepare:
 	@$(MAKE) --no-print-directory peer-prepare LANGUAGE=all
 
 image-status:
-	@$(PYTHON) $(HARNESS) image-status --image "$(PODMAN_IMAGE)"
+	@$(PYTHON) $(HARNESS) image-status --language "$(LANGUAGE)" \
+	    --image "$(PODMAN_IMAGE)" --ruby-image "$(PODMAN_RUBY_IMAGE)"
 
 image-build:
-	@$(PYTHON) $(HARNESS) image-build --image "$(PODMAN_IMAGE)"
+	@$(PYTHON) $(HARNESS) image-build --language "$(LANGUAGE)" \
+	    --image "$(PODMAN_IMAGE)" --ruby-image "$(PODMAN_RUBY_IMAGE)"
+
+image-build-ruby:
+	@$(MAKE) --no-print-directory image-build LANGUAGE=ruby
+
+image-status-ruby:
+	@$(MAKE) --no-print-directory image-status LANGUAGE=ruby
 
 COLD_ARGS = --tier "$(TIER)" --root "$(COMPILATION_ROOT)" \
             --warmup-calls "$(WARMUP_CALLS)" \

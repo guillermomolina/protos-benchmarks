@@ -13,8 +13,8 @@ import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 
 /**
- * Peer surface {@code executable-value} for GraalJS and GraalPy: the workload
- * is evaluated and its {@code truffleRun} member acquired once before timing;
+ * Peer surface {@code executable-value} for GraalJS, GraalPy and TruffleRuby: the workload
+ * is evaluated and an executable value acquired once before timing;
  * each timed call is exactly {@code run.execute()}. Same semantics and result
  * normalization as the existing peer runner. The guest language is taken from
  * the {@code protos.benchmarks.peer.language} system property so that one
@@ -27,7 +27,8 @@ public final class PeerExecutableSurface {
         MeasurementEngine.Arguments arguments = MeasurementEngine.Arguments.parse(args);
         String language = System.getProperty("protos.benchmarks.peer.language", "");
 
-        if (!"js".equals(language) && !"python".equals(language)) {
+        if (!"js".equals(language) && !"python".equals(language)
+                && !"ruby".equals(language)) {
             throw new IllegalArgumentException("unsupported peer language: " + language);
         }
 
@@ -41,13 +42,16 @@ public final class PeerExecutableSurface {
         long setupStart = System.nanoTime();
 
         try (Context context =
-                Context.newBuilder(language).allowExperimentalOptions(true).build()) {
-            context.eval(source);
+                Context.newBuilder(language).allowExperimentalOptions(true)
+                        .allowAllAccess("ruby".equals(language)).build()) {
+            Value evaluated = context.eval(source);
 
-            Value run = context.getBindings(language).getMember("truffleRun");
+            Value run = "ruby".equals(language)
+                    ? evaluated
+                    : context.getBindings(language).getMember("truffleRun");
 
             if (run == null || !run.canExecute()) {
-                throw new IllegalStateException("workload does not expose executable truffleRun");
+                throw new IllegalStateException("workload does not expose an executable run value");
             }
 
             long setupNs = System.nanoTime() - setupStart;

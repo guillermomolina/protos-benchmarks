@@ -59,7 +59,7 @@ OUTPUT_MARKER = ".measure-protos-output"
 STAGING = ".staging"
 STAGES = ("reference", "smoke")
 PROFILES = ("none", "jfr")
-PEER_LANGUAGES = ("js", "python")
+PEER_LANGUAGES = ("js", "python", "ruby")
 
 # The only Git subcommands this driver may run. None of them changes a
 # working tree, an index or a ref; in particular checkout, reset, clone,
@@ -364,6 +364,10 @@ def producer_files(
 
     if surface_def["classpath"] == "peer":
         files.append(HARNESS_DIR / "pom.xml")
+        if language == "ruby":
+            files.append(HARNESS_DIR / "policy" / "runtimes.json")
+            files.append(HARNESS_DIR / "policy" / "ruby-peer.pom.xml")
+            files.append(HARNESS_DIR / "Containerfile.ruby")
 
     return sorted(set(path.resolve() for path in files))
 
@@ -542,67 +546,131 @@ def dependency_classpath_ready(value: str) -> bool:
 
 def peer_classpath(
     requested_version: str | None = None,
-    *, offline: bool = True,
+    *,
+    offline: bool = True,
+    language: str = "js",
 ) -> tuple[str, str]:
-    """Offline classpath for the selected GraalJS/GraalPy version."""
-    version = requested_version or jvm_runtime.harness_graalvm_version()
-    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", version):
-        raise UsageError(f"invalid peer version: {version!r}")
-    peer_root = EMBEDDED_CACHE / "peer-classpath" / version
-    peer_root.mkdir(parents=True, exist_ok=True)
+    """Resolve a peer with the existing Maven cache protocol."""
+    graal = jvm_runtime.harness_graalvm_version()
 
+    if language not in PEER_LANGUAGES:
+        raise UsageError(f"Unknown peer language: {language}")
+
+    if language == "ruby":
+        spec = jvm_runtime.ruby_runtime_spec()
+        version = requested_version or spec["version"]
+        if version != spec["version"]:
+            raise UsageError(
+                f"RUBY_TRUFFLE_VERSION_INCOMPATIBLE: {version}"
+            )
+        image_cp = os.environ.get("PROTOS_RUBY_IMAGE_CLASSPATH", "")
+        if not image_cp or not Path(image_cp).is_file():
+            raise UsageError(
+                "RUBY_NOT_PREPARED: select the Ruby image; "
+                "run make image-build-ruby"
+            )
+        dependency_cp = Path(image_cp).read_text(encoding="utf-8").strip()
+        if not dependency_classpath_ready(dependency_cp):
+            raise UsageError("RUBY_IMAGE_CLASSPATH_INVALID")
+        jvm_runtime.verify_ruby_classpath(
+            dependency_cp, version, spec["truffle_version"]
+        )
+        return version, dependency_cp
+    else:
+        version = requested_version or graal
+        peer_root = EMBEDDED_CACHE / "peer-classpath" / version
+        expected = jvm_runtime.peer_pom(version)
+
+    if not re.fullmatch(
+        r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", version
+    ):
+        raise UsageError(f"Invalid peer version: {version!r}")
+
+    peer_root.mkdir(parents=True, exist_ok=True)
     pom = peer_root / "pom.xml"
-    expected = jvm_runtime.peer_pom(version)
+    cp_file = peer_root / "classpath.txt"
+
     pom_changed = (
         not pom.is_file()
         or pom.read_text(encoding="utf-8") != expected
     )
-
-    cp_file = peer_root / "classpath.txt"
     dependency_cp = (
         cp_file.read_text(encoding="utf-8").strip()
-        if cp_file.is_file()
-        else ""
+        if cp_file.is_file() else ""
     )
+    ready = dependency_classpath_ready(dependency_cp)
 
-    if pom_changed or not dependency_classpath_ready(dependency_cp):
+    if language == "ruby" and offline and (
+        pom_changed or not ready
+    ):
+        raise UsageError(
+            "RUBY_NOT_PREPARED: run peer-prepare LANGUAGE=ruby"
+        )
+
+    if pom_changed or not ready:
         with tempfile.TemporaryDirectory(
-            prefix="peer-classpath-",
-            dir=peer_root,
+            prefix="peer-classpath-", dir=peer_root
         ) as staging:
             staged_pom = Path(staging) / "pom.xml"
-            staged_pom.write_text(expected, encoding="utf-8")
             built = Path(staging) / "classpath.txt"
-            subprocess.run(
-                [
-                    "mvn",
-                    * (["-o"] if offline else []),
-                    "-q",
-                    "-f",
-                    str(staged_pom),
-                    "dependency:build-classpath",
-                    f"-Dmdep.outputFile={built}",
-                ],
-                cwd=ROOT,
-                check=True,
-            )
+            staged_pom.write_text(expected, encoding="utf-8")
+
+            command = [
+                "mvn",
+                *(["-o"] if offline else []),
+                *(["-U"] if language == "ruby" and not offline else []),
+                "-q", "-f", str(staged_pom),
+                "dependency:build-classpath",
+                f"-Dmdep.outputFile={built}",
+            ]
+
+            if language == "ruby":
+                result = subprocess.run(
+                    command, cwd=ROOT,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    check=False,
+                )
+                log = peer_root / "prepare.log"
+                log.write_text(
+                    result.stdout, encoding="utf-8"
+                )
+                if result.returncode:
+                    raise UsageError(
+                        f"RUBY_MAVEN_RESOLUTION_FAILED: {log}"
+                    )
+            else:
+                subprocess.run(command, cwd=ROOT, check=True)
 
             if not built.is_file():
                 raise InvalidMeasurement(
                     "PEER_CLASSPATH_MISSING", str(built)
                 )
 
-            resolved = built.read_text(encoding="utf-8").strip()
+            resolved = built.read_text(
+                encoding="utf-8"
+            ).strip()
 
             if not dependency_classpath_ready(resolved):
                 raise InvalidMeasurement(
                     "PEER_CLASSPATH_UNRESOLVED", str(built)
                 )
 
+            if language == "ruby":
+                jvm_runtime.verify_ruby_classpath(
+                    resolved, version, graal
+                )
+
             built.replace(cp_file)
             if pom_changed:
                 staged_pom.replace(pom)
             dependency_cp = resolved
+
+    if language == "ruby":
+        jvm_runtime.verify_ruby_classpath(
+            dependency_cp, version, graal
+        )
 
     return version, dependency_cp
 
@@ -758,22 +826,31 @@ def prepare_surface_runtime(
         system_properties: list[str] = []
         core_arg = str(product_before["core_root"])
     else:
-        peer_version, dependency_cp = (
-            peer_classpath(requested_peer_version)
-            if requested_peer_version is not None
-            else peer_classpath()
+        peer_version, dependency_cp = peer_classpath(
+            requested_peer_version, language=language
         )
         classes = None
         compile_cp = dependency_cp
-        owner = f"peer-{peer_version}"
+        owner = (
+            f"peer-ruby-{peer_version}-graal-"
+            f"{jvm_runtime.ruby_runtime_spec()['graalvm_version']}"
+            if language == "ruby" else f"peer-{peer_version}"
+        )
         cache_identity = {
-            "peer_graalvm_version": peer_version,
+            "peer_graalvm_version": (
+                jvm_runtime.ruby_runtime_spec()["graalvm_version"]
+                if language == "ruby" else peer_version
+            ),
             "dependency_classpath_sha256": sha256_bytes(dependency_cp.encode()),
             "java_home": metadata["java"].get("java.home"),
             "java_runtime_version": metadata["java"].get("java.runtime.version"),
         }
         metadata["peer_runtime"] = {
-            "graalvm_version": peer_version,
+            "graalvm_version": (
+                jvm_runtime.ruby_runtime_spec()["graalvm_version"]
+                if language == "ruby" else peer_version
+            ),
+            "implementation_version": peer_version,
             "dependency_classpath_sha256": cache_identity[
                 "dependency_classpath_sha256"
             ],
@@ -781,6 +858,22 @@ def prepare_surface_runtime(
                 product_before["graalvm_version"] if product_before else None
             ),
         }
+        if language == "ruby":
+            artifacts = jvm_runtime.peer_artifact_manifest(
+                dependency_cp
+            )
+            artifact_hash = sha256_json(artifacts)
+            metadata["peer_runtime"].update({
+                "truffleruby_version": peer_version,
+                "truffle_version": jvm_runtime.ruby_runtime_spec()["truffle_version"],
+                "runtime_source": "podman-image-baked-maven-dependencies",
+                "maven_coordinate": "dev.truffleruby:truffleruby",
+                "artifact_manifest_sha256": artifact_hash,
+                "artifacts": artifacts,
+            })
+            cache_identity["ruby_artifact_manifest_sha256"] = (
+                artifact_hash
+            )
         system_properties = [f"-Dprotos.benchmarks.peer.language={language}"]
         core_arg = "-"
 
@@ -1093,7 +1186,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--surface",
         help="Protos uses canonical; "
-        "GraalJS and GraalPy use executable-value",
+        "GraalJS, GraalPy and TruffleRuby use executable-value",
     )
     parser.add_argument("--workload")
     parser.add_argument("--stage", default="reference", choices=STAGES)
@@ -1256,7 +1349,7 @@ def prepare_peer(args: argparse.Namespace) -> int:
     """Resolve peer dependencies without timing or correctness runs."""
     if args.language not in PEER_LANGUAGES:
         raise UsageError(
-            "PEER_PREPARE_LANGUAGE: use js or python"
+            "PEER_PREPARE_LANGUAGE: use js, python or ruby"
         )
 
     if (
@@ -1274,7 +1367,8 @@ def prepare_peer(args: argparse.Namespace) -> int:
     try:
         version, classpath = peer_classpath(
             args.version,
-            offline=False,
+            offline=(args.language == "ruby"),
+            language=args.language,
         )
     except subprocess.CalledProcessError as exc:
         raise UsageError(
@@ -1285,6 +1379,11 @@ def prepare_peer(args: argparse.Namespace) -> int:
             "PEER_PREPARATION_FAILED: Maven unavailable"
         ) from exc
 
+    if args.language == "ruby":
+        artifacts = jvm_runtime.peer_artifact_manifest(classpath)
+        emit("RUBY_ARTIFACT_MANIFEST_SHA256", sha256_json(artifacts))
+        emit("RUBY_TRUFFLE_VERSION", jvm_runtime.ruby_runtime_spec()["truffle_version"])
+        emit("RUBY_RUNTIME_SOURCE", "IMAGE_BAKED")
     emit("PEER_VERSION_PREPARED", "YES")
     emit("LANGUAGE", args.language)
     emit("IMPLEMENTATION_VERSION", version)
@@ -1466,9 +1565,14 @@ def measure(args: argparse.Namespace) -> int:
                 f"checkout version {implementation_version!r}"
             )
     else:
-        implementation_version = (
-            args.version or jvm_runtime.harness_graalvm_version()
-        )
+        if language == "ruby":
+            implementation_version = (
+                args.version or jvm_runtime.ruby_runtime_spec()["version"]
+            )
+        else:
+            implementation_version = (
+                args.version or jvm_runtime.harness_graalvm_version()
+            )
 
     if product_before is not None and not product_before["clean"] and not args.allow_dirty_product:
         raise UsageError(
@@ -1536,6 +1640,18 @@ def measure(args: argparse.Namespace) -> int:
         result_key["diagnostic_affinity"] = (
             args.diagnostic_affinity + "-linux-thread-v1"
         )
+
+    if language == "ruby":
+        prepared_version, prepared_cp = peer_classpath(
+            args.version, language="ruby", offline=True
+        )
+        result_key["ruby_runtime"] = {
+            "version": prepared_version,
+            "graalvm_version": jvm_runtime.harness_graalvm_version(),
+            "artifact_manifest_sha256": sha256_json(
+                jvm_runtime.peer_artifact_manifest(prepared_cp)
+            ),
+        }
 
     prepare_output(output)
     case = case_id(language, surface, args.workload, args.stage, args.profile)
@@ -1662,7 +1778,7 @@ def measure(args: argparse.Namespace) -> int:
         )
 
         if language in PEER_LANGUAGES:
-            actual_peer_version = metadata["peer_runtime"]["graalvm_version"]
+            actual_peer_version = metadata["peer_runtime"]["implementation_version"]
             if actual_peer_version != implementation_version:
                 raise InvalidMeasurement(
                     "PEER_VERSION_MISMATCH",

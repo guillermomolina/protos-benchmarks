@@ -420,6 +420,7 @@ class DriverTest(unittest.TestCase):
         resolve.assert_called_once_with(
             "25.4.4.1.1",
             offline=False,
+            language="js",
         )
 
     def test_peer_prepare_rejects_protos(self):
@@ -870,7 +871,10 @@ class DriverTest(unittest.TestCase):
         self.assertNotIn("RESULT", lines)
 
     def test_peer_versions_are_selected_and_not_interchanged(self):
-        def fake_peer_classpath(version=None):
+        def fake_peer_classpath(
+            version=None, *, language="js"
+        ):
+            self.assertEqual("js", language)
             return version or "25.4.4.1.1", "/fake/peer.jar"
 
         with mock.patch.object(
@@ -1005,7 +1009,9 @@ class DriverTest(unittest.TestCase):
         self.assertEqual(params, ["cases", "workload", "stage", "kind", "overrides"])
 
     def test_same_reference_timing_policy_for_every_language(self):
-        mp.peer_classpath = lambda: ("25.4.4.1.1", "/fake/peer.jar")
+        mp.peer_classpath = lambda version=None, *, language="js": (
+            version or "25.4.4.1.1", "/fake/peer.jar"
+        )
         older = make_product(self.tmp, "protos-older", "0.3.0-SNAPSHOT")
         runs = {
             "protos": ["--dir", str(self.product), "--surface", "canonical"],
@@ -1656,7 +1662,9 @@ class DriverTest(unittest.TestCase):
 
     def test_peer_language_needs_no_product(self):
         argv = ["--language", "js", "--workload", WORKLOAD, "--stage", "smoke", "--output", str(self.output)]
-        mp.peer_classpath = lambda: ("25.4.4.1.1", "/fake/peer.jar")
+        mp.peer_classpath = lambda version=None, *, language="js": (
+            version or "25.4.4.1.1", "/fake/peer.jar"
+        )
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
             code = mp.main(argv)

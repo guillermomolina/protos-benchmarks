@@ -57,7 +57,7 @@ HARNESS_DIR = mp.HARNESS_DIR
 POLICY = HARNESS_DIR / "policy" / "graphs.json"
 ANALYZER = HARNESS_DIR / "igv_analyzer.sh"
 SCHEMA_VERSION = 1
-LANGUAGES = ("protos", "js", "python")
+LANGUAGES = ("protos", "js", "python", "ruby")
 PROTOS_STABLE_ROOT_OPTION = (
     "-Dprotos.diagnostic.stableRootIdentity=true"
 )
@@ -129,6 +129,7 @@ def graph_capture_key(
     workload: str,
     stage: str,
     java: dict[str, str],
+    requested_ruby_version: str | None = None,
 ) -> dict[str, Any]:
     """Language-owned capture identity.
 
@@ -139,6 +140,25 @@ def graph_capture_key(
         runtime = {
             "revision": product["revision"],
             "source_state_sha256": product["source_state_sha256"],
+        }
+    elif language == "ruby":
+        spec = mp.jvm_runtime.ruby_runtime_spec()
+        version, classpath = mp.peer_classpath(
+            requested_ruby_version,
+            language="ruby",
+            offline=True,
+        )
+        runtime = {
+            "graalvm_version": spec["graalvm_version"],
+            "truffleruby_version": version,
+            "peer_dependencies_sha256": mp.sha256_bytes(
+                mp.jvm_runtime.ruby_peer_pom(
+                    version, spec["graalvm_version"]
+                ).encode("utf-8")
+            ),
+            "artifact_manifest_sha256": mp.sha256_json(
+                mp.jvm_runtime.peer_artifact_manifest(classpath)
+            ),
         }
     else:
         version = mp.jvm_runtime.harness_graalvm_version()
@@ -209,15 +229,23 @@ def capture_case(
     language_policy = policy["languages"][language]
     surface = language_policy["surface"]
     surface_def = mp.surface_definition(cases, surface)
-    product_dir = args.dir.expanduser().resolve()
+    product_dir = (
+        args.dir.expanduser().resolve()
+        if language != "ruby" and args.dir is not None else None
+    )
+    if language != "ruby" and product_dir is None:
+        raise mp.UsageError("--dir is required for non-Ruby graph captures")
     expected = workload_catalog.expected_result(workload)
     source = workload_catalog.source_for(workload, language)
     budgets = list(policy["budgets"][args.stage])
     destination = case_dir(output, workload, language)
 
-    product_before = mp.product_identity(product_dir)
+    product_before = (
+        mp.product_identity(product_dir) if product_dir is not None else None
+    )
 
-    if not product_before["clean"] and not args.allow_dirty_product:
+    if (product_before is not None and not product_before["clean"]
+            and not args.allow_dirty_product):
         raise mp.UsageError(
             "Protos checkout is dirty; retained graph evidence requires a clean "
             "checkout (use --allow-dirty-product only for diagnostics)"
@@ -231,7 +259,7 @@ def capture_case(
     java = mp.java_identity()
     key = graph_capture_key(
         policy, product_before, language, surface, workload,
-        args.stage, java,
+        args.stage, java, args.ruby_version,
     )
 
     existing = destination / "capture.json"
@@ -259,7 +287,7 @@ def capture_case(
         "capture_valid": False,
         "capture_key": key,
         "capture_started": started.isoformat(),
-        "protos_revision": product_before["revision"],
+        "protos_revision": product_before["revision"] if product_before else None,
         "product_before": product_before,
         "language": language,
         "surface": surface,
@@ -283,7 +311,12 @@ def capture_case(
 
     try:
         runtime = mp.prepare_surface_runtime(
-            cases, surface, surface_def, language, product_dir, product_before, metadata, raw
+            cases, surface, surface_def, language,
+            product_dir, product_before, metadata, raw,
+            requested_peer_version=(
+                args.ruby_version if language == "ruby"
+                else None
+            ),
         )
 
         code, out = mp.run_logged(
@@ -340,12 +373,14 @@ def capture_case(
             for run in runs
         ]
 
-        product_after = mp.product_identity(product_dir)
-        metadata["product_after"] = product_after
-        changed = mp.compare_product(product_before, product_after)
-
-        if changed:
-            raise mp.InvalidMeasurement("PRODUCT_CHANGED_DURING_CAPTURE", ",".join(changed))
+        if product_dir is not None:
+            product_after = mp.product_identity(product_dir)
+            metadata["product_after"] = product_after
+            changed = mp.compare_product(product_before, product_after)
+            if changed:
+                raise mp.InvalidMeasurement(
+                    "PRODUCT_CHANGED_DURING_CAPTURE", ",".join(changed)
+                )
 
         harness_after = mp.producer_hashes(files)
 
@@ -495,8 +530,10 @@ def retain_runs(runs: list[dict[str, Any]], stabilization: dict[str, Any], stagi
 
 
 def capture(args: argparse.Namespace) -> int:
-    if args.dir is None or args.output is None:
-        raise mp.UsageError("--dir and --output are required")
+    if args.output is None:
+        raise mp.UsageError("--output is required")
+    if any(lang != "ruby" for lang in select_languages(args.language)) and args.dir is None:
+        raise mp.UsageError("--dir is required for non-Ruby graph captures")
 
     policy = load_policy()
     cases = mp.load_cases()
@@ -999,7 +1036,9 @@ def summarize(args: argparse.Namespace) -> int:
         mp.emit(
             "RUNG",
             f"{rung['workload']} protos={result['protos_total']} js={result['js_total']} "
-            f"python={result['python_total']} peer={result['peer_reference']} "
+            f"python={result['python_total']} ruby={result['ruby_total']} "
+            f"peer_scope={result['peer_reference_scope']} "
+            f"peer={result['peer_reference']} "
             f"protos_stabilization={result['protos_stabilization']} "
             f"protos_status={result['protos_status']} node_comparison={result['peer_node_comparison']} "
             f"final_state={result['final_compilation_state'] or '-'} "
@@ -1105,6 +1144,44 @@ def run_bytecode_diagnostic(
     unavailable_reason = None
     runtime_cp = runtime["runtime_cp"]
     jvm_options = bytecode_histogram_options(language)
+
+    if language == "ruby":
+        jvm_options = []
+        command = mp.java_command(
+            runtime_cp,
+            runtime["main_class"],
+            runtime["system_properties"],
+            jvm_options,
+            ["measure", runtime["core_arg"], str(source),
+             "0", "1", str(calls), "-"],
+            cpu,
+        )
+        code, output = mp.run_logged(command, log)
+        actual = mp.output_result(output)
+        if code != 0 or actual != expected:
+            raise mp.InvalidMeasurement(
+                "BYTECODE_DIAGNOSTIC_FAILED",
+                f"exit_code={code}, expected={expected}, actual={actual!r}",
+            )
+        histogram = ge.parse_bytecode_histogram(output)
+        if histogram["status"] == "AVAILABLE":
+            raise ge.EvidenceError("RUBY_UNEXPECTED_BYTECODE_DSL_HISTOGRAM")
+        return {
+            "status": "UNAVAILABLE",
+            "histogram": histogram,
+            "semantic_root_catalog": None,
+            "size": {"status": "UNAVAILABLE", "observations": [],
+                     "reason": "AST_RUNTIME_NO_BYTECODE_DSL"},
+            "size_instrument": {"status": "UNAVAILABLE",
+                                "reason": "AST_RUNTIME_NO_BYTECODE_DSL"},
+            "raw_log": "raw/bytecode-histogram.log",
+            "raw_log_sha256": mp.sha256_file(log),
+            "jvm_options": jvm_options,
+            "calls": calls,
+            "execution": "dedicated-fresh-jvm",
+            "timing_evidence": "NONE",
+            "unavailable_reason": "AST_RUNTIME_NO_BYTECODE_DSL",
+        }
 
     try:
         instrument = bsr.compile_instrument(runtime_cp)
@@ -1460,7 +1537,12 @@ def cold_capture(args: argparse.Namespace) -> int:
             "--retain-recompiled-tiers requires --root all"
         )
 
-    product_dir = args.dir.expanduser().resolve()
+    product_dir = (
+        args.dir.expanduser().resolve()
+        if args.language != "ruby" and args.dir is not None else None
+    )
+    if args.language != "ruby" and product_dir is None:
+        raise mp.UsageError("--dir is required for non-Ruby cold capture")
     output = args.output.expanduser().resolve()
     prepare_output(output)
 
@@ -1480,8 +1562,10 @@ def cold_capture(args: argparse.Namespace) -> int:
     )
     expected = workload_catalog.expected_result(args.workload)
 
-    product_before = mp.product_identity(product_dir)
-    if not product_before["clean"]:
+    product_before = (
+        mp.product_identity(product_dir) if product_dir is not None else None
+    )
+    if product_before is not None and not product_before["clean"]:
         raise mp.UsageError(
             "cold compilation requires a clean Protos checkout"
         )
@@ -1515,6 +1599,7 @@ def cold_capture(args: argparse.Namespace) -> int:
             args.workload,
             "smoke",
             java,
+            args.version if args.language == "ruby" else None,
         ),
         "capture_mode": "cold-single-compilation-v1",
         "requested_tier": args.tier,
@@ -1525,6 +1610,10 @@ def cold_capture(args: argparse.Namespace) -> int:
         "first_tier_threshold": args.first_threshold,
         "last_tier_threshold": args.last_threshold,
         "extra_jvm_options": list(args.jvm_option),
+        "requested_peer_version": (
+            args.version if args.language != "protos"
+            else None
+        ),
     }
 
     metadata: dict[str, Any] = {
@@ -1537,7 +1626,7 @@ def cold_capture(args: argparse.Namespace) -> int:
         "workload": args.workload,
         "surface": surface,
         "expected_result": expected,
-        "protos_revision": product_before["revision"],
+        "protos_revision": product_before["revision"] if product_before else None,
         "product_before": product_before,
         "harness": harness_before,
         "java": java,
@@ -1563,6 +1652,10 @@ def cold_capture(args: argparse.Namespace) -> int:
             product_before,
             metadata,
             raw,
+            requested_peer_version=(
+                args.version if args.language != "protos"
+                else None
+            ),
         )
 
         correctness_command = mp.java_command(
@@ -2047,18 +2140,14 @@ def cold_capture(args: argparse.Namespace) -> int:
                 "bgv": matched[0],
             }
 
-        product_after = mp.product_identity(product_dir)
-        metadata["product_after"] = product_after
-
-        changed = mp.compare_product(
-            product_before, product_after
-        )
-
-        if changed:
-            raise mp.InvalidMeasurement(
-                "PRODUCT_CHANGED_DURING_CAPTURE",
-                ",".join(changed),
-            )
+        if product_dir is not None:
+            product_after = mp.product_identity(product_dir)
+            metadata["product_after"] = product_after
+            changed = mp.compare_product(product_before, product_after)
+            if changed:
+                raise mp.InvalidMeasurement(
+                    "PRODUCT_CHANGED_DURING_CAPTURE", ",".join(changed)
+                )
 
         harness_after = mp.producer_hashes(files)
         metadata["harness_after_source_sha256"] = harness_after
@@ -3874,6 +3963,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     cap.add_argument("--dir", type=Path, help="Protos checkout (always recorded)")
     cap.add_argument("--output", type=Path)
     cap.add_argument("--language", default="all")
+    cap.add_argument("--ruby-version")
     cap.add_argument("--workload", default="ladder")
     cap.add_argument("--stage", default="reference", choices=("reference", "smoke"))
     cap.add_argument("--cpu", type=int)
@@ -3884,10 +3974,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "cold",
         help="fresh-JVM compilation capture of one root and tier",
     )
-    cold.add_argument("--dir", type=Path, required=True)
+    cold.add_argument("--dir", type=Path)
     cold.add_argument("--output", type=Path, required=True)
     cold.add_argument("--language", choices=LANGUAGES, required=True)
     cold.add_argument("--workload", required=True)
+    cold.add_argument("--version")
     cold.add_argument("--tier", type=int, choices=(1, 2), required=True)
     cold.add_argument("--root", default="primary")
     cold.add_argument(

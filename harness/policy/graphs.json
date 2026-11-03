@@ -12,13 +12,26 @@
   ],
   "dump_path_option": "-Djdk.graal.DumpPath=",
   "budgets": {
-    "reference": [1000, 4000, 16000, 64000, 256000],
-    "smoke": [16000]
+    "reference": [
+      1000,
+      4000,
+      16000,
+      64000,
+      256000
+    ],
+    "smoke": [
+      16000
+    ]
   },
   "framework_label_patterns": [
     "^org\\.graalvm\\.polyglot\\.Value<[^>]*>\\.execute$"
   ],
-  "call_edge_verbs": ["Cutoff", "Indirect", "BailedOut", "Expanded"],
+  "call_edge_verbs": [
+    "Cutoff",
+    "Indirect",
+    "BailedOut",
+    "Expanded"
+  ],
   "languages": {
     "protos": {
       "surface": "canonical",
@@ -34,6 +47,13 @@
       "surface": "executable-value",
       "primary_label_pattern": "^<bytecode run at [0-9a-f]+>$",
       "primary_src_contains_source": false
+    },
+    "ruby": {
+      "surface": "executable-value",
+      "primary_label_pattern": null,
+      "primary_src_contains_source": false,
+      "root_identity_status": "PENDING_RUNTIME_EVIDENCE",
+      "root_identity_mode": "observed-framework-callee"
     }
   },
   "ladders": {

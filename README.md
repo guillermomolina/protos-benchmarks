@@ -5,7 +5,7 @@ Single GraalVM benchmarking harness for
 and TruffleRuby (GraalRuby).
 
 The host entry point is `benchmark.py`; the root `Makefile` forwards to
-it. The workload catalog is `cases/catalog.json` (currently 17
+it. The workload catalog is `cases/catalog.json` (currently 18
 cases, with one source file per implementation and case). The current adapters
 are Protos `canonical` and GraalJS/GraalPy/TruffleRuby `executable-value`, configured in
 `harness/policy/cases.json`.

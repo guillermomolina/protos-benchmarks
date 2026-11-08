@@ -46,6 +46,12 @@ match the actual checkout. GraalJS and GraalPy still use explicit
 baked into a separate, SHA-pinned Podman image during `image-build-ruby`.
 Correctness must pass before timing is accepted.
 
+Protos uses a dedicated, digest-pinned GraalVM CE `25.5.5.0.3`
+runner image. GraalJS and GraalPy retain the shared `25.4.4.1.1`
+image, so upgrading Protos does not silently change peer runtimes.
+Build the Protos image explicitly with `make image-build LANGUAGE=protos`
+before preparing or measuring Protos.
+
 The Ruby image is independent because TruffleRuby `40.0.0` requires
 GraalVM/Truffle `25.3.4.1`, while the other implementations use `25.4.4.1.1`.
 No manual host Ruby installation is used. Build and validate explicitly:

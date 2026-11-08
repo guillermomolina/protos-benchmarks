@@ -24,6 +24,7 @@ CONTAINER_ROOT = "/workspaces/protos-benchmarks"
 CONTAINER_PRODUCT = "/workspaces/protos"
 
 LANGUAGES = ("protos", "js", "python", "ruby")
+DEFAULT_PROTOS_IMAGE = "localhost/protos-bench-runner:protos-graal25.5.5.0.3-standalone"
 DEFAULT_RUBY_IMAGE = "localhost/protos-bench-runner:ruby-40.0.0-graal25.3.4.1"
 DEFAULT_IMAGE = (
     "localhost/protos-bench-runner:"
@@ -187,8 +188,12 @@ def container_output(path):
 
 
 def runtime_image(args, language):
-    """Only Ruby uses the independent GraalVM 25.3 container image."""
-    return args.ruby_image if language == "ruby" else args.image
+    """Select the language-specific pinned GraalVM runtime."""
+    if language == "protos":
+        return args.protos_image
+    if language == "ruby":
+        return args.ruby_image
+    return args.image
 
 
 def podman_binary():
@@ -469,7 +474,8 @@ def run_bytecode_prepare(args):
 def run_product_prepare(args):
     """Prepare Protos dependencies outside all measurement JVMs."""
     binary = podman_binary()
-    require_image(binary, args.image)
+    selected_image = runtime_image(args, "protos")
+    require_image(binary, selected_image)
 
     product = product_directory(args.product)
 
@@ -487,7 +493,7 @@ def run_product_prepare(args):
 
     return run_container(
         binary,
-        args.image,
+        selected_image,
         product,
         arguments,
         allow_network=True,
@@ -849,6 +855,7 @@ def parse_args(argv=None):
     parser.add_argument("--last-threshold", type=int)
     parser.add_argument("--jvm-option", action="append", default=[])
     parser.add_argument("--image", default=DEFAULT_IMAGE)
+    parser.add_argument("--protos-image", default=DEFAULT_PROTOS_IMAGE)
     parser.add_argument("--ruby-image", default=DEFAULT_RUBY_IMAGE)
     return parser.parse_args(argv)
 
@@ -864,7 +871,8 @@ def main(argv=None):
         if args.command == "image-status":
             binary = podman_binary()
             selected_image = runtime_image(
-                args, "ruby" if args.language == "ruby" else "js"
+                args,
+                args.language if args.language != "all" else "js",
             )
             if image_present(binary, selected_image):
                 print(f"IMAGE_AVAILABLE=YES")
@@ -880,13 +888,14 @@ def main(argv=None):
 
         if args.command == "image-build":
             binary = podman_binary()
-            is_ruby = args.language == "ruby"
-            selected_image = runtime_image(
-                args, "ruby" if is_ruby else "js"
+            language = (
+                args.language if args.language != "all" else "js"
             )
-            containerfile = (
-                "Containerfile.ruby" if is_ruby else "Containerfile"
-            )
+            selected_image = runtime_image(args, language)
+            containerfile = {
+                "protos": "Containerfile.protos",
+                "ruby": "Containerfile.ruby",
+            }.get(language, "Containerfile")
             return subprocess.run(
                 [
                     binary, "build",

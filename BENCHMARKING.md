@@ -101,6 +101,19 @@ retained peer baseline manifest and archive under `results/peer-baselines/`
 remain available as historical comparators, not automatically accepted new
 results for a different version or host.
 
+## Protos GraalVM runtime
+
+Protos is measured in its own digest-pinned GraalVM CE 25.5.5.0.3
+container (`harness/Containerfile.protos`). The existing shared
+GraalVM 25.4.4.1.1 image remains assigned to GraalJS and GraalPy,
+and the separate GraalVM 25.3.4.1 image remains assigned to Ruby.
+
+The runtime selector is language-specific for correctness, timing,
+bytecode captures and graph captures. Product preparation uses the
+Protos image. Toolchain and immutable image identities are recorded
+with measurements; compilation graphs from different GraalVM versions
+must not be represented as same-toolchain comparisons.
+
 ## Ruby container and semantics
 
 `harness/Containerfile.ruby` creates a separate Community GraalVM 25.3.4.1

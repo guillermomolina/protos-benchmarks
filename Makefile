@@ -41,11 +41,13 @@ CPU ?=
 OUTPUT ?=
 PROTOS_REPO ?= $(abspath ../protos)
 PODMAN_IMAGE ?= localhost/protos-bench-runner:graal25.4.4.1.1-standalone
+PROTOS_IMAGE ?= localhost/protos-bench-runner:protos-graal25.5.5.0.3-standalone
 
 ARGS = --case "$(CASE)" --language "$(LANGUAGE)" --stage "$(STAGE)" \
        --profile "$(PROFILE)" --surface "$(SURFACE)" \
        --temperature "$(TEMPERATURE)" \
        --product "$(PROTOS_REPO)" --image "$(PODMAN_IMAGE)" \
+       --protos-image "$(PROTOS_IMAGE)" \
        --ruby-image "$(PODMAN_RUBY_IMAGE)" \
        $(if $(strip $(PROTOS_VERSION)),--protos-version "$(PROTOS_VERSION)",) \
        $(if $(strip $(GRAALJS_VERSION)),--js-version "$(GRAALJS_VERSION)",) \
@@ -94,7 +96,7 @@ peer-prepare:
 	@$(PYTHON) $(HARNESS) peer-prepare $(ARGS)
 
 product-prepare:
-	@$(PYTHON) $(HARNESS) product-prepare --product "$(PROTOS_REPO)" --image "$(PODMAN_IMAGE)" $(if $(strip $(PROTOS_VERSION)),--protos-version "$(PROTOS_VERSION)",)
+	@$(PYTHON) $(HARNESS) product-prepare --product "$(PROTOS_REPO)" --image "$(PODMAN_IMAGE)" --protos-image "$(PROTOS_IMAGE)" $(if $(strip $(PROTOS_VERSION)),--protos-version "$(PROTOS_VERSION)",)
 
 runtime-prepare:
 	@$(MAKE) --no-print-directory image-status
@@ -103,11 +105,11 @@ runtime-prepare:
 
 image-status:
 	@$(PYTHON) $(HARNESS) image-status --language "$(LANGUAGE)" \
-	    --image "$(PODMAN_IMAGE)" --ruby-image "$(PODMAN_RUBY_IMAGE)"
+	    --image "$(PODMAN_IMAGE)" --protos-image "$(PROTOS_IMAGE)" --ruby-image "$(PODMAN_RUBY_IMAGE)"
 
 image-build:
 	@$(PYTHON) $(HARNESS) image-build --language "$(LANGUAGE)" \
-	    --image "$(PODMAN_IMAGE)" --ruby-image "$(PODMAN_RUBY_IMAGE)"
+	    --image "$(PODMAN_IMAGE)" --protos-image "$(PROTOS_IMAGE)" --ruby-image "$(PODMAN_RUBY_IMAGE)"
 
 image-build-ruby:
 	@$(MAKE) --no-print-directory image-build LANGUAGE=ruby

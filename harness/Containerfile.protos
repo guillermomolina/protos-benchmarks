@@ -1,0 +1,43 @@
+# Protos GraalVM 25.5.5.0.3 benchmark runtime.
+# Separate from the GraalJS/GraalPy 25.4 and Ruby 25.3 images.
+# Exact image digest selected from the downloaded host-platform image.
+
+FROM ghcr.io/graalvm/jdk-community:25i5-25.0.5.0.3@sha256:267e78b5e941a5b18ce634c0aa2d333f888c42b65aa5c1e54a767642cc9db53d
+
+USER root
+
+RUN microdnf install -y \
+    findutils \
+    diffutils \
+    git \
+    gzip \
+    shadow-utils \
+    tar \
+    unzip \
+    xz \
+    procps \
+    time \
+    python3 \
+    util-linux-core
+
+RUN microdnf install -y \
+    --enablerepo=ol10_codeready_builder \
+    maven \
+    maven-unbound
+
+RUN microdnf clean all
+
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+RUN java -version 2>&1 | grep -F "GraalVM CE 25.5.5.0.3"
+RUN mvn -version | grep -F "Apache Maven"
+RUN python3 -c "import sys; assert sys.version_info[:2] == (3, 12)"
+RUN command -v taskset
+
+RUN useradd --create-home --shell /bin/bash vscode
+
+USER vscode
+
+WORKDIR /workspaces/protos-benchmarks
+
+ENV MAVEN_OPTS="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow"

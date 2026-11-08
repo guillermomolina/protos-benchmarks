@@ -1414,7 +1414,7 @@ def parse_bytecode_histogram(output: str) -> dict[str, Any]:
         count = int(match.group(1))
         label = match.group(3).strip()
 
-        if label.startswith("▶"):
+        if label.startswith(("▶", "?")):
             group_name = label[1:].strip()
             if group_name.startswith("Language:"):
                 language = group_name.partition(":")[2].strip()

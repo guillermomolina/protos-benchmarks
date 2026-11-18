@@ -1,0 +1,2004 @@
+{
+  "adapter_source_sha256": "328fa1ab6301eebb3494d6bc151289737c9a32d33027496b5be64cfb647a287e",
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "capture_finished": "2026-11-18T10:15:48.343320+00:00",
+  "capture_key": {
+    "budgets": [
+      1000,
+      4000,
+      16000,
+      64000,
+      256000
+    ],
+    "expected_result": "6765",
+    "final_tier": 2,
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "java_runtime_version": "25.0.5.0.3+1-jvmci-25.5-b26",
+    "language": "protos",
+    "runtime": {
+      "revision": "09589f783ddf57f31cbd1cae5efcdc8410077cd0",
+      "source_state_sha256": "2209ef7b414b440bd8fd6500d7c87fe09ee9f63a91f22f7ddb96019756d33b36"
+    },
+    "selected_phase": "After TruffleTier",
+    "stage": "reference",
+    "surface": "canonical",
+    "workload": "fibonacci"
+  },
+  "capture_started": "2026-11-18T10:15:09.785237+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "d2de930aeda2cf54f3d0da529f00b282b7eefdd7805a6cb14c5bdb65ecee676a",
+    "identity": {
+      "dependency_classpath_sha256": "30a2cffa2279109bb8d94cc75f62878bf5502c28f41c035028807e3ce665a9a9",
+      "java_home": "/usr/lib64/graalvm/graalvm-community-java25i5",
+      "java_runtime_version": "25.0.5.0.3+1-jvmci-25.5-b26",
+      "product_classes_sha256": "124cc058303a49e9486d29ad583e2e6bb12057a1820e42a244d2a389588212d4",
+      "protos_revision": "09589f783ddf57f31cbd1cae5efcdc8410077cd0",
+      "protos_source_state_sha256": "2209ef7b414b440bd8fd6500d7c87fe09ee9f63a91f22f7ddb96019756d33b36",
+      "surface": "canonical"
+    },
+    "identity_sha256": "628953f4259060de79a3b4eb188310bffa96a44dabbd597187ffe13a4f8301ad",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/09589f783ddf57f31cbd1cae5efcdc8410077cd0/canonical/328fa1ab6301eebb3494d6bc151289737c9a32d33027496b5be64cfb647a287e",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "6765",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "dependency_classpath_sha256": "30a2cffa2279109bb8d94cc75f62878bf5502c28f41c035028807e3ce665a9a9",
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "expected_result": "6765",
+  "final_tier": 2,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "f55bc82a8632206a73faa3a4f19d0bc127a647cc",
+    "porcelain": "",
+    "source_sha256": {
+      "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+      "cases/catalog.json": "eddfaebc5ff32c43ec89730b1e9705045e4f5f73da629b9f79bcf6c1ef5ef210",
+      "cases/fibonacci/fibonacci.protos": "4c064b92f8adb13540f0ffe7d834b9c44a9bade6354151c27ec09a10413e711f",
+      "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+      "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+      "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+      "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+      "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+      "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+      "harness/measure/surfaces/canonical/ProtosCanonicalSurface.java": "9f1f3862998c54a55f8afdade2bac7bb07935cc8db32521f7303c4d02cedd535",
+      "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+      "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+      "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+      "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+      "harness/policy/cases.json": "c3c96f82720dc6ba8007c4d986ef57f05fbd2b0081806d9010f0dc435000097d",
+      "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+      "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+    }
+  },
+  "harness_dirty": false,
+  "harness_git_head": "f55bc82a8632206a73faa3a4f19d0bc127a647cc",
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "e3948bf6f366",
+    "kernel": "7.3.4-zen2-2-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/usr/lib64/graalvm/graalvm-community-java25i5",
+    "java.runtime.version": "25.0.5.0.3+1-jvmci-25.5-b26",
+    "java.vendor.version": "GraalVM CE 25.5.5.0.3+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.5.0.3+1-jvmci-25.5-b26",
+    "version_output": "openjdk version \"25.0.5.0.3\" 2026-10-24\nOpenJDK Runtime Environment GraalVM CE 25.5.5.0.3+1.1 (build 25.0.5.0.3+1-jvmci-25.5-b26)\nOpenJDK 64-Bit Server VM GraalVM CE 25.5.5.0.3+1.1 (build 25.0.5.0.3+1-jvmci-25.5-b26, mixed mode, sharing)"
+  },
+  "language": "protos",
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "20d56f107adb8924b61063133a9c0486670a6dadf55980edbe26369ad2b2c2cf",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.5.5.0.3",
+    "maven_compiler_release": "25",
+    "pom_sha256": "6c9da3b773fc3c3095dec3c51997fd5867d9309f0e16f6327a61970408218570",
+    "porcelain": "",
+    "revision": "09589f783ddf57f31cbd1cae5efcdc8410077cd0",
+    "source_state_sha256": "2209ef7b414b440bd8fd6500d7c87fe09ee9f63a91f22f7ddb96019756d33b36",
+    "version": "0.4.169-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "20d56f107adb8924b61063133a9c0486670a6dadf55980edbe26369ad2b2c2cf",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.5.5.0.3",
+    "maven_compiler_release": "25",
+    "pom_sha256": "6c9da3b773fc3c3095dec3c51997fd5867d9309f0e16f6327a61970408218570",
+    "porcelain": "",
+    "revision": "09589f783ddf57f31cbd1cae5efcdc8410077cd0",
+    "source_state_sha256": "2209ef7b414b440bd8fd6500d7c87fe09ee9f63a91f22f7ddb96019756d33b36",
+    "version": "0.4.169-SNAPSHOT"
+  },
+  "product_classes_sha256": "124cc058303a49e9486d29ad583e2e6bb12057a1820e42a244d2a389588212d4",
+  "protos_revision": "09589f783ddf57f31cbd1cae5efcdc8410077cd0",
+  "runs": [
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 161,
+              "cycles": 149,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 205
+            },
+            "ir_after_truffle_tier": 161,
+            "label": "ProtosBytecodeRootNodeGen@*",
+            "role": "primary",
+            "tier": 1
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1456,
+              "cycles": 1207,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1894
+            },
+            "ir_after_truffle_tier": 1464,
+            "label": "ProtosBytecodeRootNodeGen@*",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 1000,
+      "calls": 1001,
+      "compilation_count": 4,
+      "dump_inventory": [
+        {
+          "bytes": 1169847,
+          "name": "TruffleHotSpotCompilation-2912[ProtosBytecodeRootNodeGen@664bd5e7].bgv",
+          "sha256": "124403b363cfd530e5154f319a7616aeea01d89d2c19cef0b3b41eea562cce81"
+        },
+        {
+          "bytes": 2216777,
+          "name": "TruffleHotSpotCompilation-2976[ProtosBytecodeRootNodeGen@664bd5e7].bgv",
+          "sha256": "b3d1b9715fd74f3831cc43bed1b8bb27cdec6bbb61268b9c72f4834426819777"
+        },
+        {
+          "bytes": 654594,
+          "name": "TruffleHotSpotCompilation-3142[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "3d0eef134d0fa52a351e4fcac9ecde4968a8794d59d0ebadb74c052be76a083b"
+        },
+        {
+          "bytes": 256562,
+          "name": "TruffleHotSpotCompilation-3160[ProtosBytecodeRootNodeGen@1085489a].bgv",
+          "sha256": "c1387f85fbb99cb6fdf47bdb07d03e725aa4b923287a4271660de09c087b688e"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+        ],
+        "primary_label": "ProtosBytecodeRootNodeGen@1085489a",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 15,
+                  "cycles": 21,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 22
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 9,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$ReadGlobal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 9
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "DynamicObjectFactory$GetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3160[ProtosBytecodeRootNodeGen@1085489a].bgv"
+            ],
+            "comp_id": 3160,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 161,
+              "cycles": 149,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 205
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 161,
+            "label": "ProtosBytecodeRootNodeGen@1085489a",
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "role": "primary",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:3",
+            "tier": 1,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 21,
+                  "cycles": 11,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 11,
+                  "cycles": 9,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2976[ProtosBytecodeRootNodeGen@664bd5e7].bgv"
+            ],
+            "comp_id": 2976,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1456,
+              "cycles": 1207,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1894
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7",
+              "ProtosBytecodeRootNodeGen@664bd5e7"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1464,
+            "label": "ProtosBytecodeRootNodeGen@664bd5e7",
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "role": "additional",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              2912
+            ],
+            "target": "1:2",
+            "tier": 2,
+            "via": "ProtosBytecodeRootNodeGen@1085489a"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [],
+      "trace_log": "budget-1000/trace.log.gz",
+      "trace_log_sha256": "e92e03cbad38d0732bbc0990906de553b72633b8249d4028bf2e89978ac9ab47"
+    },
+    {
+      "assessment": {
+        "problems": [
+          "UNIT_NOT_AT_FINAL_TIER"
+        ],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 161,
+              "cycles": 149,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 205
+            },
+            "ir_after_truffle_tier": 161,
+            "label": "ProtosBytecodeRootNodeGen@*",
+            "role": "primary",
+            "tier": 1
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1456,
+              "cycles": 1207,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1894
+            },
+            "ir_after_truffle_tier": 1464,
+            "label": "ProtosBytecodeRootNodeGen@*",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "NOT_STABLE"
+      },
+      "budget": 4000,
+      "calls": 4001,
+      "compilation_count": 4,
+      "dump_inventory": [
+        {
+          "bytes": 1169841,
+          "name": "TruffleHotSpotCompilation-2918[ProtosBytecodeRootNodeGen@44934896].bgv",
+          "sha256": "e8d1c169efea4a27d2852d4439180ee612bfc4fa5e3e37291351d9c0343518e2"
+        },
+        {
+          "bytes": 2216770,
+          "name": "TruffleHotSpotCompilation-2974[ProtosBytecodeRootNodeGen@44934896].bgv",
+          "sha256": "cf1fd79b913bf7a9687b4261febe9137c471b9c8afffba6b731f4ea4652b9096"
+        },
+        {
+          "bytes": 654593,
+          "name": "TruffleHotSpotCompilation-3136[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "3c21494a19ecf3db14944fd3811b3029f24ca5e8d0dbbd9df6a54419e19fe58a"
+        },
+        {
+          "bytes": 256562,
+          "name": "TruffleHotSpotCompilation-3158[ProtosBytecodeRootNodeGen@7827fef3].bgv",
+          "sha256": "178ab69ec01e1ef5a2964ca5df4034ab1e7377284febae6c9881db68f70244d9"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+        ],
+        "primary_label": "ProtosBytecodeRootNodeGen@7827fef3",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 15,
+                  "cycles": 21,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 22
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 9,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$ReadGlobal_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 9
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "DynamicObjectFactory$GetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3158[ProtosBytecodeRootNodeGen@7827fef3].bgv"
+            ],
+            "comp_id": 3158,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 161,
+              "cycles": 149,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 205
+            },
+            "failed_after_final": false,
+            "inlined": [],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 161,
+            "label": "ProtosBytecodeRootNodeGen@7827fef3",
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "role": "primary",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:3",
+            "tier": 1,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 21,
+                  "cycles": 11,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 11,
+                  "cycles": 9,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2974[ProtosBytecodeRootNodeGen@44934896].bgv"
+            ],
+            "comp_id": 2974,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1456,
+              "cycles": 1207,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1894
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1464,
+            "label": "ProtosBytecodeRootNodeGen@44934896",
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "role": "additional",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              2918
+            ],
+            "target": "1:2",
+            "tier": 2,
+            "via": "ProtosBytecodeRootNodeGen@7827fef3"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [],
+      "trace_log": "budget-4000/trace.log.gz",
+      "trace_log_sha256": "33c63c5900b252389028376c07d47d44252fa2f6fb10b177c1e818ff5504820f"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1155,
+              "cycles": 955,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1562
+            },
+            "ir_after_truffle_tier": 1178,
+            "label": "ProtosBytecodeRootNodeGen@*",
+            "role": "primary",
+            "tier": 2
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1456,
+              "cycles": 1207,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1894
+            },
+            "ir_after_truffle_tier": 1464,
+            "label": "ProtosBytecodeRootNodeGen@*",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 16000,
+      "calls": 16001,
+      "compilation_count": 6,
+      "dump_inventory": [
+        {
+          "bytes": 1169854,
+          "name": "TruffleHotSpotCompilation-2968[ProtosBytecodeRootNodeGen@44934896].bgv",
+          "sha256": "49bcdf08df0595bb6863c9e0a7e79e20f30a4db62a4be974b7c3ea23e38a22e1"
+        },
+        {
+          "bytes": 2216778,
+          "name": "TruffleHotSpotCompilation-3027[ProtosBytecodeRootNodeGen@44934896].bgv",
+          "sha256": "5bf99c189172089ed27b9fc1b7de139037118aba85e368060306e2e4a2527ff1"
+        },
+        {
+          "bytes": 654594,
+          "name": "TruffleHotSpotCompilation-3197[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "e035901e0e1d534f1f7b106d24f80c4370e04ebcd958a280890ea77745504350"
+        },
+        {
+          "bytes": 256564,
+          "name": "TruffleHotSpotCompilation-3213[ProtosBytecodeRootNodeGen@4a552e51].bgv",
+          "sha256": "25c36b977fb10a3ba8652ac5c380de6b1d9d06733c73ae97f494ddf364f40765"
+        },
+        {
+          "bytes": 2271321,
+          "name": "TruffleHotSpotCompilation-3261[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "59a2803ab4fc7b2ae435508348aa16c6dc2ad6459ef55ff15537bc0c02428455"
+        },
+        {
+          "bytes": 1967581,
+          "name": "TruffleHotSpotCompilation-3299[ProtosBytecodeRootNodeGen@4a552e51].bgv",
+          "sha256": "17d4febefd39f377cf31a15e75dcf41eea0cf7549ba6989ccfbf8a0027de4df0"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+        ],
+        "primary_label": "ProtosBytecodeRootNodeGen@4a552e51",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 14,
+                  "cycles": 21,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 22
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 12,
+                  "cycles": 12,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3299[ProtosBytecodeRootNodeGen@4a552e51].bgv"
+            ],
+            "comp_id": 3299,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1155,
+              "cycles": 955,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1562
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1178,
+            "label": "ProtosBytecodeRootNodeGen@4a552e51",
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "role": "primary",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              3213
+            ],
+            "target": "1:3",
+            "tier": 2,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 21,
+                  "cycles": 11,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 11,
+                  "cycles": 9,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3027[ProtosBytecodeRootNodeGen@44934896].bgv"
+            ],
+            "comp_id": 3027,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1456,
+              "cycles": 1207,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1894
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1464,
+            "label": "ProtosBytecodeRootNodeGen@44934896",
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "role": "additional",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              2968
+            ],
+            "target": "1:2",
+            "tier": 2,
+            "via": "ProtosBytecodeRootNodeGen@4a552e51"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [
+        "budget-16000/bgv/TruffleHotSpotCompilation-3299[ProtosBytecodeRootNodeGen@4a552e51].bgv.gz",
+        "budget-16000/bgv/TruffleHotSpotCompilation-3027[ProtosBytecodeRootNodeGen@44934896].bgv.gz"
+      ],
+      "trace_log": "budget-16000/trace.log.gz",
+      "trace_log_sha256": "e80c7ea408202683e36b5d9106ea3f0e7fe1192537f895e58a809332189d68e5"
+    },
+    {
+      "assessment": {
+        "problems": [],
+        "signature": [
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1155,
+              "cycles": 955,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1562
+            },
+            "ir_after_truffle_tier": 1178,
+            "label": "ProtosBytecodeRootNodeGen@*",
+            "role": "primary",
+            "tier": 2
+          },
+          {
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1456,
+              "cycles": 1207,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1894
+            },
+            "ir_after_truffle_tier": 1464,
+            "label": "ProtosBytecodeRootNodeGen@*",
+            "role": "additional",
+            "tier": 2
+          }
+        ],
+        "status": "STABLE_CANDIDATE"
+      },
+      "budget": 64000,
+      "calls": 64001,
+      "compilation_count": 6,
+      "dump_inventory": [
+        {
+          "bytes": 1169846,
+          "name": "TruffleHotSpotCompilation-2937[ProtosBytecodeRootNodeGen@44934896].bgv",
+          "sha256": "f3e0b50351d5365fcfc38f39fee47545798bac85cc6709a422b4aa7fa6caf3a5"
+        },
+        {
+          "bytes": 2216779,
+          "name": "TruffleHotSpotCompilation-3012[ProtosBytecodeRootNodeGen@44934896].bgv",
+          "sha256": "57cfc49d02eda16a87ff68d72a8cd551ecfd09566025d6655de1022db44ee210"
+        },
+        {
+          "bytes": 654593,
+          "name": "TruffleHotSpotCompilation-3184[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "6dfa47bf299d5d4a0cd1040d44d0946852c4e7ba3b6782894d1926c895a8fc47"
+        },
+        {
+          "bytes": 256552,
+          "name": "TruffleHotSpotCompilation-3208[ProtosBytecodeRootNodeGen@4a552e51].bgv",
+          "sha256": "b22d831ff96d5546c8180f76d21f2790a42f84574dc80a18d7ceac9b7f74d56f"
+        },
+        {
+          "bytes": 2271325,
+          "name": "TruffleHotSpotCompilation-3253[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "b54d63ef9a9706a2ccd544cd9ff508aafcfdc3e3820d40b890b8e93df138b561"
+        },
+        {
+          "bytes": 1967590,
+          "name": "TruffleHotSpotCompilation-3286[ProtosBytecodeRootNodeGen@4a552e51].bgv",
+          "sha256": "80d83e2909835fe3e92fd8f8bd5e7c2b8edc995d6a542e700a7b1c664c8af1f3"
+        }
+      ],
+      "error": null,
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "framework_targets": [
+          "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+        ],
+        "primary_label": "ProtosBytecodeRootNodeGen@4a552e51",
+        "unattributed_language_targets": [],
+        "uncompiled_callees": [],
+        "units": [
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 14,
+                  "cycles": 21,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 22
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 12,
+                  "cycles": 12,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3286[ProtosBytecodeRootNodeGen@4a552e51].bgv"
+            ],
+            "comp_id": 3286,
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1155,
+              "cycles": 955,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1562
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1178,
+            "label": "ProtosBytecodeRootNodeGen@4a552e51",
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "role": "primary",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              3208
+            ],
+            "target": "1:3",
+            "tier": 2,
+            "via": null
+          },
+          {
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 21,
+                  "cycles": 11,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 11,
+                  "cycles": 9,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3012[ProtosBytecodeRootNodeGen@44934896].bgv"
+            ],
+            "comp_id": 3012,
+            "edge": "Cutoff",
+            "expansion_truffle_tier": {
+              "allocs": 49,
+              "count": 1456,
+              "cycles": 1207,
+              "ifs": 15,
+              "invokes": 0,
+              "loops": 0,
+              "size": 1894
+            },
+            "failed_after_final": false,
+            "inlined": [
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896",
+              "ProtosBytecodeRootNodeGen@44934896"
+            ],
+            "invalidated_after_final": false,
+            "ir_after_truffle_tier": 1464,
+            "label": "ProtosBytecodeRootNodeGen@44934896",
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "role": "additional",
+            "src": "n/a",
+            "superseded_comp_ids": [
+              2937
+            ],
+            "target": "1:2",
+            "tier": 2,
+            "via": "ProtosBytecodeRootNodeGen@4a552e51"
+          }
+        ]
+      },
+      "result": "6765",
+      "retained_bgv": [
+        "budget-64000/bgv/TruffleHotSpotCompilation-3286[ProtosBytecodeRootNodeGen@4a552e51].bgv.gz",
+        "budget-64000/bgv/TruffleHotSpotCompilation-3012[ProtosBytecodeRootNodeGen@44934896].bgv.gz"
+      ],
+      "trace_log": "budget-64000/trace.log.gz",
+      "trace_log_sha256": "4d0aa998fa5df5156214b9b9ebae127d47bebb2670ab1e76a94feb29f6c79ee4"
+    }
+  ],
+  "schema_version": 1,
+  "selected_phase": "After TruffleTier",
+  "stabilization": {
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "surface": "canonical",
+  "surface_timed_call": "run.execute()",
+  "timing_evidence": "NONE (graph instrumentation is never a timing run)",
+  "workload": "fibonacci",
+  "workload_source": "cases/fibonacci/fibonacci.protos",
+  "workload_source_sha256": "4c064b92f8adb13540f0ffe7d834b9c44a9bade6354151c27ec09a10413e711f"
+}

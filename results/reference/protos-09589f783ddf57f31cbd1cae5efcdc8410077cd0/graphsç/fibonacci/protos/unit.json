@@ -1,0 +1,725 @@
+{
+  "analyzer": {
+    "command": "filter",
+    "graal_version": "25.4.4.1.1",
+    "image": "ghcr.io/guillermomolina/protos-benchmarks/igv-analyzer:graal-25.4.4.1.1",
+    "script": "harness/igv_analyzer.sh",
+    "script_sha256": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23"
+  },
+  "budget_policy": [
+    1000,
+    4000,
+    16000,
+    64000,
+    256000
+  ],
+  "budgets_run": [
+    1000,
+    4000,
+    16000,
+    64000
+  ],
+  "correctness": {
+    "actual": "6765",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "evidence_unit_definition": "One (protos revision, harness producer, language, surface, workload) case: correctness on the measured surface, the natural-warmup budget runs up to the first stable pair, the selected relevant language-owned compilation units of the later budget of that pair, their After-TruffleTier graphs from the retained BGVs, and the derived metrics.",
+  "evidence_valid": true,
+  "expected_result": "6765",
+  "framework_targets": [
+    "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute"
+  ],
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1"
+  ],
+  "harness_dirty": false,
+  "harness_git_head": "f55bc82a8632206a73faa3a4f19d0bc127a647cc",
+  "harness_source_sha256": {
+    "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+    "cases/catalog.json": "eddfaebc5ff32c43ec89730b1e9705045e4f5f73da629b9f79bcf6c1ef5ef210",
+    "cases/fibonacci/fibonacci.protos": "4c064b92f8adb13540f0ffe7d834b9c44a9bade6354151c27ec09a10413e711f",
+    "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+    "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+    "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+    "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+    "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+    "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+    "harness/measure/surfaces/canonical/ProtosCanonicalSurface.java": "9f1f3862998c54a55f8afdade2bac7bb07935cc8db32521f7303c4d02cedd535",
+    "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+    "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+    "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+    "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+    "harness/policy/cases.json": "c3c96f82720dc6ba8007c4d986ef57f05fbd2b0081806d9010f0dc435000097d",
+    "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+    "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "e3948bf6f366",
+    "kernel": "7.3.4-zen2-2-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "java": {
+    "java.home": "/usr/lib64/graalvm/graalvm-community-java25i5",
+    "java.runtime.version": "25.0.5.0.3+1-jvmci-25.5-b26",
+    "java.vendor.version": "GraalVM CE 25.5.5.0.3+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.5.0.3+1-jvmci-25.5-b26",
+    "version_output": "openjdk version \"25.0.5.0.3\" 2026-10-24\nOpenJDK Runtime Environment GraalVM CE 25.5.5.0.3+1.1 (build 25.0.5.0.3+1-jvmci-25.5-b26)\nOpenJDK 64-Bit Server VM GraalVM CE 25.5.5.0.3+1.1 (build 25.0.5.0.3+1-jvmci-25.5-b26, mixed mode, sharing)"
+  },
+  "language": "protos",
+  "protos_revision": "09589f783ddf57f31cbd1cae5efcdc8410077cd0",
+  "schema_version": 1,
+  "selected_budget": 64000,
+  "selected_phase": "After TruffleTier",
+  "selected_stable_tier": 2,
+  "stabilization": {
+    "after_truffle_tier_confirmed": true,
+    "pair": [
+      16000,
+      64000
+    ],
+    "status": "STABLE"
+  },
+  "stage": "reference",
+  "summary": {
+    "additional_language_owned_compiled_units": [
+      {
+        "edge": "Cutoff",
+        "label": "ProtosBytecodeRootNodeGen@44934896",
+        "nodes": 1464,
+        "via": "ProtosBytecodeRootNodeGen@4a552e51"
+      }
+    ],
+    "families": {
+      "allocations": 131,
+      "control_flow_splits": 15,
+      "guards_deopts": 226,
+      "invokes": 32,
+      "loads": 79,
+      "loops": 0
+    },
+    "graph_count": 2,
+    "node_class_histogram": {
+      "AllocatedObjectNode": 32,
+      "BeginNode": 62,
+      "BoxNode$AllocatingBoxNode": 34,
+      "BoxNode$TrustedBoxedValue": 33,
+      "CommitAllocationNode": 32,
+      "ConditionalNode": 15,
+      "ConstantNode": 95,
+      "DeoptimizeNode": 32,
+      "EndNode": 30,
+      "ExceptionObjectNode": 32,
+      "FixedGuardNode": 194,
+      "FrameState": 727,
+      "IfNode": 15,
+      "InstanceOfNode": 3,
+      "IntegerAddExactNode": 30,
+      "IntegerAddExactOverflowNode": 30,
+      "IntegerLessThanNode": 15,
+      "IntegerSubExactNode": 30,
+      "IntegerSubExactOverflowNode": 30,
+      "InvokeWithExceptionNode": 32,
+      "IsNullNode": 1,
+      "LoadFieldNode": 68,
+      "LoadIndexedNode": 11,
+      "MaterializedObjectState": 93,
+      "MergeNode": 15,
+      "MethodCallTargetNode": 32,
+      "ObjectEqualsNode": 69,
+      "ParameterNode": 2,
+      "PiArrayNode": 2,
+      "PiNode": 102,
+      "ReturnNode": 2,
+      "StartNode": 2,
+      "TrufflePreserveFrameStateNode": 2,
+      "UnboxNode": 33,
+      "ValuePhiNode": 45,
+      "VirtualArrayNode": 156,
+      "VirtualBoxingNode": 89,
+      "VirtualInstanceNode": 31,
+      "VirtualObjectState": 384
+    },
+    "primary_guest_graph_nodes": 1178,
+    "relevant_graph_nodes_total_after_truffle_tier": 2642,
+    "trace_node_expansion_truffle_tier": [
+      {
+        "allocs": 49,
+        "count": 1155,
+        "cycles": 955,
+        "ifs": 0,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1562
+      },
+      {
+        "allocs": 49,
+        "count": 1456,
+        "cycles": 1207,
+        "ifs": 15,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1894
+      }
+    ]
+  },
+  "surface": "canonical",
+  "surface_timed_call": "run.execute()",
+  "trace_log": "budget-64000/trace.log.gz",
+  "unattributed_language_targets": [],
+  "units": [
+    {
+      "analysis": "budget-64000/bgv/TruffleHotSpotCompilation-3286[ProtosBytecodeRootNodeGen@4a552e51].filter.json.gz",
+      "analysis_sha256": "c6160233a4fc613a21577875f77eaf4acf12cbaffae43562d0682fb8b8c0ba4b",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+          "self": {
+            "allocs": 0,
+            "count": 14,
+            "cycles": 21,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 22
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+          "self": {
+            "allocs": 1,
+            "count": 12,
+            "cycles": 12,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 18
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        }
+      ],
+      "bgv": "budget-64000/bgv/TruffleHotSpotCompilation-3286[ProtosBytecodeRootNodeGen@4a552e51].bgv.gz",
+      "bgv_sha256": "80d83e2909835fe3e92fd8f8bd5e7c2b8edc995d6a542e700a7b1c664c8af1f3",
+      "comp_id": 3286,
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 49,
+        "count": 1155,
+        "cycles": 955,
+        "ifs": 0,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1562
+      },
+      "graph": {
+        "allocations": 65,
+        "control_flow_splits": 0,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier2.ProtosBytecodeRootNodeGen@4a552e51()"
+        ],
+        "guards_deopts": 98,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.callBoundary": 16
+        },
+        "invokes": 16,
+        "loads": 38,
+        "loops": 0,
+        "node_class_histogram": {
+          "AllocatedObjectNode": 16,
+          "BeginNode": 16,
+          "BoxNode$AllocatingBoxNode": 17,
+          "BoxNode$TrustedBoxedValue": 16,
+          "CommitAllocationNode": 16,
+          "ConstantNode": 54,
+          "DeoptimizeNode": 16,
+          "ExceptionObjectNode": 16,
+          "FixedGuardNode": 82,
+          "FrameState": 362,
+          "InstanceOfNode": 1,
+          "IntegerAddExactNode": 15,
+          "IntegerAddExactOverflowNode": 15,
+          "InvokeWithExceptionNode": 16,
+          "IsNullNode": 1,
+          "LoadFieldNode": 33,
+          "LoadIndexedNode": 5,
+          "MaterializedObjectState": 47,
+          "MethodCallTargetNode": 16,
+          "ObjectEqualsNode": 33,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 51,
+          "ReturnNode": 1,
+          "StartNode": 1,
+          "TrufflePreserveFrameStateNode": 1,
+          "UnboxNode": 16,
+          "VirtualArrayNode": 80,
+          "VirtualBoxingNode": 45,
+          "VirtualInstanceNode": 16,
+          "VirtualObjectState": 172
+        },
+        "node_count": 1178,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896"
+      ],
+      "ir_after_truffle_tier": 1178,
+      "label": "ProtosBytecodeRootNodeGen@4a552e51",
+      "normalized_label": "ProtosBytecodeRootNodeGen@*",
+      "role": "primary",
+      "src": "n/a",
+      "superseded_comp_ids": [
+        3208
+      ],
+      "target": "1:3",
+      "tier": 2,
+      "via": null
+    },
+    {
+      "analysis": "budget-64000/bgv/TruffleHotSpotCompilation-3012[ProtosBytecodeRootNodeGen@44934896].filter.json.gz",
+      "analysis_sha256": "4ab08c1c93e9c3da7807f9da9e1250b2fe16aa09a9d4f6d5a55f049681c76682",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+          "self": {
+            "allocs": 1,
+            "count": 21,
+            "cycles": 11,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 38
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$CallUnaryMethod_Node",
+          "self": {
+            "allocs": 0,
+            "count": 11,
+            "cycles": 9,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 12
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        }
+      ],
+      "bgv": "budget-64000/bgv/TruffleHotSpotCompilation-3012[ProtosBytecodeRootNodeGen@44934896].bgv.gz",
+      "bgv_sha256": "57cfc49d02eda16a87ff68d72a8cd551ecfd09566025d6655de1022db44ee210",
+      "comp_id": 3012,
+      "edge": "Cutoff",
+      "expansion_truffle_tier": {
+        "allocs": 49,
+        "count": 1456,
+        "cycles": 1207,
+        "ifs": 15,
+        "invokes": 0,
+        "loops": 0,
+        "size": 1894
+      },
+      "graph": {
+        "allocations": 66,
+        "control_flow_splits": 15,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier2.ProtosBytecodeRootNodeGen@44934896()"
+        ],
+        "guards_deopts": 128,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.callBoundary": 16
+        },
+        "invokes": 16,
+        "loads": 41,
+        "loops": 0,
+        "node_class_histogram": {
+          "AllocatedObjectNode": 16,
+          "BeginNode": 46,
+          "BoxNode$AllocatingBoxNode": 17,
+          "BoxNode$TrustedBoxedValue": 17,
+          "CommitAllocationNode": 16,
+          "ConditionalNode": 15,
+          "ConstantNode": 41,
+          "DeoptimizeNode": 16,
+          "EndNode": 30,
+          "ExceptionObjectNode": 16,
+          "FixedGuardNode": 112,
+          "FrameState": 365,
+          "IfNode": 15,
+          "InstanceOfNode": 2,
+          "IntegerAddExactNode": 15,
+          "IntegerAddExactOverflowNode": 15,
+          "IntegerLessThanNode": 15,
+          "IntegerSubExactNode": 30,
+          "IntegerSubExactOverflowNode": 30,
+          "InvokeWithExceptionNode": 16,
+          "LoadFieldNode": 35,
+          "LoadIndexedNode": 6,
+          "MaterializedObjectState": 46,
+          "MergeNode": 15,
+          "MethodCallTargetNode": 16,
+          "ObjectEqualsNode": 36,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 51,
+          "ReturnNode": 1,
+          "StartNode": 1,
+          "TrufflePreserveFrameStateNode": 1,
+          "UnboxNode": 17,
+          "ValuePhiNode": 45,
+          "VirtualArrayNode": 76,
+          "VirtualBoxingNode": 44,
+          "VirtualInstanceNode": 15,
+          "VirtualObjectState": 212
+        },
+        "node_count": 1464,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896",
+        "ProtosBytecodeRootNodeGen@44934896"
+      ],
+      "ir_after_truffle_tier": 1464,
+      "label": "ProtosBytecodeRootNodeGen@44934896",
+      "normalized_label": "ProtosBytecodeRootNodeGen@*",
+      "role": "additional",
+      "src": "n/a",
+      "superseded_comp_ids": [
+        2937
+      ],
+      "target": "1:2",
+      "tier": 2,
+      "via": "ProtosBytecodeRootNodeGen@4a552e51"
+    }
+  ],
+  "workload": "fibonacci",
+  "workload_source_sha256": "4c064b92f8adb13540f0ffe7d834b9c44a9bade6354151c27ec09a10413e711f"
+}

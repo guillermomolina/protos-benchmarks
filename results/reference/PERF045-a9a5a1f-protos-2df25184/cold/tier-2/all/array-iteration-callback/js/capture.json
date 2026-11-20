@@ -1,0 +1,1158 @@
+{
+  "adapter_source_sha256": "25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f",
+  "capture_finished": "2026-11-20T11:15:20.089570+00:00",
+  "capture_key": {
+    "budgets": [
+      16000
+    ],
+    "capture_mode": "cold-single-compilation-v1",
+    "expected_result": "2080",
+    "extra_jvm_options": [],
+    "final_tier": 2,
+    "first_tier_threshold": 100,
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "invocations": 2000,
+    "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "language": "js",
+    "last_tier_threshold": 1000,
+    "requested_peer_version": null,
+    "requested_root": "all",
+    "requested_tier": 2,
+    "retain_recompiled_tiers": false,
+    "runtime": {
+      "graalvm_version": "25.4.4.1.1",
+      "peer_dependencies_sha256": "584324ce50be1948837ba1406465685b3ce4ec5b8f68b5f73466dd1987c1da2c"
+    },
+    "selected_phase": "After TruffleTier",
+    "stage": "smoke",
+    "surface": "executable-value",
+    "warmup_calls": 0,
+    "workload": "array-iteration-callback"
+  },
+  "capture_started": "2026-11-20T11:15:16.419831+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "70b730c94df0571071bca53dc9e1b53f194f0c94a41c6a4f3dd841e2b7f5038d",
+    "identity": {
+      "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+      "java_home": "/opt/graalvm-community-java25i4",
+      "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+      "peer_graalvm_version": "25.4.4.1.1",
+      "surface": "executable-value"
+    },
+    "identity_sha256": "53907ca822cc27ad9d929da83abacd9f7f5f527aecbdec55fa86318b48570844",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/peer-25.4.4.1.1/executable-value/25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "2080",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "correctness_uses_separate_jvm": true,
+  "expected_result": "2080",
+  "fresh_jvm": true,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1",
+    "-Dpolyglot.engine.MultiTier=true",
+    "-Dpolyglot.engine.DynamicCompilationThresholds=false",
+    "-Dpolyglot.engine.FirstTierMinInvokeThreshold=1",
+    "-Dpolyglot.engine.MinInvokeThreshold=1",
+    "-Dpolyglot.engine.OSR=false",
+    "-Dpolyglot.engine.FirstTierCompilationThreshold=100",
+    "-Dpolyglot.engine.LastTierCompilationThreshold=1000",
+    "-Djdk.graal.DumpPath=/workspaces/protos-benchmarks/results/local/perf045/a9a5a1f/cold/tier-2/all/.staging/cold-capture-shpy8w5n/raw/cold-jvm/dumps"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "a9a5a1f52ba2536b1c6bbbcf852016486b166bd5",
+    "porcelain": "",
+    "source_sha256": {
+      "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+      "cases/array-iteration-callback/array-iteration-callback.mjs": "ad6e8300b9be175bb32b4e4047c6cd6b395a3b58a2eaeef23956006500f8e033",
+      "cases/catalog.json": "524abf9221627e9d6633fff5408f10f4a99613cfe72ebaaedfe578e8302e7f3a",
+      "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+      "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+      "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+      "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+      "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+      "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+      "harness/measure/surfaces/peer/PeerExecutableSurface.java": "59b11007925da6594fccc235c92ed66a94e7a8e10e08f89f7271fc40179f6dab",
+      "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+      "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+      "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+      "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+      "harness/policy/cases.json": "7b42633fa16ae4a9594735488916f48b3c03d98a2e35cddff6d1cd502ab88114",
+      "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+      "harness/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+      "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+    }
+  },
+  "harness_after_source_sha256": {
+    "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+    "cases/array-iteration-callback/array-iteration-callback.mjs": "ad6e8300b9be175bb32b4e4047c6cd6b395a3b58a2eaeef23956006500f8e033",
+    "cases/catalog.json": "524abf9221627e9d6633fff5408f10f4a99613cfe72ebaaedfe578e8302e7f3a",
+    "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+    "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+    "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+    "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+    "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+    "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+    "harness/measure/surfaces/peer/PeerExecutableSurface.java": "59b11007925da6594fccc235c92ed66a94e7a8e10e08f89f7271fc40179f6dab",
+    "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+    "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+    "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+    "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+    "harness/policy/cases.json": "7b42633fa16ae4a9594735488916f48b3c03d98a2e35cddff6d1cd502ab88114",
+    "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+    "harness/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+    "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "6700c4b6a837",
+    "kernel": "7.3.4-zen2-2-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "invocation_sequence": {
+    "cold_calls": 1,
+    "post_warmup_calls": 2000,
+    "process": "fresh-jvm",
+    "setup": "before-cold-call",
+    "total_measured_invocations": 2001,
+    "warmup_calls": 0
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "js",
+  "mode": "cold-compilation",
+  "peer_runtime": {
+    "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+    "graalvm_version": "25.4.4.1.1",
+    "implementation_version": "25.4.4.1.1",
+    "protos_graalvm_version": "25.5.5.0.3"
+  },
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "20d56f107adb8924b61063133a9c0486670a6dadf55980edbe26369ad2b2c2cf",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.5.5.0.3",
+    "maven_compiler_release": "25",
+    "pom_sha256": "731b5e1abc681e62dde9b8d282a06255a5ab793861df90e2f68f15bd806e74a1",
+    "porcelain": "",
+    "revision": "2df251847ead94012f8d5a87c2b81d2d981882c7",
+    "source_state_sha256": "a13d41d6dddaae046c238c3af2fa33e020c013283d00d61382c359623029612e",
+    "version": "0.4.186-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "20d56f107adb8924b61063133a9c0486670a6dadf55980edbe26369ad2b2c2cf",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.5.5.0.3",
+    "maven_compiler_release": "25",
+    "pom_sha256": "731b5e1abc681e62dde9b8d282a06255a5ab793861df90e2f68f15bd806e74a1",
+    "porcelain": "",
+    "revision": "2df251847ead94012f8d5a87c2b81d2d981882c7",
+    "source_state_sha256": "a13d41d6dddaae046c238c3af2fa33e020c013283d00d61382c359623029612e",
+    "version": "0.4.186-SNAPSHOT"
+  },
+  "protos_revision": "2df251847ead94012f8d5a87c2b81d2d981882c7",
+  "requested_root": "all",
+  "requested_tier": 2,
+  "retain_recompiled_tiers": false,
+  "root_inventory": {
+    "interpreted_roots_coverage": "NOT_ESTABLISHED",
+    "requested_tier": 2,
+    "roots": [
+      {
+        "compilation_ids": [
+          2386,
+          2514
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": ":=>",
+        "normalized_label": ":=>",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:261"
+      },
+      {
+        "compilation_ids": [
+          2485,
+          2542
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Array.prototype.forEach",
+        "normalized_label": "Array.prototype.forEach",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:260"
+      },
+      {
+        "compilation_ids": [
+          2619,
+          2727
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+        "normalized_label": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:212"
+      },
+      {
+        "compilation_ids": [
+          2624,
+          2746
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "run",
+        "normalized_label": "run",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:259"
+      }
+    ],
+    "scope": "observed-compiled-call-targets-only"
+  },
+  "runs": [
+    {
+      "budget": 2000,
+      "calls": 2001,
+      "compilation_count": 8,
+      "dump_inventory": [
+        {
+          "bytes": 564184,
+          "name": "TruffleHotSpotCompilation-2386[:=>].bgv",
+          "sha256": "73dba38fe042896da2e14406a548bd8d2eaf4b9f25b313b268a384af34c3e961"
+        },
+        {
+          "bytes": 891384,
+          "name": "TruffleHotSpotCompilation-2485[Array.prototype.forEach].bgv",
+          "sha256": "77407a9d7654180c05ce6dcbb104f65ab43c8185313bb179d480fc2a4d4296de"
+        },
+        {
+          "bytes": 173609,
+          "name": "TruffleHotSpotCompilation-2514[:=>].bgv",
+          "sha256": "8eb3e65d7f5ac31eba341b98c1e8bb93b2e5b9b061cb91e9883af8160d1690ff"
+        },
+        {
+          "bytes": 454264,
+          "name": "TruffleHotSpotCompilation-2542[Array.prototype.forEach].bgv",
+          "sha256": "377ddb091adcec8de622e24008511347deb3f76a65847c1c623eb0154d1bc392"
+        },
+        {
+          "bytes": 665812,
+          "name": "TruffleHotSpotCompilation-2619[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "ced7e7e6354784664ba6e8439ca59b1d3ddacd19c12e53c260444bcfa7266a48"
+        },
+        {
+          "bytes": 876687,
+          "name": "TruffleHotSpotCompilation-2624[run].bgv",
+          "sha256": "51105fdf0ba06c9c816b5a20e436acf5a6e8c03c9599f30113f4eca1e4c233a1"
+        },
+        {
+          "bytes": 868308,
+          "name": "TruffleHotSpotCompilation-2727[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "6beb851b59b7cddc2814f7ca13852fb367dd747918a9a0f6c24953298fa411ba"
+        },
+        {
+          "bytes": 630525,
+          "name": "TruffleHotSpotCompilation-2746[run].bgv",
+          "sha256": "4ed77b38d3d4314af0bc12fc865727913882ea031d12590e27cf73a0d1201b42"
+        }
+      ],
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "units": [
+          {
+            "ast_nodes": 14,
+            "attribution": [
+              {
+                "location": "js:31:1455-1460",
+                "name": "JSReadScopeFrameSlotNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 12,
+                  "cycles": 28,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 26
+                }
+              },
+              {
+                "location": "js:31:1447-1468",
+                "name": "JSWriteScopeFrameSlotNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 14,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 16,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 16,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 16,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "js:31:1447-1468",
+                "name": "TemporalDeadZoneCheckNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 13,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "js:31:1455-1468",
+                "name": "JSAddNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "AccessIndexedArgumentNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 16
+                }
+              },
+              {
+                "location": "js:30:1437-1475",
+                "name": "DiscardResultNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:30:1426-1475",
+                "name": "FunctionRootNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2514[:=>].bgv"
+            ],
+            "comp_id": 2514,
+            "compilation_time_ms": 22,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 0,
+              "count": 106,
+              "cycles": 155,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 189
+            },
+            "graal_compilation_ms": 13,
+            "inlined": [],
+            "ir_after_truffle_tier": 106,
+            "ir_final": 113,
+            "label": ":=>",
+            "machine_code_bytes": 457,
+            "normalized_label": ":=>",
+            "other_compilation_ids": [
+              2386
+            ],
+            "role": "selected",
+            "src": "/workspaces/protos-benchmarks/cases/array-iteration-callback/array-iteration-callback.mjs:30 0x5f416e28",
+            "superseded_comp_ids": [],
+            "target": "1:261",
+            "tier": 2,
+            "truffle_compilation_ms": 9,
+            "via": null
+          },
+          {
+            "ast_nodes": 27,
+            "attribution": [
+              {
+                "location": "js:1:0-0",
+                "name": "ForEachIndexCallNode$ForwardForEachIndexCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 22,
+                  "cycles": 9,
+                  "ifs": 2,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 21
+                }
+              },
+              {
+                "location": "js:31:1447-1468",
+                "name": "TemporalDeadZoneCheckNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 19,
+                  "cycles": 39,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ScopeFrameNode$EnclosingFunctionFrameNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 31,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 29
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "JSArrayNextElementIndexNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 12,
+                  "cycles": 11,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "JSArrayLastElementIndexNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "js:31:1447-1468",
+                "name": "JSWriteScopeFrameSlotNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 16,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "ArrayLengthNodeFactory$ArrayLengthReadNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 16,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "js:30:1426-1475",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "IsCallableNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 5,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "LongToIntOrDoubleNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "ReadElementNodeFactory$ConstantArrayReadElementCacheNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:31:1455-1468",
+                "name": "JSAddNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2542[Array.prototype.forEach].bgv"
+            ],
+            "comp_id": 2542,
+            "compilation_time_ms": 108,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 0,
+              "count": 201,
+              "cycles": 199,
+              "ifs": 3,
+              "invokes": 0,
+              "loops": 1,
+              "size": 258
+            },
+            "graal_compilation_ms": 24,
+            "inlined": [
+              ":=>"
+            ],
+            "ir_after_truffle_tier": 209,
+            "ir_final": 302,
+            "label": "Array.prototype.forEach",
+            "machine_code_bytes": 1082,
+            "normalized_label": "Array.prototype.forEach",
+            "other_compilation_ids": [
+              2485
+            ],
+            "role": "selected",
+            "src": "<builtin>:1 0xe756ac41",
+            "superseded_comp_ids": [],
+            "target": "1:260",
+            "tier": 2,
+            "truffle_compilation_ms": 83,
+            "via": null
+          },
+          {
+            "ast_nodes": 12,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "InteropBoundFunctionGen$InteropLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 22,
+                  "cycles": 21,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 24
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$ExecuteNoArgsNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 15,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 20
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "ForEachIndexCallNode$ForwardForEachIndexCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 12,
+                  "cycles": 5,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 14
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "JSArrayNextElementIndexNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 3,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$SharedExecuteNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 7
+                }
+              },
+              {
+                "location": "js:19:1069-1386",
+                "name": "ArrayLiteralNode$ConstantArrayLiteralNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:18:1048-1497",
+                "name": "BlockScopeNode$FrameBlockScopeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "IsCallableNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 5,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:18:1033-1497",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotLanguageContextFactory$ToHostValueNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 5,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:31:1455-1468",
+                "name": "JSAddNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "js:30:1426-1475",
+                "name": "JSFunctionExpressionNode$ClosureFunctionExpressionNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2727[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv"
+            ],
+            "comp_id": 2727,
+            "compilation_time_ms": 163,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 299,
+              "cycles": 191,
+              "ifs": 6,
+              "invokes": 0,
+              "loops": 1,
+              "size": 316
+            },
+            "graal_compilation_ms": 52,
+            "inlined": [
+              "run",
+              "Array.prototype.forEach",
+              ":=>"
+            ],
+            "ir_after_truffle_tier": 302,
+            "ir_final": 452,
+            "label": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+            "machine_code_bytes": 1725,
+            "normalized_label": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+            "other_compilation_ids": [
+              2619
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:212",
+            "tier": 2,
+            "truffle_compilation_ms": 112,
+            "via": null
+          },
+          {
+            "ast_nodes": 29,
+            "attribution": [
+              {
+                "location": "js:1:0-0",
+                "name": "ForEachIndexCallNode$ForwardForEachIndexCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 12,
+                  "cycles": 5,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 14
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "JSArrayNextElementIndexNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 3,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "js:18:1048-1497",
+                "name": "BlockScopeNode$FrameBlockScopeNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:19:1069-1386",
+                "name": "ArrayLiteralNode$ConstantArrayLiteralNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:31:1455-1468",
+                "name": "JSAddNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "LongToIntOrDoubleNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:30:1426-1475",
+                "name": "JSFunctionExpressionNode$ClosureFunctionExpressionNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:1:0-0",
+                "name": "ReadElementNodeFactory$ConstantArrayReadElementCacheNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:18:1033-1497",
+                "name": "ClearFrameSlotNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:18:1048-1497",
+                "name": "ClearFrameSlotNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:18:1033-1497",
+                "name": "FunctionRootNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2746[run].bgv"
+            ],
+            "comp_id": 2746,
+            "compilation_time_ms": 101,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 128,
+              "cycles": 50,
+              "ifs": 2,
+              "invokes": 0,
+              "loops": 1,
+              "size": 125
+            },
+            "graal_compilation_ms": 27,
+            "inlined": [
+              "Array.prototype.forEach",
+              ":=>"
+            ],
+            "ir_after_truffle_tier": 131,
+            "ir_final": 233,
+            "label": "run",
+            "machine_code_bytes": 671,
+            "normalized_label": "run",
+            "other_compilation_ids": [
+              2624
+            ],
+            "role": "selected",
+            "src": "/workspaces/protos-benchmarks/cases/array-iteration-callback/array-iteration-callback.mjs:18 0x5f416e28",
+            "superseded_comp_ids": [],
+            "target": "1:259",
+            "tier": 2,
+            "truffle_compilation_ms": 74,
+            "via": null
+          }
+        ]
+      },
+      "result": "2080",
+      "retained_bgv": [
+        "budget-2000/bgv/TruffleHotSpotCompilation-2514[:=>].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-2542[Array.prototype.forEach].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-2727[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-2746[run].bgv.gz"
+      ],
+      "trace_log": "budget-2000/trace.log.gz",
+      "trace_log_sha256": "6e724751ef6b2260621b98ab4bd3109197fbea3505b3cdf83fadc58265c41cb1"
+    }
+  ],
+  "schema_version": 1,
+  "selected_compilations": [
+    {
+      "bgv": "TruffleHotSpotCompilation-2514[:=>].bgv",
+      "comp_id": 2514,
+      "ir_final": 113,
+      "ir_initial": 106,
+      "machine_code_bytes": 457,
+      "normalized_root": ":=>",
+      "root": ":=>",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-2542[Array.prototype.forEach].bgv",
+      "comp_id": 2542,
+      "ir_final": 302,
+      "ir_initial": 209,
+      "machine_code_bytes": 1082,
+      "normalized_root": "Array.prototype.forEach",
+      "root": "Array.prototype.forEach",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-2727[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+      "comp_id": 2727,
+      "ir_final": 452,
+      "ir_initial": 302,
+      "machine_code_bytes": 1725,
+      "normalized_root": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+      "root": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-2746[run].bgv",
+      "comp_id": 2746,
+      "ir_final": 233,
+      "ir_initial": 131,
+      "machine_code_bytes": 671,
+      "normalized_root": "run",
+      "root": "run",
+      "tier": 2
+    }
+  ],
+  "selected_phase": "After TruffleTier",
+  "surface": "executable-value",
+  "timing_evidence": "NONE",
+  "timing_explanation": "Compilation instrumentation changes execution cost; sample timings are not benchmark measurements.",
+  "unavailable_roots": [],
+  "workload": "array-iteration-callback"
+}

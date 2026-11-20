@@ -1,0 +1,700 @@
+{
+  "adapter_source_sha256": "25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f",
+  "capture_finished": "2026-11-20T11:14:33.025094+00:00",
+  "capture_key": {
+    "budgets": [
+      16000
+    ],
+    "capture_mode": "cold-single-compilation-v1",
+    "expected_result": "2080",
+    "extra_jvm_options": [],
+    "final_tier": 2,
+    "first_tier_threshold": 100,
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "invocations": 2000,
+    "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "language": "js",
+    "last_tier_threshold": 1000,
+    "requested_peer_version": null,
+    "requested_root": "all",
+    "requested_tier": 2,
+    "retain_recompiled_tiers": false,
+    "runtime": {
+      "graalvm_version": "25.4.4.1.1",
+      "peer_dependencies_sha256": "584324ce50be1948837ba1406465685b3ce4ec5b8f68b5f73466dd1987c1da2c"
+    },
+    "selected_phase": "After TruffleTier",
+    "stage": "smoke",
+    "surface": "executable-value",
+    "warmup_calls": 0,
+    "workload": "array-iteration-sum"
+  },
+  "capture_started": "2026-11-20T11:14:29.886509+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "70b730c94df0571071bca53dc9e1b53f194f0c94a41c6a4f3dd841e2b7f5038d",
+    "identity": {
+      "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+      "java_home": "/opt/graalvm-community-java25i4",
+      "java_runtime_version": "25.0.4.1.1+1-jvmci-25.4-b23",
+      "peer_graalvm_version": "25.4.4.1.1",
+      "surface": "executable-value"
+    },
+    "identity_sha256": "53907ca822cc27ad9d929da83abacd9f7f5f527aecbdec55fa86318b48570844",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/peer-25.4.4.1.1/executable-value/25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "2080",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "correctness_uses_separate_jvm": true,
+  "expected_result": "2080",
+  "fresh_jvm": true,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1",
+    "-Dpolyglot.engine.MultiTier=true",
+    "-Dpolyglot.engine.DynamicCompilationThresholds=false",
+    "-Dpolyglot.engine.FirstTierMinInvokeThreshold=1",
+    "-Dpolyglot.engine.MinInvokeThreshold=1",
+    "-Dpolyglot.engine.OSR=false",
+    "-Dpolyglot.engine.FirstTierCompilationThreshold=100",
+    "-Dpolyglot.engine.LastTierCompilationThreshold=1000",
+    "-Djdk.graal.DumpPath=/workspaces/protos-benchmarks/results/local/perf045/a9a5a1f/cold/tier-2/all/.staging/cold-capture-51y15vup/raw/cold-jvm/dumps"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "a9a5a1f52ba2536b1c6bbbcf852016486b166bd5",
+    "porcelain": "",
+    "source_sha256": {
+      "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+      "cases/array-iteration-sum/array-iteration-sum.mjs": "0c7237e633c9ae04186463e0d36edf54293b17c4309df328918a600fc4e903ba",
+      "cases/catalog.json": "524abf9221627e9d6633fff5408f10f4a99613cfe72ebaaedfe578e8302e7f3a",
+      "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+      "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+      "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+      "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+      "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+      "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+      "harness/measure/surfaces/peer/PeerExecutableSurface.java": "59b11007925da6594fccc235c92ed66a94e7a8e10e08f89f7271fc40179f6dab",
+      "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+      "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+      "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+      "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+      "harness/policy/cases.json": "7b42633fa16ae4a9594735488916f48b3c03d98a2e35cddff6d1cd502ab88114",
+      "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+      "harness/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+      "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+    }
+  },
+  "harness_after_source_sha256": {
+    "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+    "cases/array-iteration-sum/array-iteration-sum.mjs": "0c7237e633c9ae04186463e0d36edf54293b17c4309df328918a600fc4e903ba",
+    "cases/catalog.json": "524abf9221627e9d6633fff5408f10f4a99613cfe72ebaaedfe578e8302e7f3a",
+    "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+    "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+    "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+    "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+    "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+    "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+    "harness/measure/surfaces/peer/PeerExecutableSurface.java": "59b11007925da6594fccc235c92ed66a94e7a8e10e08f89f7271fc40179f6dab",
+    "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+    "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+    "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+    "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+    "harness/policy/cases.json": "7b42633fa16ae4a9594735488916f48b3c03d98a2e35cddff6d1cd502ab88114",
+    "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+    "harness/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+    "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "aecf730db6bf",
+    "kernel": "7.3.4-zen2-2-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "invocation_sequence": {
+    "cold_calls": 1,
+    "post_warmup_calls": 2000,
+    "process": "fresh-jvm",
+    "setup": "before-cold-call",
+    "total_measured_invocations": 2001,
+    "warmup_calls": 0
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i4",
+    "java.runtime.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "java.vendor.version": "GraalVM CE 25.4.4.1.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1.1+1-jvmci-25.4-b23",
+    "version_output": "openjdk version \"25.0.4.1.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23)\nOpenJDK 64-Bit Server VM GraalVM CE 25.4.4.1.1+1.1 (build 25.0.4.1.1+1-jvmci-25.4-b23, mixed mode, sharing)"
+  },
+  "language": "js",
+  "mode": "cold-compilation",
+  "peer_runtime": {
+    "dependency_classpath_sha256": "02af7cbacdb00b26f3321291f81fe081eea48743bf4d2b67f5ddc3302d7408eb",
+    "graalvm_version": "25.4.4.1.1",
+    "implementation_version": "25.4.4.1.1",
+    "protos_graalvm_version": "25.5.5.0.3"
+  },
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "20d56f107adb8924b61063133a9c0486670a6dadf55980edbe26369ad2b2c2cf",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.5.5.0.3",
+    "maven_compiler_release": "25",
+    "pom_sha256": "731b5e1abc681e62dde9b8d282a06255a5ab793861df90e2f68f15bd806e74a1",
+    "porcelain": "",
+    "revision": "2df251847ead94012f8d5a87c2b81d2d981882c7",
+    "source_state_sha256": "a13d41d6dddaae046c238c3af2fa33e020c013283d00d61382c359623029612e",
+    "version": "0.4.186-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "20d56f107adb8924b61063133a9c0486670a6dadf55980edbe26369ad2b2c2cf",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.5.5.0.3",
+    "maven_compiler_release": "25",
+    "pom_sha256": "731b5e1abc681e62dde9b8d282a06255a5ab793861df90e2f68f15bd806e74a1",
+    "porcelain": "",
+    "revision": "2df251847ead94012f8d5a87c2b81d2d981882c7",
+    "source_state_sha256": "a13d41d6dddaae046c238c3af2fa33e020c013283d00d61382c359623029612e",
+    "version": "0.4.186-SNAPSHOT"
+  },
+  "protos_revision": "2df251847ead94012f8d5a87c2b81d2d981882c7",
+  "requested_root": "all",
+  "requested_tier": 2,
+  "retain_recompiled_tiers": false,
+  "root_inventory": {
+    "interpreted_roots_coverage": "NOT_ESTABLISHED",
+    "requested_tier": 2,
+    "roots": [
+      {
+        "compilation_ids": [
+          2542,
+          2638
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+        "normalized_label": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:212"
+      },
+      {
+        "compilation_ids": [
+          2379,
+          2492
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "run",
+        "normalized_label": "run",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:259"
+      }
+    ],
+    "scope": "observed-compiled-call-targets-only"
+  },
+  "runs": [
+    {
+      "budget": 2000,
+      "calls": 2001,
+      "compilation_count": 4,
+      "dump_inventory": [
+        {
+          "bytes": 1082603,
+          "name": "TruffleHotSpotCompilation-2379[run].bgv",
+          "sha256": "66300f4207f6ee8ad9b3a9869e63c1c51bff8511ab1079c2b4a87b222a1199b6"
+        },
+        {
+          "bytes": 300636,
+          "name": "TruffleHotSpotCompilation-2492[run].bgv",
+          "sha256": "029766bff669f8c85bc1200fb1d05e88b53257d3cd0162c378eb69c6a6432a6e"
+        },
+        {
+          "bytes": 698735,
+          "name": "TruffleHotSpotCompilation-2542[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "8f6796724fb45d299772b9f2496e5d6606350c93591a1952ef740a647a33b591"
+        },
+        {
+          "bytes": 567574,
+          "name": "TruffleHotSpotCompilation-2638[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+          "sha256": "0000bdc0b3d845105cd6793acd000b04f955112832f2dc42bb7b2e971c281d43"
+        }
+      ],
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 0,
+      "resolution": {
+        "units": [
+          {
+            "ast_nodes": 12,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "InteropBoundFunctionGen$InteropLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 22,
+                  "cycles": 21,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 24
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$ExecuteNoArgsNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 15,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 20
+                }
+              },
+              {
+                "location": "js:32:1455-1530",
+                "name": "OptimizedLoopNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 5
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$SharedExecuteNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 7
+                }
+              },
+              {
+                "location": "js:19:1069-1386",
+                "name": "ArrayLiteralNode$ConstantArrayLiteralNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "IsCallableNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 5,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:18:1033-1550",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotLanguageContextFactory$ToHostValueNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 5,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "js:34:1518-1523",
+                "name": "JSAddConstantRightNumberNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "js:33:1487-1504",
+                "name": "JSAddNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "js:32:1455-1530",
+                "name": "WhileNode$WhileDoRepeatingNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 1,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 7
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ExportValueNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2638[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv"
+            ],
+            "comp_id": 2638,
+            "compilation_time_ms": 97,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 250,
+              "cycles": 194,
+              "ifs": 5,
+              "invokes": 0,
+              "loops": 1,
+              "size": 291
+            },
+            "graal_compilation_ms": 58,
+            "inlined": [
+              "run"
+            ],
+            "ir_after_truffle_tier": 250,
+            "ir_final": 656,
+            "label": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+            "machine_code_bytes": 2921,
+            "normalized_label": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+            "other_compilation_ids": [
+              2542
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:212",
+            "tier": 2,
+            "truffle_compilation_ms": 40,
+            "via": null
+          },
+          {
+            "ast_nodes": 45,
+            "attribution": [
+              {
+                "location": "js:19:1069-1386",
+                "name": "ArrayLiteralNode$ConstantArrayLiteralNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              },
+              {
+                "location": "js:32:1455-1530",
+                "name": "OptimizedLoopNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 5
+                }
+              },
+              {
+                "location": "js:34:1518-1523",
+                "name": "JSAddConstantRightNumberNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "js:33:1487-1504",
+                "name": "JSAddNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "js:32:1455-1530",
+                "name": "WhileNode$WhileDoRepeatingNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 1,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 7
+                }
+              },
+              {
+                "location": "js:33:1495-1504",
+                "name": "ReadElementNodeFactory$ConstantArrayReadElementCacheNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "js:33:1495-1504",
+                "name": "ReadElementNodeFactory$JSObjectReadElementTypeCacheNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3
+                }
+              },
+              {
+                "location": "js:18:1033-1550",
+                "name": "FunctionRootNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:32:1462-1467",
+                "name": "JSLessThanNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 1,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "js:33:1487-1492",
+                "name": "JSReadCurrentFrameSlotNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "js:36:1542-1547",
+                "name": "JSReadCurrentFrameSlotNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 1,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2492[run].bgv"
+            ],
+            "comp_id": 2492,
+            "compilation_time_ms": 71,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 76,
+              "cycles": 55,
+              "ifs": 1,
+              "invokes": 0,
+              "loops": 1,
+              "size": 97
+            },
+            "graal_compilation_ms": 42,
+            "inlined": [],
+            "ir_after_truffle_tier": 76,
+            "ir_final": 327,
+            "label": "run",
+            "machine_code_bytes": 1238,
+            "normalized_label": "run",
+            "other_compilation_ids": [
+              2379
+            ],
+            "role": "selected",
+            "src": "/workspaces/protos-benchmarks/cases/array-iteration-sum/array-iteration-sum.mjs:18 0x69461843",
+            "superseded_comp_ids": [],
+            "target": "1:259",
+            "tier": 2,
+            "truffle_compilation_ms": 29,
+            "via": null
+          }
+        ]
+      },
+      "result": "2080",
+      "retained_bgv": [
+        "budget-2000/bgv/TruffleHotSpotCompilation-2638[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-2492[run].bgv.gz"
+      ],
+      "trace_log": "budget-2000/trace.log.gz",
+      "trace_log_sha256": "558fd8ea964c7f5ca5fd5b7f9cd4fa164a5c9c9052b2dacbc37f68f843819438"
+    }
+  ],
+  "schema_version": 1,
+  "selected_compilations": [
+    {
+      "bgv": "TruffleHotSpotCompilation-2638[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv",
+      "comp_id": 2638,
+      "ir_final": 656,
+      "ir_initial": 250,
+      "machine_code_bytes": 2921,
+      "normalized_root": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+      "root": "org.graalvm.polyglot.Value<InteropBoundFunction>.execute",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-2492[run].bgv",
+      "comp_id": 2492,
+      "ir_final": 327,
+      "ir_initial": 76,
+      "machine_code_bytes": 1238,
+      "normalized_root": "run",
+      "root": "run",
+      "tier": 2
+    }
+  ],
+  "selected_phase": "After TruffleTier",
+  "surface": "executable-value",
+  "timing_evidence": "NONE",
+  "timing_explanation": "Compilation instrumentation changes execution cost; sample timings are not benchmark measurements.",
+  "unavailable_roots": [],
+  "workload": "array-iteration-sum"
+}

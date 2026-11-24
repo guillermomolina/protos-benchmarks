@@ -23,7 +23,10 @@ RUN microdnf install -y \
 RUN microdnf install -y \
     --enablerepo=ol10_codeready_builder \
     maven \
-    maven-unbound
+    maven-unbound \
+    make \
+    gcc \
+    glibc-devel
 
 RUN microdnf clean all
 

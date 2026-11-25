@@ -1,0 +1,1383 @@
+{
+  "adapter_source_sha256": "25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f",
+  "capture_finished": "2026-11-25T04:41:18.741708+00:00",
+  "capture_key": {
+    "budgets": [
+      16000
+    ],
+    "capture_mode": "cold-single-compilation-v1",
+    "expected_result": "3",
+    "extra_jvm_options": [],
+    "final_tier": 2,
+    "first_tier_threshold": 100,
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "invocations": 2000,
+    "java_runtime_version": "25.0.4.1+1-jvmci-25.3-b22",
+    "language": "ruby",
+    "last_tier_threshold": 1000,
+    "requested_peer_version": "40.0.0",
+    "requested_root": "all",
+    "requested_tier": 2,
+    "retain_recompiled_tiers": false,
+    "runtime": {
+      "artifact_manifest_sha256": "2e42ae638e9f99ef989449747b1151192d03c3b117a26094f595b6c8c9c162b3",
+      "graalvm_version": "25.3.4.1",
+      "peer_dependencies_sha256": "d0e52528b83f700e0acaa6ecd6e126574f65ba4e9af0fb59edb8ddaa858afd2d",
+      "truffleruby_version": "40.0.0"
+    },
+    "selected_phase": "After TruffleTier",
+    "stage": "smoke",
+    "surface": "executable-value",
+    "warmup_calls": 0,
+    "workload": "primitive-integer-add"
+  },
+  "capture_started": "2026-11-25T04:41:07.428235+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "70b730c94df0571071bca53dc9e1b53f194f0c94a41c6a4f3dd841e2b7f5038d",
+    "identity": {
+      "dependency_classpath_sha256": "afd1025155b9f560b300cc6368c746b9e0af531d37a5a9be50801ceb57cadf51",
+      "java_home": "/opt/graalvm-community-java25i3",
+      "java_runtime_version": "25.0.4.1+1-jvmci-25.3-b22",
+      "peer_graalvm_version": "25.3.4.1",
+      "ruby_artifact_manifest_sha256": "2e42ae638e9f99ef989449747b1151192d03c3b117a26094f595b6c8c9c162b3",
+      "surface": "executable-value"
+    },
+    "identity_sha256": "2f7c9623a15fc85367cafb6308350c68aea20d6de0e10e6dc73017c331e10727",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/peer-ruby-40.0.0-graal-25.3.4.1/executable-value/25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "3",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "correctness_uses_separate_jvm": true,
+  "expected_result": "3",
+  "fresh_jvm": true,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1",
+    "-Dpolyglot.engine.MultiTier=true",
+    "-Dpolyglot.engine.DynamicCompilationThresholds=false",
+    "-Dpolyglot.engine.FirstTierMinInvokeThreshold=1",
+    "-Dpolyglot.engine.MinInvokeThreshold=1",
+    "-Dpolyglot.engine.OSR=false",
+    "-Dpolyglot.engine.FirstTierCompilationThreshold=100",
+    "-Dpolyglot.engine.LastTierCompilationThreshold=1000",
+    "-Djdk.graal.DumpPath=/workspaces/protos-benchmarks/results/local/ruby-40.0.0-20261125/tier-2/.staging/cold-capture-97kvn18f/raw/cold-jvm/dumps"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "c36d89afd4a17b479206b22e223b6e1dbe8b9f2f",
+    "porcelain": "",
+    "source_sha256": {
+      "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+      "cases/catalog.json": "891cb7a9fd6bd5f6c382d1b31f429418164a0f84a66ffa9f32314c74f4ed422c",
+      "cases/primitive-integer-add/primitive-integer-add.rb": "d33a39e1b28a751e4ff6c72ef6c34cbebc715d327df2f5ce784770b1f265053e",
+      "harness/Containerfile.ruby": "d457c1896ae8db11239d55eb24289294cf2e1e9f8e5942d82ed6787aa3d75586",
+      "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+      "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+      "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+      "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+      "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+      "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+      "harness/measure/surfaces/peer/PeerExecutableSurface.java": "59b11007925da6594fccc235c92ed66a94e7a8e10e08f89f7271fc40179f6dab",
+      "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+      "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+      "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+      "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+      "harness/policy/cases.json": "422afa13d4101175bb438d29778b05d5354bb6b44612c30be160aad9eb6e1068",
+      "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+      "harness/policy/ruby-peer.pom.xml": "d0e52528b83f700e0acaa6ecd6e126574f65ba4e9af0fb59edb8ddaa858afd2d",
+      "harness/policy/runtimes.json": "1b62326e017e15f0c70c05f94145dd237991a8af229d099f81585c8684379e5d",
+      "harness/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+      "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+    }
+  },
+  "harness_after_source_sha256": {
+    "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+    "cases/catalog.json": "891cb7a9fd6bd5f6c382d1b31f429418164a0f84a66ffa9f32314c74f4ed422c",
+    "cases/primitive-integer-add/primitive-integer-add.rb": "d33a39e1b28a751e4ff6c72ef6c34cbebc715d327df2f5ce784770b1f265053e",
+    "harness/Containerfile.ruby": "d457c1896ae8db11239d55eb24289294cf2e1e9f8e5942d82ed6787aa3d75586",
+    "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+    "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+    "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+    "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+    "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+    "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+    "harness/measure/surfaces/peer/PeerExecutableSurface.java": "59b11007925da6594fccc235c92ed66a94e7a8e10e08f89f7271fc40179f6dab",
+    "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+    "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+    "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+    "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+    "harness/policy/cases.json": "422afa13d4101175bb438d29778b05d5354bb6b44612c30be160aad9eb6e1068",
+    "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+    "harness/policy/ruby-peer.pom.xml": "d0e52528b83f700e0acaa6ecd6e126574f65ba4e9af0fb59edb8ddaa858afd2d",
+    "harness/policy/runtimes.json": "1b62326e017e15f0c70c05f94145dd237991a8af229d099f81585c8684379e5d",
+    "harness/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+    "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 1,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      1,
+      9
+    ],
+    "hostname": "5b43445748ea",
+    "kernel": "7.3.5-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "invocation_sequence": {
+    "cold_calls": 1,
+    "post_warmup_calls": 2000,
+    "process": "fresh-jvm",
+    "setup": "before-cold-call",
+    "total_measured_invocations": 2001,
+    "warmup_calls": 0
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i3",
+    "java.runtime.version": "25.0.4.1+1-jvmci-25.3-b22",
+    "java.vendor.version": "GraalVM CE 25.3.4.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1+1-jvmci-25.3-b22",
+    "version_output": "openjdk version \"25.0.4.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.3.4.1+1.1 (build 25.0.4.1+1-jvmci-25.3-b22)\nOpenJDK 64-Bit Server VM GraalVM CE 25.3.4.1+1.1 (build 25.0.4.1+1-jvmci-25.3-b22, mixed mode, sharing)"
+  },
+  "language": "ruby",
+  "mode": "cold-compilation",
+  "peer_runtime": {
+    "artifact_manifest_sha256": "2e42ae638e9f99ef989449747b1151192d03c3b117a26094f595b6c8c9c162b3",
+    "artifacts": [
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/polyglot/polyglot/25.3.4.1/polyglot-25.3.4.1.jar",
+        "sha256": "befec2cbfb6ca279a73ee20626718a917ab1d1a3970793698ddc11b4d41e0356",
+        "size_bytes": 537932
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/sdk/collections/25.3.4.1/collections-25.3.4.1.jar",
+        "sha256": "3d0d2287f0217e7e765a47d69681c0ac1bb4ef50d70c9440449e86045bbe158f",
+        "size_bytes": 129475
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/sdk/nativeimage/25.3.4.1/nativeimage-25.3.4.1.jar",
+        "sha256": "a4315500775e98d16f083812bf5b8b664d84abad736da14ebbea5b38d7752b0f",
+        "size_bytes": 249788
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/sdk/word/25.3.4.1/word-25.3.4.1.jar",
+        "sha256": "fe1c3723e27907789732ac9f3d639ba6055d459529cfcfbd96156e73911ee7b7",
+        "size_bytes": 73160
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/truffleruby/40.0.0/truffleruby-40.0.0.pom",
+        "sha256": "7cc735c6fc3c752f9a85d250f13a4928b3fde00791945c0734570b164bb145a6",
+        "size_bytes": 2590
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/runtime/40.0.0/runtime-40.0.0.jar",
+        "sha256": "f2f71b3e115648464c7dd46f29bf387e8855c45b10aeb73dc959df4a1e777347",
+        "size_bytes": 30991056
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/annotations/40.0.0/annotations-40.0.0.jar",
+        "sha256": "cc82166017b0555df3ab0b5e0a58e23f8f84ea235d63036f4f2bd10ca60697e3",
+        "size_bytes": 7478
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/shared/40.0.0/shared-40.0.0.jar",
+        "sha256": "ea759cb8f1765150e4967f7d415d0875350db2a148616252e5e9731e1910ef69",
+        "size_bytes": 78552
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-api/25.3.4.1/truffle-api-25.3.4.1.jar",
+        "sha256": "f9efa18b1cb6c4e39862f5ac83a88ee4c9e31252c52c2ee5192c2a707cd9b27f",
+        "size_bytes": 16991993
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/sdk/jniutils/25.3.4.1/jniutils-25.3.4.1.jar",
+        "sha256": "b1d78402c744e5022fcb19f620644ab38b834c024020f3570dadaaf9cbe77067",
+        "size_bytes": 281935
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi/25.3.4.1/truffle-nfi-25.3.4.1.jar",
+        "sha256": "5320c98ba65a13a4ad9609732efa1ca2742ede7892863a154b5a89c987491853",
+        "size_bytes": 1493187
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/regex/regex/25.3.4.1/regex-25.3.4.1.jar",
+        "sha256": "7a8d81397939e693eaf089ce75c6395255e3b6896e4578e6fffb6ed458fa43e2",
+        "size_bytes": 3907363
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/icu4j/25.3.4.1/icu4j-25.3.4.1.jar",
+        "sha256": "dc408acbde92cb9233e184ee4ec135185dbcf1f53013e6356c500a6ff50a2909",
+        "size_bytes": 18564123
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/xz/25.3.4.1/xz-25.3.4.1.jar",
+        "sha256": "876df268932813d3d5a5346ca138ce9b333560076eeb71e9e5b7bcb647a001e7",
+        "size_bytes": 328720
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/jcodings/25.3.4.1/jcodings-25.3.4.1.jar",
+        "sha256": "1d63c99c630f391dc5747846dcabc6688e1a8379b636c5307672c4e7fef93240",
+        "size_bytes": 1839073
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/shadowed/joni/40.0.0/joni-40.0.0.jar",
+        "sha256": "c72a78646a4516e7ca5ecd6e0d665ee44350ca9c82e189a98163b544b9c298b9",
+        "size_bytes": 240786
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi-libffi/25.3.4.1/truffle-nfi-libffi-25.3.4.1.jar",
+        "sha256": "edb64301941d86f785f748f70742614e625971adf4595789e3b7a068dcd574d3",
+        "size_bytes": 1806944
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi-panama/25.3.4.1/truffle-nfi-panama-25.3.4.1.jar",
+        "sha256": "e3bdc4c7fa813218cf13a5210cfbc994ede13df5082326c2d709ce652a78ef2c",
+        "size_bytes": 541892
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/resources/40.0.0/resources-40.0.0.jar",
+        "sha256": "e2adc69bb4abff4dbf7c7e1b575e8a31955fbcbb319926d05166b9b7afe42c76",
+        "size_bytes": 30327042
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-runtime/25.3.4.1/truffle-runtime-25.3.4.1.jar",
+        "sha256": "d74ff0b8eb9a5fec4a571f78bc21750ee41dfd454877b8cce8b33641efd90ae3",
+        "size_bytes": 935923
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-compiler/25.3.4.1/truffle-compiler-25.3.4.1.jar",
+        "sha256": "a422df88ffaabe4669b8b6e5d63f04f2a8152e5fe763b3bfbf3dc58d7e5dd41c",
+        "size_bytes": 54592
+      }
+    ],
+    "dependency_classpath_sha256": "afd1025155b9f560b300cc6368c746b9e0af531d37a5a9be50801ceb57cadf51",
+    "graalvm_version": "25.3.4.1",
+    "implementation_version": "40.0.0",
+    "maven_coordinate": "dev.truffleruby:truffleruby",
+    "protos_graalvm_version": null,
+    "runtime_source": "podman-image-baked-maven-dependencies",
+    "truffle_version": "25.3.4.1",
+    "truffleruby_version": "40.0.0"
+  },
+  "product_before": null,
+  "protos_revision": null,
+  "requested_root": "all",
+  "requested_tier": 2,
+  "retain_recompiled_tiers": false,
+  "root_inventory": {
+    "interpreted_roots_coverage": "NOT_ESTABLISHED",
+    "requested_tier": 2,
+    "roots": [
+      {
+        "compilation_ids": [
+          4692
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Array#<< <split-1160>",
+        "normalized_label": "Array#<< <split-1160>",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:1160"
+      },
+      {
+        "compilation_ids": [
+          3340
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Array#size",
+        "normalized_label": "Array#size",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:408"
+      },
+      {
+        "compilation_ids": [
+          3443
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Encoding#name",
+        "normalized_label": "Encoding#name",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:635"
+      },
+      {
+        "compilation_ids": [
+          4335,
+          4349,
+          4377,
+          4390,
+          4447,
+          4455,
+          4525,
+          4536
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "File.basename",
+        "normalized_label": "File.basename",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:1103"
+      },
+      {
+        "compilation_ids": [
+          4289,
+          4303,
+          4559,
+          4567,
+          4577,
+          4590
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "File.extname",
+        "normalized_label": "File.extname",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:1079"
+      },
+      {
+        "compilation_ids": [
+          3534,
+          3587,
+          3722
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Hash#[]=",
+        "normalized_label": "Hash#[]=",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:640"
+      },
+      {
+        "compilation_ids": [
+          2833
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Module#alias_method",
+        "normalized_label": "Module#alias_method",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:67"
+      },
+      {
+        "compilation_ids": [
+          4157
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Module#const_set <split-930>",
+        "normalized_label": "Module#const_set <split-930>",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:930"
+      },
+      {
+        "compilation_ids": [
+          4942,
+          5011
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Object#run",
+        "normalized_label": "Object#run",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:1361"
+      },
+      {
+        "compilation_ids": [
+          4710
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#[]",
+        "normalized_label": "String#[]",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:792"
+      },
+      {
+        "compilation_ids": [
+          4514
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#end_with?",
+        "normalized_label": "String#end_with?",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:1077"
+      },
+      {
+        "compilation_ids": [
+          4637
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#size",
+        "normalized_label": "String#size",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:771"
+      },
+      {
+        "compilation_ids": [
+          3524
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#to_sym",
+        "normalized_label": "String#to_sym",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:639"
+      },
+      {
+        "compilation_ids": [
+          3450,
+          3548,
+          3564
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#upcase",
+        "normalized_label": "String#upcase",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:636"
+      },
+      {
+        "compilation_ids": [
+          3464
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#upcase!",
+        "normalized_label": "String#upcase!",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:637"
+      },
+      {
+        "compilation_ids": [
+          4724
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Truffle::FeatureLoader.extension_symbol",
+        "normalized_label": "Truffle::FeatureLoader.extension_symbol",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:1075"
+      },
+      {
+        "compilation_ids": [
+          4140
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Truffle::POSIX.generated_posix_resolve_function",
+        "normalized_label": "Truffle::POSIX.generated_posix_resolve_function",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:929"
+      },
+      {
+        "compilation_ids": [
+          3484
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Truffle::StringOperations.validate_case_mapping_options",
+        "normalized_label": "Truffle::StringOperations.validate_case_mapping_options",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:638"
+      },
+      {
+        "compilation_ids": [
+          4663
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "block in <module:KernelOperations>",
+        "normalized_label": "block in <module:KernelOperations>",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:145"
+      },
+      {
+        "compilation_ids": [
+          3374
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "block in Truffle::EncodingOperations.build_encoding_map",
+        "normalized_label": "block in Truffle::EncodingOperations.build_encoding_map",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:630"
+      },
+      {
+        "compilation_ids": [
+          4924,
+          5002
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+        "normalized_label": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:1314"
+      }
+    ],
+    "scope": "observed-compiled-call-targets-only"
+  },
+  "runs": [
+    {
+      "budget": 2000,
+      "calls": 2001,
+      "compilation_count": 39,
+      "dump_inventory": [
+        {
+          "bytes": 391245,
+          "name": "TruffleHotSpotCompilation-2833[Module#alias_method].bgv",
+          "sha256": "ae56b144252255c7ff32e91bda7dfd9ad22478c8577b3bc49b2ea6c5f8696cc6"
+        },
+        {
+          "bytes": 134141,
+          "name": "TruffleHotSpotCompilation-3340[Array#size].bgv",
+          "sha256": "9c5c57278b84a15b984cd4147ee218b60c929bfc5b0868051b71235ff24a531c"
+        },
+        {
+          "bytes": 1125164,
+          "name": "TruffleHotSpotCompilation-3374[block_in_Truffle::EncodingOperations.build_encoding_map].bgv",
+          "sha256": "0c21ad93dc1252163b04f4f27c8bf0498ef95eb890ab2e1fe08493a38166b1b5"
+        },
+        {
+          "bytes": 118383,
+          "name": "TruffleHotSpotCompilation-3443[Encoding#name].bgv",
+          "sha256": "de26b00372f9e7bfc2bb78bd36d49a1efd1b3f189b5e8f07de1228e52316b369"
+        },
+        {
+          "bytes": 476762,
+          "name": "TruffleHotSpotCompilation-3450[String#upcase].bgv",
+          "sha256": "2bdb5195e450e7a0e8097dc401cb2543030b1154bf1365284a617fad11ebce3c"
+        },
+        {
+          "bytes": 1104855,
+          "name": "TruffleHotSpotCompilation-3464[String#upcase!].bgv",
+          "sha256": "a649809e07c93fda57a2015156789ba564f250e10a11167ae48a35be80f26334"
+        },
+        {
+          "bytes": 428704,
+          "name": "TruffleHotSpotCompilation-3484[Truffle::StringOperations.validate_case_mapping_options].bgv",
+          "sha256": "5e98b7e3803a36d75d2e51bc1b9d516c26146b0a907de895abb2940d3e19b664"
+        },
+        {
+          "bytes": 243317,
+          "name": "TruffleHotSpotCompilation-3524[String#to_sym].bgv",
+          "sha256": "e471791da8d0ed9903eebfd3f9f60c62ffe93e17f57d6747ab1d0c95d2fd74c0"
+        },
+        {
+          "bytes": 820561,
+          "name": "TruffleHotSpotCompilation-3534[Hash#[]=].bgv",
+          "sha256": "169fea372006b22a02882468fb4d8d57b2ce77f140a5f2110f9ae7a0e2109c7a"
+        },
+        {
+          "bytes": 275095,
+          "name": "TruffleHotSpotCompilation-3548[String#upcase].bgv",
+          "sha256": "9144d0c3ba050780df81cb7e49cdd4a5cb156a51fa0f6cbdb075ddeeb83dbb03"
+        },
+        {
+          "bytes": 306510,
+          "name": "TruffleHotSpotCompilation-3564[String#upcase].bgv",
+          "sha256": "342839129e01f94c2d86058a5564564bd0d05557c46a5512006470b97cf4439d"
+        },
+        {
+          "bytes": 628532,
+          "name": "TruffleHotSpotCompilation-3587[Hash#[]=].bgv",
+          "sha256": "a5f4c9c735f63ad3d80a8a84d118a2349762144bc38fa73df1354f548f01ef89"
+        },
+        {
+          "bytes": 635731,
+          "name": "TruffleHotSpotCompilation-3722[Hash#[]=].bgv",
+          "sha256": "bac5dc19a189bf058828175b7352c9db9f061505044e35dea1ea9a700be75d8d"
+        },
+        {
+          "bytes": 354692,
+          "name": "TruffleHotSpotCompilation-4140[Truffle::POSIX.generated_posix_resolve_function].bgv",
+          "sha256": "89131bc0304551e9dfccbc7f5e241392a1905d81ba394bad2dbf27841f52cb13"
+        },
+        {
+          "bytes": 159081,
+          "name": "TruffleHotSpotCompilation-4157[Module#const_set_<split-930>].bgv",
+          "sha256": "6ab115d0e8d722ca7a1ae3f4258ceb1449a543d29ece8b8fdfe062ae69872190"
+        },
+        {
+          "bytes": 756075,
+          "name": "TruffleHotSpotCompilation-4289[File.extname].bgv",
+          "sha256": "95b0beb085c5ce198277cf205d45a6c53ecc215b242e78cf3c514d4eda951637"
+        },
+        {
+          "bytes": 1673401,
+          "name": "TruffleHotSpotCompilation-4303[File.extname].bgv",
+          "sha256": "90bef82ca2145d40e11dcd90f76001824872f3aa6988b3b505536aced4a67cec"
+        },
+        {
+          "bytes": 763726,
+          "name": "TruffleHotSpotCompilation-4335[File.basename].bgv",
+          "sha256": "ea096bc9c37005cd0b3c0b4ebca1ac7fd33f76b0ba1191f4546a3ca12626c5c1"
+        },
+        {
+          "bytes": 1642902,
+          "name": "TruffleHotSpotCompilation-4349[File.basename].bgv",
+          "sha256": "90bae9c7a7295f512774ade59def17ed385b569dbff03dc8e73a310ebc9640f4"
+        },
+        {
+          "bytes": 715061,
+          "name": "TruffleHotSpotCompilation-4377[File.basename].bgv",
+          "sha256": "aebbe35e3cf42fe72b6153357b4a21d9fb53e22b11bc46d15083978c2dc6e89b"
+        },
+        {
+          "bytes": 1642335,
+          "name": "TruffleHotSpotCompilation-4390[File.basename].bgv",
+          "sha256": "d5b7ff6c96cc20dd5646c7719668ef10499ccbc7a1ab21021080494e792d1c7a"
+        },
+        {
+          "bytes": 1100862,
+          "name": "TruffleHotSpotCompilation-4447[File.basename].bgv",
+          "sha256": "aa91351ca64187e604bcd6ffec03616a9b2fbd20a374ff953e6e62f58c9f9216"
+        },
+        {
+          "bytes": 2590441,
+          "name": "TruffleHotSpotCompilation-4455[File.basename].bgv",
+          "sha256": "5909662ff912185d88c8e0c38650b9b6b2337593211edd302a267a170de3f638"
+        },
+        {
+          "bytes": 850202,
+          "name": "TruffleHotSpotCompilation-4514[String#end_with?].bgv",
+          "sha256": "555c6f1981657484ccbf689a38e574fe9492d54afdabb60ec59eea782dd2c76a"
+        },
+        {
+          "bytes": 1088422,
+          "name": "TruffleHotSpotCompilation-4525[File.basename].bgv",
+          "sha256": "38c4fd9751de1e8574c648ccd9ee28754bc7acb53638816155e1138a783060cb"
+        },
+        {
+          "bytes": 2485937,
+          "name": "TruffleHotSpotCompilation-4536[File.basename].bgv",
+          "sha256": "ee9666bf199b152577241596725e3711785b047cb62c717e4feefed3aee8c076"
+        },
+        {
+          "bytes": 521231,
+          "name": "TruffleHotSpotCompilation-4559[File.extname].bgv",
+          "sha256": "88c12088355bda724c5c616bbebe9c925b23859c31b54e34f153ebffff0fd6d9"
+        },
+        {
+          "bytes": 1708414,
+          "name": "TruffleHotSpotCompilation-4567[File.extname].bgv",
+          "sha256": "e8c58e84516b20d47d29ba73f0ad1c7668db50e56137e3a8de2582e393f23ab0"
+        },
+        {
+          "bytes": 841572,
+          "name": "TruffleHotSpotCompilation-4577[File.extname].bgv",
+          "sha256": "c0bb05f2917cea8fd9c0ca390467add9c64cf436b3bbb9122f4667d9eec53b5c"
+        },
+        {
+          "bytes": 2342597,
+          "name": "TruffleHotSpotCompilation-4590[File.extname].bgv",
+          "sha256": "aa82f8ea5d4c08c180a49b20443e2192497e7968c4b2303e35c5fa698b4c441a"
+        },
+        {
+          "bytes": 226330,
+          "name": "TruffleHotSpotCompilation-4637[String#size].bgv",
+          "sha256": "7b7ee0f47b6fbd4f6b352e7169e35b12902f261c3001a5a5f8cebf1246123679"
+        },
+        {
+          "bytes": 115120,
+          "name": "TruffleHotSpotCompilation-4663[block_in_<module:KernelOperations>].bgv",
+          "sha256": "8e8afbb24082e8388a5feb2d4ce40ed2b8fbbf768628a6abb237443af6355566"
+        },
+        {
+          "bytes": 402604,
+          "name": "TruffleHotSpotCompilation-4692[Array#<<_<split-1160>].bgv",
+          "sha256": "453c613cff8547fe808b936e860c2a42a0bc431c6a35ecae7cda832451bc99c9"
+        },
+        {
+          "bytes": 852689,
+          "name": "TruffleHotSpotCompilation-4710[String#[]].bgv",
+          "sha256": "577c74293978b6a591a385632158ca469ec01df46241907b4f2751817c3e30d3"
+        },
+        {
+          "bytes": 691425,
+          "name": "TruffleHotSpotCompilation-4724[Truffle::FeatureLoader.extension_symbol].bgv",
+          "sha256": "5ab28ebdbe5b2d8ced476206e18725aef52f91b3c3a1776d600ad77d7fb600d3"
+        },
+        {
+          "bytes": 511614,
+          "name": "TruffleHotSpotCompilation-4924[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv",
+          "sha256": "93d29a81bb8da2b545bd4bf7ea8c33763ab49a900eae890af53c8281d640d6e3"
+        },
+        {
+          "bytes": 114957,
+          "name": "TruffleHotSpotCompilation-4942[Object#run].bgv",
+          "sha256": "aa97428a9ad20ede6188a68b40e2e38467d57b2db8feef278caee81d0b31dbf9"
+        },
+        {
+          "bytes": 261158,
+          "name": "TruffleHotSpotCompilation-5002[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv",
+          "sha256": "aa6ee4565744bfb7a934524fe280447b22b4f8a6d317e286dbcd5f4713d77fdc"
+        },
+        {
+          "bytes": 72140,
+          "name": "TruffleHotSpotCompilation-5011[Object#run].bgv",
+          "sha256": "82f7cbbcb6d4e6ce0f23d36e9583036d63a831a0a451d59fa274c821cc5fb2dd"
+        }
+      ],
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 11,
+      "resolution": {
+        "units": [
+          {
+            "ast_nodes": 18,
+            "attribution": [
+              {
+                "location": "ruby:19:1046-1058",
+                "name": "InlinedAddNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 1,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5011[Object#run].bgv"
+            ],
+            "comp_id": 5011,
+            "compilation_time_ms": 6,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 25,
+              "cycles": 74,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 88
+            },
+            "graal_compilation_ms": 3,
+            "inlined": [],
+            "ir_after_truffle_tier": 25,
+            "ir_final": 21,
+            "label": "Object#run",
+            "machine_code_bytes": 193,
+            "normalized_label": "Object#run",
+            "other_compilation_ids": [
+              4942
+            ],
+            "role": "selected",
+            "src": "/workspaces/protos-benchmarks/cases/primitive-integer-add/primitive-integer-add.rb:16 0x7f7f0724",
+            "superseded_comp_ids": [],
+            "target": "1:1361",
+            "tier": 2,
+            "truffle_compilation_ms": 3,
+            "via": null
+          },
+          {
+            "ast_nodes": 8,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$ExecuteNoArgsNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 13,
+                  "cycles": 15,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "RubyMethodGen$InteropLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotLanguageContextFactory$ToHostValueNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 5,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "CallInternalMethodNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 5,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "ruby:19:1046-1058",
+                "name": "InlinedAddNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "ruby:16:1013-1062",
+                "name": "ProfileArgumentNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$SharedExecuteNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-5002[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv"
+            ],
+            "comp_id": 5002,
+            "compilation_time_ms": 28,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 141,
+              "cycles": 151,
+              "ifs": 3,
+              "invokes": 0,
+              "loops": 0,
+              "size": 181
+            },
+            "graal_compilation_ms": 11,
+            "inlined": [
+              "Object#run"
+            ],
+            "ir_after_truffle_tier": 141,
+            "ir_final": 213,
+            "label": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+            "machine_code_bytes": 1048,
+            "normalized_label": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+            "other_compilation_ids": [
+              4924
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:1314",
+            "tier": 2,
+            "truffle_compilation_ms": 17,
+            "via": null
+          }
+        ]
+      },
+      "result": "3",
+      "retained_bgv": [
+        "budget-2000/bgv/TruffleHotSpotCompilation-5011[Object#run].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-5002[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz"
+      ],
+      "trace_log": "budget-2000/trace.log.gz",
+      "trace_log_sha256": "2b3a8e57c4616c39d716ed7862181cdd95ecd7b4c0f0bef43198c044512ea84f"
+    }
+  ],
+  "schema_version": 1,
+  "selected_compilations": [
+    {
+      "bgv": "TruffleHotSpotCompilation-5011[Object#run].bgv",
+      "comp_id": 5011,
+      "ir_final": 21,
+      "ir_initial": 25,
+      "machine_code_bytes": 193,
+      "normalized_root": "Object#run",
+      "root": "Object#run",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-5002[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv",
+      "comp_id": 5002,
+      "ir_final": 213,
+      "ir_initial": 141,
+      "machine_code_bytes": 1048,
+      "normalized_root": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+      "root": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+      "tier": 2
+    }
+  ],
+  "selected_phase": "After TruffleTier",
+  "surface": "executable-value",
+  "timing_evidence": "NONE",
+  "timing_explanation": "Compilation instrumentation changes execution cost; sample timings are not benchmark measurements.",
+  "unavailable_roots": [
+    {
+      "compilation_ids": [
+        4692
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Array#<< <split-1160>",
+      "normalized_label": "Array#<< <split-1160>",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:1160"
+    },
+    {
+      "compilation_ids": [
+        3340
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Array#size",
+      "normalized_label": "Array#size",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:408"
+    },
+    {
+      "compilation_ids": [
+        3443
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Encoding#name",
+      "normalized_label": "Encoding#name",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:635"
+    },
+    {
+      "compilation_ids": [
+        4335,
+        4349,
+        4377,
+        4390,
+        4447,
+        4455,
+        4525,
+        4536
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "File.basename",
+      "normalized_label": "File.basename",
+      "observed_tiers": [
+        1,
+        2
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:1103"
+    },
+    {
+      "compilation_ids": [
+        4289,
+        4303,
+        4559,
+        4567,
+        4577,
+        4590
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "File.extname",
+      "normalized_label": "File.extname",
+      "observed_tiers": [
+        1,
+        2
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:1079"
+    },
+    {
+      "compilation_ids": [
+        3534,
+        3587,
+        3722
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Hash#[]=",
+      "normalized_label": "Hash#[]=",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:640"
+    },
+    {
+      "compilation_ids": [
+        2833
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Module#alias_method",
+      "normalized_label": "Module#alias_method",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:67"
+    },
+    {
+      "compilation_ids": [
+        4157
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Module#const_set <split-930>",
+      "normalized_label": "Module#const_set <split-930>",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:930"
+    },
+    {
+      "compilation_ids": [
+        4710
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "String#[]",
+      "normalized_label": "String#[]",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:792"
+    },
+    {
+      "compilation_ids": [
+        4514
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "String#end_with?",
+      "normalized_label": "String#end_with?",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:1077"
+    },
+    {
+      "compilation_ids": [
+        4637
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "String#size",
+      "normalized_label": "String#size",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:771"
+    },
+    {
+      "compilation_ids": [
+        3524
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "String#to_sym",
+      "normalized_label": "String#to_sym",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:639"
+    },
+    {
+      "compilation_ids": [
+        3450,
+        3548,
+        3564
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "String#upcase",
+      "normalized_label": "String#upcase",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:636"
+    },
+    {
+      "compilation_ids": [
+        3464
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "String#upcase!",
+      "normalized_label": "String#upcase!",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:637"
+    },
+    {
+      "compilation_ids": [
+        4724
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Truffle::FeatureLoader.extension_symbol",
+      "normalized_label": "Truffle::FeatureLoader.extension_symbol",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:1075"
+    },
+    {
+      "compilation_ids": [
+        4140
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Truffle::POSIX.generated_posix_resolve_function",
+      "normalized_label": "Truffle::POSIX.generated_posix_resolve_function",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:929"
+    },
+    {
+      "compilation_ids": [
+        3484
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Truffle::StringOperations.validate_case_mapping_options",
+      "normalized_label": "Truffle::StringOperations.validate_case_mapping_options",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:638"
+    },
+    {
+      "compilation_ids": [
+        4663
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "block in <module:KernelOperations>",
+      "normalized_label": "block in <module:KernelOperations>",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:145"
+    },
+    {
+      "compilation_ids": [
+        3374
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "block in Truffle::EncodingOperations.build_encoding_map",
+      "normalized_label": "block in Truffle::EncodingOperations.build_encoding_map",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:630"
+    }
+  ],
+  "workload": "primitive-integer-add"
+}

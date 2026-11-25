@@ -1,0 +1,3149 @@
+{
+  "adapter_source_sha256": "25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f",
+  "capture_finished": "2026-11-25T04:38:52.442850+00:00",
+  "capture_key": {
+    "budgets": [
+      16000
+    ],
+    "capture_mode": "cold-single-compilation-v1",
+    "expected_result": "8",
+    "extra_jvm_options": [],
+    "final_tier": 2,
+    "first_tier_threshold": 100,
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "invocations": 2000,
+    "java_runtime_version": "25.0.4.1+1-jvmci-25.3-b22",
+    "language": "ruby",
+    "last_tier_threshold": 1000000,
+    "requested_peer_version": "40.0.0",
+    "requested_root": "all",
+    "requested_tier": 1,
+    "retain_recompiled_tiers": false,
+    "runtime": {
+      "artifact_manifest_sha256": "2e42ae638e9f99ef989449747b1151192d03c3b117a26094f595b6c8c9c162b3",
+      "graalvm_version": "25.3.4.1",
+      "peer_dependencies_sha256": "d0e52528b83f700e0acaa6ecd6e126574f65ba4e9af0fb59edb8ddaa858afd2d",
+      "truffleruby_version": "40.0.0"
+    },
+    "selected_phase": "After TruffleTier",
+    "stage": "smoke",
+    "surface": "executable-value",
+    "warmup_calls": 0,
+    "workload": "primitive-while-counted"
+  },
+  "capture_started": "2026-11-25T04:38:41.138538+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "70b730c94df0571071bca53dc9e1b53f194f0c94a41c6a4f3dd841e2b7f5038d",
+    "identity": {
+      "dependency_classpath_sha256": "afd1025155b9f560b300cc6368c746b9e0af531d37a5a9be50801ceb57cadf51",
+      "java_home": "/opt/graalvm-community-java25i3",
+      "java_runtime_version": "25.0.4.1+1-jvmci-25.3-b22",
+      "peer_graalvm_version": "25.3.4.1",
+      "ruby_artifact_manifest_sha256": "2e42ae638e9f99ef989449747b1151192d03c3b117a26094f595b6c8c9c162b3",
+      "surface": "executable-value"
+    },
+    "identity_sha256": "2f7c9623a15fc85367cafb6308350c68aea20d6de0e10e6dc73017c331e10727",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/peer-ruby-40.0.0-graal-25.3.4.1/executable-value/25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "8",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "correctness_uses_separate_jvm": true,
+  "expected_result": "8",
+  "fresh_jvm": true,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1",
+    "-Dpolyglot.engine.MultiTier=true",
+    "-Dpolyglot.engine.DynamicCompilationThresholds=false",
+    "-Dpolyglot.engine.FirstTierMinInvokeThreshold=1",
+    "-Dpolyglot.engine.MinInvokeThreshold=1",
+    "-Dpolyglot.engine.OSR=false",
+    "-Dpolyglot.engine.FirstTierCompilationThreshold=100",
+    "-Dpolyglot.engine.LastTierCompilationThreshold=1000000",
+    "-Djdk.graal.DumpPath=/workspaces/protos-benchmarks/results/local/ruby-40.0.0-20261125/tier-1/.staging/cold-capture-1unwq78y/raw/cold-jvm/dumps"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "c36d89afd4a17b479206b22e223b6e1dbe8b9f2f",
+    "porcelain": "",
+    "source_sha256": {
+      "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+      "cases/catalog.json": "891cb7a9fd6bd5f6c382d1b31f429418164a0f84a66ffa9f32314c74f4ed422c",
+      "cases/primitive-while-counted/primitive-while-counted.rb": "c620099d62d8063389355c5aa0b3df846796395cf6de501471aec3e5e5a13532",
+      "harness/Containerfile.ruby": "d457c1896ae8db11239d55eb24289294cf2e1e9f8e5942d82ed6787aa3d75586",
+      "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+      "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+      "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+      "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+      "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+      "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+      "harness/measure/surfaces/peer/PeerExecutableSurface.java": "59b11007925da6594fccc235c92ed66a94e7a8e10e08f89f7271fc40179f6dab",
+      "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+      "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+      "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+      "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+      "harness/policy/cases.json": "422afa13d4101175bb438d29778b05d5354bb6b44612c30be160aad9eb6e1068",
+      "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+      "harness/policy/ruby-peer.pom.xml": "d0e52528b83f700e0acaa6ecd6e126574f65ba4e9af0fb59edb8ddaa858afd2d",
+      "harness/policy/runtimes.json": "1b62326e017e15f0c70c05f94145dd237991a8af229d099f81585c8684379e5d",
+      "harness/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+      "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+    }
+  },
+  "harness_after_source_sha256": {
+    "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+    "cases/catalog.json": "891cb7a9fd6bd5f6c382d1b31f429418164a0f84a66ffa9f32314c74f4ed422c",
+    "cases/primitive-while-counted/primitive-while-counted.rb": "c620099d62d8063389355c5aa0b3df846796395cf6de501471aec3e5e5a13532",
+    "harness/Containerfile.ruby": "d457c1896ae8db11239d55eb24289294cf2e1e9f8e5942d82ed6787aa3d75586",
+    "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+    "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+    "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+    "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+    "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+    "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+    "harness/measure/surfaces/peer/PeerExecutableSurface.java": "59b11007925da6594fccc235c92ed66a94e7a8e10e08f89f7271fc40179f6dab",
+    "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+    "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+    "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+    "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+    "harness/policy/cases.json": "422afa13d4101175bb438d29778b05d5354bb6b44612c30be160aad9eb6e1068",
+    "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+    "harness/policy/ruby-peer.pom.xml": "d0e52528b83f700e0acaa6ecd6e126574f65ba4e9af0fb59edb8ddaa858afd2d",
+    "harness/policy/runtimes.json": "1b62326e017e15f0c70c05f94145dd237991a8af229d099f81585c8684379e5d",
+    "harness/pom.xml": "0e86c0ace18996858b0e997b10a32cb3b1c35b77ca2e4b873a7b179f5bc0f399",
+    "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 1,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      1,
+      9
+    ],
+    "hostname": "ef2b8e0b671e",
+    "kernel": "7.3.5-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "invocation_sequence": {
+    "cold_calls": 1,
+    "post_warmup_calls": 2000,
+    "process": "fresh-jvm",
+    "setup": "before-cold-call",
+    "total_measured_invocations": 2001,
+    "warmup_calls": 0
+  },
+  "java": {
+    "java.home": "/opt/graalvm-community-java25i3",
+    "java.runtime.version": "25.0.4.1+1-jvmci-25.3-b22",
+    "java.vendor.version": "GraalVM CE 25.3.4.1+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.4.1+1-jvmci-25.3-b22",
+    "version_output": "openjdk version \"25.0.4.1\" 2026-08-18\nOpenJDK Runtime Environment GraalVM CE 25.3.4.1+1.1 (build 25.0.4.1+1-jvmci-25.3-b22)\nOpenJDK 64-Bit Server VM GraalVM CE 25.3.4.1+1.1 (build 25.0.4.1+1-jvmci-25.3-b22, mixed mode, sharing)"
+  },
+  "language": "ruby",
+  "mode": "cold-compilation",
+  "peer_runtime": {
+    "artifact_manifest_sha256": "2e42ae638e9f99ef989449747b1151192d03c3b117a26094f595b6c8c9c162b3",
+    "artifacts": [
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/polyglot/polyglot/25.3.4.1/polyglot-25.3.4.1.jar",
+        "sha256": "befec2cbfb6ca279a73ee20626718a917ab1d1a3970793698ddc11b4d41e0356",
+        "size_bytes": 537932
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/sdk/collections/25.3.4.1/collections-25.3.4.1.jar",
+        "sha256": "3d0d2287f0217e7e765a47d69681c0ac1bb4ef50d70c9440449e86045bbe158f",
+        "size_bytes": 129475
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/sdk/nativeimage/25.3.4.1/nativeimage-25.3.4.1.jar",
+        "sha256": "a4315500775e98d16f083812bf5b8b664d84abad736da14ebbea5b38d7752b0f",
+        "size_bytes": 249788
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/sdk/word/25.3.4.1/word-25.3.4.1.jar",
+        "sha256": "fe1c3723e27907789732ac9f3d639ba6055d459529cfcfbd96156e73911ee7b7",
+        "size_bytes": 73160
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/truffleruby/40.0.0/truffleruby-40.0.0.pom",
+        "sha256": "7cc735c6fc3c752f9a85d250f13a4928b3fde00791945c0734570b164bb145a6",
+        "size_bytes": 2590
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/runtime/40.0.0/runtime-40.0.0.jar",
+        "sha256": "f2f71b3e115648464c7dd46f29bf387e8855c45b10aeb73dc959df4a1e777347",
+        "size_bytes": 30991056
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/annotations/40.0.0/annotations-40.0.0.jar",
+        "sha256": "cc82166017b0555df3ab0b5e0a58e23f8f84ea235d63036f4f2bd10ca60697e3",
+        "size_bytes": 7478
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/shared/40.0.0/shared-40.0.0.jar",
+        "sha256": "ea759cb8f1765150e4967f7d415d0875350db2a148616252e5e9731e1910ef69",
+        "size_bytes": 78552
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-api/25.3.4.1/truffle-api-25.3.4.1.jar",
+        "sha256": "f9efa18b1cb6c4e39862f5ac83a88ee4c9e31252c52c2ee5192c2a707cd9b27f",
+        "size_bytes": 16991993
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/sdk/jniutils/25.3.4.1/jniutils-25.3.4.1.jar",
+        "sha256": "b1d78402c744e5022fcb19f620644ab38b834c024020f3570dadaaf9cbe77067",
+        "size_bytes": 281935
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi/25.3.4.1/truffle-nfi-25.3.4.1.jar",
+        "sha256": "5320c98ba65a13a4ad9609732efa1ca2742ede7892863a154b5a89c987491853",
+        "size_bytes": 1493187
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/regex/regex/25.3.4.1/regex-25.3.4.1.jar",
+        "sha256": "7a8d81397939e693eaf089ce75c6395255e3b6896e4578e6fffb6ed458fa43e2",
+        "size_bytes": 3907363
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/icu4j/25.3.4.1/icu4j-25.3.4.1.jar",
+        "sha256": "dc408acbde92cb9233e184ee4ec135185dbcf1f53013e6356c500a6ff50a2909",
+        "size_bytes": 18564123
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/xz/25.3.4.1/xz-25.3.4.1.jar",
+        "sha256": "876df268932813d3d5a5346ca138ce9b333560076eeb71e9e5b7bcb647a001e7",
+        "size_bytes": 328720
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/jcodings/25.3.4.1/jcodings-25.3.4.1.jar",
+        "sha256": "1d63c99c630f391dc5747846dcabc6688e1a8379b636c5307672c4e7fef93240",
+        "size_bytes": 1839073
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/shadowed/joni/40.0.0/joni-40.0.0.jar",
+        "sha256": "c72a78646a4516e7ca5ecd6e0d665ee44350ca9c82e189a98163b544b9c298b9",
+        "size_bytes": 240786
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi-libffi/25.3.4.1/truffle-nfi-libffi-25.3.4.1.jar",
+        "sha256": "edb64301941d86f785f748f70742614e625971adf4595789e3b7a068dcd574d3",
+        "size_bytes": 1806944
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi-panama/25.3.4.1/truffle-nfi-panama-25.3.4.1.jar",
+        "sha256": "e3bdc4c7fa813218cf13a5210cfbc994ede13df5082326c2d709ce652a78ef2c",
+        "size_bytes": 541892
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/resources/40.0.0/resources-40.0.0.jar",
+        "sha256": "e2adc69bb4abff4dbf7c7e1b575e8a31955fbcbb319926d05166b9b7afe42c76",
+        "size_bytes": 30327042
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-runtime/25.3.4.1/truffle-runtime-25.3.4.1.jar",
+        "sha256": "d74ff0b8eb9a5fec4a571f78bc21750ee41dfd454877b8cce8b33641efd90ae3",
+        "size_bytes": 935923
+      },
+      {
+        "path": "/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-compiler/25.3.4.1/truffle-compiler-25.3.4.1.jar",
+        "sha256": "a422df88ffaabe4669b8b6e5d63f04f2a8152e5fe763b3bfbf3dc58d7e5dd41c",
+        "size_bytes": 54592
+      }
+    ],
+    "dependency_classpath_sha256": "afd1025155b9f560b300cc6368c746b9e0af531d37a5a9be50801ceb57cadf51",
+    "graalvm_version": "25.3.4.1",
+    "implementation_version": "40.0.0",
+    "maven_coordinate": "dev.truffleruby:truffleruby",
+    "protos_graalvm_version": null,
+    "runtime_source": "podman-image-baked-maven-dependencies",
+    "truffle_version": "25.3.4.1",
+    "truffleruby_version": "40.0.0"
+  },
+  "product_before": null,
+  "protos_revision": null,
+  "requested_root": "all",
+  "requested_tier": 1,
+  "retain_recompiled_tiers": false,
+  "root_inventory": {
+    "interpreted_roots_coverage": "NOT_ESTABLISHED",
+    "requested_tier": 1,
+    "roots": [
+      {
+        "compilation_ids": [
+          4693
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Array#<< <split-1160>",
+        "normalized_label": "Array#<< <split-1160>",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:1160"
+      },
+      {
+        "compilation_ids": [
+          3324
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Array#size",
+        "normalized_label": "Array#size",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:408"
+      },
+      {
+        "compilation_ids": [
+          3424
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Encoding#name",
+        "normalized_label": "Encoding#name",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:635"
+      },
+      {
+        "compilation_ids": [
+          4312,
+          4323,
+          4366,
+          4380,
+          4445,
+          4451,
+          4536,
+          4544
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "File.basename",
+        "normalized_label": "File.basename",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 1,
+        "status": "UNAVAILABLE",
+        "target": "1:1103"
+      },
+      {
+        "compilation_ids": [
+          4280,
+          4284,
+          4567,
+          4575,
+          4588,
+          4598
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "File.extname",
+        "normalized_label": "File.extname",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 1,
+        "status": "UNAVAILABLE",
+        "target": "1:1079"
+      },
+      {
+        "compilation_ids": [
+          3519,
+          3578,
+          3720
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Hash#[]=",
+        "normalized_label": "Hash#[]=",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 1,
+        "status": "UNAVAILABLE",
+        "target": "1:640"
+      },
+      {
+        "compilation_ids": [
+          2829
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Module#alias_method",
+        "normalized_label": "Module#alias_method",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:67"
+      },
+      {
+        "compilation_ids": [
+          4148
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Module#const_set <split-930>",
+        "normalized_label": "Module#const_set <split-930>",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:930"
+      },
+      {
+        "compilation_ids": [
+          4904
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Object#run",
+        "normalized_label": "Object#run",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:1361"
+      },
+      {
+        "compilation_ids": [
+          4714
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#[]",
+        "normalized_label": "String#[]",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:792"
+      },
+      {
+        "compilation_ids": [
+          4527
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#end_with?",
+        "normalized_label": "String#end_with?",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:1077"
+      },
+      {
+        "compilation_ids": [
+          4643
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#size",
+        "normalized_label": "String#size",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:771"
+      },
+      {
+        "compilation_ids": [
+          3512
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#to_sym",
+        "normalized_label": "String#to_sym",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:639"
+      },
+      {
+        "compilation_ids": [
+          3430,
+          3533,
+          3551
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#upcase",
+        "normalized_label": "String#upcase",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 1,
+        "status": "UNAVAILABLE",
+        "target": "1:636"
+      },
+      {
+        "compilation_ids": [
+          3445
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "String#upcase!",
+        "normalized_label": "String#upcase!",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:637"
+      },
+      {
+        "compilation_ids": [
+          4725
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Truffle::FeatureLoader.extension_symbol",
+        "normalized_label": "Truffle::FeatureLoader.extension_symbol",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:1075"
+      },
+      {
+        "compilation_ids": [
+          4136
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Truffle::POSIX.generated_posix_resolve_function",
+        "normalized_label": "Truffle::POSIX.generated_posix_resolve_function",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:929"
+      },
+      {
+        "compilation_ids": [
+          3464
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "Truffle::StringOperations.validate_case_mapping_options",
+        "normalized_label": "Truffle::StringOperations.validate_case_mapping_options",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:638"
+      },
+      {
+        "compilation_ids": [
+          4667
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "block in <module:KernelOperations>",
+        "normalized_label": "block in <module:KernelOperations>",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:145"
+      },
+      {
+        "compilation_ids": [
+          3360
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "block in Truffle::EncodingOperations.build_encoding_map",
+        "normalized_label": "block in Truffle::EncodingOperations.build_encoding_map",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "ROOT_INVALIDATED_AFTER_COMPILATION",
+        "requested_tier": 1,
+        "status": "UNAVAILABLE",
+        "target": "1:630"
+      },
+      {
+        "compilation_ids": [
+          4928
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+        "normalized_label": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:1314"
+      }
+    ],
+    "scope": "observed-compiled-call-targets-only"
+  },
+  "runs": [
+    {
+      "budget": 2000,
+      "calls": 2001,
+      "compilation_count": 37,
+      "dump_inventory": [
+        {
+          "bytes": 391160,
+          "name": "TruffleHotSpotCompilation-2829[Module#alias_method].bgv",
+          "sha256": "7030cb5300a40b99998110fc62f1884ee252feb0874872f5fb425f837b1b75a1"
+        },
+        {
+          "bytes": 134172,
+          "name": "TruffleHotSpotCompilation-3324[Array#size].bgv",
+          "sha256": "1cec27b4b6b4d5a4429f5b3b0da58790fb43e551924360dec502959ad1c7dc28"
+        },
+        {
+          "bytes": 1125185,
+          "name": "TruffleHotSpotCompilation-3360[block_in_Truffle::EncodingOperations.build_encoding_map].bgv",
+          "sha256": "2b4a4c28af4faa22660af814bf37a812b80d3f92c78d1c3a60cda3a4ab6ae6d4"
+        },
+        {
+          "bytes": 118414,
+          "name": "TruffleHotSpotCompilation-3424[Encoding#name].bgv",
+          "sha256": "77e2f36c2a3eb5255b745294653dea71722de801de9e42a7f9d30017a8ed688d"
+        },
+        {
+          "bytes": 476794,
+          "name": "TruffleHotSpotCompilation-3430[String#upcase].bgv",
+          "sha256": "d7497b9ea607671f9e1560c18003723681e376d18c2605c1af46a3de2f7cfd18"
+        },
+        {
+          "bytes": 1104886,
+          "name": "TruffleHotSpotCompilation-3445[String#upcase!].bgv",
+          "sha256": "483c4f71a356c61ed5e840df23899534959b24ee3626d64d04e76f1a428f61ab"
+        },
+        {
+          "bytes": 428732,
+          "name": "TruffleHotSpotCompilation-3464[Truffle::StringOperations.validate_case_mapping_options].bgv",
+          "sha256": "b491004d49e6662d5165e2803ea53d2f9f5e596f0079d55a8d2ec93c0cf91f2b"
+        },
+        {
+          "bytes": 243347,
+          "name": "TruffleHotSpotCompilation-3512[String#to_sym].bgv",
+          "sha256": "3638fc64bd82f3c85dc518b3f225327f0ee86aa9c099a4d83d122fefe365fe4e"
+        },
+        {
+          "bytes": 820434,
+          "name": "TruffleHotSpotCompilation-3519[Hash#[]=].bgv",
+          "sha256": "28fe72fcbebf04a58d9410a57e70328a51720fd2dabb17edae6adf8cefc7e347"
+        },
+        {
+          "bytes": 275127,
+          "name": "TruffleHotSpotCompilation-3533[String#upcase].bgv",
+          "sha256": "b7614556b4a95bd8c3484b8d9b196881ce3a6a1e6833bcd0e03694abead7e93c"
+        },
+        {
+          "bytes": 306542,
+          "name": "TruffleHotSpotCompilation-3551[String#upcase].bgv",
+          "sha256": "9b3b1440a721553070106273fc5c2cb6e51b681e4d734c565de9f33ccd02c0b4"
+        },
+        {
+          "bytes": 628405,
+          "name": "TruffleHotSpotCompilation-3578[Hash#[]=].bgv",
+          "sha256": "737ee7b1eacc0dabc47d66ac2826066045a39e769306b19a60d6aa8ef62c27f3"
+        },
+        {
+          "bytes": 635604,
+          "name": "TruffleHotSpotCompilation-3720[Hash#[]=].bgv",
+          "sha256": "13766423157d1113f67e2af56e9908f162c81815a2b5fe2071007a6181aa90a4"
+        },
+        {
+          "bytes": 354723,
+          "name": "TruffleHotSpotCompilation-4136[Truffle::POSIX.generated_posix_resolve_function].bgv",
+          "sha256": "7a0ed5f42cfdbd58440d56ab581f14894b4382d45bae238c20d3321b053f9e2e"
+        },
+        {
+          "bytes": 159111,
+          "name": "TruffleHotSpotCompilation-4148[Module#const_set_<split-930>].bgv",
+          "sha256": "4b76a373d5371aafa35a6d82b87af3930b9a66df2444261d06a5d269fe35e2fa"
+        },
+        {
+          "bytes": 756108,
+          "name": "TruffleHotSpotCompilation-4280[File.extname].bgv",
+          "sha256": "5273ed6326fe23477c984e9e8dcd636a8fdd2a3816e3e0afa62825686cc4c8bf"
+        },
+        {
+          "bytes": 1673409,
+          "name": "TruffleHotSpotCompilation-4284[File.extname].bgv",
+          "sha256": "b98fd0173a76d199f8d707000fd8bf82c7774cd4f32f461713660c9039d38b79"
+        },
+        {
+          "bytes": 763761,
+          "name": "TruffleHotSpotCompilation-4312[File.basename].bgv",
+          "sha256": "8650c59d6812b69dac347e009b4c460b244292e6b6beadd76c340852063da0d8"
+        },
+        {
+          "bytes": 1642915,
+          "name": "TruffleHotSpotCompilation-4323[File.basename].bgv",
+          "sha256": "7c9328752cf888de2fc077173c847f36a3cec734a5a917257197177fcd9d1a29"
+        },
+        {
+          "bytes": 715096,
+          "name": "TruffleHotSpotCompilation-4366[File.basename].bgv",
+          "sha256": "a9d481394f15cc1060f58f53bd9da505285f2cb49bdd88ce20ee0f8b612ee58c"
+        },
+        {
+          "bytes": 1642347,
+          "name": "TruffleHotSpotCompilation-4380[File.basename].bgv",
+          "sha256": "13662ea2f283a657ab027ec2b6a455dc47b47ec87d8001d944b5649daab83e78"
+        },
+        {
+          "bytes": 1100627,
+          "name": "TruffleHotSpotCompilation-4445[File.basename].bgv",
+          "sha256": "640fe169eeda289dc6e94bc22b5461f10155349889c1b8a37b436e5e936eea93"
+        },
+        {
+          "bytes": 2590193,
+          "name": "TruffleHotSpotCompilation-4451[File.basename].bgv",
+          "sha256": "a98014d7296c5d0c1c23e79c0d6450e3236e20fabb71ce2824ad9898301b5dd7"
+        },
+        {
+          "bytes": 849980,
+          "name": "TruffleHotSpotCompilation-4527[String#end_with?].bgv",
+          "sha256": "a1804692de47baa8b90a067fb18bb3c8e7ff67c9289d151102afbd8785c51f0a"
+        },
+        {
+          "bytes": 1088200,
+          "name": "TruffleHotSpotCompilation-4536[File.basename].bgv",
+          "sha256": "7335ddbc65ab60ea18d3f810bbcb0b116143afb465612d050f919837b293d7cd"
+        },
+        {
+          "bytes": 2485689,
+          "name": "TruffleHotSpotCompilation-4544[File.basename].bgv",
+          "sha256": "2186c60eda8cb3c2086dfd4b14e873aaf68217a201e120b8ea46ed52595bd6ca"
+        },
+        {
+          "bytes": 521264,
+          "name": "TruffleHotSpotCompilation-4567[File.extname].bgv",
+          "sha256": "38df02ab02d86f4248c1f5f32ce6620ab86fb5e72114e383b67b6e6ca9d01d58"
+        },
+        {
+          "bytes": 1708424,
+          "name": "TruffleHotSpotCompilation-4575[File.extname].bgv",
+          "sha256": "87a2700921a27b3d1462f75c5efbdaf30d287589fd8f5877fc11e69080a54f33"
+        },
+        {
+          "bytes": 841605,
+          "name": "TruffleHotSpotCompilation-4588[File.extname].bgv",
+          "sha256": "42f6a515ea6b499f2a15c19c9e8868547b058fbe5f30b7aca2ec3be0007141b4"
+        },
+        {
+          "bytes": 2342523,
+          "name": "TruffleHotSpotCompilation-4598[File.extname].bgv",
+          "sha256": "9fb011723c8d4ecc5c20ed3c425e4357e1765681105ffe0275444b1551ac9fa6"
+        },
+        {
+          "bytes": 226361,
+          "name": "TruffleHotSpotCompilation-4643[String#size].bgv",
+          "sha256": "652e8d472896ce3a358225fdedbfe18c83c27699c461c5bf0d2ba70dac3e6791"
+        },
+        {
+          "bytes": 115151,
+          "name": "TruffleHotSpotCompilation-4667[block_in_<module:KernelOperations>].bgv",
+          "sha256": "ed03377a2529a36c15d189eaab1f24388e9f986138eddfe0e8ea4372a5222ffe"
+        },
+        {
+          "bytes": 402519,
+          "name": "TruffleHotSpotCompilation-4693[Array#<<_<split-1160>].bgv",
+          "sha256": "c302a97731b0f721cc3995f6716dd31beda04bbfb9033b52cb3898c432e11cc9"
+        },
+        {
+          "bytes": 852718,
+          "name": "TruffleHotSpotCompilation-4714[String#[]].bgv",
+          "sha256": "848ed215a95e70f0dd67160b9ded26aa0bebe3377bfe6d26a727e3fc71fc7956"
+        },
+        {
+          "bytes": 691282,
+          "name": "TruffleHotSpotCompilation-4725[Truffle::FeatureLoader.extension_symbol].bgv",
+          "sha256": "5674fc0ac93c26e7a8bcb95376f2539ca313c0227fc534e4aa08e99a3f109224"
+        },
+        {
+          "bytes": 277368,
+          "name": "TruffleHotSpotCompilation-4904[Object#run].bgv",
+          "sha256": "450b0f8abc6616403330ea776291a38311c441561c2881e6639274fdb5214d0b"
+        },
+        {
+          "bytes": 511661,
+          "name": "TruffleHotSpotCompilation-4928[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv",
+          "sha256": "9818748aa368ce37e1deded3a144e5a810d8b1b1c6d855be6dfb938d40a2db88"
+        }
+      ],
+      "exit_code": 0,
+      "failure_count": 0,
+      "invalidation_count": 11,
+      "resolution": {
+        "units": [
+          {
+            "ast_nodes": 17,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "ArrayAppendOneNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 14,
+                  "ifs": 2,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 15
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "DelegatedArrayStorageGen$ArrayStoreLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 20,
+                  "cycles": 17,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 23
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "ArrayNodesFactory$AppendNodeFactory$AppendNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 11
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "DelegatedArrayStorageGen$ArrayStoreLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 12,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 11
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "ObjectArrayStoreGen$ArrayStoreLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 18,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "ObjectArrayStoreGen$ArrayStoreLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "ObjectArrayStoreGen$ArrayStoreLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "DynamicObjectFactory$GetShapeFlagsNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "IsFrozenNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "ObjectArrayStoreGen$ArrayStoreLibraryExports$Cached",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "ObjectArrayStoreGen$ArrayStoreLibraryExports$Cached",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "ProfileArgumentNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4693[Array#<<_<split-1160>].bgv"
+            ],
+            "comp_id": 4693,
+            "compilation_time_ms": 37,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 203,
+              "cycles": 226,
+              "ifs": 7,
+              "invokes": 0,
+              "loops": 1,
+              "size": 293
+            },
+            "graal_compilation_ms": 11,
+            "inlined": [],
+            "ir_after_truffle_tier": 203,
+            "ir_final": 405,
+            "label": "Array#<< <split-1160>",
+            "machine_code_bytes": 2117,
+            "normalized_label": "Array#<< <split-1160>",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "(core):1 0xcd4aedd7",
+            "superseded_comp_ids": [],
+            "target": "1:1160",
+            "tier": 1,
+            "truffle_compilation_ms": 26,
+            "via": null
+          },
+          {
+            "ast_nodes": 4,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "ArrayNodesFactory$SizeNodeFactory$SizeNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 9
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3324[Array#size].bgv"
+            ],
+            "comp_id": 3324,
+            "compilation_time_ms": 19,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 84,
+              "cycles": 120,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 141
+            },
+            "graal_compilation_ms": 12,
+            "inlined": [],
+            "ir_after_truffle_tier": 84,
+            "ir_final": 145,
+            "label": "Array#size",
+            "machine_code_bytes": 666,
+            "normalized_label": "Array#size",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "(core):1 0xcd4aedd7",
+            "superseded_comp_ids": [],
+            "target": "1:408",
+            "tier": 1,
+            "truffle_compilation_ms": 7,
+            "via": null
+          },
+          {
+            "ast_nodes": 4,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "EncodingNodesFactory$ToSNodeFactory$ToSNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3424[Encoding#name].bgv"
+            ],
+            "comp_id": 3424,
+            "compilation_time_ms": 7,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 0,
+              "count": 85,
+              "cycles": 116,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 136
+            },
+            "graal_compilation_ms": 4,
+            "inlined": [],
+            "ir_after_truffle_tier": 85,
+            "ir_final": 93,
+            "label": "Encoding#name",
+            "machine_code_bytes": 446,
+            "normalized_label": "Encoding#name",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "(core):1 0xcd4aedd7",
+            "superseded_comp_ids": [],
+            "target": "1:635",
+            "tier": 1,
+            "truffle_compilation_ms": 4,
+            "via": null
+          },
+          {
+            "ast_nodes": 11,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "ModuleNodesFactory$AliasMethodNodeFactory$AliasMethodNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 28,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 30
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TypeNodesFactory$CheckFrozenNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 18,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "DynamicObjectFactory$GetShapeFlagsNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "IsFrozenNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-2829[Module#alias_method].bgv"
+            ],
+            "comp_id": 2829,
+            "compilation_time_ms": 183,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 0,
+              "count": 135,
+              "cycles": 188,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 221
+            },
+            "graal_compilation_ms": 34,
+            "inlined": [],
+            "ir_after_truffle_tier": 135,
+            "ir_final": 213,
+            "label": "Module#alias_method",
+            "machine_code_bytes": 926,
+            "normalized_label": "Module#alias_method",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "(core):1 0xcd4aedd7",
+            "superseded_comp_ids": [],
+            "target": "1:67",
+            "tier": 1,
+            "truffle_compilation_ms": 148,
+            "via": null
+          },
+          {
+            "ast_nodes": 11,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "ModuleNodesFactory$ConstSetNodeFactory$ConstSetNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4148[Module#const_set_<split-930>].bgv"
+            ],
+            "comp_id": 4148,
+            "compilation_time_ms": 10,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 0,
+              "count": 126,
+              "cycles": 150,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 186
+            },
+            "graal_compilation_ms": 5,
+            "inlined": [],
+            "ir_after_truffle_tier": 126,
+            "ir_final": 161,
+            "label": "Module#const_set <split-930>",
+            "machine_code_bytes": 793,
+            "normalized_label": "Module#const_set <split-930>",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "(core):1 0xcd4aedd7",
+            "superseded_comp_ids": [],
+            "target": "1:930",
+            "tier": 1,
+            "truffle_compilation_ms": 4,
+            "via": null
+          },
+          {
+            "ast_nodes": 26,
+            "attribution": [
+              {
+                "location": "ruby:18:1031-1062",
+                "name": "OptimizedLoopNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 27,
+                  "cycles": 13,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 23
+                }
+              },
+              {
+                "location": "ruby:19:1051-1056",
+                "name": "InlinedAddNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 6,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "ruby:18:1031-1062",
+                "name": "WhileNodeFactory$WhileRepeatingNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 1,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "ruby:18:1037-1042",
+                "name": "InlinedLessThanNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 1,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "ruby:21:1065-1066",
+                "name": "ReadFrameSlotNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 1,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "ruby:16:1013-1070",
+                "name": "SequenceNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "ruby:16:1013-1070",
+                "name": "WriteLocalVariableNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4904[Object#run].bgv"
+            ],
+            "comp_id": 4904,
+            "compilation_time_ms": 30,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 155,
+              "cycles": 139,
+              "ifs": 6,
+              "invokes": 0,
+              "loops": 1,
+              "size": 197
+            },
+            "graal_compilation_ms": 11,
+            "inlined": [],
+            "ir_after_truffle_tier": 155,
+            "ir_final": 239,
+            "label": "Object#run",
+            "machine_code_bytes": 1081,
+            "normalized_label": "Object#run",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "/workspaces/protos-benchmarks/cases/primitive-while-counted/primitive-while-counted.rb:16 0xa2c2b54d",
+            "superseded_comp_ids": [],
+            "target": "1:1361",
+            "tier": 1,
+            "truffle_compilation_ms": 19,
+            "via": null
+          },
+          {
+            "ast_nodes": 15,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "StringNodesFactory$GetIndexNodeFactory$GetIndexNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 80,
+                  "cycles": 101,
+                  "ifs": 7,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 121
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "StringPrimitiveNodesFactory$StringSubstringPrimitiveNodeFactory$StringSubstringPrimitiveNodeGen",
+                "self": {
+                  "allocs": 2,
+                  "count": 71,
+                  "cycles": 60,
+                  "ifs": 4,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 59
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "TruffleStringFactory$SubstringNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 70,
+                  "cycles": 89,
+                  "ifs": 3,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 91
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TStringInternalNodesFactory$SubstringInternalNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 37,
+                  "cycles": 52,
+                  "ifs": 2,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 53
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "TruffleStringFactory$CodePointLengthNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 26,
+                  "cycles": 46,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 48
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "RangeNodesFactory$NormalizedStartLengthNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 24,
+                  "cycles": 29,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 28
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "TruffleStringFactory$CodePointLengthNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 43,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 42
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "FixnumLowerNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 9,
+                  "cycles": 29,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 44
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TStringInternalNodesFactory$GetCodePointLengthWithMaterializationNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 8,
+                  "cycles": 14,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TStringInternalNodesFactory$CalcStringAttributesNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TStringInternalNodesFactory$SubstringInternalNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "TruffleStringFactory$CodePointLengthNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4714[String#[]].bgv"
+            ],
+            "comp_id": 4714,
+            "compilation_time_ms": 103,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 7,
+              "count": 574,
+              "cycles": 695,
+              "ifs": 22,
+              "invokes": 0,
+              "loops": 0,
+              "size": 775
+            },
+            "graal_compilation_ms": 27,
+            "inlined": [],
+            "ir_after_truffle_tier": 612,
+            "ir_final": 1121,
+            "label": "String#[]",
+            "machine_code_bytes": 4358,
+            "normalized_label": "String#[]",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "(core):1 0xcd4aedd7",
+            "superseded_comp_ids": [],
+            "target": "1:792",
+            "tier": 1,
+            "truffle_compilation_ms": 76,
+            "via": null
+          },
+          {
+            "ast_nodes": 69,
+            "attribution": [
+              {
+                "location": "ruby:472:14431-14476",
+                "name": "StringPrimitiveNodesFactory$EndWithNodeFactory$EndWithNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 94,
+                  "cycles": 135,
+                  "ifs": 6,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 139
+                }
+              },
+              {
+                "location": "ruby:471:14364-14417",
+                "name": "EncodingNodesFactory$CheckStringEncodingPrimitiveNodeFactory$CheckStringEncodingPrimitiveNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 63,
+                  "cycles": 44,
+                  "ifs": 6,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 51
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "MetaClassNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 29,
+                  "cycles": 42,
+                  "ifs": 4,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 48
+                }
+              },
+              {
+                "location": "ruby:472:14431-14476",
+                "name": "TruffleStringFactory$RegionEqualByteIndexNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 28,
+                  "cycles": 40,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 52
+                }
+              },
+              {
+                "location": "ruby:472:14431-14476",
+                "name": "TruffleStringFactory$ReadByteNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 18,
+                  "cycles": 30,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 26
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "BooleanCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 22,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 23
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "ruby:472:14431-14476",
+                "name": "IsCharacterHeadNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 7,
+                  "cycles": 7,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 7
+                }
+              },
+              {
+                "location": "ruby:470:14320-14351",
+                "name": "IsANodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              },
+              {
+                "location": "ruby:469:14240-14744",
+                "name": "ReadRestArgumentNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 4,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "ruby:470:14272-14351",
+                "name": "AndNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3
+                }
+              },
+              {
+                "location": "ruby:470:14272-14285",
+                "name": "RubyCallNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4527[String#end_with?].bgv"
+            ],
+            "comp_id": 4527,
+            "compilation_time_ms": 118,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 4,
+              "count": 487,
+              "cycles": 493,
+              "ifs": 21,
+              "invokes": 0,
+              "loops": 0,
+              "size": 614
+            },
+            "graal_compilation_ms": 58,
+            "inlined": [],
+            "ir_after_truffle_tier": 511,
+            "ir_final": 981,
+            "label": "String#end_with?",
+            "machine_code_bytes": 4299,
+            "normalized_label": "String#end_with?",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "<internal:core> core/string.rb:469 0xb6d21e08",
+            "superseded_comp_ids": [],
+            "target": "1:1077",
+            "tier": 1,
+            "truffle_compilation_ms": 61,
+            "via": null
+          },
+          {
+            "ast_nodes": 5,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "StringNodesFactory$SizeNodeFactory$SizeNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 30,
+                  "cycles": 43,
+                  "ifs": 2,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 45
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "TruffleStringFactory$CodePointLengthNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 13,
+                  "cycles": 23,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 24
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TStringInternalNodesFactory$GetCodePointLengthWithMaterializationNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 7,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4643[String#size].bgv"
+            ],
+            "comp_id": 4643,
+            "compilation_time_ms": 26,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 159,
+              "cycles": 183,
+              "ifs": 6,
+              "invokes": 0,
+              "loops": 0,
+              "size": 219
+            },
+            "graal_compilation_ms": 15,
+            "inlined": [],
+            "ir_after_truffle_tier": 159,
+            "ir_final": 286,
+            "label": "String#size",
+            "machine_code_bytes": 1317,
+            "normalized_label": "String#size",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "(core):1 0xcd4aedd7",
+            "superseded_comp_ids": [],
+            "target": "1:771",
+            "tier": 1,
+            "truffle_compilation_ms": 11,
+            "via": null
+          },
+          {
+            "ast_nodes": 12,
+            "attribution": [
+              {
+                "location": "ruby:229:7504-7543",
+                "name": "TruffleStringFactory$GetByteCodeRangeNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 29,
+                  "cycles": 37,
+                  "ifs": 2,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 45
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "StringToSymbolNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 13,
+                  "cycles": 22,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 22
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TStringInternalNodesFactory$GetPreciseCodeRangeWithMaterializationNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 7,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              },
+              {
+                "location": "ruby:228:7489-7549",
+                "name": "ProfileArgumentNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "ruby:228:7489-7549",
+                "name": "SequenceNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "ruby:229:7504-7543",
+                "name": "StringPrimitiveNodesFactory$ToSymNodeFactory$ToSymNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "ruby:228:7489-7549",
+                "name": "WriteLocalVariableNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3512[String#to_sym].bgv"
+            ],
+            "comp_id": 3512,
+            "compilation_time_ms": 28,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 0,
+              "count": 173,
+              "cycles": 180,
+              "ifs": 6,
+              "invokes": 0,
+              "loops": 0,
+              "size": 230
+            },
+            "graal_compilation_ms": 10,
+            "inlined": [],
+            "ir_after_truffle_tier": 173,
+            "ir_final": 247,
+            "label": "String#to_sym",
+            "machine_code_bytes": 1129,
+            "normalized_label": "String#to_sym",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "<internal:core> core/string.rb:228 0xb6d21e08",
+            "superseded_comp_ids": [],
+            "target": "1:639",
+            "tier": 1,
+            "truffle_compilation_ms": 18,
+            "via": null
+          },
+          {
+            "ast_nodes": 42,
+            "attribution": [
+              {
+                "location": "ruby:1232:37170-37215",
+                "name": "StringHelperNodesFactory$InvertAsciiCaseHelperNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 34,
+                  "cycles": 30,
+                  "ifs": 3,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 44
+                }
+              },
+              {
+                "location": "ruby:1232:37170-37215",
+                "name": "StringHelperNodesFactory$InvertAsciiCaseNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 30,
+                  "cycles": 17,
+                  "ifs": 2,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 40
+                }
+              },
+              {
+                "location": "ruby:285:8859-9789",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 23,
+                  "cycles": 17,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 22
+                }
+              },
+              {
+                "location": "ruby:1232:37170-37215",
+                "name": "TruffleStringFactory$GetByteCodeRangeNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 18,
+                  "cycles": 36,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 38
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TruffleStringIteratorFactory$InternalNextNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 18,
+                  "cycles": 14,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TruffleStringFactory$InternalCopyToByteArrayNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 17,
+                  "cycles": 17,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 146
+                }
+              },
+              {
+                "location": "ruby:1232:37170-37215",
+                "name": "TruffleStringFactory$CreateCodePointIteratorNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 26,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 23
+                }
+              },
+              {
+                "location": "ruby:1232:37170-37215",
+                "name": "StringPrimitiveNodesFactory$StringUpcaseBangPrimitiveNodeFactory$StringUpcaseBangPrimitiveNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 13,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 11
+                }
+              },
+              {
+                "location": "ruby:1232:37170-37215",
+                "name": "TypeNodesFactory$CheckMutableStringNodeFactory$CheckMutableStringNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "ruby:1230:37051-37221",
+                "name": "ReadRestArgumentNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3
+                }
+              },
+              {
+                "location": "ruby:1232:37170-37215",
+                "name": "TruffleStringFactory$FromByteArrayNodeGen",
+                "self": {
+                  "allocs": 1,
+                  "count": 5,
+                  "cycles": 1,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "TStringInternalNodesFactory$GetPreciseCodeRangeWithMaterializationNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 7,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 6
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3445[String#upcase!].bgv"
+            ],
+            "comp_id": 3445,
+            "compilation_time_ms": 141,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 7,
+              "count": 377,
+              "cycles": 415,
+              "ifs": 12,
+              "invokes": 0,
+              "loops": 1,
+              "size": 644
+            },
+            "graal_compilation_ms": 62,
+            "inlined": [],
+            "ir_after_truffle_tier": 377,
+            "ir_final": 765,
+            "label": "String#upcase!",
+            "machine_code_bytes": 3026,
+            "normalized_label": "String#upcase!",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "<internal:core> core/string.rb:1230 0xb6d21e08",
+            "superseded_comp_ids": [],
+            "target": "1:637",
+            "tier": 1,
+            "truffle_compilation_ms": 78,
+            "via": null
+          },
+          {
+            "ast_nodes": 80,
+            "attribution": [
+              {
+                "location": "ruby:482:15112-16019",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 21,
+                  "cycles": 17,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 21
+                }
+              },
+              {
+                "location": "ruby:469:14240-14744",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "ruby:469:14240-14744",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "ruby:469:14240-14744",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 9,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "ruby:251:9055-9296",
+                "name": "IfElseNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 2,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "BooleanCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "BooleanCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "BooleanCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "BooleanCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 18
+                }
+              },
+              {
+                "location": "ruby:251:9058-9079",
+                "name": "RubyCallNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "ruby:253:9108-9129",
+                "name": "RubyCallNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4725[Truffle::FeatureLoader.extension_symbol].bgv"
+            ],
+            "comp_id": 4725,
+            "compilation_time_ms": 99,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 10,
+              "count": 366,
+              "cycles": 385,
+              "ifs": 6,
+              "invokes": 0,
+              "loops": 0,
+              "size": 533
+            },
+            "graal_compilation_ms": 29,
+            "inlined": [],
+            "ir_after_truffle_tier": 507,
+            "ir_final": 949,
+            "label": "Truffle::FeatureLoader.extension_symbol",
+            "machine_code_bytes": 3773,
+            "normalized_label": "Truffle::FeatureLoader.extension_symbol",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "<internal:core> core/truffle/feature_loader.rb:249 0x916f1ac0",
+            "superseded_comp_ids": [],
+            "target": "1:1075",
+            "tier": 1,
+            "truffle_compilation_ms": 70,
+            "via": null
+          },
+          {
+            "ast_nodes": 86,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 28,
+                  "cycles": 31,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 35
+                }
+              },
+              {
+                "location": "ruby:34:1738-1773",
+                "name": "TrufflePosixNodesFactory$ResolveNodeFactory$ResolveNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 12
+                }
+              },
+              {
+                "location": "ruby:36:1806-1839",
+                "name": "RubyCallNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "BooleanCastNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "MetaClassNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3
+                }
+              },
+              {
+                "location": "ruby:33:1640-2081",
+                "name": "RubyMethodRootNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "ruby:36:1806-1839",
+                "name": "CallInternalMethodNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              },
+              {
+                "location": "ruby:34:1727-1773",
+                "name": "WriteFrameSlotNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "ruby:33:1640-2081",
+                "name": "WriteLocalVariableNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4136[Truffle::POSIX.generated_posix_resolve_function].bgv"
+            ],
+            "comp_id": 4136,
+            "compilation_time_ms": 65,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 3,
+              "count": 189,
+              "cycles": 220,
+              "ifs": 5,
+              "invokes": 0,
+              "loops": 0,
+              "size": 274
+            },
+            "graal_compilation_ms": 31,
+            "inlined": [],
+            "ir_after_truffle_tier": 189,
+            "ir_final": 355,
+            "label": "Truffle::POSIX.generated_posix_resolve_function",
+            "machine_code_bytes": 1573,
+            "normalized_label": "Truffle::POSIX.generated_posix_resolve_function",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "<internal:core> core/posix_functions.rb:33 0x7e16c64b",
+            "superseded_comp_ids": [],
+            "target": "1:929",
+            "tier": 1,
+            "truffle_compilation_ms": 34,
+            "via": null
+          },
+          {
+            "ast_nodes": 118,
+            "attribution": [
+              {
+                "location": "ruby:1:0-0",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 23,
+                  "cycles": 17,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 22
+                }
+              },
+              {
+                "location": "ruby:1:0-0",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 22,
+                  "cycles": 17,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 21
+                }
+              },
+              {
+                "location": "ruby:290:9010-9781",
+                "name": "IfElseNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "ruby:286:8925-9002",
+                "name": "IfNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 3,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "ruby:286:8928-8940",
+                "name": "RubyCallNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "ruby:290:9013-9025",
+                "name": "RubyCallNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 3,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 0
+                }
+              },
+              {
+                "location": "ruby:290:9013-9030",
+                "name": "InlinedEqualNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "ruby:286:8928-8944",
+                "name": "InlinedGreaterThanNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 17
+                }
+              },
+              {
+                "location": "ruby:286:8928-8940",
+                "name": "LookupMethodNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3
+                }
+              },
+              {
+                "location": "ruby:290:9013-9025",
+                "name": "LookupMethodNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3
+                }
+              },
+              {
+                "location": "ruby:285:8859-9789",
+                "name": "SequenceNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 2
+                }
+              },
+              {
+                "location": "ruby:285:8859-9789",
+                "name": "WriteLocalVariableNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 2,
+                  "cycles": 3,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 3
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3464[Truffle::StringOperations.validate_case_mapping_options].bgv"
+            ],
+            "comp_id": 3464,
+            "compilation_time_ms": 87,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 5,
+              "count": 225,
+              "cycles": 257,
+              "ifs": 6,
+              "invokes": 0,
+              "loops": 0,
+              "size": 352
+            },
+            "graal_compilation_ms": 58,
+            "inlined": [],
+            "ir_after_truffle_tier": 225,
+            "ir_final": 408,
+            "label": "Truffle::StringOperations.validate_case_mapping_options",
+            "machine_code_bytes": 1474,
+            "normalized_label": "Truffle::StringOperations.validate_case_mapping_options",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "<internal:core> core/truffle/string_operations.rb:285 0x595f7f7e",
+            "superseded_comp_ids": [],
+            "target": "1:638",
+            "tier": 1,
+            "truffle_compilation_ms": 29,
+            "via": null
+          },
+          {
+            "ast_nodes": 9,
+            "attribution": [],
+            "bgv": [
+              "TruffleHotSpotCompilation-4667[block_in_<module:KernelOperations>].bgv"
+            ],
+            "comp_id": 4667,
+            "compilation_time_ms": 17,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 0,
+              "count": 82,
+              "cycles": 110,
+              "ifs": 4,
+              "invokes": 0,
+              "loops": 0,
+              "size": 133
+            },
+            "graal_compilation_ms": 9,
+            "inlined": [],
+            "ir_after_truffle_tier": 82,
+            "ir_final": 87,
+            "label": "block in <module:KernelOperations>",
+            "machine_code_bytes": 448,
+            "normalized_label": "block in <module:KernelOperations>",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "<internal:core> core/truffle/kernel_operations.rb:52 0x8b8f1779",
+            "superseded_comp_ids": [],
+            "target": "1:145",
+            "tier": 1,
+            "truffle_compilation_ms": 7,
+            "via": null
+          },
+          {
+            "ast_nodes": 8,
+            "attribution": [
+              {
+                "location": "ruby:16:1013-1070",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 31,
+                  "cycles": 37,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 40
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$ExecuteNoArgsNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 15,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 20
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "RubyMethodGen$InteropLibraryExports$Cached",
+                "self": {
+                  "allocs": 1,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 8
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotLanguageContextFactory$ToHostValueNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 5,
+                  "cycles": 4,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 4
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$SharedExecuteNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 5,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "CallInternalMethodNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 4,
+                  "cycles": 5,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 5
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4928[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv"
+            ],
+            "comp_id": 4928,
+            "compilation_time_ms": 40,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 4,
+              "count": 250,
+              "cycles": 246,
+              "ifs": 8,
+              "invokes": 0,
+              "loops": 0,
+              "size": 293
+            },
+            "graal_compilation_ms": 20,
+            "inlined": [],
+            "ir_after_truffle_tier": 250,
+            "ir_final": 399,
+            "label": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+            "machine_code_bytes": 1676,
+            "normalized_label": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+            "other_compilation_ids": [],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:1314",
+            "tier": 1,
+            "truffle_compilation_ms": 20,
+            "via": null
+          }
+        ]
+      },
+      "result": "8",
+      "retained_bgv": [
+        "budget-2000/bgv/TruffleHotSpotCompilation-4693[Array#<<_<split-1160>].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3324[Array#size].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3424[Encoding#name].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-2829[Module#alias_method].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4148[Module#const_set_<split-930>].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4904[Object#run].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4714[String#[]].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4527[String#end_with?].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4643[String#size].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3512[String#to_sym].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3445[String#upcase!].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4725[Truffle::FeatureLoader.extension_symbol].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4136[Truffle::POSIX.generated_posix_resolve_function].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3464[Truffle::StringOperations.validate_case_mapping_options].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4667[block_in_<module:KernelOperations>].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4928[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz"
+      ],
+      "trace_log": "budget-2000/trace.log.gz",
+      "trace_log_sha256": "9e4fcd9000ad53fcaa9a6620ab0443223d484299ff16cac3e456b5f96195ec64"
+    }
+  ],
+  "schema_version": 1,
+  "selected_compilations": [
+    {
+      "bgv": "TruffleHotSpotCompilation-4693[Array#<<_<split-1160>].bgv",
+      "comp_id": 4693,
+      "ir_final": 405,
+      "ir_initial": 203,
+      "machine_code_bytes": 2117,
+      "normalized_root": "Array#<< <split-1160>",
+      "root": "Array#<< <split-1160>",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3324[Array#size].bgv",
+      "comp_id": 3324,
+      "ir_final": 145,
+      "ir_initial": 84,
+      "machine_code_bytes": 666,
+      "normalized_root": "Array#size",
+      "root": "Array#size",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3424[Encoding#name].bgv",
+      "comp_id": 3424,
+      "ir_final": 93,
+      "ir_initial": 85,
+      "machine_code_bytes": 446,
+      "normalized_root": "Encoding#name",
+      "root": "Encoding#name",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-2829[Module#alias_method].bgv",
+      "comp_id": 2829,
+      "ir_final": 213,
+      "ir_initial": 135,
+      "machine_code_bytes": 926,
+      "normalized_root": "Module#alias_method",
+      "root": "Module#alias_method",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4148[Module#const_set_<split-930>].bgv",
+      "comp_id": 4148,
+      "ir_final": 161,
+      "ir_initial": 126,
+      "machine_code_bytes": 793,
+      "normalized_root": "Module#const_set <split-930>",
+      "root": "Module#const_set <split-930>",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4904[Object#run].bgv",
+      "comp_id": 4904,
+      "ir_final": 239,
+      "ir_initial": 155,
+      "machine_code_bytes": 1081,
+      "normalized_root": "Object#run",
+      "root": "Object#run",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4714[String#[]].bgv",
+      "comp_id": 4714,
+      "ir_final": 1121,
+      "ir_initial": 612,
+      "machine_code_bytes": 4358,
+      "normalized_root": "String#[]",
+      "root": "String#[]",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4527[String#end_with?].bgv",
+      "comp_id": 4527,
+      "ir_final": 981,
+      "ir_initial": 511,
+      "machine_code_bytes": 4299,
+      "normalized_root": "String#end_with?",
+      "root": "String#end_with?",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4643[String#size].bgv",
+      "comp_id": 4643,
+      "ir_final": 286,
+      "ir_initial": 159,
+      "machine_code_bytes": 1317,
+      "normalized_root": "String#size",
+      "root": "String#size",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3512[String#to_sym].bgv",
+      "comp_id": 3512,
+      "ir_final": 247,
+      "ir_initial": 173,
+      "machine_code_bytes": 1129,
+      "normalized_root": "String#to_sym",
+      "root": "String#to_sym",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3445[String#upcase!].bgv",
+      "comp_id": 3445,
+      "ir_final": 765,
+      "ir_initial": 377,
+      "machine_code_bytes": 3026,
+      "normalized_root": "String#upcase!",
+      "root": "String#upcase!",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4725[Truffle::FeatureLoader.extension_symbol].bgv",
+      "comp_id": 4725,
+      "ir_final": 949,
+      "ir_initial": 507,
+      "machine_code_bytes": 3773,
+      "normalized_root": "Truffle::FeatureLoader.extension_symbol",
+      "root": "Truffle::FeatureLoader.extension_symbol",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4136[Truffle::POSIX.generated_posix_resolve_function].bgv",
+      "comp_id": 4136,
+      "ir_final": 355,
+      "ir_initial": 189,
+      "machine_code_bytes": 1573,
+      "normalized_root": "Truffle::POSIX.generated_posix_resolve_function",
+      "root": "Truffle::POSIX.generated_posix_resolve_function",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3464[Truffle::StringOperations.validate_case_mapping_options].bgv",
+      "comp_id": 3464,
+      "ir_final": 408,
+      "ir_initial": 225,
+      "machine_code_bytes": 1474,
+      "normalized_root": "Truffle::StringOperations.validate_case_mapping_options",
+      "root": "Truffle::StringOperations.validate_case_mapping_options",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4667[block_in_<module:KernelOperations>].bgv",
+      "comp_id": 4667,
+      "ir_final": 87,
+      "ir_initial": 82,
+      "machine_code_bytes": 448,
+      "normalized_root": "block in <module:KernelOperations>",
+      "root": "block in <module:KernelOperations>",
+      "tier": 1
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4928[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv",
+      "comp_id": 4928,
+      "ir_final": 399,
+      "ir_initial": 250,
+      "machine_code_bytes": 1676,
+      "normalized_root": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+      "root": "org.graalvm.polyglot.Value<RubyMethod>.execute",
+      "tier": 1
+    }
+  ],
+  "selected_phase": "After TruffleTier",
+  "surface": "executable-value",
+  "timing_evidence": "NONE",
+  "timing_explanation": "Compilation instrumentation changes execution cost; sample timings are not benchmark measurements.",
+  "unavailable_roots": [
+    {
+      "compilation_ids": [
+        4312,
+        4323,
+        4366,
+        4380,
+        4445,
+        4451,
+        4536,
+        4544
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "File.basename",
+      "normalized_label": "File.basename",
+      "observed_tiers": [
+        1,
+        2
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 1,
+      "status": "UNAVAILABLE",
+      "target": "1:1103"
+    },
+    {
+      "compilation_ids": [
+        4280,
+        4284,
+        4567,
+        4575,
+        4588,
+        4598
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "File.extname",
+      "normalized_label": "File.extname",
+      "observed_tiers": [
+        1,
+        2
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 1,
+      "status": "UNAVAILABLE",
+      "target": "1:1079"
+    },
+    {
+      "compilation_ids": [
+        3519,
+        3578,
+        3720
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "Hash#[]=",
+      "normalized_label": "Hash#[]=",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 1,
+      "status": "UNAVAILABLE",
+      "target": "1:640"
+    },
+    {
+      "compilation_ids": [
+        3430,
+        3533,
+        3551
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "String#upcase",
+      "normalized_label": "String#upcase",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 1,
+      "status": "UNAVAILABLE",
+      "target": "1:636"
+    },
+    {
+      "compilation_ids": [
+        3360
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "block in Truffle::EncodingOperations.build_encoding_map",
+      "normalized_label": "block in Truffle::EncodingOperations.build_encoding_map",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "ROOT_INVALIDATED_AFTER_COMPILATION",
+      "requested_tier": 1,
+      "status": "UNAVAILABLE",
+      "target": "1:630"
+    }
+  ],
+  "workload": "primitive-while-counted"
+}

@@ -1,0 +1,81 @@
+$ taskset -c 1 java -Dprotos.benchmarks.peer.language=ruby -cp /workspaces/protos-benchmarks/.work/embedded/peer-ruby-40.0.0-graal-25.3.4.1/executable-value/25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f/classes:/opt/protos-ruby-runtime/m2/org/graalvm/polyglot/polyglot/25.3.4.1/polyglot-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/sdk/collections/25.3.4.1/collections-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/sdk/nativeimage/25.3.4.1/nativeimage-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/sdk/word/25.3.4.1/word-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/dev/truffleruby/truffleruby/40.0.0/truffleruby-40.0.0.pom:/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/runtime/40.0.0/runtime-40.0.0.jar:/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/annotations/40.0.0/annotations-40.0.0.jar:/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/shared/40.0.0/shared-40.0.0.jar:/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-api/25.3.4.1/truffle-api-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/sdk/jniutils/25.3.4.1/jniutils-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi/25.3.4.1/truffle-nfi-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/regex/regex/25.3.4.1/regex-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/icu4j/25.3.4.1/icu4j-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/xz/25.3.4.1/xz-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/shadowed/jcodings/25.3.4.1/jcodings-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/dev/truffleruby/shadowed/joni/40.0.0/joni-40.0.0.jar:/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi-libffi/25.3.4.1/truffle-nfi-libffi-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-nfi-panama/25.3.4.1/truffle-nfi-panama-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/dev/truffleruby/internal/resources/40.0.0/resources-40.0.0.jar:/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-runtime/25.3.4.1/truffle-runtime-25.3.4.1.jar:/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-compiler/25.3.4.1/truffle-compiler-25.3.4.1.jar com.guillermomolina.protos.benchmarks.measure.peer.PeerExecutableSurface measure - /workspaces/protos-benchmarks/cases/primitive-method-call/primitive-method-call.rb 50 10 10000 -
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by com.oracle.truffle.polyglot.JDKSupport in an unnamed module (file:/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-api/25.3.4.1/truffle-api-25.3.4.1.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime (file:/opt/protos-ruby-runtime/m2/org/graalvm/truffle/truffle-runtime/25.3.4.1/truffle-runtime-25.3.4.1.jar)
+WARNING: Please consider reporting this to the maintainers of class com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+mode=jvm
+surface=executable-value
+language=ruby
+run_mode=executable-value
+source=/workspaces/protos-benchmarks/cases/primitive-method-call/primitive-method-call.rb
+warmup_iterations=50
+steady_iterations=10
+sample_calls=10000
+setup_ns=3510682098
+sample phase=cold iteration=1 elapsed_ns=1042835
+sample phase=warmup iteration=1 elapsed_ns=103501839
+sample phase=warmup iteration=2 elapsed_ns=45851350
+sample phase=warmup iteration=3 elapsed_ns=10581983
+sample phase=warmup iteration=4 elapsed_ns=5114281
+sample phase=warmup iteration=5 elapsed_ns=7383111
+sample phase=warmup iteration=6 elapsed_ns=4917130
+sample phase=warmup iteration=7 elapsed_ns=5018091
+sample phase=warmup iteration=8 elapsed_ns=1100964
+sample phase=warmup iteration=9 elapsed_ns=5775354
+sample phase=warmup iteration=10 elapsed_ns=4208118
+sample phase=warmup iteration=11 elapsed_ns=803923
+sample phase=warmup iteration=12 elapsed_ns=4236248
+sample phase=warmup iteration=13 elapsed_ns=834284
+sample phase=warmup iteration=14 elapsed_ns=4183167
+sample phase=warmup iteration=15 elapsed_ns=4035897
+sample phase=warmup iteration=16 elapsed_ns=992354
+sample phase=warmup iteration=17 elapsed_ns=4407558
+sample phase=warmup iteration=18 elapsed_ns=956594
+sample phase=warmup iteration=19 elapsed_ns=4327788
+sample phase=warmup iteration=20 elapsed_ns=2855152
+sample phase=warmup iteration=21 elapsed_ns=938354
+sample phase=warmup iteration=22 elapsed_ns=2024628
+sample phase=warmup iteration=23 elapsed_ns=187231
+sample phase=warmup iteration=24 elapsed_ns=182141
+sample phase=warmup iteration=25 elapsed_ns=311901
+sample phase=warmup iteration=26 elapsed_ns=183191
+sample phase=warmup iteration=27 elapsed_ns=186841
+sample phase=warmup iteration=28 elapsed_ns=182101
+sample phase=warmup iteration=29 elapsed_ns=1932388
+sample phase=warmup iteration=30 elapsed_ns=185161
+sample phase=warmup iteration=31 elapsed_ns=181920
+sample phase=warmup iteration=32 elapsed_ns=319072
+sample phase=warmup iteration=33 elapsed_ns=182181
+sample phase=warmup iteration=34 elapsed_ns=182880
+sample phase=warmup iteration=35 elapsed_ns=181851
+sample phase=warmup iteration=36 elapsed_ns=1655877
+sample phase=warmup iteration=37 elapsed_ns=182601
+sample phase=warmup iteration=38 elapsed_ns=182681
+sample phase=warmup iteration=39 elapsed_ns=184621
+sample phase=warmup iteration=40 elapsed_ns=323901
+sample phase=warmup iteration=41 elapsed_ns=179951
+sample phase=warmup iteration=42 elapsed_ns=2140249
+sample phase=warmup iteration=43 elapsed_ns=186711
+sample phase=warmup iteration=44 elapsed_ns=323551
+sample phase=warmup iteration=45 elapsed_ns=180101
+sample phase=warmup iteration=46 elapsed_ns=180050
+sample phase=warmup iteration=47 elapsed_ns=314981
+sample phase=warmup iteration=48 elapsed_ns=182431
+sample phase=warmup iteration=49 elapsed_ns=187611
+sample phase=warmup iteration=50 elapsed_ns=180030
+sample phase=steady iteration=1 elapsed_ns=302841
+sample phase=steady iteration=2 elapsed_ns=180591
+sample phase=steady iteration=3 elapsed_ns=185701
+sample phase=steady iteration=4 elapsed_ns=179960
+sample phase=steady iteration=5 elapsed_ns=305331
+sample phase=steady iteration=6 elapsed_ns=1799187
+sample phase=steady iteration=7 elapsed_ns=183201
+sample phase=steady iteration=8 elapsed_ns=182280
+sample phase=steady iteration=9 elapsed_ns=388651
+sample phase=steady iteration=10 elapsed_ns=181031
+result=1

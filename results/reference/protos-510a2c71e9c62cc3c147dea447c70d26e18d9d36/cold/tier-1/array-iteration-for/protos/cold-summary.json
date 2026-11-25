@@ -1,0 +1,482 @@
+{
+  "interpreted_roots_coverage": "NOT_ESTABLISHED",
+  "invocation_sequence": {
+    "cold_calls": 1,
+    "post_warmup_calls": 2000,
+    "process": "fresh-jvm",
+    "setup": "before-cold-call",
+    "total_measured_invocations": 2001,
+    "warmup_calls": 0
+  },
+  "language": "protos",
+  "mode": "cold-all-compiled-roots",
+  "phase": "After TruffleTier",
+  "requested_tier": 1,
+  "root_inventory": {
+    "interpreted_roots_coverage": "NOT_ESTABLISHED",
+    "requested_tier": 1,
+    "roots": [
+      {
+        "compilation_ids": [
+          3246
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+        "normalized_label": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:197"
+      },
+      {
+        "compilation_ids": [
+          3144
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:c652504e70df9280[CLOSURE|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos|1050+428]",
+        "normalized_label": "protos-root:c652504e70df9280[CLOSURE|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos|1050+428]",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:2"
+      }
+    ],
+    "scope": "observed-compiled-call-targets-only"
+  },
+  "schema": 1,
+  "scope": "observed-compiled-call-targets-only",
+  "timing_evidence": "NONE",
+  "unavailable_roots": [],
+  "units": [
+    {
+      "analysis": "budget-2000/bgv/TruffleHotSpotCompilation-3246[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "analysis_sha256": "724b53e318855101116035ba27844c27264dec2246d6f595ffd1bcb80ba6c44b",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosHostExecutableClosureGen$InteropLibraryExports$Cached",
+          "self": {
+            "allocs": 1,
+            "count": 47,
+            "cycles": 67,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 82
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "PolyglotValueDispatchFactory$InteropValueFactory$ExecuteNoArgsNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 15,
+            "cycles": 15,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 20
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosFunctionCallDispatchersFactory$FunctionCachedCallNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 11,
+            "cycles": 16,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 19
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 10,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 13
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "PolyglotLanguageContextFactory$ToHostValueNodeGen$Inlined",
+          "self": {
+            "allocs": 1,
+            "count": 9,
+            "cycles": 14,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 14
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "PolyglotValueDispatchFactory$InteropValueFactory$SharedExecuteNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 6,
+            "cycles": 2,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 7
+          }
+        }
+      ],
+      "bgv": "budget-2000/bgv/TruffleHotSpotCompilation-3246[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bgv_sha256": "0bfee85d4cf0e2062da6dd86a2e78bebbf4cfc0692c2e501f7be1ed5e60a7356",
+      "comp_id": 3246,
+      "cross_run_identity": "UNIQUE",
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 4,
+        "count": 292,
+        "cycles": 283,
+        "ifs": 7,
+        "invokes": 0,
+        "loops": 0,
+        "size": 372
+      },
+      "graph": {
+        "allocations": 5,
+        "control_flow_splits": 7,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier1.org_graalvm_polyglot_Value<ProtosHostExecutableClosure>_execute()"
+        ],
+        "guards_deopts": 17,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.callBoundary": 1,
+          "OptimizedCallTarget.lastTierCompile": 1,
+          "PolyglotContextImpl.enterThreadChanged": 1,
+          "PolyglotContextImpl.leaveThreadChanged": 1,
+          "ProtosEmbeddedProcess.beginHostEntryExtent": 1,
+          "ProtosEmbeddedProcess.endHostEntryExtent": 1,
+          "ProtosEmbeddedProcess.enterRootActor": 1,
+          "ProtosEmbeddedProcess.exitRootActor": 1,
+          "ProtosFunctionCallDispatchers.sealHostSuspension": 1,
+          "ProtosHostExecutableClosure$Execute.drivePending": 1,
+          "ProtosHostExecutableClosure$Execute.hostResult": 1
+        },
+        "invokes": 11,
+        "loads": 19,
+        "loops": 0,
+        "node_class_histogram": {
+          "AddNode": 6,
+          "AllocatedObjectNode": 2,
+          "BeginNode": 25,
+          "BoxNode$TrustedBoxedValue": 1,
+          "CommitAllocationNode": 2,
+          "ConditionalNode": 1,
+          "ConstantNode": 47,
+          "CurrentJavaThreadNode": 1,
+          "DeoptimizeNode": 11,
+          "EndNode": 11,
+          "ExceptionObjectNode": 11,
+          "FixedGuardNode": 6,
+          "FrameState": 64,
+          "HotSpotLoadReservedReferenceNode": 2,
+          "HotSpotStoreReservedReferenceNode": 2,
+          "IfNode": 7,
+          "InstanceOfNode": 1,
+          "IntegerEqualsNode": 1,
+          "IntegerLessThanNode": 2,
+          "InvokeWithExceptionNode": 11,
+          "IsNullNode": 5,
+          "LoadFieldNode": 10,
+          "LoadIndexedNode": 3,
+          "MaterializedObjectState": 2,
+          "MergeNode": 4,
+          "MethodCallTargetNode": 11,
+          "MulNode": 1,
+          "ObjectEqualsNode": 4,
+          "OffsetAddressNode": 3,
+          "ParameterNode": 1,
+          "PiArrayNode": 2,
+          "PiNode": 5,
+          "ReadNode": 4,
+          "ReturnNode": 1,
+          "RightShiftNode": 3,
+          "StartNode": 1,
+          "StateSplitProxyNode": 4,
+          "StoreFieldNode": 4,
+          "ValuePhiNode": 3,
+          "VirtualArrayNode": 2,
+          "VirtualInstanceNode": 2,
+          "VirtualObjectState": 3
+        },
+        "node_count": 292,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [],
+      "ir_after_truffle_tier": 292,
+      "label": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+      "normalized_label": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+      "role": "selected",
+      "src": "n/a",
+      "superseded_comp_ids": [],
+      "target": "1:197",
+      "tier": 1,
+      "via": null
+    },
+    {
+      "analysis": "budget-2000/bgv/TruffleHotSpotCompilation-3144[protos-root:c652504e70df9280[CLOSURE|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797__workspaces_protos-benchmarks_cases_array-iteration-for_array-iteration-for.protos|1050+428]].filter.json.gz",
+      "analysis_sha256": "da27c61a3b94fc34613d96c9a15504764f4187cfd518bd0fc88af7c68005e755",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+          "self": {
+            "allocs": 2,
+            "count": 46,
+            "cycles": 29,
+            "ifs": 2,
+            "invokes": 0,
+            "loops": 0,
+            "size": 46
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosLexicalSelectionNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 9,
+            "cycles": 14,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 12
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$MakeConstantLongArray_Node",
+          "self": {
+            "allocs": 0,
+            "count": 8,
+            "cycles": 2,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 7
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$IterationNext_Node",
+          "self": {
+            "allocs": 0,
+            "count": 5,
+            "cycles": 3,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 8
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$BinarySubscript_Node",
+          "self": {
+            "allocs": 0,
+            "count": 4,
+            "cycles": 12,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 12
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 3,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 3
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$NumberAdd_Node",
+          "self": {
+            "allocs": 0,
+            "count": 3,
+            "cycles": 6,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 6
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$PrepareRangeIteration_Node",
+          "self": {
+            "allocs": 0,
+            "count": 3,
+            "cycles": 2,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 3
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosLexicalSelectionNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 2,
+            "cycles": 2,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 2
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosNumericSelectionNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 2,
+            "cycles": 3,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 3
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ProtosBytecodeRootNodeGen$MakeRange_Node",
+          "self": {
+            "allocs": 0,
+            "count": 1,
+            "cycles": 2,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 2
+          }
+        }
+      ],
+      "bgv": "budget-2000/bgv/TruffleHotSpotCompilation-3144[protos-root:c652504e70df9280[CLOSURE|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797__workspaces_protos-benchmarks_cases_array-iteration-for_array-iteration-for.protos|1050+428]].bgv.gz",
+      "bgv_sha256": "d849aac97d26629ed44e49d5d6160bc6ff4fe942e6d9af87bcd1f3c5a3e6a566",
+      "comp_id": 3144,
+      "cross_run_identity": "UNIQUE",
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 3,
+        "count": 357,
+        "cycles": 931,
+        "ifs": 7,
+        "invokes": 0,
+        "loops": 1,
+        "size": 938
+      },
+      "graph": {
+        "allocations": 3,
+        "control_flow_splits": 7,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier1.protos-root:c652504e70df9280[CLOSURE|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for_protos|1050+428]()"
+        ],
+        "guards_deopts": 15,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.lastTierCompile": 1
+        },
+        "invokes": 1,
+        "loads": 83,
+        "loops": 1,
+        "node_class_histogram": {
+          "AddNode": 8,
+          "AllocatedObjectNode": 1,
+          "BeginNode": 14,
+          "BoxNode$AllocatingBoxNode": 1,
+          "CommitAllocationNode": 1,
+          "ConditionalNode": 2,
+          "ConstantNode": 101,
+          "DeoptimizeNode": 1,
+          "EndNode": 8,
+          "ExceptionObjectNode": 1,
+          "FixedGuardNode": 14,
+          "FrameState": 28,
+          "IfNode": 7,
+          "InstanceOfNode": 1,
+          "IntegerAddExactNode": 1,
+          "IntegerAddExactOverflowNode": 1,
+          "IntegerBelowNode": 1,
+          "IntegerEqualsNode": 1,
+          "IntegerLessThanNode": 7,
+          "InvokeWithExceptionNode": 1,
+          "IsNullNode": 1,
+          "LoadFieldNode": 13,
+          "LoadIndexedNode": 70,
+          "LoopBeginNode": 1,
+          "LoopEndNode": 2,
+          "LoopExitNode": 1,
+          "MergeNode": 2,
+          "MethodCallTargetNode": 1,
+          "MulNode": 1,
+          "NarrowNode": 1,
+          "ObjectEqualsNode": 6,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 8,
+          "ReturnNode": 1,
+          "RightShiftNode": 3,
+          "StartNode": 1,
+          "StateSplitProxyNode": 2,
+          "StoreFieldNode": 4,
+          "TrufflePreserveFrameStateNode": 1,
+          "ValuePhiNode": 7,
+          "ValueProxyNode": 7,
+          "VirtualArrayNode": 5,
+          "VirtualBoxingNode": 1,
+          "VirtualInstanceNode": 5,
+          "VirtualObjectState": 25
+        },
+        "node_count": 371,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [],
+      "ir_after_truffle_tier": 371,
+      "label": "protos-root:c652504e70df9280[CLOSURE|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos|1050+428]",
+      "normalized_label": "protos-root:c652504e70df9280[CLOSURE|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos|1050+428]",
+      "role": "selected",
+      "src": "n/a",
+      "superseded_comp_ids": [],
+      "target": "1:2",
+      "tier": 1,
+      "via": null
+    }
+  ],
+  "workload": "array-iteration-for"
+}

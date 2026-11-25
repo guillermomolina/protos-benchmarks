@@ -1,0 +1,947 @@
+$ taskset -c 1 java -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.BytecodeHistogram=language,root -Dprotos.diagnostic.stableRootIdentity=true -Dpolyglot.bench-bytecode-size=true -cp /workspaces/protos-benchmarks/.work/embedded/bytecode-size-instrument/235d1ac7658696f4574e92e773f28ece1f12b7710afa367b73030afb5b53fe73/classes:/workspaces/protos-benchmarks/.work/embedded/510a2c71e9c62cc3c147dea447c70d26e18d9d36/canonical/328fa1ab6301eebb3494d6bc151289737c9a32d33027496b5be64cfb647a287e/classes:/workspaces/protos/target/classes:/home/vscode/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.86/bcprov-jdk18on-1.86.jar:/home/vscode/.m2/repository/org/jline/jline/3.30.6/jline-3.30.6.jar:/home/vscode/.m2/repository/com/ibm/icu/icu4j/78.1/icu4j-78.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/graal-sdk/25.5.5.0.3/graal-sdk-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/sdk/collections/25.5.5.0.3/collections-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/sdk/nativeimage/25.5.5.0.3/nativeimage-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/sdk/word/25.5.5.0.3/word-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/polyglot/polyglot/25.5.5.0.3/polyglot-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-api/25.5.5.0.3/truffle-api-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/sdk/jniutils/25.5.5.0.3/jniutils-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-runtime/25.5.5.0.3/truffle-runtime-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-compiler/25.5.5.0.3/truffle-compiler-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/polyglot/dap/25.5.5.0.3/dap-25.5.5.0.3.pom:/home/vscode/.m2/repository/org/graalvm/tools/dap-tool/25.5.5.0.3/dap-tool-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/graalvm/shadowed/json/25.5.5.0.3/json-25.5.5.0.3.jar:/home/vscode/.m2/repository/org/eclipse/lsp4j/org.eclipse.lsp4j/1.0.0/org.eclipse.lsp4j-1.0.0.jar:/home/vscode/.m2/repository/org/eclipse/lsp4j/org.eclipse.lsp4j.jsonrpc/1.0.0/org.eclipse.lsp4j.jsonrpc-1.0.0.jar:/home/vscode/.m2/repository/com/google/code/gson/gson/2.15.0/gson-2.15.0.jar:/home/vscode/.m2/repository/com/google/errorprone/error_prone_annotations/2.50.0/error_prone_annotations-2.50.0.jar:/home/vscode/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.2/junit-jupiter-5.10.2.jar:/home/vscode/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.2/junit-jupiter-api-5.10.2.jar:/home/vscode/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/vscode/.m2/repository/org/junit/platform/junit-platform-commons/1.10.2/junit-platform-commons-1.10.2.jar:/home/vscode/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/vscode/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.2/junit-jupiter-params-5.10.2.jar:/home/vscode/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.2/junit-jupiter-engine-5.10.2.jar:/home/vscode/.m2/repository/org/junit/platform/junit-platform-engine/1.10.2/junit-platform-engine-1.10.2.jar com.guillermomolina.protos.benchmarks.measure.protos.ProtosCanonicalSurface measure /workspaces/protos/protos/lib/core /workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos 0 1 100 -
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by com.oracle.truffle.polyglot.JDKSupport in an unnamed module (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-api/25.5.5.0.3/truffle-api-25.5.5.0.3.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-runtime/25.5.5.0.3/truffle-runtime-25.5.5.0.3.jar)
+WARNING: Please consider reporting this to the maintainers of class com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[protos-root] selector=protos-root:c652504e70df9280 kind=CLOSURE source=truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos start=1050 length=428
+[protos-root] selector=protos-root:6fe4d62b685e56a3 kind=TOP_LEVEL source=truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos start=1033 length=447
+[protos-root] selector=protos-root:6d16927587986393 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Object.protos start=1197 length=72
+[protos-root] selector=protos-root:26837ee3fdcb6147 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Object.protos start=1309 length=14
+[protos-root] selector=protos-root:d2c2046d7677ba9c kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Object.protos start=1364 length=15
+[protos-root] selector=protos-root:0ec55efbb1a438ea kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Object.protos start=1590 length=121
+[protos-root] selector=protos-root:3b721d3ab461adf9 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Object.protos start=1915 length=121
+[protos-root] selector=protos-root:85f61d8d491c5e4b kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Object.protos start=2136 length=130
+[protos-root] selector=protos-root:82b1b3dbb6cae682 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Object.protos start=2377 length=134
+[protos-root] selector=protos-root:e68dd911baee7ff8 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Object.protos start=1161 length=1352
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6ZTY4ZGQ5MTFiYWVlN2ZmOFtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvT2JqZWN0LnByb3Rvc3wxMTYxKzEzNTJd	1	CACHED	74	354	0	354	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAyYWYwMDRi
+[protos-root] selector=protos-root:7e167c137ac8ebbb kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Context.protos start=1015 length=11
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6N2UxNjdjMTM3YWM4ZWJiYltUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvQ29udGV4dC5wcm90b3N8MTAxNSsxMV0=	2	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA2MWM0ZWVlMA==
+[protos-root] selector=protos-root:d738f2c950f0d817 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Number.protos start=1364 length=92
+[protos-root] selector=protos-root:9d262615b7b8d688 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Number.protos start=1502 length=97
+[protos-root] selector=protos-root:9b2b9c47a6b5fa1c kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Number.protos start=1261 length=346
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6OWIyYjljNDdhNmI1ZmExY1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvTnVtYmVyLnByb3Rvc3wxMjYxKzM0Nl0=	3	CACHED	94	312	0	312	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA0M2YwMmVmMg==
+[protos-root] selector=protos-root:0331599b1c726c58 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Integer.protos start=1062 length=8
+[protos-root] selector=protos-root:fe4d39dc9ed02927 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Integer.protos start=1125 length=24
+[protos-root] selector=protos-root:ccb7484bf858815d kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Integer.protos start=1015 length=142
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6Y2NiNzQ4NGJmODU4ODE1ZFtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvSW50ZWdlci5wcm90b3N8MTAxNSsxNDJd	4	CACHED	98	334	0	334	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAyZGZhZWE4Ng==
+[protos-root] selector=protos-root:4476252a471f8f81 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/SmallInteger.protos start=1015 length=24
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NDQ3NjI1MmE0NzFmOGY4MVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvU21hbGxJbnRlZ2VyLnByb3Rvc3wxMDE1KzI0XQ==	5	CACHED	58	202	0	202	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA0ZDE0YjZjMg==
+[protos-root] selector=protos-root:707b9c71207044d3 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/BigInteger.protos start=1015 length=22
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NzA3YjljNzEyMDcwNDRkM1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvQmlnSW50ZWdlci5wcm90b3N8MTAxNSsyMl0=	6	CACHED	58	202	0	202	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3OTIwNzM4MQ==
+[protos-root] selector=protos-root:507870b5ae09182c kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=1647 length=224
+[protos-root] selector=protos-root:4736f8b4ad5b6d9c kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=2328 length=281
+[protos-root] selector=protos-root:57088e99b897f382 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=2254 length=36
+[protos-root] selector=protos-root:4736f8b4ad5b6d9c kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=2328 length=281
+[protos-root] selector=protos-root:870d2ceb7275c80f kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=2206 length=417
+[protos-root] selector=protos-root:e2e9707f026a6549 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=2003 length=630
+[protos-root] selector=protos-root:401df12ad59a90d9 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=3052 length=281
+[protos-root] selector=protos-root:a81cf9ec6363c22d kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=2977 length=37
+[protos-root] selector=protos-root:401df12ad59a90d9 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=3052 length=281
+[protos-root] selector=protos-root:beb48c31148cb200 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=2929 length=418
+[protos-root] selector=protos-root:e57db647dee252f4 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=2726 length=631
+[protos-root] selector=protos-root:f5e7b60a665a8678 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=3776 length=269
+[protos-root] selector=protos-root:304933031adf8daa kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=3701 length=37
+[protos-root] selector=protos-root:f5e7b60a665a8678 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=3776 length=269
+[protos-root] selector=protos-root:c4417b5b4a91fa38 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=3653 length=406
+[protos-root] selector=protos-root:4de37084ad82b5f1 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=3450 length=619
+[protos-root] selector=protos-root:80a60715f192a59b kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=4562 length=269
+[protos-root] selector=protos-root:3a2f84b60a70ca58 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=4486 length=38
+[protos-root] selector=protos-root:80a60715f192a59b kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=4562 length=269
+[protos-root] selector=protos-root:120ca1713f168890 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=4438 length=407
+[protos-root] selector=protos-root:d31f9956fc3efe1e kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=4235 length=620
+[protos-root] selector=protos-root:669981c0a22e7773 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Fraction.protos start=1599 length=3289
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NjY5OTgxYzBhMjJlNzc3M1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvRnJhY3Rpb24ucHJvdG9zfDE1OTkrMzI4OV0=	7	CACHED	190	632	0	632	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3MjNlODhmOQ==
+[protos-root] selector=protos-root:2dec8ef76adb6661 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Float.protos start=1060 length=18
+[protos-root] selector=protos-root:62a680a223180d84 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Float.protos start=1015 length=71
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NjJhNjgwYTIyMzE4MGQ4NFtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvRmxvYXQucHJvdG9zfDEwMTUrNzFd	8	CACHED	78	270	0	270	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAxYjI2Njg0Mg==
+[protos-root] selector=protos-root:3d1a0ee47a2aa0a4 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Complex.protos start=1798 length=121
+[protos-root] selector=protos-root:1dc0bb5a55900d30 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Complex.protos start=2050 length=125
+[protos-root] selector=protos-root:3cb5287d162bf6ce kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Complex.protos start=2267 length=126
+[protos-root] selector=protos-root:d06a9ec7b5721686 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Complex.protos start=2485 length=126
+[protos-root] selector=protos-root:f464410b1f97c585 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Complex.protos start=2810 length=127
+[protos-root] selector=protos-root:bb9d2878bc32b503 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Complex.protos start=1751 length=1218
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YmI5ZDI4NzhiYzMyYjUwM1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvQ29tcGxleC5wcm90b3N8MTc1MSsxMjE4XQ==	9	CACHED	190	632	0	632	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA1N2MwM2Q4OA==
+[protos-root] selector=protos-root:4be45f808e4d8125 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Error.protos start=1015 length=9
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NGJlNDVmODA4ZTRkODEyNVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvRXJyb3IucHJvdG9zfDEwMTUrOV0=	10	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA2YzM3MmZlNg==
+[protos-root] selector=protos-root:0a36d48e34accf31 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/InvalidReturn.protos start=1015 length=23
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MGEzNmQ0OGUzNGFjY2YzMVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvSW52YWxpZFJldHVybi5wcm90b3N8MTAxNSsyM10=	11	CACHED	58	202	0	202	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA1YjNmNjFmZg==
+[protos-root] selector=protos-root:c35393179f305c94 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/error_taxonomy.protos start=1015 length=471
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YzM1MzkzMTc5ZjMwNWM5NFtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvZXJyb3JfdGF4b25vbXkucHJvdG9zfDEwMTUrNDcxXQ==	12	CACHED	614	2200	0	2200	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAyN2Q1YTU4MA==
+[protos-root] selector=protos-root:ede17c8287610dee kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Array.protos start=1015 length=9
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6ZWRlMTdjODI4NzYxMGRlZVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvQXJyYXkucHJvdG9zfDEwMTUrOV0=	13	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAzZTZmM2YyOA==
+[protos-root] selector=protos-root:271de23a6f0d8bb3 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Any.protos start=1046 length=4
+[protos-root] selector=protos-root:03294caf2f24a2be kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Any.protos start=1015 length=37
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MDMyOTRjYWYyZjI0YTJiZVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvQW55LnByb3Rvc3wxMDE1KzM3XQ==	14	CACHED	74	248	0	248	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAxYmFlMzE2ZA==
+[protos-root] selector=protos-root:4ef13bcefd7d35d6 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Capture.protos start=1050 length=9
+[protos-root] selector=protos-root:493523c4d9f37f8e kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Capture.protos start=1015 length=46
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NDkzNTIzYzRkOWYzN2Y4ZVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvQ2FwdHVyZS5wcm90b3N8MTAxNSs0Nl0=	15	CACHED	74	248	0	248	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA1MDgyZDYyMg==
+[protos-root] selector=protos-root:c7b01e6354a6d2d9 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/String.protos start=1015 length=10
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YzdiMDFlNjM1NGE2ZDJkOVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvU3RyaW5nLnByb3Rvc3wxMDE1KzEwXQ==	16	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA2MDU3YWViYg==
+[protos-root] selector=protos-root:4abe5588f0bb8483 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Encoding.protos start=1015 length=12
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NGFiZTU1ODhmMGJiODQ4M1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvRW5jb2RpbmcucHJvdG9zfDEwMTUrMTJd	17	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3ZDg5ODk4MQ==
+[protos-root] selector=protos-root:a7f95459b92ca8c2 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Map.protos start=1015 length=7
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YTdmOTU0NTliOTJjYThjMltUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvTWFwLnByb3Rvc3wxMDE1Kzdd	18	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA0MDljNTRm
+[protos-root] selector=protos-root:9587a48bff43cc63 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/IdentityMap.protos start=1015 length=15
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6OTU4N2E0OGJmZjQzY2M2M1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvSWRlbnRpdHlNYXAucHJvdG9zfDEwMTUrMTVd	19	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3YjhiNDNjNw==
+[protos-root] selector=protos-root:c5f5f6d09cb2382a kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=1722 length=543
+[protos-root] selector=protos-root:4c403134cfcb3565 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=2624 length=495
+[protos-root] selector=protos-root:114bd66128874f0d kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=2537 length=592
+[protos-root] selector=protos-root:54e01a89f04b4bdd kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=3234 length=23
+[protos-root] selector=protos-root:1f90ae8294b93208 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=3414 length=310
+[protos-root] selector=protos-root:c4b317271bdec4ed kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=3832 length=36
+[protos-root] selector=protos-root:dd79de9aa00cc479 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=4010 length=44
+[protos-root] selector=protos-root:a442c9b4c5ff2e01 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=4314 length=551
+[protos-root] selector=protos-root:dc74adc6c2a66f83 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=5232 length=487
+[protos-root] selector=protos-root:583846b4e8d094b3 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=5137 length=592
+[protos-root] selector=protos-root:230f802fdc18e76d kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=5835 length=24
+[protos-root] selector=protos-root:8b5cbd07e0aacedd kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=6016 length=310
+[protos-root] selector=protos-root:90b5683e1f86be6a kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=6434 length=28
+[protos-root] selector=protos-root:41ca03a6b71abab5 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Range.protos start=6604 length=36
+[protos-root] selector=protos-root:bc1ad6d85ed8bfda kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Range.protos start=1567 length=5081
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YmMxYWQ2ZDg1ZWQ4YmZkYVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvUmFuZ2UucHJvdG9zfDE1NjcrNTA4MV0=	20	CACHED	326	1062	0	1062	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3ZDFjZmI4Yg==
+[protos-root] selector=protos-root:729bcd66d7c45830 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Path.protos start=1401 length=26
+[protos-root] selector=protos-root:a4dddc41c2554e1d kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Path.protos start=1466 length=316
+[protos-root] selector=protos-root:b24ed27c7d0600b4 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Path.protos start=2322 length=14
+[protos-root] selector=protos-root:c2c660b39245d3b6 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Path.protos start=2152 length=229
+[protos-root] selector=protos-root:374372c9295f9a56 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Path.protos start=1913 length=493
+[protos-root] selector=protos-root:6626889a16d297b6 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/Path.protos start=2664 length=450
+[protos-root] selector=protos-root:bc03f727921029b5 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Path.protos start=1363 length=1895
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YmMwM2Y3Mjc5MjEwMjliNVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvUGF0aC5wcm90b3N8MTM2MysxODk1XQ==	21	CACHED	166	546	0	546	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA0ZGY1YmNiNA==
+[protos-root] selector=protos-root:6150128fb9f8f843 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/IpAddress.protos start=1530 length=1003
+[protos-root] selector=protos-root:7c23ef8f1221f01b kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/IpAddress.protos start=2669 length=314
+[protos-root] selector=protos-root:4cf95775b376aa35 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/IpAddress.protos start=3017 length=135
+[protos-root] selector=protos-root:5cdf5486eff32a7a kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/network/IpAddress.protos start=1401 length=1795
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NWNkZjU0ODZlZmYzMmE3YVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvbmV0d29yay9JcEFkZHJlc3MucHJvdG9zfDE0MDErMTc5NV0=	22	CACHED	128	436	0	436	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA0ZGM4Y2FhNw==
+[protos-root] selector=protos-root:50eab260287e729e kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos start=1491 length=640
+[protos-root] selector=protos-root:2ddb80345f8b5949 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos start=2268 length=316
+[protos-root] selector=protos-root:de8ed3d4db27c78f kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos start=2618 length=143
+[protos-root] selector=protos-root:2217aec1b2fcd0db kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos start=1361 length=1446
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MjIxN2FlYzFiMmZjZDBkYltUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvbmV0d29yay9JcEVuZHBvaW50LnByb3Rvc3wxMzYxKzE0NDZd	23	CACHED	128	436	0	436	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA0MGRmZjBiNw==
+[protos-root] selector=protos-root:461cf5c3235cac16 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Network.protos start=2671 length=122
+[protos-root] selector=protos-root:889d7f45bb6f6872 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Network.protos start=2517 length=341
+[protos-root] selector=protos-root:d77b2037a3b38950 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/network/Network.protos start=2309 length=557
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6ZDc3YjIwMzdhM2IzODk1MFtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvbmV0d29yay9OZXR3b3JrLnByb3Rvc3wyMzA5KzU1N10=	24	CACHED	106	354	0	354	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAzNTY5ZmMwOA==
+[protos-root] selector=protos-root:e48a51f8f76654a0 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/network/TcpConnection.protos start=1015 length=31
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6ZTQ4YTUxZjhmNzY2NTRhMFtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvbmV0d29yay9UY3BDb25uZWN0aW9uLnByb3Rvc3wxMDE1KzMxXQ==	25	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAzNTM5MGVlMw==
+[protos-root] selector=protos-root:2f7491a5bdba5fe2 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/network/TcpListener.protos start=1015 length=29
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MmY3NDkxYTViZGJhNWZlMltUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvbmV0d29yay9UY3BMaXN0ZW5lci5wcm90b3N8MTAxNSsyOV0=	26	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAzZmI2Y2Y2MA==
+[protos-root] selector=protos-root:4b7e22c153a4b185 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/network/TcpAcceptor.protos start=1015 length=29
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NGI3ZTIyYzE1M2E0YjE4NVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvbmV0d29yay9UY3BBY2NlcHRvci5wcm90b3N8MTAxNSsyOV0=	27	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAyMzVhMGMxNg==
+[protos-root] selector=protos-root:610e3ab6e0cfcb70 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=3015 length=26
+[protos-root] selector=protos-root:564379cf11463220 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2866 length=197
+[protos-root] selector=protos-root:610e3ab6e0cfcb70 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=3015 length=26
+[protos-root] selector=protos-root:564379cf11463220 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2866 length=197
+[protos-root] selector=protos-root:35a91c0317be3363 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2687 length=394
+[protos-root] selector=protos-root:610e3ab6e0cfcb70 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=3015 length=26
+[protos-root] selector=protos-root:564379cf11463220 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2866 length=197
+[protos-root] selector=protos-root:610e3ab6e0cfcb70 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=3015 length=26
+[protos-root] selector=protos-root:564379cf11463220 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2866 length=197
+[protos-root] selector=protos-root:35a91c0317be3363 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2687 length=394
+[protos-root] selector=protos-root:7f8859ffaf3af1b3 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2638 length=457
+[protos-root] selector=protos-root:a1e92a283c824abc kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=3167 length=44
+[protos-root] selector=protos-root:f597f538853b8a73 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2548 length=752
+[protos-root] selector=protos-root:d80a01b5b3364435 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=3566 length=44
+[protos-root] selector=protos-root:7b92d2ed65f9b3f0 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=3417 length=218
+[protos-root] selector=protos-root:5374481c35479f45 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/network/Resolver.protos start=2337 length=1306
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NTM3NDQ4MWMzNTQ3OWY0NVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvbmV0d29yay9SZXNvbHZlci5wcm90b3N8MjMzNysxMzA2XQ==	28	CACHED	130	440	0	440	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAzZTc2MzRiOQ==
+[protos-root] selector=protos-root:3e99a0e09f001e11 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1476 length=88
+[protos-root] selector=protos-root:86d70cdd6cd3c353 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1435 length=147
+[protos-root] selector=protos-root:3e99a0e09f001e11 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1476 length=88
+[protos-root] selector=protos-root:86d70cdd6cd3c353 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1435 length=147
+[protos-root] selector=protos-root:c046a6cc59169a3e kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1352 length=244
+[protos-root] selector=protos-root:a009f47fc833c699 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1670 length=44
+[protos-root] selector=protos-root:3e752a7d21049892 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1261 length=545
+[protos-root] selector=protos-root:280ac64372caa180 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1996 length=44
+[protos-root] selector=protos-root:f54eaf8cdd5b18a1 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1848 length=217
+[protos-root] selector=protos-root:d5218c0a2dcc6cf9 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos start=1216 length=857
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6ZDUyMThjMGEyZGNjNmNmOVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvZW50cm9weS9FbnRyb3B5LnByb3Rvc3wxMjE2Kzg1N10=	29	CACHED	94	312	0	312	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3MjZlNTgwNQ==
+[protos-root] selector=protos-root:76bfde3a6ffda926 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/clock/Clock.protos start=1187 length=58
+[protos-root] selector=protos-root:7a1e44d6fa076fc1 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/clock/Clock.protos start=1152 length=139
+[protos-root] selector=protos-root:652b3109f764824b kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/clock/Clock.protos start=1098 length=201
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NjUyYjMxMDlmNzY0ODI0YltUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvY2xvY2svQ2xvY2sucHJvdG9zfDEwOTgrMjAxXQ==	30	CACHED	74	248	0	248	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAxZmRmYWZkMg==
+[protos-root] selector=protos-root:5ef0eef29316226d kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/Execution.protos start=2154 length=13
+[protos-root] selector=protos-root:ac0ec0b529e7166b kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/Execution.protos start=2099 length=86
+[protos-root] selector=protos-root:01e0fc7abcdb9496 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/Execution.protos start=2020 length=179
+[protos-root] selector=protos-root:15b3bcaaff7f67de kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/Execution.protos start=2487 length=44
+[protos-root] selector=protos-root:fa45e25bea064c65 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/Execution.protos start=1675 length=881
+[protos-root] selector=protos-root:1e5bf638cad59ff1 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/execution/Execution.protos start=1628 length=936
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MWU1YmY2MzhjYWQ1OWZmMVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvZXhlY3V0aW9uL0V4ZWN1dGlvbi5wcm90b3N8MTYyOCs5MzZd	31	CACHED	74	248	0	248	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA1ZDAxODEwNw==
+[protos-root] selector=protos-root:c1e97c5d4eb6eff0 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos start=1436 length=107
+[protos-root] selector=protos-root:9327fc90d90fbc68 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos start=1586 length=108
+[protos-root] selector=protos-root:d341aa2ecc85c6a1 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos start=1737 length=108
+[protos-root] selector=protos-root:0981bd03848639b0 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos start=1886 length=106
+[protos-root] selector=protos-root:01b8e6f3a7fa87aa kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos start=2038 length=111
+[protos-root] selector=protos-root:3445800d6ae937da kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos start=1386 length=771
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MzQ0NTgwMGQ2YWU5MzdkYVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvZXhlY3V0aW9uL0NoaWxkUHJvY2Vzcy5wcm90b3N8MTM4Nis3NzFd	32	CACHED	154	504	0	504	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3NzYwMjk1NA==
+[protos-root] selector=protos-root:30bc6914078aca2b kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos start=1330 length=109
+[protos-root] selector=protos-root:cb900b126dde499b kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos start=1484 length=111
+[protos-root] selector=protos-root:4b2f157df607ae81 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos start=1640 length=111
+[protos-root] selector=protos-root:1dafbdd8e592a674 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos start=1281 length=478
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MWRhZmJkZDhlNTkyYTY3NFtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvZXhlY3V0aW9uL0V4aXRTdGF0dXMucHJvdG9zfDEyODErNDc4XQ==	33	CACHED	114	376	0	376	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAzZjI4YmQ1Ng==
+[protos-root] selector=protos-root:740e0a44e352ab73 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildStdin.protos start=1218 length=119
+[protos-root] selector=protos-root:f3e1ac84a0ea9485 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildStdin.protos start=1379 length=110
+[protos-root] selector=protos-root:4a38099da81bf76a kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/execution/ChildStdin.protos start=1170 length=327
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NGEzODA5OWRhODFiZjc2YVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvZXhlY3V0aW9uL0NoaWxkU3RkaW4ucHJvdG9zfDExNzArMzI3XQ==	34	CACHED	94	312	0	312	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAyNGZhZWE4OA==
+[protos-root] selector=protos-root:db7046ef55e5f91a kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildOutput.protos start=1275 length=118
+[protos-root] selector=protos-root:282b975cd449a591 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/execution/ChildOutput.protos start=1435 length=110
+[protos-root] selector=protos-root:716442a6a12dffa9 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/execution/ChildOutput.protos start=1227 length=326
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NzE2NDQyYTZhMTJkZmZhOVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvZXhlY3V0aW9uL0NoaWxkT3V0cHV0LnByb3Rvc3wxMjI3KzMyNl0=	35	CACHED	94	312	0	312	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA1MmI1NmEzZQ==
+[protos-root] selector=protos-root:a61cf093b60769f4 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Future.protos start=1015 length=10
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YTYxY2YwOTNiNjA3NjlmNFtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvRnV0dXJlLnByb3Rvc3wxMDE1KzEwXQ==	36	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3MTZhNzEyNA==
+[protos-root] selector=protos-root:6af481effb19efbc kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Actor.protos start=1015 length=98
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NmFmNDgxZWZmYjE5ZWZiY1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvQWN0b3IucHJvdG9zfDEwMTUrOThd	37	CACHED	150	498	0	498	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA1Yjk3MGY3
+[protos-root] selector=protos-root:2261c09c2d1e2a4c kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Process.protos start=1015 length=11
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MjI2MWMwOWMyZDFlMmE0Y1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvUHJvY2Vzcy5wcm90b3N8MTAxNSsxMV0=	38	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3NmM3YmViMw==
+[protos-root] selector=protos-root:a01c5c01ad92b097 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/TextReader.protos start=1015 length=14
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YTAxYzVjMDFhZDkyYjA5N1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvVGV4dFJlYWRlci5wcm90b3N8MTAxNSsxNF0=	39	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA2MjczYzVhNA==
+[protos-root] selector=protos-root:32742f32ab6b504b kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/TextWriter.protos start=1015 length=14
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6MzI3NDJmMzJhYjZiNTA0YltUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvVGV4dFdyaXRlci5wcm90b3N8MTAxNSsxNF0=	40	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA3OGFlYTRiOQ==
+[protos-root] selector=protos-root:7fd3ad9efdb6e68d kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/import.protos start=2070 length=93
+[protos-root] selector=protos-root:4418015fc0dda085 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/import.protos start=1823 length=366
+[protos-root] selector=protos-root:fd89af3672abf063 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/import.protos start=1778 length=419
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6ZmQ4OWFmMzY3MmFiZjA2M1tUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvaW1wb3J0LnByb3Rvc3wxNzc4KzQxOV0=	41	CACHED	74	248	0	248	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAzNWZlMjEyNQ==
+[protos-root] selector=protos-root:6d5971b25375adc1 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/Bytes.protos start=1015 length=9
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NmQ1OTcxYjI1Mzc1YWRjMVtUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvQnl0ZXMucHJvdG9zfDEwMTUrOV0=	42	CACHED	54	180	0	180	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA1ZjU5MTg1ZQ==
+[protos-root] selector=protos-root:ee2f045ce9c761d1 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/filesystem/Open.protos start=2122 length=170
+[protos-root] selector=protos-root:b18f678db214eec6 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/filesystem/Open.protos start=1977 length=317
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YjE4ZjY3OGRiMjE0ZWVjNltUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvZmlsZXN5c3RlbS9PcGVuLnByb3Rvc3wxOTc3KzMxN10=	43	CACHED	26	102	0	102	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAzYTRlMzQz
+[protos-root] selector=protos-root:fada205850060a06 kind=CLOSURE source=file:///workspaces/protos/protos/lib/core/prelude.protos start=1412 length=79
+[protos-root] selector=protos-root:fea0888be9f06f52 kind=TOP_LEVEL source=file:///workspaces/protos/protos/lib/core/prelude.protos start=1015 length=1503
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6ZmVhMDg4OGJlOWYwNmY1MltUT1BfTEVWRUx8ZmlsZTovLy93b3Jrc3BhY2VzL3Byb3Rvcy9wcm90b3MvbGliL2NvcmUvcHJlbHVkZS5wcm90b3N8MTAxNSsxNTAzXQ==	44	CACHED	888	3240	0	3240	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA5NTczYjNi
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6NmZlNGQ2MmI2ODVlNTZhM1tUT1BfTEVWRUx8dHJ1ZmZsZTpmZGQ4YjQyNTdmNjgwNWRmN2Q1ODBiNDEzZWExMTA5Y2U0NDk3ZjVjYTM0MmY5MTk3NDk4MWM4ZTlhMTQ1Nzk3Ly93b3Jrc3BhY2VzL3Byb3Rvcy1iZW5jaG1hcmtzL2Nhc2VzL2FycmF5LWl0ZXJhdGlvbi1mb3IvYXJyYXktaXRlcmF0aW9uLWZvci5wcm90b3N8MTAzMys0NDdd	45	CACHED	26	102	0	102	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkAxYmRhYTIzZA==
+mode=jvm
+surface=canonical
+language=protos
+run_mode=canonical
+source=/workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos
+warmup_iterations=0
+steady_iterations=1
+sample_calls=100
+setup_ns=1966109323
+BENCH_BYTECODE_SIZE_V2	cHJvdG9zLXJvb3Q6YzY1MjUwNGU3MGRmOTI4MFtDTE9TVVJFfHRydWZmbGU6ZmRkOGI0MjU3ZjY4MDVkZjdkNTgwYjQxM2VhMTEwOWNlNDQ5N2Y1Y2EzNDJmOTE5NzQ5ODFjOGU5YTE0NTc5Ny8vd29ya3NwYWNlcy9wcm90b3MtYmVuY2htYXJrcy9jYXNlcy9hcnJheS1pdGVyYXRpb24tZm9yL2FycmF5LWl0ZXJhdGlvbi1mb3IucHJvdG9zfDEwNTArNDI4XQ==	46	CACHED	344	1464	0	1464	UHJvdG9zQnl0ZWNvZGVSb290Tm9kZUdlbkA2NjlkMmIxYg==
+sample phase=cold iteration=1 elapsed_ns=126318112
+sample phase=steady iteration=1 elapsed_ns=1281350786
+result=2080
+[To redirect Truffle log output to a file use one of the following options:
+* '--log.file=<path>' if the option is passed using a guest language launcher.
+* '-Dpolyglot.log.file=<path>' if the option is passed using the host Java launcher.
+* Configure logging using the polyglot embedding API.]
+[engine] [bc] Instruction histogram for: com.guillermomolina.protos.execution.ProtosBytecodeRootNode
+  ------------------------------------------
+    Count  | Percent | Group / Instruction
+  ------------------------------------------
+   104982  |   100.0 | ? protos
+   102414  |    97.6 |   ? Root: protos-root:c652504e70df9280[CLOSURE|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos|1050+428]
+    19897  |    19.0 |     018 branch.false
+    13231  |    12.6 |     078 c.LoadAndClearTempLocal
+     6863  |     6.5 |     00d load.local$generic
+     6763  |     6.4 |     00a load.local$Long$unboxed
+     6565  |     6.3 |     023 tag.enter
+     6565  |     6.3 |     068 c.IterationNext
+     6563  |     6.3 |     009 load.local$Long
+     6563  |     6.3 |     010 store.local$Long
+     6464  |     6.2 |     017 branch.backward
+     6464  |     6.2 |     02a tag.leaveVoid
+     6464  |     6.2 |     115 c.NumberAdd
+     6463  |     6.2 |     06d c.BinarySubscript$LongStorage#DoubleStorage#BooleanStorage#Array#Bytes
+      608  |     0.6 |     004 load.constant
+      606  |     0.6 |     00e clear.local
+      500  |     0.5 |     014 store.local$generic
+      300  |     0.3 |     011 store.local$Long$Long
+      202  |     0.2 |     079 c.AccessNamedLexical
+      202  |     0.2 |     0c7 c.MaterializePrimitiveNumericCarrier
+      200  |     0.2 |     005 load.constant$Long
+      101  |     0.1 |     016 branch
+      101  |     0.1 |     01f return
+      101  |     0.1 |     046 c.EnterRoot
+      101  |     0.1 |     047 c.EpilogForReturn
+      101  |     0.1 |     069 c.PrepareRangeIteration
+      101  |     0.1 |     073 c.MakeConstantLongArray
+      101  |     0.1 |     077 c.GetLen
+      100  |     0.1 |     029 tag.leave$generic
+      100  |     0.1 |     06b c.MakeRange$CapturedLong#Long
+       11  |     0.0 |     008 load.local
+       10  |     0.0 |     00f store.local
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     06a c.MakeRange
+        1  |     0.0 |     06c c.BinarySubscript
+      442  |     0.4 |   ? Root: protos-root:fea0888be9f06f52[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/prelude.protos|1015+1503]
+      143  |     0.1 |     008 load.local
+       95  |     0.1 |     004 load.constant
+       52  |     0.0 |     00f store.local
+       47  |     0.0 |     07e c.CreateCurrentLocalSlot
+       46  |     0.0 |     079 c.AccessNamedLexical
+       45  |     0.0 |     083 c.DiscardValue
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+      305  |     0.3 |   ? Root: protos-root:c35393179f305c94[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/error_taxonomy.protos|1015+471]
+       69  |     0.1 |     008 load.local
+       69  |     0.1 |     00f store.local
+       46  |     0.0 |     048 c.CurrentActivation
+       29  |     0.0 |     004 load.constant
+       17  |     0.0 |     07e c.CreateCurrentLocalSlot
+       17  |     0.0 |     092 c.NewConstructedObject
+       17  |     0.0 |     093 c.NewObjectConstructionActivation
+       16  |     0.0 |     083 c.DiscardValue
+       12  |     0.0 |     079 c.AccessNamedLexical
+        5  |     0.0 |     0fc c.ReadGlobal
+        3  |     0.0 |     00e clear.local
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+      161  |     0.2 |   ? Root: protos-root:bc1ad6d85ed8bfda[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Range.protos|1567+5081]
+       45  |     0.0 |     008 load.local
+       40  |     0.0 |     004 load.constant
+       23  |     0.0 |     00f store.local
+       14  |     0.0 |     07e c.CreateCurrentLocalSlot
+       12  |     0.0 |     090 c.MaterializeClosure
+       11  |     0.0 |     083 c.DiscardValue
+        4  |     0.0 |     048 c.CurrentActivation
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     092 c.NewConstructedObject
+        2  |     0.0 |     093 c.NewObjectConstructionActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+       93  |     0.1 |   ? Root: protos-root:669981c0a22e7773[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Fraction.protos|1599+3289]
+       24  |     0.0 |     008 load.local
+       19  |     0.0 |     004 load.constant
+       15  |     0.0 |     00f store.local
+        7  |     0.0 |     07e c.CreateCurrentLocalSlot
+        5  |     0.0 |     048 c.CurrentActivation
+        5  |     0.0 |     083 c.DiscardValue
+        5  |     0.0 |     090 c.MaterializeClosure
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     092 c.NewConstructedObject
+        2  |     0.0 |     093 c.NewObjectConstructionActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     079 c.AccessNamedLexical
+       93  |     0.1 |   ? Root: protos-root:bb9d2878bc32b503[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Complex.protos|1751+1218]
+       24  |     0.0 |     008 load.local
+       19  |     0.0 |     004 load.constant
+       15  |     0.0 |     00f store.local
+        7  |     0.0 |     07e c.CreateCurrentLocalSlot
+        5  |     0.0 |     048 c.CurrentActivation
+        5  |     0.0 |     083 c.DiscardValue
+        5  |     0.0 |     090 c.MaterializeClosure
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     092 c.NewConstructedObject
+        2  |     0.0 |     093 c.NewObjectConstructionActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     079 c.AccessNamedLexical
+       81  |     0.1 |   ? Root: protos-root:bc03f727921029b5[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Path.protos|1363+1895]
+       21  |     0.0 |     008 load.local
+       16  |     0.0 |     004 load.constant
+       14  |     0.0 |     00f store.local
+        6  |     0.0 |     07e c.CreateCurrentLocalSlot
+        4  |     0.0 |     048 c.CurrentActivation
+        4  |     0.0 |     083 c.DiscardValue
+        4  |     0.0 |     090 c.MaterializeClosure
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     092 c.NewConstructedObject
+        2  |     0.0 |     093 c.NewObjectConstructionActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+       75  |     0.1 |   ? Root: protos-root:3445800d6ae937da[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos|1386+771]
+       20  |     0.0 |     008 load.local
+       17  |     0.0 |     004 load.constant
+       11  |     0.0 |     00f store.local
+        6  |     0.0 |     07e c.CreateCurrentLocalSlot
+        5  |     0.0 |     090 c.MaterializeClosure
+        4  |     0.0 |     083 c.DiscardValue
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       73  |     0.1 |   ? Root: protos-root:6af481effb19efbc[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Actor.protos|1015+98]
+       17  |     0.0 |     008 load.local
+       17  |     0.0 |     00f store.local
+        8  |     0.0 |     004 load.constant
+        8  |     0.0 |     048 c.CurrentActivation
+        4  |     0.0 |     07e c.CreateCurrentLocalSlot
+        4  |     0.0 |     092 c.NewConstructedObject
+        4  |     0.0 |     093 c.NewObjectConstructionActivation
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     083 c.DiscardValue
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+       63  |     0.1 |   ? Root: protos-root:5374481c35479f45[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/network/Resolver.protos|2337+1306]
+       15  |     0.0 |     008 load.local
+       12  |     0.0 |     00f store.local
+       10  |     0.0 |     004 load.constant
+        5  |     0.0 |     048 c.CurrentActivation
+        4  |     0.0 |     07e c.CreateCurrentLocalSlot
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     083 c.DiscardValue
+        2  |     0.0 |     090 c.MaterializeClosure
+        2  |     0.0 |     092 c.NewConstructedObject
+        2  |     0.0 |     093 c.NewObjectConstructionActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     079 c.AccessNamedLexical
+       62  |     0.1 |   ? Root: protos-root:2217aec1b2fcd0db[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos|1361+1446]
+       15  |     0.0 |     008 load.local
+       12  |     0.0 |     004 load.constant
+       10  |     0.0 |     00f store.local
+        5  |     0.0 |     07e c.CreateCurrentLocalSlot
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     048 c.CurrentActivation
+        3  |     0.0 |     083 c.DiscardValue
+        3  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+        1  |     0.0 |     0fc c.ReadGlobal
+       62  |     0.1 |   ? Root: protos-root:5cdf5486eff32a7a[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/network/IpAddress.protos|1401+1795]
+       15  |     0.0 |     008 load.local
+       12  |     0.0 |     004 load.constant
+       10  |     0.0 |     00f store.local
+        5  |     0.0 |     07e c.CreateCurrentLocalSlot
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     048 c.CurrentActivation
+        3  |     0.0 |     083 c.DiscardValue
+        3  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+        1  |     0.0 |     0fc c.ReadGlobal
+       55  |     0.1 |   ? Root: protos-root:1dafbdd8e592a674[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos|1281+478]
+       14  |     0.0 |     008 load.local
+       11  |     0.0 |     004 load.constant
+        9  |     0.0 |     00f store.local
+        4  |     0.0 |     07e c.CreateCurrentLocalSlot
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     090 c.MaterializeClosure
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     083 c.DiscardValue
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       51  |     0.0 |   ? Root: protos-root:d77b2037a3b38950[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/network/Network.protos|2309+557]
+       12  |     0.0 |     008 load.local
+       11  |     0.0 |     00f store.local
+        7  |     0.0 |     004 load.constant
+        4  |     0.0 |     048 c.CurrentActivation
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     07e c.CreateCurrentLocalSlot
+        2  |     0.0 |     092 c.NewConstructedObject
+        2  |     0.0 |     093 c.NewObjectConstructionActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     083 c.DiscardValue
+        1  |     0.0 |     090 c.MaterializeClosure
+       47  |     0.0 |   ? Root: protos-root:ccb7484bf858815d[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Integer.protos|1015+142]
+       11  |     0.0 |     008 load.local
+        8  |     0.0 |     004 load.constant
+        8  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     048 c.CurrentActivation
+        3  |     0.0 |     07e c.CreateCurrentLocalSlot
+        2  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     079 c.AccessNamedLexical
+        1  |     0.0 |     083 c.DiscardValue
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       45  |     0.0 |   ? Root: protos-root:9b2b9c47a6b5fa1c[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Number.protos|1261+346]
+       11  |     0.0 |     008 load.local
+        8  |     0.0 |     004 load.constant
+        8  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     07e c.CreateCurrentLocalSlot
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     083 c.DiscardValue
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       45  |     0.0 |   ? Root: protos-root:716442a6a12dffa9[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/execution/ChildOutput.protos|1227+326]
+       11  |     0.0 |     008 load.local
+        8  |     0.0 |     004 load.constant
+        8  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     07e c.CreateCurrentLocalSlot
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     083 c.DiscardValue
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       45  |     0.0 |   ? Root: protos-root:d5218c0a2dcc6cf9[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos|1216+857]
+       11  |     0.0 |     008 load.local
+        8  |     0.0 |     004 load.constant
+        8  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     07e c.CreateCurrentLocalSlot
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     083 c.DiscardValue
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       45  |     0.0 |   ? Root: protos-root:4a38099da81bf76a[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/execution/ChildStdin.protos|1170+327]
+       11  |     0.0 |     008 load.local
+        8  |     0.0 |     004 load.constant
+        8  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     07e c.CreateCurrentLocalSlot
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     083 c.DiscardValue
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       37  |     0.0 |   ? Root: protos-root:62a680a223180d84[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Float.protos|1015+71]
+        8  |     0.0 |     008 load.local
+        7  |     0.0 |     00f store.local
+        5  |     0.0 |     004 load.constant
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     079 c.AccessNamedLexical
+        1  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       35  |     0.0 |   ? Root: protos-root:03294caf2f24a2be[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Any.protos|1015+37]
+        8  |     0.0 |     008 load.local
+        7  |     0.0 |     00f store.local
+        5  |     0.0 |     004 load.constant
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       35  |     0.0 |   ? Root: protos-root:1e5bf638cad59ff1[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/execution/Execution.protos|1628+936]
+        8  |     0.0 |     008 load.local
+        7  |     0.0 |     00f store.local
+        5  |     0.0 |     004 load.constant
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       35  |     0.0 |   ? Root: protos-root:652b3109f764824b[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/clock/Clock.protos|1098+201]
+        8  |     0.0 |     008 load.local
+        7  |     0.0 |     00f store.local
+        5  |     0.0 |     004 load.constant
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       35  |     0.0 |   ? Root: protos-root:fd89af3672abf063[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/import.protos|1778+419]
+        8  |     0.0 |     008 load.local
+        7  |     0.0 |     00f store.local
+        5  |     0.0 |     004 load.constant
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       35  |     0.0 |   ? Root: protos-root:493523c4d9f37f8e[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Capture.protos|1015+46]
+        8  |     0.0 |     008 load.local
+        7  |     0.0 |     00f store.local
+        5  |     0.0 |     004 load.constant
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     090 c.MaterializeClosure
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       35  |     0.0 |   ? Root: protos-root:e68dd911baee7ff8[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Object.protos|1161+1352]
+       15  |     0.0 |     004 load.constant
+        7  |     0.0 |     091 c.MaterializeCurrentClosure
+        6  |     0.0 |     07d c.CreateDiscardedModuleBinding
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+       27  |     0.0 |   ? Root: protos-root:0a36d48e34accf31[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/InvalidReturn.protos|1015+23]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     004 load.constant
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     079 c.AccessNamedLexical
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       27  |     0.0 |   ? Root: protos-root:4476252a471f8f81[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/SmallInteger.protos|1015+24]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     004 load.constant
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     079 c.AccessNamedLexical
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       27  |     0.0 |   ? Root: protos-root:707b9c71207044d3[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/BigInteger.protos|1015+22]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        3  |     0.0 |     048 c.CurrentActivation
+        2  |     0.0 |     004 load.constant
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     079 c.AccessNamedLexical
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:a7f95459b92ca8c2[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Map.protos|1015+7]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:ede17c8287610dee[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Array.protos|1015+9]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:6d5971b25375adc1[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Bytes.protos|1015+9]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:4abe5588f0bb8483[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Encoding.protos|1015+12]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:9587a48bff43cc63[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/IdentityMap.protos|1015+15]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:4b7e22c153a4b185[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/network/TcpAcceptor.protos|1015+29]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:a61cf093b60769f4[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Future.protos|1015+10]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:4be45f808e4d8125[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Error.protos|1015+9]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:2f7491a5bdba5fe2[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/network/TcpListener.protos|1015+29]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:a01c5c01ad92b097[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/TextReader.protos|1015+14]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:32742f32ab6b504b[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/TextWriter.protos|1015+14]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:e48a51f8f76654a0[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/network/TcpConnection.protos|1015+31]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:7e167c137ac8ebbb[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Context.protos|1015+11]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:c7b01e6354a6d2d9[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/String.protos|1015+10]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       25  |     0.0 |   ? Root: protos-root:2261c09c2d1e2a4c[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/Process.protos|1015+11]
+        5  |     0.0 |     008 load.local
+        5  |     0.0 |     00f store.local
+        3  |     0.0 |     00e clear.local
+        2  |     0.0 |     004 load.constant
+        2  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     092 c.NewConstructedObject
+        1  |     0.0 |     093 c.NewObjectConstructionActivation
+       11  |     0.0 |   ? Root: protos-root:b18f678db214eec6[TOP_LEVEL|file:///workspaces/protos/protos/lib/core/filesystem/Open.protos|1977+317]
+        3  |     0.0 |     004 load.constant
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     091 c.MaterializeCurrentClosure
+       11  |     0.0 |   ? Root: protos-root:6fe4d62b685e56a3[TOP_LEVEL|truffle:fdd8b4257f6805df7d580b413ea1109ce4497f5ca342f91974981c8e9a145797//workspaces/protos-benchmarks/cases/array-iteration-for/array-iteration-for.protos|1033+447]
+        3  |     0.0 |     004 load.constant
+        1  |     0.0 |     01f return
+        1  |     0.0 |     023 tag.enter
+        1  |     0.0 |     024 tag.leave
+        1  |     0.0 |     046 c.EnterRoot
+        1  |     0.0 |     047 c.EpilogForReturn
+        1  |     0.0 |     048 c.CurrentActivation
+        1  |     0.0 |     07e c.CreateCurrentLocalSlot
+        1  |     0.0 |     091 c.MaterializeCurrentClosure
+  ------------------------------------------
+  Total executed instructions: 104982
+

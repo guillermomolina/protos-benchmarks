@@ -1,0 +1,863 @@
+{
+  "interpreted_roots_coverage": "NOT_ESTABLISHED",
+  "invocation_sequence": {
+    "cold_calls": 1,
+    "post_warmup_calls": 2000,
+    "process": "fresh-jvm",
+    "setup": "before-cold-call",
+    "total_measured_invocations": 2001,
+    "warmup_calls": 0
+  },
+  "language": "python",
+  "mode": "cold-all-compiled-roots",
+  "phase": "After TruffleTier",
+  "requested_tier": 1,
+  "root_inventory": {
+    "interpreted_roots_coverage": "NOT_ESTABLISHED",
+    "requested_tier": 1,
+    "roots": [
+      {
+        "compilation_ids": [
+          4546
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "<builtin function ObjectBuiltins.__setattr__ at 7273039>",
+        "normalized_label": "<builtin function ObjectBuiltins.__setattr__ at *>",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:82"
+      },
+      {
+        "compilation_ids": [
+          4072,
+          4096
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "<builtin function StringBuiltins.rpartition at 1f01a35f>",
+        "normalized_label": "<builtin function StringBuiltins.rpartition at *>",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:86"
+      },
+      {
+        "compilation_ids": [
+          4164,
+          4231,
+          4577,
+          4592
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "<bytecode ModuleSpec.parent at 3deeaa35>",
+        "normalized_label": "<bytecode ModuleSpec.parent at *>",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 1,
+        "status": "UNAVAILABLE",
+        "target": "1:85"
+      },
+      {
+        "compilation_ids": [
+          5034,
+          5078,
+          5188
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "<bytecode run at 6d355cb4>",
+        "normalized_label": "<bytecode run at *>",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 1,
+        "status": "UNAVAILABLE",
+        "target": "1:466"
+      },
+      {
+        "compilation_ids": [
+          5124
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "org.graalvm.polyglot.Value<PFunction>.execute",
+        "normalized_label": "org.graalvm.polyglot.Value<PFunction>.execute",
+        "observed_tiers": [
+          1
+        ],
+        "reason": null,
+        "requested_tier": 1,
+        "status": "AVAILABLE",
+        "target": "1:419"
+      }
+    ],
+    "scope": "observed-compiled-call-targets-only"
+  },
+  "schema": 1,
+  "scope": "observed-compiled-call-targets-only",
+  "timing_evidence": "NONE",
+  "unavailable_roots": [
+    {
+      "compilation_ids": [
+        4164,
+        4231,
+        4577,
+        4592
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "<bytecode ModuleSpec.parent at 3deeaa35>",
+      "normalized_label": "<bytecode ModuleSpec.parent at *>",
+      "observed_tiers": [
+        1,
+        2
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 1,
+      "status": "UNAVAILABLE",
+      "target": "1:85"
+    },
+    {
+      "compilation_ids": [
+        5034,
+        5078,
+        5188
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "<bytecode run at 6d355cb4>",
+      "normalized_label": "<bytecode run at *>",
+      "observed_tiers": [
+        1,
+        2
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 1,
+      "status": "UNAVAILABLE",
+      "target": "1:466"
+    }
+  ],
+  "units": [
+    {
+      "analysis": "budget-2000/bgv/TruffleHotSpotCompilation-4546[<builtin_function_ObjectBuiltins.__setattr___at_7273039>].filter.json.gz",
+      "analysis_sha256": "84b5377639759ea664f0a39f1012ae1d3899cb8505f7159400db15d0c43d8b57",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "LookupAttributeInMRONodeGen$DynamicNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 50,
+            "cycles": 51,
+            "ifs": 5,
+            "invokes": 0,
+            "loops": 2,
+            "size": 75
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "WriteAttributeToObjectNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 31,
+            "cycles": 41,
+            "ifs": 3,
+            "invokes": 0,
+            "loops": 0,
+            "size": 41
+          }
+        },
+        {
+          "location": "python:641:0-0",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 22,
+            "cycles": 52,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 52
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ObjectBuiltinsFactory$SetattrNodeFactory$SetattrNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 21,
+            "cycles": 17,
+            "ifs": 2,
+            "invokes": 0,
+            "loops": 0,
+            "size": 19
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "GetDictIfExistsNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 16,
+            "cycles": 25,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 27
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "HashingStorageNodesFactory$HashingStorageSetItemNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 16,
+            "cycles": 31,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 29
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "GetClassNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 11,
+            "cycles": 25,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 27
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "GetClassNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 11,
+            "cycles": 25,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 27
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "DynamicObjectFactory$PutNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 8,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 14
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "TpSlotDescrSetFactory$CallSlotDescrSetNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 8,
+            "cycles": 15,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 16
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "DynamicObjectFactory$PutNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 7,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 14
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "DynamicObjectFactory$GetNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 6,
+            "cycles": 10,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 12
+          }
+        }
+      ],
+      "bgv": "budget-2000/bgv/TruffleHotSpotCompilation-4546[<builtin_function_ObjectBuiltins.__setattr___at_7273039>].bgv.gz",
+      "bgv_sha256": "d52cc4c87976c439a99dbceb4db288f3bbdc9992d50fd542c1bcbd49769d503b",
+      "comp_id": 4546,
+      "cross_run_identity": "UNIQUE",
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 2,
+        "count": 476,
+        "cycles": 562,
+        "ifs": 18,
+        "invokes": 0,
+        "loops": 2,
+        "size": 717
+      },
+      "graph": {
+        "allocations": 3,
+        "control_flow_splits": 18,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier1.<builtin_function_ObjectBuiltins___setattr___at_7273039>()"
+        ],
+        "guards_deopts": 51,
+        "histogram_available": true,
+        "invoke_targets": {
+          "DynamicObject$GetNode.doGeneric": 4,
+          "ObsolescenceStrategy.putGeneric": 2,
+          "OptimizedCallTarget.callBoundary": 1,
+          "OptimizedCallTarget.lastTierCompile": 1
+        },
+        "invokes": 8,
+        "loads": 42,
+        "loops": 2,
+        "node_class_histogram": {
+          "AddNode": 5,
+          "AllocatedObjectNode": 1,
+          "BeginNode": 40,
+          "CommitAllocationNode": 1,
+          "ConstantNode": 54,
+          "DeoptimizeNode": 8,
+          "EndNode": 27,
+          "ExceptionObjectNode": 8,
+          "FixedGuardNode": 43,
+          "FrameState": 115,
+          "IfNode": 18,
+          "InstanceOfNode": 28,
+          "IntegerEqualsNode": 2,
+          "IntegerLessThanNode": 4,
+          "IntegerTestNode": 4,
+          "InvokeWithExceptionNode": 8,
+          "IsNullNode": 12,
+          "LoadFieldNode": 31,
+          "LoadIndexedNode": 11,
+          "LoopBeginNode": 2,
+          "LoopEndNode": 2,
+          "LoopExitNode": 4,
+          "MergeNode": 9,
+          "MethodCallTargetNode": 8,
+          "MulNode": 1,
+          "NewArrayNode": 1,
+          "ObjectEqualsNode": 10,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 32,
+          "ReturnNode": 1,
+          "RightShiftNode": 3,
+          "ShortCircuitOrNode": 3,
+          "StartNode": 1,
+          "StateSplitProxyNode": 2,
+          "StoreFieldNode": 3,
+          "StoreIndexedNode": 1,
+          "ValuePhiNode": 7,
+          "ValueProxyNode": 3,
+          "VirtualArrayNode": 2,
+          "VirtualInstanceNode": 2,
+          "VirtualObjectState": 3
+        },
+        "node_count": 522,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [],
+      "ir_after_truffle_tier": 522,
+      "label": "<builtin function ObjectBuiltins.__setattr__ at 7273039>",
+      "normalized_label": "<builtin function ObjectBuiltins.__setattr__ at *>",
+      "role": "selected",
+      "src": "n/a",
+      "superseded_comp_ids": [],
+      "target": "1:82",
+      "tier": 1,
+      "via": null
+    },
+    {
+      "analysis": "budget-2000/bgv/TruffleHotSpotCompilation-4072[<builtin_function_StringBuiltins.rpartition_at_1f01a35f>].filter.json.gz",
+      "analysis_sha256": "23e6aa80192d37f3b016bfdd5798e6a42075d86a83358e45d25235318e630d80",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "TruffleStringFactory$LastIndexOfStringNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 125,
+            "cycles": 121,
+            "ifs": 10,
+            "invokes": 0,
+            "loops": 1,
+            "size": 142
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "StringBuiltinsFactory$RPartitionNodeFactory$RPartitionNodeGen",
+          "self": {
+            "allocs": 1,
+            "count": 16,
+            "cycles": 8,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 14
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "TruffleStringFactory$CodePointLengthNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 12,
+            "cycles": 13,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 15
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "TStringOpsNodesFactory$RawLastIndexOfStringNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 5,
+            "cycles": 9,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 9
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "TStringInternalNodesFactory$GetCodePointLengthWithMaterializationNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 3,
+            "cycles": 5,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 4
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "TStringInternalNodesFactory$LastIndexOfStringNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 3,
+            "cycles": 4,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 4
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "ExecutionContext$CalleeContext",
+          "self": {
+            "allocs": 0,
+            "count": 1,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 0
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "TStringOpsNodesFactory$RawLastIndexOfStringNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 1,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 1
+          }
+        }
+      ],
+      "bgv": "budget-2000/bgv/TruffleHotSpotCompilation-4072[<builtin_function_StringBuiltins.rpartition_at_1f01a35f>].bgv.gz",
+      "bgv_sha256": "702ac02ae3566b77489489e3fd38cacc07344750913b3ef693d8bb5e6816eac6",
+      "comp_id": 4072,
+      "cross_run_identity": "UNIQUE",
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 2,
+        "count": 298,
+        "cycles": 302,
+        "ifs": 14,
+        "invokes": 0,
+        "loops": 1,
+        "size": 371
+      },
+      "graph": {
+        "allocations": 2,
+        "control_flow_splits": 14,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier1.<builtin_function_StringBuiltins_rpartition_at_1f01a35f>()"
+        ],
+        "guards_deopts": 18,
+        "histogram_available": true,
+        "invoke_targets": {
+          "OptimizedCallTarget.lastTierCompile": 1
+        },
+        "invokes": 1,
+        "loads": 30,
+        "loops": 1,
+        "node_class_histogram": {
+          "AddNode": 10,
+          "AllocatedObjectNode": 1,
+          "AndNode": 6,
+          "BeginNode": 27,
+          "CommitAllocationNode": 1,
+          "ConditionalNode": 4,
+          "ConstantNode": 42,
+          "DeoptimizeNode": 1,
+          "EndNode": 16,
+          "ExceptionObjectNode": 1,
+          "FixedGuardNode": 17,
+          "FrameState": 37,
+          "IfNode": 14,
+          "InstanceOfNode": 2,
+          "IntegerBelowNode": 3,
+          "IntegerEqualsNode": 14,
+          "IntegerLessThanNode": 8,
+          "IntegerTestNode": 7,
+          "InvokeWithExceptionNode": 1,
+          "IsNullNode": 1,
+          "LoadFieldNode": 20,
+          "LoadIndexedNode": 8,
+          "LoopBeginNode": 1,
+          "LoopEndNode": 2,
+          "LoopExitNode": 2,
+          "MergeNode": 3,
+          "MethodCallTargetNode": 1,
+          "MulNode": 1,
+          "NarrowNode": 2,
+          "OrNode": 2,
+          "ParameterNode": 1,
+          "PiArrayNode": 1,
+          "PiNode": 7,
+          "RawLoadNode": 2,
+          "ReturnNode": 1,
+          "RightShiftNode": 3,
+          "ShortCircuitOrNode": 4,
+          "SignExtendNode": 3,
+          "StartNode": 1,
+          "StateSplitProxyNode": 2,
+          "StoreFieldNode": 3,
+          "ValuePhiNode": 4,
+          "ValueProxyNode": 1,
+          "VirtualArrayNode": 2,
+          "VirtualInstanceNode": 4,
+          "VirtualObjectState": 3,
+          "ZeroExtendNode": 1
+        },
+        "node_count": 298,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [],
+      "ir_after_truffle_tier": 298,
+      "label": "<builtin function StringBuiltins.rpartition at 1f01a35f>",
+      "normalized_label": "<builtin function StringBuiltins.rpartition at *>",
+      "role": "selected",
+      "src": "n/a",
+      "superseded_comp_ids": [],
+      "target": "1:86",
+      "tier": 1,
+      "via": null
+    },
+    {
+      "analysis": "budget-2000/bgv/TruffleHotSpotCompilation-5124[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "analysis_sha256": "9f3d0b1dc9eb898cf9aa628ec10e4c1384059bac735728632206c80c963bc349",
+      "attribution": [
+        {
+          "location": "null:-1:-1--1",
+          "name": "CallDispatchersFactory$SimpleDirectInvokeNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 36,
+            "cycles": 42,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 43
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "PFunctionGen$InteropLibraryExports$Cached",
+          "self": {
+            "allocs": 0,
+            "count": 33,
+            "cycles": 36,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 48
+          }
+        },
+        {
+          "location": "python:16:1012-1798",
+          "name": "OptimizedDirectCallNode",
+          "self": {
+            "allocs": 0,
+            "count": 16,
+            "cycles": 26,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 28
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "PolyglotValueDispatchFactory$InteropValueFactory$ExecuteNoArgsNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 15,
+            "cycles": 15,
+            "ifs": 1,
+            "invokes": 0,
+            "loops": 0,
+            "size": 20
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "GetInteropBehaviorNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 12,
+            "cycles": 36,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 34
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "GilNode$Cached",
+          "self": {
+            "allocs": 0,
+            "count": 11,
+            "cycles": 19,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 18
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "DynamicObjectFactory$GetNodeGen",
+          "self": {
+            "allocs": 0,
+            "count": 7,
+            "cycles": 9,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 7
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "PolyglotLanguageContextFactory$ToHostValueNodeGen$Inlined",
+          "self": {
+            "allocs": 1,
+            "count": 6,
+            "cycles": 4,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 4
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "PolyglotValueDispatchFactory$InteropValueFactory$SharedExecuteNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 5,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 5
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "CallDispatchersFactory$FunctionCachedCallNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 3,
+            "cycles": 3,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 4
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "CreateArgumentsNodeGen$Inlined",
+          "self": {
+            "allocs": 1,
+            "count": 2,
+            "cycles": 0,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 0
+          }
+        },
+        {
+          "location": "null:-1:-1--1",
+          "name": "GetClassNodeGen$GetPythonObjectClassNodeGen$Inlined",
+          "self": {
+            "allocs": 0,
+            "count": 2,
+            "cycles": 2,
+            "ifs": 0,
+            "invokes": 0,
+            "loops": 0,
+            "size": 1
+          }
+        }
+      ],
+      "bgv": "budget-2000/bgv/TruffleHotSpotCompilation-5124[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bgv_sha256": "6cedc5ffbc0210817fcfedfb966d57d21e5dbb3fd19d16c704ec0bd6831a62ea",
+      "comp_id": 5124,
+      "cross_run_identity": "UNIQUE",
+      "edge": null,
+      "expansion_truffle_tier": {
+        "allocs": 4,
+        "count": 370,
+        "cycles": 356,
+        "ifs": 9,
+        "invokes": 0,
+        "loops": 0,
+        "size": 458
+      },
+      "graph": {
+        "allocations": 5,
+        "control_flow_splits": 9,
+        "graph_name": "1: After TruffleTier",
+        "graph_type": "StructuredGraph",
+        "graphs_in_dump": 9,
+        "group_path": [
+          "TruffleIR.Tier1.org_graalvm_polyglot_Value<PFunction>_execute()"
+        ],
+        "guards_deopts": 24,
+        "histogram_available": true,
+        "invoke_targets": {
+          "HotSpotThreadLocalHandshake.getCurrent": 1,
+          "OptimizedCallTarget.callBoundary": 1,
+          "OptimizedCallTarget.lastTierCompile": 1,
+          "PolyglotContextImpl.enterThreadChanged": 1,
+          "PolyglotContextImpl.leaveThreadChanged": 1,
+          "PythonContext.releaseGil": 1,
+          "PythonContext.tryAcquireGil": 1,
+          "ThreadLocalHandshake$TruffleSafepointImpl.setBlockedBoundary": 1
+        },
+        "invokes": 8,
+        "loads": 32,
+        "loops": 0,
+        "node_class_histogram": {
+          "AddNode": 6,
+          "AllocatedObjectNode": 2,
+          "BeginNode": 26,
+          "BoxNode$TrustedBoxedValue": 1,
+          "CommitAllocationNode": 2,
+          "ConditionalNode": 1,
+          "ConstantNode": 54,
+          "CurrentJavaThreadNode": 1,
+          "DeoptimizeNode": 8,
+          "EndNode": 15,
+          "ExceptionObjectNode": 8,
+          "FixedGuardNode": 16,
+          "FrameState": 85,
+          "HotSpotLoadReservedReferenceNode": 4,
+          "HotSpotStoreReservedReferenceNode": 2,
+          "IfNode": 9,
+          "InstanceOfNode": 2,
+          "IntegerEqualsNode": 3,
+          "IntegerLessThanNode": 2,
+          "InvokeWithExceptionNode": 8,
+          "IsNullNode": 10,
+          "LoadFieldNode": 15,
+          "LoadIndexedNode": 7,
+          "MergeNode": 6,
+          "MethodCallTargetNode": 8,
+          "MulNode": 1,
+          "ObjectEqualsNode": 7,
+          "OffsetAddressNode": 4,
+          "ParameterNode": 1,
+          "PiArrayNode": 5,
+          "PiNode": 13,
+          "ReadNode": 6,
+          "ReturnNode": 1,
+          "RightShiftNode": 3,
+          "StartNode": 1,
+          "StateSplitProxyNode": 5,
+          "StoreFieldNode": 8,
+          "ValuePhiNode": 3,
+          "VirtualArrayNode": 2,
+          "VirtualInstanceNode": 3,
+          "VirtualObjectState": 6
+        },
+        "node_count": 370,
+        "phase": "After TruffleTier"
+      },
+      "inlined": [],
+      "ir_after_truffle_tier": 370,
+      "label": "org.graalvm.polyglot.Value<PFunction>.execute",
+      "normalized_label": "org.graalvm.polyglot.Value<PFunction>.execute",
+      "role": "selected",
+      "src": "n/a",
+      "superseded_comp_ids": [],
+      "target": "1:419",
+      "tier": 1,
+      "via": null
+    }
+  ],
+  "workload": "bubble-sort"
+}

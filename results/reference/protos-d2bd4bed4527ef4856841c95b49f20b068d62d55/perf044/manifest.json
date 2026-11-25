@@ -1,0 +1,3565 @@
+{
+  "schema": 1,
+  "issue": "PERF044",
+  "date": "2026-11-25",
+  "protos_revision": "d2bd4bed4527ef4856841c95b49f20b068d62d55",
+  "protos_version": "0.4.223-SNAPSHOT",
+  "benchmark_revision": "02270f962a9a316e766d05b869ef4dc019745552",
+  "workloads": [
+    "primitive-switch-first",
+    "primitive-switch-middle",
+    "primitive-switch-last",
+    "primitive-switch-default",
+    "integer-switch"
+  ],
+  "languages": [
+    "protos",
+    "python",
+    "js",
+    "ruby"
+  ],
+  "capture_count": 60,
+  "valid_captures": 60,
+  "structural_reports": {
+    "complete": 5,
+    "incomplete": 15
+  },
+  "timing_evidence": "NONE",
+  "files": [
+    {
+      "path": "bytecode/integer-switch/js/capture.json",
+      "bytes": 10900,
+      "sha256": "9f56b56a02c2d2d7d0fbdff47bd72b6608e963e9ac353e9990468224f8974fba"
+    },
+    {
+      "path": "bytecode/integer-switch/js/raw/bytecode-histogram.log",
+      "bytes": 3814,
+      "sha256": "da00779436ca622e80879c7051a69631fc4257002fbac40efbbb9bcf31641036"
+    },
+    {
+      "path": "bytecode/integer-switch/protos/capture.json",
+      "bytes": 133377,
+      "sha256": "beb367795497abd74d0054b2649a5e962335fad4afb7a17815966e20a2ed38b9"
+    },
+    {
+      "path": "bytecode/integer-switch/protos/raw/bytecode-histogram.log",
+      "bytes": 93684,
+      "sha256": "fa35769a4af0ca84e4ed9ac06f5fb0ec994ed546bcecef24f2412e8863567eae"
+    },
+    {
+      "path": "bytecode/integer-switch/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "bytecode/integer-switch/python/capture.json",
+      "bytes": 162980,
+      "sha256": "4fd2ac41f6be51b2865f73d6dd8c6de5229c8644ab4001dec73d5647f5f111de"
+    },
+    {
+      "path": "bytecode/integer-switch/python/raw/bytecode-histogram.log",
+      "bytes": 134003,
+      "sha256": "bdcee91c50ea039211893a6eebca7d9bac9d8a69327bba37bd0a5f5c5960e9fc"
+    },
+    {
+      "path": "bytecode/integer-switch/ruby/capture.json",
+      "bytes": 22412,
+      "sha256": "13fad1df74593f3b725a52c53b98c33604a438e3c80386bc720bb8d6345d593c"
+    },
+    {
+      "path": "bytecode/integer-switch/ruby/raw/bytecode-histogram.log",
+      "bytes": 3605,
+      "sha256": "e9f2659b0363fa327b1ab991fa6b4d096dfce9d9aeabe782bf6c22f6fe768898"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/js/capture.json",
+      "bytes": 10977,
+      "sha256": "159ad6e517462850c06104adcf9e88d4ea0d9ad97c7caf6df7667c15ee6a19a6"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/js/raw/bytecode-histogram.log",
+      "bytes": 3849,
+      "sha256": "384705dc56f9383c2867e80e81dc7ea644a32edc0010a924869ce54661f08937"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/protos/capture.json",
+      "bytes": 124876,
+      "sha256": "87a535a491a21086c4e06800bc46a7be6c810815971588eafd1fd8de40343fbb"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/protos/raw/bytecode-histogram.log",
+      "bytes": 85019,
+      "sha256": "064fa099c35082cf43597bdede425276c64cd053032eb3046c226b6b3d51bf6f"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/python/capture.json",
+      "bytes": 162676,
+      "sha256": "3216523c6b2f6dd29e0ed2f71a16d9b5149b0c55387c26247ab124e0a7277db9"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/python/raw/bytecode-histogram.log",
+      "bytes": 128778,
+      "sha256": "5a7ecc765870bb796b44155c4972b71344336fb974d972acd97441e9ed5a226c"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/ruby/capture.json",
+      "bytes": 22489,
+      "sha256": "a82f7031f7bd1b1fe767afd4d5b1a05771c54086e472299c91dedc5731d9fc47"
+    },
+    {
+      "path": "bytecode/primitive-switch-default/ruby/raw/bytecode-histogram.log",
+      "bytes": 3638,
+      "sha256": "667e445486fb557df65a61653e719af7ddfaa887648025f7345ccc0edcf9c216"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/js/capture.json",
+      "bytes": 10961,
+      "sha256": "ae32343a8b5bf976418372446d52eceb5fa1a6354f03d9263428cd4357abcd29"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/js/raw/bytecode-histogram.log",
+      "bytes": 3841,
+      "sha256": "5ab22382a73b1ef3f77b1d333ab63a3767ede24471e8837f6ff33906345d715a"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/protos/capture.json",
+      "bytes": 123644,
+      "sha256": "f5c67d8b7ab2c610c3cadfaf0da4cfcb3f70d3605e60fbecdfa0be6fba253fce"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/protos/raw/bytecode-histogram.log",
+      "bytes": 84102,
+      "sha256": "7ba1d4ad0db756c8c9d12beb0c184c11bd9c301b9ef432cf1e666551390b9258"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/python/capture.json",
+      "bytes": 162657,
+      "sha256": "5ea4a95c28935ff37faa2c36f976cc315e383649eeff7bbf50372f869e2e8b7d"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/python/raw/bytecode-histogram.log",
+      "bytes": 128762,
+      "sha256": "5a0cc3adddbb86e3350435b15e0f5874760b496856042a66b0246738c37e7ce4"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/ruby/capture.json",
+      "bytes": 22473,
+      "sha256": "82f7ea84d1d34c9cd1981413bd7d28bb3f11ed5081dd48cd9abf425651be879a"
+    },
+    {
+      "path": "bytecode/primitive-switch-first/ruby/raw/bytecode-histogram.log",
+      "bytes": 3630,
+      "sha256": "ce08551d790abc1d18a1718502a1c0c51f929410ab74594437a122bbf8bce91c"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/js/capture.json",
+      "bytes": 10953,
+      "sha256": "d3bfad8141f1d106783176263ec676f16f4dd3ad475d752b5e86643fd1dc5099"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/js/raw/bytecode-histogram.log",
+      "bytes": 3837,
+      "sha256": "8873534235ecebdb395bef7bccb94a18e0815f3cc695422d0a0b01c20eeff518"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/protos/capture.json",
+      "bytes": 123608,
+      "sha256": "bbb011d94079399b865cfe545be7c7fb456740fd6309782dbae5e887b06d685b"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/protos/raw/bytecode-histogram.log",
+      "bytes": 84075,
+      "sha256": "f368c94a7c95c09aacf02783e747b458c4c5cc6c9cad5e82da8ea7080f36ba20"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/python/capture.json",
+      "bytes": 162638,
+      "sha256": "f574be5bbb83a88237ad4ff1b0260f500c652d2a432fa45e888340c98845dd72"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/python/raw/bytecode-histogram.log",
+      "bytes": 128766,
+      "sha256": "2742a52a8129299bf986da37d4b676fb5c9ff3faeee71f430bc430c4c6184062"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/ruby/capture.json",
+      "bytes": 22465,
+      "sha256": "470f3307e447d2e5a80a463d3a6c7cc2b9d24485f07e9a4dd091075cff2611e4"
+    },
+    {
+      "path": "bytecode/primitive-switch-last/ruby/raw/bytecode-histogram.log",
+      "bytes": 3625,
+      "sha256": "3e84cd783ca4041e189ac6185272fa68d3793aee6474be0c13148c792d014799"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/js/capture.json",
+      "bytes": 10969,
+      "sha256": "7345edcaadcb72d2189cdf95b157a3438c1d87e7d8ed6aece3d41ca95557e538"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/js/raw/bytecode-histogram.log",
+      "bytes": 3845,
+      "sha256": "6f0f1c9245e7aa9f78e592d981613a2f49fcfd762cc5d4c8f8bde15b79614120"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/protos/capture.json",
+      "bytes": 123682,
+      "sha256": "1d6a9d6cba9fd4e756879686b1c8aa31cff6ad88cf9636a8585fc728ab457da7"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/protos/raw/bytecode-histogram.log",
+      "bytes": 84135,
+      "sha256": "63341bb5a4205a7a41f2f22b16885731e5950ee4c288ab33ab77aa2e2d5b6a4a"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/python/capture.json",
+      "bytes": 162668,
+      "sha256": "2f79a7fd2f47b12acac73486ba5876a244693b76f99e1a260dd7b466cc293c7f"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/python/raw/bytecode-histogram.log",
+      "bytes": 128774,
+      "sha256": "7d9a8779ee6a56a8ff77c1b0033f24bca2a3f80a4506ac5fe97e7acf481b58b7"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/ruby/capture.json",
+      "bytes": 22481,
+      "sha256": "7584ff87f915bb69b719f7421a442c0dfff737fae340872e98484170409bca7e"
+    },
+    {
+      "path": "bytecode/primitive-switch-middle/ruby/raw/bytecode-histogram.log",
+      "bytes": 3635,
+      "sha256": "0a8b289908aaf67be601b46ffa3bc74274baed0e4d3f47fa0cfa9544061e1bd3"
+    },
+    {
+      "path": "structural/integer-switch/js/structural-report.json",
+      "bytes": 19177,
+      "sha256": "cbdfcd65bfcc1aea0f7fbede881145a17a01d3ab932759e8218241334fcfb43b"
+    },
+    {
+      "path": "structural/integer-switch/protos/structural-report.json",
+      "bytes": 353062,
+      "sha256": "8efffe53278c93da3e61219cc0dcff0fc986ec66131fda2667e1126efa5fdf35"
+    },
+    {
+      "path": "structural/integer-switch/python/structural-report.json",
+      "bytes": 576423,
+      "sha256": "7e0036889e6613b82120c609c22e94f5568c9b8a53a8742007def25eb9125cb0"
+    },
+    {
+      "path": "structural/integer-switch/ruby/structural-report.json",
+      "bytes": 65051,
+      "sha256": "00a94a9e2433670ff37d6c3a8ed99852f9fd0707da5b76f3df03a2db159ec18e"
+    },
+    {
+      "path": "structural/primitive-switch-default/js/structural-report.json",
+      "bytes": 17714,
+      "sha256": "fc56404c55a54a69378fed09f13f8bd297bf7a599175f1c7c707442d30b5c955"
+    },
+    {
+      "path": "structural/primitive-switch-default/protos/structural-report.json",
+      "bytes": 308725,
+      "sha256": "39f3bc3208880a8fe9d2b72effd532c4b94d767c99fccaffe3224190aeb4358e"
+    },
+    {
+      "path": "structural/primitive-switch-default/python/structural-report.json",
+      "bytes": 576103,
+      "sha256": "d6685afc9ed9c373dd7bf6d7f237c1bfb1ce2926e5f1959d2f4da5cdb8faaa2d"
+    },
+    {
+      "path": "structural/primitive-switch-default/ruby/structural-report.json",
+      "bytes": 63616,
+      "sha256": "943352d64b726775b1e9e728a205ed6b7cde6cc9d2e02fb1c8e1654aa5b8676f"
+    },
+    {
+      "path": "structural/primitive-switch-first/js/structural-report.json",
+      "bytes": 17688,
+      "sha256": "8ac11f150bb706d4bf0df3d8616b1e8ebb8ac95d1173e0127b6de71785fe7a67"
+    },
+    {
+      "path": "structural/primitive-switch-first/protos/structural-report.json",
+      "bytes": 300511,
+      "sha256": "66826512bb33b8fd24f899adcc0215dda3e8c962d81c8ac46146eff22d5e0f95"
+    },
+    {
+      "path": "structural/primitive-switch-first/python/structural-report.json",
+      "bytes": 576068,
+      "sha256": "be0cc1af696860c70c24e96aa74a8f75441bd76ad1d0d778cd0d6a2e9b86c1d4"
+    },
+    {
+      "path": "structural/primitive-switch-first/ruby/structural-report.json",
+      "bytes": 63590,
+      "sha256": "35eab65f850df26d55bad28426405f40fc500c19618bdc3d3d7182ff86c79a48"
+    },
+    {
+      "path": "structural/primitive-switch-last/js/structural-report.json",
+      "bytes": 17675,
+      "sha256": "a5b891b606424a42bdffdd008f4439cd9ce179df76791ef6c3a554816d1cbf4b"
+    },
+    {
+      "path": "structural/primitive-switch-last/protos/structural-report.json",
+      "bytes": 300412,
+      "sha256": "860eff48663ce4141a7c3699bfe8f0f2f7e9713cee8289175346bf6faf98f90d"
+    },
+    {
+      "path": "structural/primitive-switch-last/python/structural-report.json",
+      "bytes": 576019,
+      "sha256": "ffa171bc91e0a6ef30260de3c534ad01b16f58fa68bb77c9b1bb558431c2dca0"
+    },
+    {
+      "path": "structural/primitive-switch-last/ruby/structural-report.json",
+      "bytes": 63577,
+      "sha256": "2ce645065d6a3af5cfb0eda3ae9b552cdf50e7adb34b968f785b596d1a83a98c"
+    },
+    {
+      "path": "structural/primitive-switch-middle/js/structural-report.json",
+      "bytes": 17701,
+      "sha256": "cce972f1ac2d9ffb5f32a1648aa1c8b204995fe6e2d2043abc11cf51719f041a"
+    },
+    {
+      "path": "structural/primitive-switch-middle/protos/structural-report.json",
+      "bytes": 300608,
+      "sha256": "320e563185d9d88942d02175768b346f2a66d31a2b8fd8fac65b8c1765a650ed"
+    },
+    {
+      "path": "structural/primitive-switch-middle/python/structural-report.json",
+      "bytes": 576090,
+      "sha256": "13bd4243a5c87d1f20052d906f45debc9297c67b1369766083c11786c0413d7b"
+    },
+    {
+      "path": "structural/primitive-switch-middle/ruby/structural-report.json",
+      "bytes": 63603,
+      "sha256": "01cf12ff02100f9b06fdd3c6327f2dd2a8465fa46091750795a082a3203cefa4"
+    },
+    {
+      "path": "tier-1/integer-switch/js/budget-2000/bgv/TruffleHotSpotCompilation-2477[run].bgv.gz",
+      "bytes": 95695,
+      "sha256": "9fbed8309fa83020ae385815dae83f6c44a2ad04baa3d8add657901c876ee4cc"
+    },
+    {
+      "path": "tier-1/integer-switch/js/budget-2000/bgv/TruffleHotSpotCompilation-2477[run].filter.json.gz",
+      "bytes": 129503,
+      "sha256": "c6f19874c0c659c236985895ab2d230c0aaf302ad4f4e9ea3f47310ea86afaf6"
+    },
+    {
+      "path": "tier-1/integer-switch/js/budget-2000/bgv/TruffleHotSpotCompilation-2615[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 106499,
+      "sha256": "93cd5d1df26e6715d955fffdc98c2bb174f5b35cd523558be55ee1cc0b0c460f"
+    },
+    {
+      "path": "tier-1/integer-switch/js/budget-2000/bgv/TruffleHotSpotCompilation-2615[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 166006,
+      "sha256": "f191f924ae708246f45090e5abc3b4e94abcff6f162636df700426aa18198796"
+    },
+    {
+      "path": "tier-1/integer-switch/js/budget-2000/trace.log.gz",
+      "bytes": 14968,
+      "sha256": "36af6a3aac9c2dcd1f47cb58036eb8e0a55e472952e01ead641b4113b915e285"
+    },
+    {
+      "path": "tier-1/integer-switch/js/capture.json",
+      "bytes": 25349,
+      "sha256": "216e0c13396f85bcfa94b8b53a62cd469aae9928773b5bee3d1911880e05d154"
+    },
+    {
+      "path": "tier-1/integer-switch/js/cold-summary.json",
+      "bytes": 15349,
+      "sha256": "76d4f73ffab1565736c2caec0e2d9ecbbbc69057672e0a0f021990e3eaf8c193"
+    },
+    {
+      "path": "tier-1/integer-switch/js/raw/correctness.log",
+      "bytes": 3226,
+      "sha256": "fee9bacc36e3aec7a6860deeb623ff2e1147eeac8c7d95504afcccd610e29e41"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3387[ProtosBytecodeRootNodeGen@1e454d9e].bgv.gz",
+      "bytes": 496227,
+      "sha256": "5c46a0443003de2bad9ccd6a19a3066331e08eced84098a8fca565fc32426210"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3387[ProtosBytecodeRootNodeGen@1e454d9e].filter.json.gz",
+      "bytes": 1312066,
+      "sha256": "7d16b076e4a80a59c6fe67511cc2842c510398326e8b0bb89809d9ad500b61b9"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3462[ProtosBuiltinCallRootNode@2beee4b].bgv.gz",
+      "bytes": 166742,
+      "sha256": "34a40845ad401d0e17f127bebcf7b3be7d912a6d9c87a35cf86add27f9b7b747"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3462[ProtosBuiltinCallRootNode@2beee4b].filter.json.gz",
+      "bytes": 337270,
+      "sha256": "5907679fdee5825247968e0684b845141f0a76bf5e57d3aa88f8f40a92c775a7"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3514[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].bgv.gz",
+      "bytes": 163606,
+      "sha256": "5ba5b2e7128d9739ce5ce7ad23485a42f9c29d8c3baa83c30454393c971e64bc"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3514[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].filter.json.gz",
+      "bytes": 341249,
+      "sha256": "54ada634744783717472e9d937531bcb82b6503473b46f51d7e70a44df38b499"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3523[ProtosBuiltinCallRootNode@631598c0].bgv.gz",
+      "bytes": 283914,
+      "sha256": "0e583e48e3fe8399571f383a87d6faf220494eeb8f2850a97dbab3b6183a92f9"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3523[ProtosBuiltinCallRootNode@631598c0].filter.json.gz",
+      "bytes": 684832,
+      "sha256": "534beb114ce855f2a0fa7434260f36672bdefea72958d8db198d1c5d99e0c3f2"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3648[ProtosBuiltinCallRootNode@794b4bcd].bgv.gz",
+      "bytes": 153008,
+      "sha256": "ab77610180a0f808ae70c8e6d632a3fa6c3f74787e7660f28f418ce46741a91a"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3648[ProtosBuiltinCallRootNode@794b4bcd].filter.json.gz",
+      "bytes": 336718,
+      "sha256": "fa5183b5eb3c51c279b9218cd2c965cf5765c38abe0bfbda8985df329d8e2a23"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3655[ProtosBuiltinCallRootNode@4155d77a].bgv.gz",
+      "bytes": 152984,
+      "sha256": "42c583c22f4f06cb2ce0ae797860f978378874b520c39c7669710f99e1cc63a9"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3655[ProtosBuiltinCallRootNode@4155d77a].filter.json.gz",
+      "bytes": 336717,
+      "sha256": "146c7a046af001fce04c7f9141276a677f35886a334f559003869037ebd07ab2"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3663[ProtosBuiltinCallRootNode@34f903d6].bgv.gz",
+      "bytes": 155714,
+      "sha256": "b4aff6d9fb5440f86dedcd074644fa0cc3fb365aa52bb1f49d62619fc27840f2"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3663[ProtosBuiltinCallRootNode@34f903d6].filter.json.gz",
+      "bytes": 340234,
+      "sha256": "57785924c147bc7f5c9aa89408291a4d6b2bbba3d36fa6f5eccd42a98a323476"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3929[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].bgv.gz",
+      "bytes": 24536,
+      "sha256": "d5f946b7ee989cfd235246d846d2b7aad122102e773cee1482fe32723705c284"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3929[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].filter.json.gz",
+      "bytes": 48864,
+      "sha256": "71f74484645050e1c612b49785908f644dbd048d425d2b1cfa78fbe871467685"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3935[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].bgv.gz",
+      "bytes": 24524,
+      "sha256": "c59f0d90e7a8bdb98c09af22963ee3a965a4b497cdb476fc11da7cab14fa49b8"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3935[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].filter.json.gz",
+      "bytes": 48858,
+      "sha256": "6f96ede83ad7d04269dbd0f75b670f6f26c2a20961bddbd5755fc5242fdbf2dc"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3938[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].bgv.gz",
+      "bytes": 24515,
+      "sha256": "0d6929f0a62d9854b3712daee3248b12bc06c69b63531e09b0b8e58f3eea7f30"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3938[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].filter.json.gz",
+      "bytes": 48855,
+      "sha256": "ddaadd26eecc9acbd63456e3d10a3d33a53a30b3f433c9f6b3073007caf28c45"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3941[protos-root:271de23a6f0d8bb3[CLOSURE|file:___workspaces_protos_protos_lib_core_Any.protos|1046+4]].bgv.gz",
+      "bytes": 24578,
+      "sha256": "4f96a027a6d305026ea9b63a4868a057d58baab8cf508c0ce660a2c9fa86b495"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3941[protos-root:271de23a6f0d8bb3[CLOSURE|file:___workspaces_protos_protos_lib_core_Any.protos|1046+4]].filter.json.gz",
+      "bytes": 49762,
+      "sha256": "29317abb13d105e424f36e3d06d91b7d5dc6335182ddb174b855178a20fbba5b"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3944[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].bgv.gz",
+      "bytes": 24508,
+      "sha256": "37e228c7bc8e15a241f6e30ac2d213d3ad1a9409656644ac7869dfbe3f173d7b"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3944[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].filter.json.gz",
+      "bytes": 48849,
+      "sha256": "19824791c82d38d3bdd0d3064530eedc3a7ff817a5f7b0f663c904f0984654d7"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4142[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 95004,
+      "sha256": "7f86c690dbc690155d08745650f4dd311e94949f61b1e4fd249dbeeec797a1da"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4142[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 170771,
+      "sha256": "829b7b20d561caef62a9f4ec144365c5617a4a5d64d8d2971c0a802952b50e3e"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/budget-2000/trace.log.gz",
+      "bytes": 43079,
+      "sha256": "f13820485a4358e043f9ada0300b88d4600a3841a548dbbffa54f7ce4156c9c4"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/capture.json",
+      "bytes": 122456,
+      "sha256": "b0cbef1f8cf00a1015d400bab8e5dccdea20c25facf2f72d339556844406974a"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/cold-summary.json",
+      "bytes": 76213,
+      "sha256": "9904e7beb78d359f49741b297a1eaa2b48d3af50c71371c99983f9efa0ae755c"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/raw/correctness.log",
+      "bytes": 3976,
+      "sha256": "57ff92f54148f72281b1d3d43ab61e3f85bbce0307f6237ad98581cc3a8dee3d"
+    },
+    {
+      "path": "tier-1/integer-switch/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-1/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-4046[<builtin_function_StringBuiltins.rpartition_at_1f01a35f>].bgv.gz",
+      "bytes": 119365,
+      "sha256": "bfb8e2cc877d4e33507e222d1756aaa7c27f411ee8ece15a803beff7697ff37c"
+    },
+    {
+      "path": "tier-1/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-4046[<builtin_function_StringBuiltins.rpartition_at_1f01a35f>].filter.json.gz",
+      "bytes": 176717,
+      "sha256": "e5308634049b27b201e2ab8a2d9ad82f954d7124d3d0363379c822b8ec4c7f2f"
+    },
+    {
+      "path": "tier-1/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-4532[<builtin_function_ObjectBuiltins.__setattr___at_2746fac5>].bgv.gz",
+      "bytes": 199063,
+      "sha256": "174f8b15e85be59b9a7e5636558f9e8211f82ceaae6b6093396446521ce45748"
+    },
+    {
+      "path": "tier-1/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-4532[<builtin_function_ObjectBuiltins.__setattr___at_2746fac5>].filter.json.gz",
+      "bytes": 401450,
+      "sha256": "1d1620fc632046bb68dbeb7453efc5522b6227f4757ba208c0d3e3daa3e947e8"
+    },
+    {
+      "path": "tier-1/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-5081[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 137543,
+      "sha256": "b1f2a03fbf348d9e2f58ca152d62250044869d89316cd932486681ededa6686a"
+    },
+    {
+      "path": "tier-1/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-5081[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 247440,
+      "sha256": "511095866f863cf6d2bd7a0bafdbd58fb34ea6176468c37a8d0b749dd11bb34f"
+    },
+    {
+      "path": "tier-1/integer-switch/python/budget-2000/trace.log.gz",
+      "bytes": 17512,
+      "sha256": "b25fe44f310e394d3acbcac7d5fef43705caf0df9c10818cefb641190d799728"
+    },
+    {
+      "path": "tier-1/integer-switch/python/capture.json",
+      "bytes": 35069,
+      "sha256": "74c57d425887bb9d32e5a5d4b1bb0fb5e375cc8dee178b3fee3a3eaa43441b2c"
+    },
+    {
+      "path": "tier-1/integer-switch/python/cold-summary.json",
+      "bytes": 24117,
+      "sha256": "e6bee301db1bd9e2c0e03aaa37014c52fb4b0358b33c2f10c2ca9d13be59317c"
+    },
+    {
+      "path": "tier-1/integer-switch/python/raw/correctness.log",
+      "bytes": 3233,
+      "sha256": "6d29d04515d13e0390aa5a22014e222dd2ec755b8538232b4e8199889df8a88e"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2876[Module#alias_method].bgv.gz",
+      "bytes": 56970,
+      "sha256": "d6dca28cfccc6b6c18ae68bec2de8b7521e72ac087d0789419af5c24290e7cd6"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2876[Module#alias_method].filter.json.gz",
+      "bytes": 73633,
+      "sha256": "7f81c884c94ab9c66a610fb1e7b1ada51f3281e84d92ac891f84c0c69ea0b6a2"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3388[Array#size].bgv.gz",
+      "bytes": 22489,
+      "sha256": "e17dd216ae6206a42f0e0a59bf2ea599f1b2255c2ed533b04680ed747a20d549"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3388[Array#size].filter.json.gz",
+      "bytes": 46074,
+      "sha256": "e5708e3ed307c1ba034538f5b081d6e2a84353914da5fef918fd18a00e058da3"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3488[Encoding#name].bgv.gz",
+      "bytes": 19535,
+      "sha256": "707bcbe3858ac20cd8afe62482ceebc02a45bb72be4ab3c28f647d9c79d8dc5d"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3488[Encoding#name].filter.json.gz",
+      "bytes": 40592,
+      "sha256": "02a077c13033b16c362fd9af6cef563a22f816811e918471495149f1e3260502"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3506[String#upcase!].bgv.gz",
+      "bytes": 158722,
+      "sha256": "debc423689c72a589eb228512dbeb16eb6facd1977e226ad0709dc4178aa4d9d"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3506[String#upcase!].filter.json.gz",
+      "bytes": 274310,
+      "sha256": "74eabb10ca500df04d80f571815cdc6ec1b8e867c6eb99adb2404383fb3245f1"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3528[Truffle::StringOperations.validate_case_mapping_options].bgv.gz",
+      "bytes": 75563,
+      "sha256": "6bba9d1cbc882396acf2db04327abe09588250ff5d1de54a78c37683ddcc234f"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3528[Truffle::StringOperations.validate_case_mapping_options].filter.json.gz",
+      "bytes": 145570,
+      "sha256": "71d2cca1db56bbd0e01faece53b1554bf6fecdcde9dc618e03f9748c005c3601"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3564[String#to_sym].bgv.gz",
+      "bytes": 38190,
+      "sha256": "0c3c0e7bbd820eb1cd95163a0bc347ae8958b3f61c97cbf71803a03c1f3dea0e"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3564[String#to_sym].filter.json.gz",
+      "bytes": 100337,
+      "sha256": "b1c1592fa664a10fedd8ca94fc901607b51697c598d3132d4d833087cd0b3c2a"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4202[Truffle::POSIX.generated_posix_resolve_function].bgv.gz",
+      "bytes": 67776,
+      "sha256": "0bd1b56a0e95f66964193da609621aafd91d06ea2c114c41287bc9f30bd7f8c3"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4202[Truffle::POSIX.generated_posix_resolve_function].filter.json.gz",
+      "bytes": 121551,
+      "sha256": "81ec1ac9a455073450f1ecd246526fbb078ce9f69ebbf6a7acac31e3892f1580"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4215[Module#const_set_<split-930>].bgv.gz",
+      "bytes": 25727,
+      "sha256": "c0c0fa2d2a8753d136ad4905cfa952a5824663b14e864cf8b855e1e792925abc"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4215[Module#const_set_<split-930>].filter.json.gz",
+      "bytes": 61058,
+      "sha256": "7ee33a3bc4a4f7ca98a97a6b6abd63fc791e498bdac1ad81458bcb29875db50f"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4586[String#end_with?].bgv.gz",
+      "bytes": 153021,
+      "sha256": "b95ba8e902b563ba691b4a917472564446153c188d24ef9fc06a9a4f961f8858"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4586[String#end_with?].filter.json.gz",
+      "bytes": 337868,
+      "sha256": "e6c7372f83c5c1d145d40b5e9bdb44bac1703fbcd6fd1f868ad9cef99e83ed50"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4714[String#size].bgv.gz",
+      "bytes": 36189,
+      "sha256": "feb592322b3e4159e545ab7942451e81b6dcd326342b2a97bcf6fad81ba40b79"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4714[String#size].filter.json.gz",
+      "bytes": 89682,
+      "sha256": "19fe115ead00f6f77aed561e3d6cd50ac4d94319035be3266ea5e630fc6612dc"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4741[block_in_<module:KernelOperations>].bgv.gz",
+      "bytes": 18684,
+      "sha256": "41b5e4b64516b4e885d26f591ccfd6c2c3a9542229cea55a0b8c2e8f0430769c"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4741[block_in_<module:KernelOperations>].filter.json.gz",
+      "bytes": 36479,
+      "sha256": "41fc73e298b425cef50ce4b793462163dcc9c450d43773abd1b153745cb58dbc"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4769[Array#<<_<split-1160>].bgv.gz",
+      "bytes": 72566,
+      "sha256": "bce26bf12a04e99eb5388ef1ce90685c9867ab129a04a561015f9d4b6d1cb866"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4769[Array#<<_<split-1160>].filter.json.gz",
+      "bytes": 124814,
+      "sha256": "92a2cfdcfb4cdaacc6d285de5107099a3688e923122769440f7fc17c1bb35fd5"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4784[String#[]].bgv.gz",
+      "bytes": 155245,
+      "sha256": "83a444d8d46982e28a8277518e4db28a71a071d17cd913f9f6a12af3a70cc0c1"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4784[String#[]].filter.json.gz",
+      "bytes": 357530,
+      "sha256": "5c24e9c5706bfb93deaf3193c1923ee94a3d40e60cb67de33216327c62288c0c"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4793[Truffle::FeatureLoader.extension_symbol].bgv.gz",
+      "bytes": 122594,
+      "sha256": "9dbcdcbdf968bb73a323ecd5e4847176166f3b7f90d7538ba9704e484170b8c6"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4793[Truffle::FeatureLoader.extension_symbol].filter.json.gz",
+      "bytes": 324168,
+      "sha256": "6f50fe517aefa3faabbea16c2b319b3b46bece1fb21dd73dde58d515e14ef7eb"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4991[Object#run].bgv.gz",
+      "bytes": 68594,
+      "sha256": "1aeb55ef49af5b66c345fd8a4c86a93f9f14147b4a7802f8117f400df2bf59bc"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4991[Object#run].filter.json.gz",
+      "bytes": 117868,
+      "sha256": "0dd0fbebbb18b184afb627d1d51063d829633bea1fc1d4770060119f5e1c3359"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5026[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 86448,
+      "sha256": "7b1a6c350b98c236c7f29416263aecc9cd37353bb7b5bab365dee51b96aff689"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5026[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 148392,
+      "sha256": "42726affe54a37d72143da6aa22938b96374dd0dc27eca938274ff875413b9b4"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/budget-2000/trace.log.gz",
+      "bytes": 46278,
+      "sha256": "9a3657c54e5425ed4bf9e115519e349c0fc7107cbc77a0f0a922ed52cef11ea7"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/capture.json",
+      "bytes": 106042,
+      "sha256": "608e04d0de6d73d16623fa4c913f9d7828c83b661152a5ae0627ad882d15fcc6"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/cold-summary.json",
+      "bytes": 94280,
+      "sha256": "20cb3f0d17f2b80dded66954e39630569f1a97155ad29e0a806b3730377a6f78"
+    },
+    {
+      "path": "tier-1/integer-switch/ruby/raw/correctness.log",
+      "bytes": 3295,
+      "sha256": "2461d52b438f148f0124795fd4da3da69a79322e0e21d7f3ac16dc0c72b75ce7"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/js/budget-2000/bgv/TruffleHotSpotCompilation-2373[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 114501,
+      "sha256": "a4c1bd9575a3ebc862f3ddfd997e28a55c28ca569829c25b5a59f8270eb6defc"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/js/budget-2000/bgv/TruffleHotSpotCompilation-2373[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 166190,
+      "sha256": "a750dbf130b4f1751bb7355db5f874e23b9a558335fcb36cc34d230123bed467"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/js/budget-2000/bgv/TruffleHotSpotCompilation-2435[run].bgv.gz",
+      "bytes": 45811,
+      "sha256": "16932cd3c006e3cd208106f97ec738e65aa4c325839aed4a5671259f96d51c12"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/js/budget-2000/bgv/TruffleHotSpotCompilation-2435[run].filter.json.gz",
+      "bytes": 39652,
+      "sha256": "0c860588d90456829c2e1aaf15d3677044fa8e525b869e252b9c5b7368702548"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/js/budget-2000/trace.log.gz",
+      "bytes": 11031,
+      "sha256": "a9dfcf61696bc79920b62e69b0c4ff0001373752952244ebc95f854c5870411a"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/js/capture.json",
+      "bytes": 20948,
+      "sha256": "70f83a09ce43ec99ea3dd6ad2d89e20d7b48f3e62919f04687fdda828d3d3f7b"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/js/cold-summary.json",
+      "bytes": 11488,
+      "sha256": "701fa0d017f0ac1b73977122566925f0283ed98ad269d7000fb65c175a3420d1"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/js/raw/correctness.log",
+      "bytes": 3243,
+      "sha256": "ec83cbd9f631566428b080533ff2ef291aed6f20e2a6b67a040782d610056b91"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3242[ProtosBytecodeRootNodeGen@23d2e7fa].bgv.gz",
+      "bytes": 447480,
+      "sha256": "205b93a9103a90830adf40f02257b3566df5aeffebaa38eed337cb4b3308a1fc"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3242[ProtosBytecodeRootNodeGen@23d2e7fa].filter.json.gz",
+      "bytes": 1194374,
+      "sha256": "5881473c1e158f43af1c029d314784ab87bf1a6c1a62b252d7f7f23d6381977f"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3344[ProtosBuiltinCallRootNode@53ba34d0].bgv.gz",
+      "bytes": 168848,
+      "sha256": "11d5cfefc334abd5649047bdf0b05959fc0bf1f48fabb0411cd77c2ed6823900"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3344[ProtosBuiltinCallRootNode@53ba34d0].filter.json.gz",
+      "bytes": 337268,
+      "sha256": "065a9c1d3ec9cbd4a36c62da3883bc8ccd82d13792e2408f6140fe3e68bf9a8d"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3347[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].bgv.gz",
+      "bytes": 164528,
+      "sha256": "0ed217212cea8b0c74fe531c2b7da138f416254ecfdaeeab0cb4466204133214"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3347[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].filter.json.gz",
+      "bytes": 341248,
+      "sha256": "1535ae05b97b048dd27d89ab9c8ed62d5bf1a10b5e3376ae363aa788587cff43"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3355[ProtosBuiltinCallRootNode@525730f3].bgv.gz",
+      "bytes": 283012,
+      "sha256": "252c922f6682e54ee791e98b74c7070c7c9f808773b8e8735d1c5b46c125df0e"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3355[ProtosBuiltinCallRootNode@525730f3].filter.json.gz",
+      "bytes": 684827,
+      "sha256": "a90b0e77ede4e0614224d85bf3bcd0e8a9280b4bbf746517b35e1af51f283d7e"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3484[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 95187,
+      "sha256": "2f5b33e4b4a4153f25245ad9e696d417ab85ac6e6eaf2d6a4526999ad3d05a55"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3484[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 170787,
+      "sha256": "550accb3737535d74a34fb02245e94dad08773b08d5a6babda01127d00e09611"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3488[protos-root:5cde0cc85742f5a8[CLOSURE|truffle:1afaddbf0e74f87045fe4069a6c815219f04ed97312213601a2e55e38dbb7feb__workspaces_protos-benchmarks_cases_primitive-switch-default_primitive-switch-default.protos|...].bgv.gz",
+      "bytes": 3237158,
+      "sha256": "2888779f0e98c39280028e2159a015770d497a40bf6813f2bf34b2e24114b02b"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3488[protos-root:5cde0cc85742f5a8[CLOSURE|truffle:1afaddbf0e74f87045fe4069a6c815219f04ed97312213601a2e55e38dbb7feb__workspaces_protos-benchmarks_cases_primitive-switch-default_primitive-switch-default.protos|...].filter.json.gz",
+      "bytes": 6446160,
+      "sha256": "e6fcc99c8569dfaed7bd257be482b24e32cd724ea2d8d84dfff2dbb0f9e1b637"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3506[ProtosBuiltinCallRootNode@71a03c8e].bgv.gz",
+      "bytes": 152933,
+      "sha256": "834b9f38c5ca50c5529ecf05de1b150254cae96c8566c8403b4282b21daa6799"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3506[ProtosBuiltinCallRootNode@71a03c8e].filter.json.gz",
+      "bytes": 336710,
+      "sha256": "5f6b73afc5232f59f85a371293ee619a1ad48fa394f0dfaac27c4345d741c65a"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3511[ProtosBuiltinCallRootNode@61abb59c].bgv.gz",
+      "bytes": 152909,
+      "sha256": "082452fa545232c5a76556b9b807163398c8ac3e8b8458115d8b7f8e31940c7e"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3511[ProtosBuiltinCallRootNode@61abb59c].filter.json.gz",
+      "bytes": 336710,
+      "sha256": "d3f418b2ce09d770b791d675d6560eb4b460e09bad61ea230ff5034285995117"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3517[ProtosBuiltinCallRootNode@3ae73894].bgv.gz",
+      "bytes": 155643,
+      "sha256": "a9215ff3f92e08e468447a8ba7e6d41351a461cf1507fd26c87fc832e8b0f899"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3517[ProtosBuiltinCallRootNode@3ae73894].filter.json.gz",
+      "bytes": 340224,
+      "sha256": "689699d44607561b2f016c29702c1435bc24ccb21015a028092514eb60419907"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3526[protos-root:271de23a6f0d8bb3[CLOSURE|file:___workspaces_protos_protos_lib_core_Any.protos|1046+4]].bgv.gz",
+      "bytes": 24540,
+      "sha256": "bb443791b58d002b19bf1e4b72cefe488e4284d1d72e389243c5042ad0474974"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3526[protos-root:271de23a6f0d8bb3[CLOSURE|file:___workspaces_protos_protos_lib_core_Any.protos|1046+4]].filter.json.gz",
+      "bytes": 49764,
+      "sha256": "f96c24f5f48c53bf3685e6c7e2237ff9050fe92549e4443dac047cabce8b23bd"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3534[protos-root:4ad687a98a0aeeaf[CLOSURE|truffle:1afaddbf0e74f87045fe4069a6c815219f04ed97312213601a2e55e38dbb7feb__workspaces_protos-benchmarks_cases_primitive-switch-default_primitive-switch-default.protos|...].bgv.gz",
+      "bytes": 24537,
+      "sha256": "b07e29bc89b6eaeba4ce67ab5293d696f6772ac9f2b52a11c26f0366c4505034"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3534[protos-root:4ad687a98a0aeeaf[CLOSURE|truffle:1afaddbf0e74f87045fe4069a6c815219f04ed97312213601a2e55e38dbb7feb__workspaces_protos-benchmarks_cases_primitive-switch-default_primitive-switch-default.protos|...].filter.json.gz",
+      "bytes": 48887,
+      "sha256": "69a1cfc145e3aef08f1c11a110c049e3cf834bf8307d8cbbde07d6bc2cda4338"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/budget-2000/trace.log.gz",
+      "bytes": 21259,
+      "sha256": "5a5515bb92928d5c30b4f25331ef0817b3d2f38c18a2a183e8536245c31a0076"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/capture.json",
+      "bytes": 102768,
+      "sha256": "cd4101e9291fa15d5ed9b73f7ae81e5e7323c3b524c5081f0a0d2344d15bc144"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/cold-summary.json",
+      "bytes": 67616,
+      "sha256": "8d2271c585611f3e51a8a4a9bbe0f7cce8ef3e47186fda4416e80307636437e0"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/raw/correctness.log",
+      "bytes": 3993,
+      "sha256": "4cf9fee6e49f7ca45b767a270c86d6bc3054debc5454976be7d896166ff42d22"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4024[<builtin_function_StringBuiltins.rpartition_at_20a4d9f2>].bgv.gz",
+      "bytes": 119576,
+      "sha256": "c176fbaecdec65aab235af95a2e583dd92b802e52873eb4ecb7e7289df6c6b38"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4024[<builtin_function_StringBuiltins.rpartition_at_20a4d9f2>].filter.json.gz",
+      "bytes": 176719,
+      "sha256": "eca642682f114b45795bef63b5c47312b7c477e88e251daac6655eb9ef3d517f"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4482[<builtin_function_ObjectBuiltins.__setattr___at_6bf972c7>].bgv.gz",
+      "bytes": 198922,
+      "sha256": "68603d4aed100080ebd3d8b51d17bbc32f89de0032d075e325c696a808e6185a"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4482[<builtin_function_ObjectBuiltins.__setattr___at_6bf972c7>].filter.json.gz",
+      "bytes": 402323,
+      "sha256": "ff046c68555562bd86fe1552f6e0fda2c68e97fa428593de1e2190b3b55add8e"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4935[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 138133,
+      "sha256": "d5f397abb62f95ec98c50fa55952c5f09bd0e87f07d28b0fdc096a1983114caa"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4935[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 247555,
+      "sha256": "40b85f17f952bfee7104fc90030c957a3883adcd0cbc1ba3e8ee19c454b59111"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4952[<bytecode_run_at_55bfd83b>].bgv.gz",
+      "bytes": 27047,
+      "sha256": "2e46c4baa2d208939987f91e498ae6f20c36e3998dfd6e779a8cfa1905f8f96b"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4952[<bytecode_run_at_55bfd83b>].filter.json.gz",
+      "bytes": 50852,
+      "sha256": "d2d129e0c38bef8cd99746fd36273495b8489eddc63029fdc4065b288a0d6f40"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/budget-2000/trace.log.gz",
+      "bytes": 14918,
+      "sha256": "6725758aaabb87721ef4552e3834ce81d21691e7cd195248310d431d46b550b3"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/capture.json",
+      "bytes": 36629,
+      "sha256": "9da4b22fcfee843f0fc5d02b33138a938a30f0d91ed28f1aad934b7070e78a63"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/cold-summary.json",
+      "bytes": 26966,
+      "sha256": "da57fea81c284d71dd74e6a2774091970a3ff6fc93f48406d60b1b4144f9d45a"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/python/raw/correctness.log",
+      "bytes": 3250,
+      "sha256": "c20449f27058b60e8fd316479866116f99018d5c1e47e45a02a1adb8295f1fc5"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2900[Module#alias_method].bgv.gz",
+      "bytes": 56812,
+      "sha256": "5924a0a847ffa83e9403e97f4ed9f6cd74fc0018746431b6b3c8becec881d3c9"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2900[Module#alias_method].filter.json.gz",
+      "bytes": 73638,
+      "sha256": "61bd94437aa7bacfb025a72e118f3dda0acd9613b927f419a69fc67e9b5b8bd7"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3431[Array#size].bgv.gz",
+      "bytes": 22474,
+      "sha256": "ecfcd8cc662f9ef37db5ede4ca2d7f8b22b029de1163124aa4eb27463ad6014f"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3431[Array#size].filter.json.gz",
+      "bytes": 46082,
+      "sha256": "8c254cc3faf45ac46d3e770d63d13512d7de83d28736ba45818b1b35b79eacce"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3526[Encoding#name].bgv.gz",
+      "bytes": 19552,
+      "sha256": "5577ab8c6683ab43f1c0872023080035bcb1233966b5caaf16047c2e9bdd0e1c"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3526[Encoding#name].filter.json.gz",
+      "bytes": 40599,
+      "sha256": "cccde7f09d10a36f32ca169528c04b122405bb643425e66010865f160faa31de"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3547[String#upcase!].bgv.gz",
+      "bytes": 158965,
+      "sha256": "f59ec7fcf7f0e84209f68fc0623e7630c29e3d28554cc81242a1b1e89324c21d"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3547[String#upcase!].filter.json.gz",
+      "bytes": 274322,
+      "sha256": "90d9b59ceb6ba03c094f2953483959ed34b937d6f2ed245fa2de5487ed367776"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3569[Truffle::StringOperations.validate_case_mapping_options].bgv.gz",
+      "bytes": 75375,
+      "sha256": "5924a16d6e76dd393816848e4705b7555be6f7ae9f3c1de7f2353f2e7cb2d483"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3569[Truffle::StringOperations.validate_case_mapping_options].filter.json.gz",
+      "bytes": 145580,
+      "sha256": "b82daf282f25b3dc315cd761b9024f2285b25454c8896194e8e5b8069aa195db"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3611[String#to_sym].bgv.gz",
+      "bytes": 38186,
+      "sha256": "5fdb416198b923a689664e55335957b76564a4a67ddf149695b07f34adf40c7c"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3611[String#to_sym].filter.json.gz",
+      "bytes": 100346,
+      "sha256": "bccd0befee126e6fba8222869ede3249263d1e70947f321c24796bf1f872b37d"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4243[Truffle::POSIX.generated_posix_resolve_function].bgv.gz",
+      "bytes": 68122,
+      "sha256": "09dd3170f9678face8348a8e80c8c3d6bce39732e0f2098375a1444aef60ee03"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4243[Truffle::POSIX.generated_posix_resolve_function].filter.json.gz",
+      "bytes": 121551,
+      "sha256": "4cfba27d11f7cf15d5c4e4c0f025ad6d213320777fba54f613fa917aee573247"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4259[Module#const_set_<split-930>].bgv.gz",
+      "bytes": 25695,
+      "sha256": "7b1f99ad7fd13a7b2e78075c883b1ff2076283107fc8be1d9960115949cccbe2"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4259[Module#const_set_<split-930>].filter.json.gz",
+      "bytes": 61064,
+      "sha256": "11d2adae60b7b5ae4a7d48e20b09831bc6a078698231c18c8800a174d49947bb"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4622[String#end_with?].bgv.gz",
+      "bytes": 152907,
+      "sha256": "f7f00c4739a613ccb16644b2f12b9464bd49ccf0c1b92553b7d56d007e1da989"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4622[String#end_with?].filter.json.gz",
+      "bytes": 337883,
+      "sha256": "50e70a533a1453ead7e00e3e73ea0512cc1c4a1bc8ceed2c3db57c40a5fc5794"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4743[String#size].bgv.gz",
+      "bytes": 36201,
+      "sha256": "48b45fc724dde86e847fe5743c521e83e80d04366621103f6e00c7fac71f64a8"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4743[String#size].filter.json.gz",
+      "bytes": 89687,
+      "sha256": "59ef85c67e98c90d878a06a676b4dea270c7ad5f62e1e194aa8b774a5d83b5a6"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4770[block_in_<module:KernelOperations>].bgv.gz",
+      "bytes": 18697,
+      "sha256": "ddfea8fc904fa589b041c74d60bf88e5ecaa832c8754c5542a9229886f12dfea"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4770[block_in_<module:KernelOperations>].filter.json.gz",
+      "bytes": 36484,
+      "sha256": "6f77503c1efc74a2e53e7cd89429b36b55a397912479e7af7b7e9ac32243a5b8"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4801[Array#<<_<split-1160>].bgv.gz",
+      "bytes": 71960,
+      "sha256": "55472b036dacb84542048cc77eab7b8d324f54e697abaabb3e3412d278c669ad"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4801[Array#<<_<split-1160>].filter.json.gz",
+      "bytes": 124823,
+      "sha256": "ad9f1b23031f3e036721e300f9cb4fcba8e133de84fd771664330f7f95e3e392"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4821[String#[]].bgv.gz",
+      "bytes": 155077,
+      "sha256": "df25ab4f6f1b8567815e56d8f981ebbe64bff43a924d23f52ebd8091c739d1d5"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4821[String#[]].filter.json.gz",
+      "bytes": 357531,
+      "sha256": "2f270fddfe9fe7b5bfb7d41adaf6a016962f84854d6f1a25fc196cf4a7c42e1e"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4835[Truffle::FeatureLoader.extension_symbol].bgv.gz",
+      "bytes": 122616,
+      "sha256": "23bc4866b704721a72eb673d3c04dc2ac658247b1eef487005b6dce446b2b19b"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4835[Truffle::FeatureLoader.extension_symbol].filter.json.gz",
+      "bytes": 324184,
+      "sha256": "8e2e9730ca97bb58ad511a5cf80d08f91547541c21279c887c1f3a8b663e6ac2"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5020[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 86696,
+      "sha256": "40e077137a0a9af2ca7cb113405fc37a288a70539e13c0369ebb421c94a428ec"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5020[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 148510,
+      "sha256": "c7068f1f9ea1b33846dc520d67d318841adb81c2ba77347a92a9766f59d54625"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5035[Object#run].bgv.gz",
+      "bytes": 21061,
+      "sha256": "9832207ca242687edcc5a4165ddb88b9d64ae2e70156dfba6d9d9353e75d86a2"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5035[Object#run].filter.json.gz",
+      "bytes": 39977,
+      "sha256": "6053902949cf4c7191f6a1fa8205a40817af0c7432363df73f62edd1d47354f0"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/budget-2000/trace.log.gz",
+      "bytes": 44620,
+      "sha256": "9b8fe59614f7b6d0992bc3cde9ad0523bd03930c30a91c9261ec21e62bb777f3"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/capture.json",
+      "bytes": 101587,
+      "sha256": "1b5ed0102ff51ac4be79ec747b831ad6a6be37d5c06857dfec732d749f3402d2"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/cold-summary.json",
+      "bytes": 90403,
+      "sha256": "0a9a8439fc1888da64f7140ad6ce94b5fe23cb7c6955fbecb31b86a6d4dd8922"
+    },
+    {
+      "path": "tier-1/primitive-switch-default/ruby/raw/correctness.log",
+      "bytes": 3312,
+      "sha256": "b81607d02a48554ffefbeb5ee24e23d41d202c9a4540f03c43c577d429a1a0d9"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/js/budget-2000/bgv/TruffleHotSpotCompilation-2382[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 114089,
+      "sha256": "dbc55154575b97f91a08df2012829f789e62724bdb50f1533042e90792efea67"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/js/budget-2000/bgv/TruffleHotSpotCompilation-2382[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 166153,
+      "sha256": "e0166100d24c20b35a758b78d5cb2345715052b6de52114dd763449c3a60cda3"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/js/budget-2000/bgv/TruffleHotSpotCompilation-2450[run].bgv.gz",
+      "bytes": 45917,
+      "sha256": "cbfb577295a65222c392531fd472186c07cbf4b2f6241325f9c6ba0981c949fc"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/js/budget-2000/bgv/TruffleHotSpotCompilation-2450[run].filter.json.gz",
+      "bytes": 39565,
+      "sha256": "b46975a68389accd9fbb9867fd4696fb150d720dcbde1072460e0c241affce05"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/js/budget-2000/trace.log.gz",
+      "bytes": 10823,
+      "sha256": "8db956521c6458a417c801698c8138cd5915be00d4ca9242b9a6dfebc77ed062"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/js/capture.json",
+      "bytes": 20931,
+      "sha256": "5373015d204eabcc00b5c05b2f1db04c9ad53eb528bb8e886c381f523d463155"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/js/cold-summary.json",
+      "bytes": 11481,
+      "sha256": "c55eb5a24a4a6ede7ca74a34376327e4dc0ce4de1a2aa2824d7a1b443db3ac66"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/js/raw/correctness.log",
+      "bytes": 3239,
+      "sha256": "407e548f4210601ea4cc2d7cc78bc832ef291e0cdb0f93718fde1a1f2cc65c14"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3205[ProtosBuiltinCallRootNode@56511306].bgv.gz",
+      "bytes": 182169,
+      "sha256": "989367c358ffbcc6d440ef455fd6d4acf44214747546d332bc1a9ebc958f2df8"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3205[ProtosBuiltinCallRootNode@56511306].filter.json.gz",
+      "bytes": 337167,
+      "sha256": "23bb06dd68ef531f63eecadd90c3a3c86935f4a1d70d41d144efb419f8065bb8"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3296[ProtosBytecodeRootNodeGen@79127ec9].bgv.gz",
+      "bytes": 402143,
+      "sha256": "48ecf3dc6e67c2907b00ddd1347cbf349cac2b42875b8dec2e0115e26d7570b8"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3296[ProtosBytecodeRootNodeGen@79127ec9].filter.json.gz",
+      "bytes": 1041923,
+      "sha256": "355acd74cd859fad71f860f9b229cb489659f052fc674a39237a86789c4c9e92"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3419[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 95130,
+      "sha256": "78ae54e980fd895dfd88aff1c04ce64c0e7556214be6a285b239beeaafc60d89"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3419[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 170806,
+      "sha256": "25e45ab0793d9cb3827b31eb543505ca48351b69bc683079d29c50bae17c2ff8"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3424[protos-root:24cb284b48210543[CLOSURE|truffle:2b3c4fa5e33562e9b86a70b23166b3f2b194367f5b28ea78afe6b7f2733e2383__workspaces_protos-benchmarks_cases_primitive-switch-first_primitive-switch-first.protos|1050...].bgv.gz",
+      "bytes": 3247887,
+      "sha256": "0d61b7dd163a4b3dbb3efbe422f81a4df37b56af5c56f393a9d193431df2bd07"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3424[protos-root:24cb284b48210543[CLOSURE|truffle:2b3c4fa5e33562e9b86a70b23166b3f2b194367f5b28ea78afe6b7f2733e2383__workspaces_protos-benchmarks_cases_primitive-switch-first_primitive-switch-first.protos|1050...].filter.json.gz",
+      "bytes": 6444729,
+      "sha256": "85555174d649b185efe892247feb90aa9027dac668f25c10e3886f3a9f6f39c0"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3442[ProtosBuiltinCallRootNode@5cd77e9f].bgv.gz",
+      "bytes": 152869,
+      "sha256": "5615106739ae047469107ed407f11a129dc57d33fe8bcc2dd6da1eaf873e9c14"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3442[ProtosBuiltinCallRootNode@5cd77e9f].filter.json.gz",
+      "bytes": 336609,
+      "sha256": "b2ed0093f0c8d5ac5dc9b8664a7a73ca60144708cc02064159603cd7c42e7d80"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3447[ProtosBuiltinCallRootNode@3d2c402].bgv.gz",
+      "bytes": 152904,
+      "sha256": "6312912ee7696771acc3246d69dab76b7f53726fd7acde38c01792c5dbb9f53c"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3447[ProtosBuiltinCallRootNode@3d2c402].filter.json.gz",
+      "bytes": 336608,
+      "sha256": "81189278cec3e106dce1c1e2ddc1347092e3aa1b23ca79007e123f52e27a800d"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3452[ProtosBuiltinCallRootNode@5aa885f1].bgv.gz",
+      "bytes": 169661,
+      "sha256": "67d16b03cea92ed77ce9d08a3801c8597737d96ed5f137d5d72b54701f250add"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3452[ProtosBuiltinCallRootNode@5aa885f1].filter.json.gz",
+      "bytes": 340140,
+      "sha256": "c0fdcb94c964eb7f50af92e20f6189234a214641051e47f06b98f4153c78fb70"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3458[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].bgv.gz",
+      "bytes": 153565,
+      "sha256": "b94a6220971b6bee071dbcff3db0f47b027eb18afcb47319cbd7294e37e7837f"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3458[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].filter.json.gz",
+      "bytes": 341249,
+      "sha256": "18eeec1830805fa9453925ba54b560d80637c97b0047a4aed55cc577802c4f44"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3470[ProtosBuiltinCallRootNode@9fd7a53].bgv.gz",
+      "bytes": 269144,
+      "sha256": "2eee4b6a6af8b40e36d99fdab49ce948c35d52ecc62b663b4a6bfdd69fb55b14"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3470[ProtosBuiltinCallRootNode@9fd7a53].filter.json.gz",
+      "bytes": 684762,
+      "sha256": "6cfe6e8b26655cd1302c25852c9196ac7311be2a41900f7dd20bfd4868caf2a9"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3480[protos-root:9a60255c18c7f5bc[CLOSURE|truffle:2b3c4fa5e33562e9b86a70b23166b3f2b194367f5b28ea78afe6b7f2733e2383__workspaces_protos-benchmarks_cases_primitive-switch-first_primitive-switch-first.protos|1090+2]].bgv.gz",
+      "bytes": 24507,
+      "sha256": "551c30d84e6767c6b428477849c5cf64c6b535105613785e3feab12f6671a79f"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3480[protos-root:9a60255c18c7f5bc[CLOSURE|truffle:2b3c4fa5e33562e9b86a70b23166b3f2b194367f5b28ea78afe6b7f2733e2383__workspaces_protos-benchmarks_cases_primitive-switch-first_primitive-switch-first.protos|1090+2]].filter.json.gz",
+      "bytes": 48874,
+      "sha256": "6c510824c06d333887c017f951b2fffb0aafa802119b66003d02d5e5a25172f3"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/budget-2000/trace.log.gz",
+      "bytes": 20959,
+      "sha256": "cd90bd2f7aad6b422de567ef874212c8d9078573bae29575ab9cc8c8f4e396a5"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/capture.json",
+      "bytes": 98623,
+      "sha256": "6df6437540dab7cfbefca6c00ac0f0060d7ad18708c4a4dcd6f29b25a7e0ed15"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/cold-summary.json",
+      "bytes": 63102,
+      "sha256": "99191ed5f45f6085ee5dec5bf3e96d0550468de0c6419acf774828a554893501"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/raw/correctness.log",
+      "bytes": 3989,
+      "sha256": "9e80052123e1f1c6f37d60d027bb18eb3e35d4d3ef74407419229975e92f466b"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4051[<builtin_function_StringBuiltins.rpartition_at_44d1d4c0>].bgv.gz",
+      "bytes": 119513,
+      "sha256": "12e6deb4dd390590eaa2c940112e642e4d3ffe3b1cdc4dd25d0a895e8dc3568d"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4051[<builtin_function_StringBuiltins.rpartition_at_44d1d4c0>].filter.json.gz",
+      "bytes": 176714,
+      "sha256": "af11ce1bbc875e9fc1e7c895a9a49b3c8210dd44aabe0fae4746983e103019f4"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4482[<builtin_function_ObjectBuiltins.__setattr___at_78cd73a5>].bgv.gz",
+      "bytes": 197864,
+      "sha256": "52c3370e0e685452b8e314d8b48fc18f0fe725fd6e7522d7781ab366c5c9e4bc"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4482[<builtin_function_ObjectBuiltins.__setattr___at_78cd73a5>].filter.json.gz",
+      "bytes": 401445,
+      "sha256": "037ac808cd21e35d20d59beebf3faa5a944a03c54a306944399f7eee6063d44e"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4906[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 137725,
+      "sha256": "e53be45dae0bc0958e70ef82ea5761e4c8a7773d7bfaf49231c16506d2d8a9ca"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4906[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 247559,
+      "sha256": "6973364383bf2cc23ec3ede889c43c76e1bceb2b38b6e781cb803cca0b78883f"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4921[<bytecode_run_at_16e80ccb>].bgv.gz",
+      "bytes": 26875,
+      "sha256": "f2bba0b8527973c4a64839ffafb490b0630853df358ae60cf4d6f7fec5848e05"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4921[<bytecode_run_at_16e80ccb>].filter.json.gz",
+      "bytes": 50675,
+      "sha256": "cdcc1dc52543a9202bcb4a0153e50be6a507808a24e6f3be48f15dc7efeab77f"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/budget-2000/trace.log.gz",
+      "bytes": 14690,
+      "sha256": "e465fa3ae53055b322de975e60bfd57f97f09587bfe7e13afe976ef09a545ec1"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/capture.json",
+      "bytes": 36610,
+      "sha256": "73ab6b3ef2df672d4b7ebcd1c9178cbd35ce4fa1d4a54e88b13e43fb99113479"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/cold-summary.json",
+      "bytes": 26959,
+      "sha256": "819ea77f8aa80ac9d4ca144c7d8f4f21ea6b3a11d72a4275e41325854adf7c77"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/python/raw/correctness.log",
+      "bytes": 3246,
+      "sha256": "fef8c7f87f69fc7053740fd92adb5d1a2b19ecd1b2577740a5a53d7dadd1bbcd"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2845[Module#alias_method].bgv.gz",
+      "bytes": 56529,
+      "sha256": "dd83670fb881c0ed39cfbd9cc5d79b0a90060d059c203287952ddcbeee97dd28"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2845[Module#alias_method].filter.json.gz",
+      "bytes": 73633,
+      "sha256": "c6a6cc557d218d488cbbd41da60b738ed6eebd67426c31ea80e87949e52249ec"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3364[Array#size].bgv.gz",
+      "bytes": 22461,
+      "sha256": "2243e1520a42c9269a34994fca0ce2ac14560fca59da535d0a3408c608c74227"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3364[Array#size].filter.json.gz",
+      "bytes": 46080,
+      "sha256": "e0bdf97a7df4210596d880548a5d4885370a72de376476dc64fdbdc9a4376a9a"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3466[Encoding#name].bgv.gz",
+      "bytes": 19550,
+      "sha256": "b11be6611bccb8abc86e09846a6d04846db4af71a9c668c64a86b822090a2bee"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3466[Encoding#name].filter.json.gz",
+      "bytes": 40595,
+      "sha256": "926c3c1e37aa8620450e9159c5a1e2847b9f0b9c3429b82bb9248e5b837ec961"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3492[String#upcase!].bgv.gz",
+      "bytes": 158566,
+      "sha256": "7e613ff49007009912c462dd656856fc2a704909d16c0aa40c7b316e33c98c1f"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3492[String#upcase!].filter.json.gz",
+      "bytes": 274320,
+      "sha256": "af0c0fd418b00d4a093b3fce61b336c710e9188f2102255bdc967febdccc70f0"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3513[Truffle::StringOperations.validate_case_mapping_options].bgv.gz",
+      "bytes": 75305,
+      "sha256": "1e3b620b5549b7a427f483d18ff58fad6c27d35ec1c505d8d4015dbea909af5c"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3513[Truffle::StringOperations.validate_case_mapping_options].filter.json.gz",
+      "bytes": 145577,
+      "sha256": "e0a98113bf9db5c8d23bf0cd9e274ec99209c6fa2cbc76c24ae6bc298893804c"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3551[String#to_sym].bgv.gz",
+      "bytes": 38216,
+      "sha256": "49b1c81d584972285f8764bcd2400261621b70e4feea9958ee7f3ba0b1786604"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3551[String#to_sym].filter.json.gz",
+      "bytes": 100344,
+      "sha256": "7aa301d3a31728822cb1b6008cb77573d03db5f2d2933470be99e6898f2fb1f8"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4188[Truffle::POSIX.generated_posix_resolve_function].bgv.gz",
+      "bytes": 67944,
+      "sha256": "dfb880c7f38396c1dfade9493359893d009af1497c092d9bf0ded0ec0497d231"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4188[Truffle::POSIX.generated_posix_resolve_function].filter.json.gz",
+      "bytes": 121551,
+      "sha256": "19b06bc8d7de6225e48d520a0d16ca55eb3d781df75ba23e0bbcad620f82d8b2"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4200[Module#const_set_<split-930>].bgv.gz",
+      "bytes": 25681,
+      "sha256": "4b698a264d0b7caeef0512845b676128df955dce76889c286e80472ab1dc5fc4"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4200[Module#const_set_<split-930>].filter.json.gz",
+      "bytes": 61061,
+      "sha256": "7f6284a0852273fd2b57e3b5fc796bfd47c2f3066006a5a4cd00418175eb3a54"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4550[String#end_with?].bgv.gz",
+      "bytes": 152773,
+      "sha256": "7c70c683d4a64e2a3da64ef6ab10e167b8a781ca860d3cff19618a188ee8d9f5"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4550[String#end_with?].filter.json.gz",
+      "bytes": 337878,
+      "sha256": "bb6836a1d1065afd2372161f1655671dd532f38bd2a7807c520c6eb4e5aeddb3"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4680[String#size].bgv.gz",
+      "bytes": 36200,
+      "sha256": "5ed7f0ab8af3ea636c5f70b64a9e0596233f8a8357eb92ea04846eba85310dbc"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4680[String#size].filter.json.gz",
+      "bytes": 89688,
+      "sha256": "ab4877264f212d88cb352653078b683f49de7acb8df7cac0d396824372798a1e"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4702[block_in_<module:KernelOperations>].bgv.gz",
+      "bytes": 18674,
+      "sha256": "06049a21411636c03fa88b6e5a672d8db553411482989b9aec642d7ae78f6444"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4702[block_in_<module:KernelOperations>].filter.json.gz",
+      "bytes": 36484,
+      "sha256": "93c0426d91b269cc369706b150cb79590d25ad6c89f685dcc6cdc49e5887c56c"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4728[Array#<<_<split-1160>].bgv.gz",
+      "bytes": 72051,
+      "sha256": "f2b51e1306a875a863efab14f7e45b2a0c63658d1540b5ba59b5c1fff8b5c5cb"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4728[Array#<<_<split-1160>].filter.json.gz",
+      "bytes": 124821,
+      "sha256": "b5dfd914d3ca0c7d9701df60fa2770bd02ba65e04bd6c15f316e5c627e46698e"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4741[String#[]].bgv.gz",
+      "bytes": 155024,
+      "sha256": "0676ec9ae4be47ab8507617ba08c8e506813e6224859ca6b29cf56043a17a78a"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4741[String#[]].filter.json.gz",
+      "bytes": 357536,
+      "sha256": "fe7ee5a5695689ac56944260313f2d2932f5da9b30944c5e301bc8a1ba459228"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4755[Truffle::FeatureLoader.extension_symbol].bgv.gz",
+      "bytes": 122642,
+      "sha256": "fd56b2f867645645cdd11f38b483a7ab14d955c4d25a3bf8754eac9a8f390e9b"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4755[Truffle::FeatureLoader.extension_symbol].filter.json.gz",
+      "bytes": 324179,
+      "sha256": "b200729ecf263b49fc02007d718f84ba502fb8e7c8c2eff496e4aa32addb18cb"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4938[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 86900,
+      "sha256": "51f83e68c29149cad11305fde5965aa70d70770d0ce04cf7fd58e549b9b37b8a"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4938[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 148530,
+      "sha256": "01a65a69aa85c87ff1a621062629608e3f33ac0a772fee0df8c562ccf443dafa"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4955[Object#run].bgv.gz",
+      "bytes": 20959,
+      "sha256": "bd76c030122b9938edba05f7e6ec26d0b4d014c706db9ce1f8cbb6eaee011399"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4955[Object#run].filter.json.gz",
+      "bytes": 39893,
+      "sha256": "9b12bd80c76e7cf8c536cf8dbc563aaf4037a54e74984ae8c9c9fa608d3e9c8f"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/budget-2000/trace.log.gz",
+      "bytes": 44194,
+      "sha256": "befb2a9b28c2bc56ff09a480ea444f01c2664cf7fa4a30f8f4e7548787e93028"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/capture.json",
+      "bytes": 101566,
+      "sha256": "b9b152f271a1871b3082e1ace003f7747b1b518418317d3179fc031a1a7abb21"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/cold-summary.json",
+      "bytes": 90397,
+      "sha256": "ea639fe38008cad05dfbde08a8ee3972519f20e0c568dd940a2ba80ab6f2d1b7"
+    },
+    {
+      "path": "tier-1/primitive-switch-first/ruby/raw/correctness.log",
+      "bytes": 3308,
+      "sha256": "bc0897db04febf5665cd7f7abe18216ea5a3c475caf74d3fee277b9411b52727"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/js/budget-2000/bgv/TruffleHotSpotCompilation-2433[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 114612,
+      "sha256": "cc08bb507f1a364cbf588c274b5375358fd2688390465206c69845415da95656"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/js/budget-2000/bgv/TruffleHotSpotCompilation-2433[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 166187,
+      "sha256": "05c33ebf6e5c1e9d1e951ff611888a1ea1e2b9b7c1b190daefe59fe6ff6103ca"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/js/budget-2000/bgv/TruffleHotSpotCompilation-2499[run].bgv.gz",
+      "bytes": 45688,
+      "sha256": "5f76f310433f3fd6d89c69e1d1536b7da461b89c82ad4b8063a69695b51a9e21"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/js/budget-2000/bgv/TruffleHotSpotCompilation-2499[run].filter.json.gz",
+      "bytes": 39622,
+      "sha256": "865b38aa198b8750a97b3d5ce2da73a35bed39f14e8162331a56f77c8aaf7437"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/js/budget-2000/trace.log.gz",
+      "bytes": 11026,
+      "sha256": "6741f639e7e1fa85ab02f9a9a14bc96ecc0d4f2740c32c2c69809ece0efbae59"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/js/capture.json",
+      "bytes": 20924,
+      "sha256": "0417c020ce198dce6ef57eb1ea4a953e85e8eb47d16d20c5de6fd9cea3ff4f34"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/js/cold-summary.json",
+      "bytes": 11479,
+      "sha256": "0a327bf07e4a0ca56a4d6a82f5aa3af71abe1f607649532aa0ff1dba45b3c607"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/js/raw/correctness.log",
+      "bytes": 3237,
+      "sha256": "0825389092e5290d98456289031dbb026710becacd1f6747b8bb5df2c00fd51a"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3249[ProtosBytecodeRootNodeGen@7db14f72].bgv.gz",
+      "bytes": 415117,
+      "sha256": "b4af3b25eb8b07cd2dab86b867dd03d9baecd4b645741528c8da5236b08223cd"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3249[ProtosBytecodeRootNodeGen@7db14f72].filter.json.gz",
+      "bytes": 1042587,
+      "sha256": "92e09470b44b9a9eac82ea845fc219d2c7ca6e1a5df70d5d06c9a7aeb1c01643"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3342[ProtosBuiltinCallRootNode@69daba6a].bgv.gz",
+      "bytes": 168937,
+      "sha256": "fa47164c0f02b6b7668ce35f4f9081a5a74e31b48db49ae9e279e8c8dc05d2b7"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3342[ProtosBuiltinCallRootNode@69daba6a].filter.json.gz",
+      "bytes": 337259,
+      "sha256": "c2ec425100547f8b4e5f1eea26a02b5c84450db80f2475142acd698e3e44b702"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3348[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].bgv.gz",
+      "bytes": 164530,
+      "sha256": "95ee2b1a8aeda3c32b46f3e4a9009ca2070b44193f668c79f38abe3600060eb4"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3348[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].filter.json.gz",
+      "bytes": 341255,
+      "sha256": "c07b6a9cb44efd04dde0e9a92ce9975740e992b420aadc75669505919eedb9f1"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3358[ProtosBuiltinCallRootNode@4d499a34].bgv.gz",
+      "bytes": 283105,
+      "sha256": "688bf92636f399d7aaf162468e8e5ab9456fe262822376c9de24093ec7b519a5"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3358[ProtosBuiltinCallRootNode@4d499a34].filter.json.gz",
+      "bytes": 684824,
+      "sha256": "f4170d369ec22415094bace25b321375feb393153b5e451220fb2af1fd358368"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3445[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 95019,
+      "sha256": "83578d4f8189c61d6e3b2437e70b80a4f647164c96b7d00aa53acbe547203f65"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3445[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 170804,
+      "sha256": "8b0b412a4917cbabaee296ea1d59440c7f174cbddbca6190678d94715f882035"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3449[protos-root:f82ff00276dfda01[CLOSURE|truffle:ad77788a3ac54e98b00b23238d3b696bcfc64de175099884b0c587bab372844b__workspaces_protos-benchmarks_cases_primitive-switch-last_primitive-switch-last.protos|1050+92]].bgv.gz",
+      "bytes": 3235987,
+      "sha256": "29d32e04fd0112d14a5ac53f63ac08eef67a91ffb3558ee756498d8b2b9ff0d7"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3449[protos-root:f82ff00276dfda01[CLOSURE|truffle:ad77788a3ac54e98b00b23238d3b696bcfc64de175099884b0c587bab372844b__workspaces_protos-benchmarks_cases_primitive-switch-last_primitive-switch-last.protos|1050+92]].filter.json.gz",
+      "bytes": 6445638,
+      "sha256": "78247b4b96ceafd9908cbec552fb3e19fd5349c1b258c1856af8ccf3b0e57d25"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3472[ProtosBuiltinCallRootNode@32fd3d85].bgv.gz",
+      "bytes": 152926,
+      "sha256": "a259905730d9bcfdf7473a58f83b05bbb1b77a593823f3fb6b92917f96cc6360"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3472[ProtosBuiltinCallRootNode@32fd3d85].filter.json.gz",
+      "bytes": 336695,
+      "sha256": "8d59e7565773fbc6148f27c5c3eafca44a9ca3468841998addcf7cb4b87cf1a9"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3475[ProtosBuiltinCallRootNode@1d2c3bec].bgv.gz",
+      "bytes": 152927,
+      "sha256": "6c97717219d314026d8a616122b5e7d30e6c3f9413382b599a0bbc0d2725b3a7"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3475[ProtosBuiltinCallRootNode@1d2c3bec].filter.json.gz",
+      "bytes": 336697,
+      "sha256": "422a1c2835b95a6d3f7add985b31699b4ecc1a9dbea7418fd2ea2608dc7f5998"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3484[ProtosBuiltinCallRootNode@61d48dc8].bgv.gz",
+      "bytes": 155673,
+      "sha256": "4adea56319e38a484db46da3075243e59b6d28c8db6bfb565357f8fa58036227"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3484[ProtosBuiltinCallRootNode@61d48dc8].filter.json.gz",
+      "bytes": 340224,
+      "sha256": "a55fde33dfbd178c6c0008f0f1e7610d03b6ab77bdf385fbf9ad7b5f2866d241"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3492[protos-root:9b6dffd8bc1ac373[CLOSURE|truffle:ad77788a3ac54e98b00b23238d3b696bcfc64de175099884b0c587bab372844b__workspaces_protos-benchmarks_cases_primitive-switch-last_primitive-switch-last.protos|1118+2]].bgv.gz",
+      "bytes": 24534,
+      "sha256": "ac9fe36c6e5a7f67b375e57987527c05e0c95c36780cf7aeedd8ba8299457b79"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3492[protos-root:9b6dffd8bc1ac373[CLOSURE|truffle:ad77788a3ac54e98b00b23238d3b696bcfc64de175099884b0c587bab372844b__workspaces_protos-benchmarks_cases_primitive-switch-last_primitive-switch-last.protos|1118+2]].filter.json.gz",
+      "bytes": 48892,
+      "sha256": "17c1dde3578ad59e017577c26c0f7660d613042cbca75d185644bb3249d559dd"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/budget-2000/trace.log.gz",
+      "bytes": 21304,
+      "sha256": "7a4e0e60c35285f9fffed8a075b9a895d6587cbb41af640f60ad929c647a6626"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/capture.json",
+      "bytes": 98582,
+      "sha256": "e7199c07100e5573b8962088cf1756e0dee59ab7f2dcfa666bfb78d9d2d0c8c1"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/cold-summary.json",
+      "bytes": 63085,
+      "sha256": "c90e088fd0db07f3bdd1eca1c3a41ce158ae31531c179136b8376cea669d7887"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/raw/correctness.log",
+      "bytes": 3987,
+      "sha256": "d3c4dbf7eb61d14ed33c25464f566f309cf04a619d2c342a84d90883451cbd1f"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-4132[<builtin_function_StringBuiltins.rpartition_at_20a4d9f2>].bgv.gz",
+      "bytes": 119571,
+      "sha256": "a47cd4dc6538f5bfdd05a48f121c28e74643e59a25246b53724e34c7a0ad882b"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-4132[<builtin_function_StringBuiltins.rpartition_at_20a4d9f2>].filter.json.gz",
+      "bytes": 176719,
+      "sha256": "b65b7210125729a6de0d57ff309f11b8d75a4d9ac11dbec0784e6d3aeeb6e685"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-4564[<builtin_function_ObjectBuiltins.__setattr___at_76d4ce9d>].bgv.gz",
+      "bytes": 198106,
+      "sha256": "96a09810ee8be4f38f6d8320f29aaf8b255bf112354a91b855eff5597067d9e8"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-4564[<builtin_function_ObjectBuiltins.__setattr___at_76d4ce9d>].filter.json.gz",
+      "bytes": 401441,
+      "sha256": "193d71bfd6da4a788b4f8a5853288f01ab2412556d6e1ed71355f4dfb44b3d7a"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-4990[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 137966,
+      "sha256": "c8d4b971517c6379c0ac13cfaf36471432b157280ce4676d575fbe24cbf5ae96"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-4990[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 247583,
+      "sha256": "813c478364b721f0f77ee07ab7950376eb5a318a6bf184309670f0b0930b439b"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-5008[<bytecode_run_at_ea60305>].bgv.gz",
+      "bytes": 27091,
+      "sha256": "0be60585ebcb4f3d7c8c1e27acd0002a9fc9f5ebe6cb0bf62e2d30570b3ffa8f"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-5008[<bytecode_run_at_ea60305>].filter.json.gz",
+      "bytes": 50913,
+      "sha256": "e12a6ff57d1e59cf9679d5bdd3eddb7a9dafd27dc3b01dc57531eb539c668ad7"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/budget-2000/trace.log.gz",
+      "bytes": 14915,
+      "sha256": "6cb9bde3c420528f0d1605f981842ec3ae79e95c4f5a38face600b97e076c144"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/capture.json",
+      "bytes": 36597,
+      "sha256": "03cd3d13c4c69b1bb100b166703fe3e2fa07d5f7e3c90f6e873f56ca97406a45"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/cold-summary.json",
+      "bytes": 26952,
+      "sha256": "757ff3480cfea915e9fc6fb7a5e4395db4139d720402a9f8278de20c68a77df7"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/python/raw/correctness.log",
+      "bytes": 3244,
+      "sha256": "2e5d2edecb50321be37a1a5e138eb4f7d6924578f8a6831178acc9c44a689ca3"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2865[Module#alias_method].bgv.gz",
+      "bytes": 56508,
+      "sha256": "014b3a7b9124aca18f8932228664c68363c5b86d55a3320b48bb058bd6d29658"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2865[Module#alias_method].filter.json.gz",
+      "bytes": 73637,
+      "sha256": "ff85610c24b71f25d0b307859f22c7f0977ac902b61b821b071a3db344ad3991"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3372[Array#size].bgv.gz",
+      "bytes": 22485,
+      "sha256": "e578a8e88548b92284651e0900246d9badc7de60f03c41698bd2cd5dae3c47fb"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3372[Array#size].filter.json.gz",
+      "bytes": 46080,
+      "sha256": "5a68eb655362918aa8b02674c4c73aa322f6e9a6c5f9b538f2c75c02d781c526"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3472[Encoding#name].bgv.gz",
+      "bytes": 19548,
+      "sha256": "46b03c3a74b221d9d7cadbbb38acf709d8a94d63d9d2e39617e6bb6f120d92ac"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3472[Encoding#name].filter.json.gz",
+      "bytes": 40596,
+      "sha256": "da61c9a306749f0760017251b3fc602fcf29c68ab43f13a2993eed60fb2d2ade"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3493[String#upcase!].bgv.gz",
+      "bytes": 158746,
+      "sha256": "3cabd6066cbc5b70687be71a5cd3d074d8dd753774978776015f25033b79b304"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3493[String#upcase!].filter.json.gz",
+      "bytes": 274326,
+      "sha256": "76b1dce898668dbfaf0eaa22855864801f553347ff9bd46b39319ee16dbbeff1"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3513[Truffle::StringOperations.validate_case_mapping_options].bgv.gz",
+      "bytes": 75449,
+      "sha256": "0ef1e30ec0e946bb4dbe8a99f350594f6e8d4768350dcd4ab508c58391842f7f"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3513[Truffle::StringOperations.validate_case_mapping_options].filter.json.gz",
+      "bytes": 145575,
+      "sha256": "552820226474998b5e958d2654eaf86bb096a8c9f6f24e472e2b7c583a82f5de"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3551[String#to_sym].bgv.gz",
+      "bytes": 38206,
+      "sha256": "5d8aef0d222ea690f6145c9bb05aeb9569b9c80f320d103efbea082ada6e922a"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3551[String#to_sym].filter.json.gz",
+      "bytes": 100348,
+      "sha256": "b2b265174352db30071f0ebcae89b6a0ef182d617bfb6692b0f5c010398102ea"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4205[Truffle::POSIX.generated_posix_resolve_function].bgv.gz",
+      "bytes": 68013,
+      "sha256": "bf8029f3d9e9069777c1c54517c461706537bc6b05d29065d54825fd87df81a3"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4205[Truffle::POSIX.generated_posix_resolve_function].filter.json.gz",
+      "bytes": 121551,
+      "sha256": "5f6e5cd3a2cdd0d2b62fba6d3d8a592b2266de09f150de2e2795d3018dc3b380"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4217[Module#const_set_<split-930>].bgv.gz",
+      "bytes": 25685,
+      "sha256": "0156381c5d1116bf4df26413ddd75d18b1a06aa417eeb789f69e2388a0b7aa44"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4217[Module#const_set_<split-930>].filter.json.gz",
+      "bytes": 61067,
+      "sha256": "5af769af8711f20f253cc21a307a4ed43cbfe3d8049a5d33ce3b747c71100c1c"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4571[String#end_with?].bgv.gz",
+      "bytes": 152812,
+      "sha256": "6439de767115f7da346aa8d4409c00be7a75c134ccb2ca6814a691919ccc9d18"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4571[String#end_with?].filter.json.gz",
+      "bytes": 337885,
+      "sha256": "c0dc15d6ecdf894cc001b68820d3842b23f4ea8f05188de104a474539fa66df0"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4697[String#size].bgv.gz",
+      "bytes": 36209,
+      "sha256": "639db49e155b02922190b9019f71f6ff7b1e4766eb2f9927320a20573d3dc3df"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4697[String#size].filter.json.gz",
+      "bytes": 89689,
+      "sha256": "b761965a67de0719e775b4d7084f6c61065e49cbc396feee97372ec63e253ee8"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4717[block_in_<module:KernelOperations>].bgv.gz",
+      "bytes": 18694,
+      "sha256": "529fadc935a9309d078d4cedea6765221477b40e721f4c6dae603b7f7c226add"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4717[block_in_<module:KernelOperations>].filter.json.gz",
+      "bytes": 36485,
+      "sha256": "d7472e3f5d944dfc92586835a85a53db78f0f4c452c433f941d242e62586ed92"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4743[Array#<<_<split-1160>].bgv.gz",
+      "bytes": 72222,
+      "sha256": "63c724a52940423fc278298e73aae974b10dcb2d6cc480c0459299c17a5b27e5"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4743[Array#<<_<split-1160>].filter.json.gz",
+      "bytes": 124819,
+      "sha256": "d338193156feb8e3d51bad8e964f6498783909c4ba3e49817d19f8d7d99319b6"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4763[String#[]].bgv.gz",
+      "bytes": 155155,
+      "sha256": "f89d6c2b229a40efddccc5d56effcb438999003c0643ef809f0c41fc20da65be"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4763[String#[]].filter.json.gz",
+      "bytes": 357543,
+      "sha256": "73d189769e56cc9b0f23a3653bfec376bb0abe8a8e2fca0c9720429c9b1449ef"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4781[Truffle::FeatureLoader.extension_symbol].bgv.gz",
+      "bytes": 122663,
+      "sha256": "6d8b89d9d56488395d7803f88fb31af2811c0825144e664be6d52e4390d09c9d"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4781[Truffle::FeatureLoader.extension_symbol].filter.json.gz",
+      "bytes": 324184,
+      "sha256": "5733c4a13c20f2801cbeb3401dd3b24a4412667020881acdf3b4596c917db6e7"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4966[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 86691,
+      "sha256": "53290811a9e2b79701aa1a446669f35ec59734c852c2435cf1e3c315199b4ac3"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4966[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 148527,
+      "sha256": "60ca969f832da4c977c743ddd986c828d2add254aaf871593e72f272e53ce7f7"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4979[Object#run].bgv.gz",
+      "bytes": 21071,
+      "sha256": "4bc165036c8ea1dd157fae65e1ad321df7264d1feb063c49b42c9d3334eb78b4"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4979[Object#run].filter.json.gz",
+      "bytes": 40052,
+      "sha256": "b529c01d20e39bb37df1d48b6596473bb685a6500e430f5f6dd4259054a91fb4"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/budget-2000/trace.log.gz",
+      "bytes": 44481,
+      "sha256": "381dadbae837c644e189d4a21066f9e04717513cedae87d085c50956f4f37cb4"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/capture.json",
+      "bytes": 101561,
+      "sha256": "bd3cf8a651720f184e49bf47035ddaefcf3d56f5e016b90da00cc7ee3891118e"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/cold-summary.json",
+      "bytes": 90394,
+      "sha256": "b9404df65cfe25f4b2f2e8673f61845f70563cfa1b68f439d7363a59b2ad6c3c"
+    },
+    {
+      "path": "tier-1/primitive-switch-last/ruby/raw/correctness.log",
+      "bytes": 3306,
+      "sha256": "56fc883fb410e4f9299eaed121ec7102ffd0456dffe2d6b78973deb23d61b3a6"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/js/budget-2000/bgv/TruffleHotSpotCompilation-2416[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 114328,
+      "sha256": "fd4b353485a6feb846841ece6198359dc5ab1a4074ed3f67b8e990c3705fabd9"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/js/budget-2000/bgv/TruffleHotSpotCompilation-2416[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 166210,
+      "sha256": "d59db441ec620eae6da483ce2b259be654d9f169e9a32c19ade3a9150b77ce84"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/js/budget-2000/bgv/TruffleHotSpotCompilation-2478[run].bgv.gz",
+      "bytes": 45638,
+      "sha256": "b2a3ee8312d66fd9460201344553654375e534d993b449deb8809f9c4a545706"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/js/budget-2000/bgv/TruffleHotSpotCompilation-2478[run].filter.json.gz",
+      "bytes": 39634,
+      "sha256": "d035ea7bdee10614bf727668a703ad348d2e88bf4119481ff82300c06aa064b0"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/js/budget-2000/trace.log.gz",
+      "bytes": 11129,
+      "sha256": "504574ee2a4b65a0f3bd80b43ff2a79219b5912e1a718f085d5143241478e4fa"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/js/capture.json",
+      "bytes": 20940,
+      "sha256": "3443641385809b2154492334ee9bfaae59ea5de92b3f163ff5fb986a4acd0093"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/js/cold-summary.json",
+      "bytes": 11485,
+      "sha256": "db549b094eabeec4e3b02b18e95b45c5545bb7e59699206664896596ad5cc8ad"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/js/raw/correctness.log",
+      "bytes": 3241,
+      "sha256": "2bf3f61ae77f9f5d0d6e04faab648adc3496f9e65938515d546804aedca0aadb"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3247[ProtosBuiltinCallRootNode@5d1c77e0].bgv.gz",
+      "bytes": 181961,
+      "sha256": "e504f7add4469d4abefca38c4df69ca749f114556db39787a7fb762c38599ba0"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3247[ProtosBuiltinCallRootNode@5d1c77e0].filter.json.gz",
+      "bytes": 337187,
+      "sha256": "1e5b01516e2ff7b07a697afbc759005f9918770f32f012878142f71cf640c623"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3290[ProtosBytecodeRootNodeGen@7e20caf2].bgv.gz",
+      "bytes": 403395,
+      "sha256": "37fee0ccb3290cadc11905ee626cf4ab42c53384d7d40a48d3f0a75a7481f3e7"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3290[ProtosBytecodeRootNodeGen@7e20caf2].filter.json.gz",
+      "bytes": 1043167,
+      "sha256": "5645fcb9f776001e886e32027765254d46ed90f3c0d46fe345490c158dd07e9d"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3364[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].bgv.gz",
+      "bytes": 164475,
+      "sha256": "bf54a85a61e8faff5802980631479e2b5a33a14bfdedea6e49886aafd6c37d0f"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3364[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].filter.json.gz",
+      "bytes": 341241,
+      "sha256": "6e8ffc71e3a3f9cf94513c1ab93d2f810112d1875546c6a5939443b33404d710"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3377[ProtosBuiltinCallRootNode@4e939bc2].bgv.gz",
+      "bytes": 282835,
+      "sha256": "a4202c5db9ad4108718f374f27a57c3e8c193e3f44f563468031741ff0e13f88"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3377[ProtosBuiltinCallRootNode@4e939bc2].filter.json.gz",
+      "bytes": 684769,
+      "sha256": "f7cdf93b5c92c4a6e8dc31d2fcd74d1f5cf9077ea9d2f57717f0f7de17be3145"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3456[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 94863,
+      "sha256": "095b2cc9ff49d7bb8a52deb74a89c752297d95aa609e545abbdea467fb71d364"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3456[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 170799,
+      "sha256": "81910f173bf7af1ee69ec4cf3a94c532753635f96ddfde0b452026e84d7027ad"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3459[protos-root:089be8c60955c817[CLOSURE|truffle:ac6b9af6b14d08b76bedcf71dc82ba4d1eb298d545ca4e0b0e9e958b092dc64f__workspaces_protos-benchmarks_cases_primitive-switch-middle_primitive-switch-middle.protos|10...].bgv.gz",
+      "bytes": 3236331,
+      "sha256": "ec0242e46fa888f4464f382b4112ff3d1b6d0ed0fc848847932181c8f8c48ed0"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3459[protos-root:089be8c60955c817[CLOSURE|truffle:ac6b9af6b14d08b76bedcf71dc82ba4d1eb298d545ca4e0b0e9e958b092dc64f__workspaces_protos-benchmarks_cases_primitive-switch-middle_primitive-switch-middle.protos|10...].filter.json.gz",
+      "bytes": 6445890,
+      "sha256": "6c8103590ccb08d11f6c2c172a739104b9cd2668e5565bb67bfadab6390ca378"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3480[ProtosBuiltinCallRootNode@9d8a7ec].bgv.gz",
+      "bytes": 152845,
+      "sha256": "4506dce2c3c265f112ed9d9ee24d2c394d8325f9b8f10887593bc0f5717edbe0"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3480[ProtosBuiltinCallRootNode@9d8a7ec].filter.json.gz",
+      "bytes": 336626,
+      "sha256": "bb0d2b016cc514502cfebade557431b1cec3c8809ef6135137f91e4597f263df"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3483[ProtosBuiltinCallRootNode@5d946cf5].bgv.gz",
+      "bytes": 152849,
+      "sha256": "a5d70c6c0c48a42ce84ecf26d7e1f2455275d2bdd9b029551a75fd46cc3cacf1"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3483[ProtosBuiltinCallRootNode@5d946cf5].filter.json.gz",
+      "bytes": 336629,
+      "sha256": "402ccfa3963c8572db04beca7a0c760bceeed2ea6b3b6f3d248246549c902b8d"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3489[ProtosBuiltinCallRootNode@2bff157b].bgv.gz",
+      "bytes": 155529,
+      "sha256": "369322eea1a9f341ae3796548f8b12e382953945003f8fced9b113963214b57a"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3489[ProtosBuiltinCallRootNode@2bff157b].filter.json.gz",
+      "bytes": 340151,
+      "sha256": "df9329fcbd85e7f56915bd11463adf4ba7059ad37842bf3b96fb8ddc136e2549"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3499[protos-root:9c20760d6e08d4da[CLOSURE|truffle:ac6b9af6b14d08b76bedcf71dc82ba4d1eb298d545ca4e0b0e9e958b092dc64f__workspaces_protos-benchmarks_cases_primitive-switch-middle_primitive-switch-middle.protos|11...].bgv.gz",
+      "bytes": 24520,
+      "sha256": "779e3eabc6284c799bda2c87dc681d242c1f5e7525d6b4e57ecd315dd882cb6a"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3499[protos-root:9c20760d6e08d4da[CLOSURE|truffle:ac6b9af6b14d08b76bedcf71dc82ba4d1eb298d545ca4e0b0e9e958b092dc64f__workspaces_protos-benchmarks_cases_primitive-switch-middle_primitive-switch-middle.protos|11...].filter.json.gz",
+      "bytes": 48889,
+      "sha256": "a8023c01bf2a4e2a09a371d1897da278a1dfb8d26d201ef337d1cbf9d259025a"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/budget-2000/trace.log.gz",
+      "bytes": 20984,
+      "sha256": "ab20a1355aab32dbaf7c1abd82e718165c261c2d499aae7fa523b97150e67628"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/capture.json",
+      "bytes": 98674,
+      "sha256": "9e90af85da186d8b176074829cdd84e8f2766492545f20848f7738b43915d676"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/cold-summary.json",
+      "bytes": 63128,
+      "sha256": "07cfcf99d2262183332cc169d1e2a8f6096d09481f642366353182fa88bffeca"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/raw/correctness.log",
+      "bytes": 3991,
+      "sha256": "982cf84d2e20982773704b4c90c3e7ed7d323b298e895f5d1adc62ab66b50b74"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-3997[<builtin_function_StringBuiltins.rpartition_at_20a4d9f2>].bgv.gz",
+      "bytes": 119428,
+      "sha256": "fe27bfa8b6e84f6fdac813d5dc5c1696969cd9286d00abb9226f1f06cafa4a3a"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-3997[<builtin_function_StringBuiltins.rpartition_at_20a4d9f2>].filter.json.gz",
+      "bytes": 176715,
+      "sha256": "cfb328a66da26391d2dc053dadae7eb44c1a38776bd4650a301f3b9e5a57ae81"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-4432[<builtin_function_ObjectBuiltins.__setattr___at_3b09f903>].bgv.gz",
+      "bytes": 198393,
+      "sha256": "2e219e604d877af902e5c8bf951940c37b8ae9829dd0838e6fcde6a496ba41d3"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-4432[<builtin_function_ObjectBuiltins.__setattr___at_3b09f903>].filter.json.gz",
+      "bytes": 401418,
+      "sha256": "abf2f941951b89b0e4823dd518a4f05f0f87838f8ff7b714214d798ac62ec200"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-4849[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 137680,
+      "sha256": "2a44c04be24e590cde2a1d2491c0e41f251b8969bcdb6be7b46bbf39341a1286"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-4849[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 247624,
+      "sha256": "ec7b4123c0c7cc0f868083be82ca17e8b9b2b7212235742beed0354dfd68d827"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-4860[<bytecode_run_at_6bbf47a2>].bgv.gz",
+      "bytes": 27144,
+      "sha256": "d100e058504d9e9ce84ad5e60869d7dd62d1c2bf58b02d98d7725cf910e2bf7e"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-4860[<bytecode_run_at_6bbf47a2>].filter.json.gz",
+      "bytes": 51014,
+      "sha256": "a40118056b40044f62f627cce0b214b1dc6a14c18cc09248311427155d97c8cf"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/budget-2000/trace.log.gz",
+      "bytes": 15110,
+      "sha256": "e06235200ea38a1e65fa8845444b66ae93e07b3cb5d4feab7842942ab580cf75"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/capture.json",
+      "bytes": 36619,
+      "sha256": "bc78fefb0fa513948dd96f6058baed8f9a0d471e8191b79bdd7a3ecff58f3e16"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/cold-summary.json",
+      "bytes": 26963,
+      "sha256": "8ac45927dad993e003528b2748270faa08ae1cfec4898c97e941d1ef69bafd0f"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/python/raw/correctness.log",
+      "bytes": 3248,
+      "sha256": "9c65e02df625e338309e4f763949780f740cbbc88cf30cdaf27ac4113ad30329"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2838[Module#alias_method].bgv.gz",
+      "bytes": 56674,
+      "sha256": "28803d9954885f2a71c785c39561c8173284bc3154950b05ca559cde24a4fd61"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-2838[Module#alias_method].filter.json.gz",
+      "bytes": 73727,
+      "sha256": "e5e68c45367ca89e90ace2cfb49b3f503234227348c7b1d3715be402be2e9324"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3319[Array#size].bgv.gz",
+      "bytes": 22503,
+      "sha256": "058b36db18d474b8f8c25357e81b2c1907a42ced9716ca25348338b5b7cecd1a"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3319[Array#size].filter.json.gz",
+      "bytes": 46080,
+      "sha256": "1f76d4f411d28c37115575d15c0caeadacc601b6d16dc45f7346275071ff1d2d"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3417[Encoding#name].bgv.gz",
+      "bytes": 19552,
+      "sha256": "55a3f32a02d0139a4aa52b051711642252ae84e16ff9521ae375d4b1bc81363a"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3417[Encoding#name].filter.json.gz",
+      "bytes": 40598,
+      "sha256": "8fd0e852d60f5e09419218985b1f0dd1782e15ce973e1f568b9e38202b23a71c"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3440[String#upcase!].bgv.gz",
+      "bytes": 158722,
+      "sha256": "51e40ce8f5130e78974fbadb88dab61182af5e4265b5b88cd163ce2b1135337b"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3440[String#upcase!].filter.json.gz",
+      "bytes": 274321,
+      "sha256": "e640f766af89d544295f3545af88cc70fff6f30d86c40d6f3a4690808a0d6bc7"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3465[Truffle::StringOperations.validate_case_mapping_options].bgv.gz",
+      "bytes": 75567,
+      "sha256": "d5b916be03d264e4b1d43f4c0d051b26751911906aac51dfc75c7e7039977ddf"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3465[Truffle::StringOperations.validate_case_mapping_options].filter.json.gz",
+      "bytes": 145574,
+      "sha256": "6f64e16ea0b46366e299e270cafdb3d258058fc3f173175c890a0c2d13df7556"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3498[String#to_sym].bgv.gz",
+      "bytes": 38188,
+      "sha256": "4082d1cd2fb301c20309385d2bb43b03797dcb3ea2f04274a8ae871e51cb1ad9"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-3498[String#to_sym].filter.json.gz",
+      "bytes": 100346,
+      "sha256": "4aa1cfa90e68daee5a5eec71059299a07659bd7f6bbdb98ca46b471a235cbb1d"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4135[Truffle::POSIX.generated_posix_resolve_function].bgv.gz",
+      "bytes": 67911,
+      "sha256": "9d31edb673c8112f26ef8b24ae3016209ec1f67c2714caad8d96f17a93f6368c"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4135[Truffle::POSIX.generated_posix_resolve_function].filter.json.gz",
+      "bytes": 121544,
+      "sha256": "2d32cc8180f4ade1b110f893c81aad4cf6501999cb78b79e66088155c1daf1a3"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4142[Module#const_set_<split-930>].bgv.gz",
+      "bytes": 25694,
+      "sha256": "0df13df7d5e473b8e70e5280cbca8145dbd98501f804bb9b91c1d5f0e53cc19d"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4142[Module#const_set_<split-930>].filter.json.gz",
+      "bytes": 61063,
+      "sha256": "b8db823088467c85d67ce9d4466985447858679eab87390da37a2d78ae76e603"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4498[String#end_with?].bgv.gz",
+      "bytes": 152843,
+      "sha256": "7af9dadd8390e7204b7356dd0445eb4cee0cc40405393e1f2515cdf7183bd81d"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4498[String#end_with?].filter.json.gz",
+      "bytes": 338064,
+      "sha256": "ba94b4f7cdc5787fd57e80dd365f26472bab0dae0cc9a1c43f42c1d2bfda2ca6"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4625[String#size].bgv.gz",
+      "bytes": 36188,
+      "sha256": "dc0710602000cf3ec949c1efe0dc67f6a7d76300594454de27294a9ac6a872b4"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4625[String#size].filter.json.gz",
+      "bytes": 89688,
+      "sha256": "ec57003fd1b75ab0b3d167d6469919e81421658a9805651e4cf3302ab705c189"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4649[block_in_<module:KernelOperations>].bgv.gz",
+      "bytes": 18694,
+      "sha256": "bbd09af31dc61057d20f3400fa10383b178b0618146f824c6419be1ca3a63b88"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4649[block_in_<module:KernelOperations>].filter.json.gz",
+      "bytes": 36485,
+      "sha256": "3f0869f55cac1c300edff92f874e78b13ace206778a427b00c02434202c935d2"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4677[Array#<<_<split-1160>].bgv.gz",
+      "bytes": 72157,
+      "sha256": "a57ab2c1e486766acfea4c4d0ca38861cfa154ab8d279916486a47ea6849154c"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4677[Array#<<_<split-1160>].filter.json.gz",
+      "bytes": 124905,
+      "sha256": "07889f1d76e90feaae75710a7a4404036aece07acbb836e9d15948013466bd55"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4694[String#[]].bgv.gz",
+      "bytes": 155111,
+      "sha256": "87f51d62a2ec94b8343f9f9a1d77d6750ac6f651c07d88cec112e8e456f1072c"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4694[String#[]].filter.json.gz",
+      "bytes": 357535,
+      "sha256": "493c79b5dbeceecf07b21a888fd7628c24f72042de8e6fe72046953c46817b8c"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4706[Truffle::FeatureLoader.extension_symbol].bgv.gz",
+      "bytes": 122584,
+      "sha256": "ab7da995c03a90184d3429f208dcfcc19cfdfa9be849953b90be63e4b5f5157d"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4706[Truffle::FeatureLoader.extension_symbol].filter.json.gz",
+      "bytes": 324319,
+      "sha256": "d54e6851c0b66825e560decd91888325188274e71cb827d9dc58f82b13fd879b"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4893[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 86782,
+      "sha256": "228b8cdff9536671e9e141ddb871621b2858811ee20ab4024344205a7a4fcbeb"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4893[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 148567,
+      "sha256": "dd3bb51ed43dc7a74bf7c2799619afc11166a966ce5ca24147bf32241369f46a"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4908[Object#run].bgv.gz",
+      "bytes": 21012,
+      "sha256": "6f05788c90e7f78e1a9f8accbbe1aed2f0154b8d4a1dbf447486831c06c42b38"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4908[Object#run].filter.json.gz",
+      "bytes": 39999,
+      "sha256": "08e0eda207331e0493299bb4513880c25a719548ccab864d235b6a47e87f7883"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/budget-2000/trace.log.gz",
+      "bytes": 44441,
+      "sha256": "d5cc8c1a29a9a6c74fc74b3be248330de13250b9c730c97ced31577bfb34e9af"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/capture.json",
+      "bytes": 101573,
+      "sha256": "b3717be3cc0d8b197ab3d94a0775c77abac880346276315df304112963fdf016"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/cold-summary.json",
+      "bytes": 90400,
+      "sha256": "dd513d268f757f38c27b1895dc3face7ce014f98b0a5823e5f15bcd24a19780c"
+    },
+    {
+      "path": "tier-1/primitive-switch-middle/ruby/raw/correctness.log",
+      "bytes": 3310,
+      "sha256": "0b5e28e8ca6d4ca208c4729ee7f165b6a7cef52e99b82dc3c526b1de133560b4"
+    },
+    {
+      "path": "tier-2/integer-switch/js/budget-2000/bgv/TruffleHotSpotCompilation-2551[run].bgv.gz",
+      "bytes": 39477,
+      "sha256": "8545e410f7b5c52b79e9896f4dab4632c02529d612d932847505a6f54da2f5c7"
+    },
+    {
+      "path": "tier-2/integer-switch/js/budget-2000/bgv/TruffleHotSpotCompilation-2551[run].filter.json.gz",
+      "bytes": 82846,
+      "sha256": "76a95595ce101a2411848229a4fb0506c61345a841426def9ca327fd98f67025"
+    },
+    {
+      "path": "tier-2/integer-switch/js/budget-2000/bgv/TruffleHotSpotCompilation-2718[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 96084,
+      "sha256": "8ea42f0c4ffc1996ee052f2a849542c925d034713f97be0d809532fecef1da58"
+    },
+    {
+      "path": "tier-2/integer-switch/js/budget-2000/bgv/TruffleHotSpotCompilation-2718[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 183641,
+      "sha256": "457cf596791eadcefb54af53f9fc3dcaeb60785158eb73cb13325dc5d1ff28e5"
+    },
+    {
+      "path": "tier-2/integer-switch/js/budget-2000/trace.log.gz",
+      "bytes": 14462,
+      "sha256": "3f7a4f238c142639d7a4a8a789b9e3980641ae2bc0d7d1c83ca3f1b0898e25ce"
+    },
+    {
+      "path": "tier-2/integer-switch/js/capture.json",
+      "bytes": 25583,
+      "sha256": "6a286011fe2fdd48774cb5c07245ae71a0d696281c95d051f7891676dc9e34ed"
+    },
+    {
+      "path": "tier-2/integer-switch/js/cold-summary.json",
+      "bytes": 14939,
+      "sha256": "89c6b1f86de216b6f3414c0fe03499ae3b35dbc896740f248185ad979481b193"
+    },
+    {
+      "path": "tier-2/integer-switch/js/raw/correctness.log",
+      "bytes": 3226,
+      "sha256": "fee9bacc36e3aec7a6860deeb623ff2e1147eeac8c7d95504afcccd610e29e41"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3863[ProtosBytecodeRootNodeGen@454cb9c1].bgv.gz",
+      "bytes": 1347716,
+      "sha256": "cfc0931927c01a71c09aa1ede964067be7ca813c93d1070dfb61100d0abc6434"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3863[ProtosBytecodeRootNodeGen@454cb9c1].filter.json.gz",
+      "bytes": 3983274,
+      "sha256": "8a740c8ca9d1e4b587ecb77bc5c3d468249a35321b790860c8fe1d3b941ee011"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3891[ProtosBuiltinCallRootNode@4429f323].bgv.gz",
+      "bytes": 134190,
+      "sha256": "62017bb377c9239d4be5a8c1224f3fa39044085ee616363dc517fff0fb836795"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3891[ProtosBuiltinCallRootNode@4429f323].filter.json.gz",
+      "bytes": 275612,
+      "sha256": "ef4c23a963aee11bcf31bf68d7789f696115a23adc6f0d6e1665592db49d038b"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3974[ProtosBuiltinCallRootNode@3b3cd107].bgv.gz",
+      "bytes": 133789,
+      "sha256": "bd70b01012165a62f5892fa967918c9c877e95d832ae6c9640ccc18ead9c60aa"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3974[ProtosBuiltinCallRootNode@3b3cd107].filter.json.gz",
+      "bytes": 275078,
+      "sha256": "63811d1262adbd0fa6ad05faa90c112e314a3fcb30de2651ad457218ca0e88c6"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3976[ProtosBuiltinCallRootNode@474fed2b].bgv.gz",
+      "bytes": 133778,
+      "sha256": "d54880d84fc4da67dfb3a1bb02531163652c4b78156d7d8a78747a2c91335b11"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3976[ProtosBuiltinCallRootNode@474fed2b].filter.json.gz",
+      "bytes": 275082,
+      "sha256": "7f895973ca67d4f425189cf6638deef65b6e41c206009688501e402d6de26ca1"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3980[ProtosBuiltinCallRootNode@5d351d83].bgv.gz",
+      "bytes": 136211,
+      "sha256": "2cd72572732b29089961663fd5d50f97d75796943c1704698283fd0b4842c972"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-3980[ProtosBuiltinCallRootNode@5d351d83].filter.json.gz",
+      "bytes": 277848,
+      "sha256": "9d9d4a57610c1322f282c2a2372ff65f72070b1c48890950a4d4bb5b255c222e"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4134[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].bgv.gz",
+      "bytes": 19044,
+      "sha256": "dbd2beca30dd365518e80d726d883f86382c2cd5e55c57cace039dc16ca9d31e"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4134[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].filter.json.gz",
+      "bytes": 22905,
+      "sha256": "536e2830e13a52a777f71aeea335d288d5fe3d4de6229ad63955bf39dbb17253"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4139[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].bgv.gz",
+      "bytes": 19050,
+      "sha256": "43064c70d8ee1e5f4a0af0722c87c430d2ba51d4ec4a4c7de41747d972a9b6a2"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4139[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].filter.json.gz",
+      "bytes": 22905,
+      "sha256": "b2c19baa1ddaedadc6199434f3325133996647d07653bf7a5ddabf13b55e6fc3"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4143[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].bgv.gz",
+      "bytes": 19047,
+      "sha256": "3abf51836cdb9d74f9777fa0d46ada781a4667f6520eff6ca3571a88c14f4de2"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4143[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].filter.json.gz",
+      "bytes": 22905,
+      "sha256": "de8488fbd01306099cdbed26d076558cd1a159a2e3bcf2d6827fe56088070986"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4144[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].bgv.gz",
+      "bytes": 19050,
+      "sha256": "6a0f49838f584e5b341b2c7aee7f69db03de261ba54f6465671d4ba7e83e65f4"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4144[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].filter.json.gz",
+      "bytes": 22907,
+      "sha256": "40081c67058ffda070fa57af3e125599131a722ceddc77adca4f46ce9773b7e3"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4270[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 1154952,
+      "sha256": "96cdc086d0d432fb0866ba33f7a2b92e019aca87b1df0f82ce8fe50823b421aa"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/bgv/TruffleHotSpotCompilation-4270[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 151149,
+      "sha256": "216626b5ad50f6a47d124863d29411180b0cad862cc57e3f96fda3241ad99b23"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/budget-2000/trace.log.gz",
+      "bytes": 48032,
+      "sha256": "8f62a20184467396651abd4ba1037dc2b26ac4d746c1648cbe19f4cefee8047a"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/capture.json",
+      "bytes": 114401,
+      "sha256": "a095c9717bb55a71cb87c0d0b8ff44ee4ebabf2d6e1089b0f94c16ff12d4fa86"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/cold-summary.json",
+      "bytes": 59006,
+      "sha256": "808d902c5adcc7ee7f5b9cfb3f4ca8721c57c535c2b591fa7fab6263e9ce07e7"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/raw/correctness.log",
+      "bytes": 3976,
+      "sha256": "57ff92f54148f72281b1d3d43ab61e3f85bbce0307f6237ad98581cc3a8dee3d"
+    },
+    {
+      "path": "tier-2/integer-switch/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-2/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-4125[<builtin_function_StringBuiltins.rpartition_at_5e69f60f>].bgv.gz",
+      "bytes": 68911,
+      "sha256": "49224897cd446d985730bccb0985b625e21a21970b2981d2c5a69eaa66d6286d"
+    },
+    {
+      "path": "tier-2/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-4125[<builtin_function_StringBuiltins.rpartition_at_5e69f60f>].filter.json.gz",
+      "bytes": 170206,
+      "sha256": "d430cc9c6c9740d2c19be7476830ee3b805c9bc66797788e66d4c5c482d0adad"
+    },
+    {
+      "path": "tier-2/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-5066[<bytecode_run_at_5f9f01ab>].bgv.gz",
+      "bytes": 39811,
+      "sha256": "1b7b0c6e489c7c9217ad857092a22973f700938e148f45c74d7c986ce5e05697"
+    },
+    {
+      "path": "tier-2/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-5066[<bytecode_run_at_5f9f01ab>].filter.json.gz",
+      "bytes": 81990,
+      "sha256": "8ac41af7576bf77e28d85001f34d59dd3fc85c629a42f17dfaa159568309c8d4"
+    },
+    {
+      "path": "tier-2/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-5183[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 124894,
+      "sha256": "872dc7a8ed5c6ccae73c282677c382129a3c1ae83bc1e7eb4d10518000d275fe"
+    },
+    {
+      "path": "tier-2/integer-switch/python/budget-2000/bgv/TruffleHotSpotCompilation-5183[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 281103,
+      "sha256": "63963d892e7eeb978fbece7a2c18a272466a904a587a880b9952f41b830c4a6e"
+    },
+    {
+      "path": "tier-2/integer-switch/python/budget-2000/trace.log.gz",
+      "bytes": 17557,
+      "sha256": "37ece8c78c2cbc4dae88efe77a81456ede9f9587820d2158af7497cd9aefa976"
+    },
+    {
+      "path": "tier-2/integer-switch/python/capture.json",
+      "bytes": 34615,
+      "sha256": "3d67ca1db18f2ab974c089fae9655b80a692d3e07f02d7653246dde255e7e50c"
+    },
+    {
+      "path": "tier-2/integer-switch/python/cold-summary.json",
+      "bytes": 22848,
+      "sha256": "0664e6cd6fa59750467098dcd1a6f4e864e7a8d90d18401dc2fb28d3acd22619"
+    },
+    {
+      "path": "tier-2/integer-switch/python/raw/correctness.log",
+      "bytes": 3233,
+      "sha256": "6d29d04515d13e0390aa5a22014e222dd2ec755b8538232b4e8199889df8a88e"
+    },
+    {
+      "path": "tier-2/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4993[Object#run].bgv.gz",
+      "bytes": 37772,
+      "sha256": "ad1da641baa5de03f69baf5224854be16733861997d4d6c41d86b825313b8736"
+    },
+    {
+      "path": "tier-2/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4993[Object#run].filter.json.gz",
+      "bytes": 77585,
+      "sha256": "cc20e2c4b7f5ecafa2b04b9db3a4873618b0e259f32916508491ab7b64c82408"
+    },
+    {
+      "path": "tier-2/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5080[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 86809,
+      "sha256": "351fc19aa0fd913db56255c1883060fe975a00393b036688080d228eeeecda22"
+    },
+    {
+      "path": "tier-2/integer-switch/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5080[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 162914,
+      "sha256": "282f631b37276a6c14e70cd5692d3fe20650f7b89722e5ef153805b0d24b44ef"
+    },
+    {
+      "path": "tier-2/integer-switch/ruby/budget-2000/trace.log.gz",
+      "bytes": 47666,
+      "sha256": "88396ad38d848b0b20298f5a1d7751394f97e51780c165c571189b67804fcf30"
+    },
+    {
+      "path": "tier-2/integer-switch/ruby/capture.json",
+      "bytes": 53146,
+      "sha256": "7e58717cd451b02bbc61b180792c579b7a46544efe37d3ea4137a0a452b2503c"
+    },
+    {
+      "path": "tier-2/integer-switch/ruby/cold-summary.json",
+      "bytes": 30011,
+      "sha256": "b3b4b88d9fb378994c81b615aca4e20ee71b440b94f8b9181764529eb7b5665d"
+    },
+    {
+      "path": "tier-2/integer-switch/ruby/raw/correctness.log",
+      "bytes": 3295,
+      "sha256": "2461d52b438f148f0124795fd4da3da69a79322e0e21d7f3ac16dc0c72b75ce7"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/js/budget-2000/bgv/TruffleHotSpotCompilation-2589[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 66341,
+      "sha256": "f0e83a324514d238582e67b37664b81b8372ec84dff64b40a7fcabc015457ff9"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/js/budget-2000/bgv/TruffleHotSpotCompilation-2589[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 120456,
+      "sha256": "1bb123c69d2d0bd6d5c77dd533614b6af52e3bc90a0cc415f3eeb88d6f97ac53"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/js/budget-2000/bgv/TruffleHotSpotCompilation-2638[run].bgv.gz",
+      "bytes": 14726,
+      "sha256": "eaeb9e39108fab2cd0dff95e8d0443337aa52cc93cd223c62ae19f5c960f3090"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/js/budget-2000/bgv/TruffleHotSpotCompilation-2638[run].filter.json.gz",
+      "bytes": 10355,
+      "sha256": "da269e30b1062f75ded73a47d1c76138fd8a7fa55c990c2e5ad848867f7ba637"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/js/budget-2000/trace.log.gz",
+      "bytes": 12549,
+      "sha256": "a711c5e1a7a606c08b0c1d6deea8eae955f46cf9901ee0d7010b3014adeaace0"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/js/capture.json",
+      "bytes": 20766,
+      "sha256": "43d505e016aa6359d237ae701c9807dbd4064010e23f7328bfc99739a2ead606"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/js/cold-summary.json",
+      "bytes": 10124,
+      "sha256": "3442e8baa74a421033b9b0ba787aae6b092af33add0d7dbab922a264faf9732c"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/js/raw/correctness.log",
+      "bytes": 3243,
+      "sha256": "ec83cbd9f631566428b080533ff2ef291aed6f20e2a6b67a040782d610056b91"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3583[ProtosBytecodeRootNodeGen@454cb9c1].bgv.gz",
+      "bytes": 1286954,
+      "sha256": "d395f9d306724a29ee2d3fd8059e5c7d93974bcd3f3ca732640e5d5906068e97"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3583[ProtosBytecodeRootNodeGen@454cb9c1].filter.json.gz",
+      "bytes": 3792169,
+      "sha256": "0651603bf17c43ff35cb8c00766bf63bf6044e80ca3b60b5f97c27feecf45b1a"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3640[ProtosBuiltinCallRootNode@55b830af].bgv.gz",
+      "bytes": 134279,
+      "sha256": "29e76c4f4f101f6c6a337f6c403027cfbdd341e5d3e86148fe710efc5be6a154"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3640[ProtosBuiltinCallRootNode@55b830af].filter.json.gz",
+      "bytes": 275627,
+      "sha256": "19184a42b02627c1b54cabec67b24e69449f5d2acb609e58bd3c722a66778d38"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3738[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 2949535,
+      "sha256": "cd645602abcc101ff61dae98003878ded77b3a5465c09476a3d6313b64fe1be1"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3738[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 6534755,
+      "sha256": "56cd14ea3b6fd52c452297b40001f74fccb15b7b2baf4d0264dc5947c4f05deb"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3750[protos-root:5cde0cc85742f5a8[CLOSURE|truffle:1afaddbf0e74f87045fe4069a6c815219f04ed97312213601a2e55e38dbb7feb__workspaces_protos-benchmarks_cases_primitive-switch-default_primitive-switch-default.protos|...].bgv.gz",
+      "bytes": 3205053,
+      "sha256": "75fd2d5335375d9350c9550532e8c0b86694529363d4a8b6f28607e6882df0fb"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3750[protos-root:5cde0cc85742f5a8[CLOSURE|truffle:1afaddbf0e74f87045fe4069a6c815219f04ed97312213601a2e55e38dbb7feb__workspaces_protos-benchmarks_cases_primitive-switch-default_primitive-switch-default.protos|...].filter.json.gz",
+      "bytes": 6133285,
+      "sha256": "b41e47faa527a480422efecc785d5444b4a2648531aeb1ac8c0be648111aecae"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3759[ProtosBuiltinCallRootNode@479fd00a].bgv.gz",
+      "bytes": 133786,
+      "sha256": "027b42c77b9db09de67570930b32e76cd6309874778406f3a3b9060d9bc1802e"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3759[ProtosBuiltinCallRootNode@479fd00a].filter.json.gz",
+      "bytes": 275083,
+      "sha256": "9a4460e0042ca6dac7c836cd56bc05f8003444db3cff018cc3f1c50919e81461"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3763[ProtosBuiltinCallRootNode@1f78640b].bgv.gz",
+      "bytes": 133827,
+      "sha256": "eeb09e26f8e61d47bac5f4873730f6ea2c29601477c59ed065fb89c806cfde54"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3763[ProtosBuiltinCallRootNode@1f78640b].filter.json.gz",
+      "bytes": 275085,
+      "sha256": "d7251c10fe134461cc38e34c7ab24f3b9369e79cc1e68b95e03d663b7d9e2474"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3768[ProtosBuiltinCallRootNode@54ba53a2].bgv.gz",
+      "bytes": 136202,
+      "sha256": "de0dd11a7b851b5ac594a0546d3395c9effd3181775679978b455693e4e9028a"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/bgv/TruffleHotSpotCompilation-3768[ProtosBuiltinCallRootNode@54ba53a2].filter.json.gz",
+      "bytes": 277856,
+      "sha256": "9330d3c8270229a8909021e0031f5d5daa552c29688180695856a038f31e1f18"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/budget-2000/trace.log.gz",
+      "bytes": 28504,
+      "sha256": "9e5a67deaac20da0988ea374297f97ca8b0f147e6eba530dc455d547142f2e1b"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/capture.json",
+      "bytes": 95533,
+      "sha256": "81d3782d46f74ffa027e563a79428e101c2026a5b3552632285a81c7ec2333f6"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/cold-summary.json",
+      "bytes": 55733,
+      "sha256": "e6d880292119b5d401ba9484a05a0a70064caaeed083789dfabe159e178295af"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/raw/correctness.log",
+      "bytes": 3993,
+      "sha256": "4cf9fee6e49f7ca45b767a270c86d6bc3054debc5454976be7d896166ff42d22"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4081[<builtin_function_StringBuiltins.rpartition_at_5e69f60f>].bgv.gz",
+      "bytes": 68926,
+      "sha256": "bb082d0710fc88d6cda1238520a2cde048711d4c42ac77a4f2152f5aada508bb"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-4081[<builtin_function_StringBuiltins.rpartition_at_5e69f60f>].filter.json.gz",
+      "bytes": 170209,
+      "sha256": "45157de8158873ac37ba5369ec1ffb6af02e7e1fe6c0a6587ab4465c7e6cde7e"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-5001[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 103916,
+      "sha256": "a868a5a3be31e010508e7752a4cec7d28c3b98448866628a7c0c00c6a885b905"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-5001[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 226576,
+      "sha256": "2512d8222e66b73890b4dfa74a0ec52a7cdc227de9f433d15c7ef79cf42f4abb"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-5016[<bytecode_run_at_6bee0074>].bgv.gz",
+      "bytes": 19340,
+      "sha256": "f98ae94a442d41ced512ec8c9fbd08a61fe643e2b5a0ecbaf17ff613ef809169"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/budget-2000/bgv/TruffleHotSpotCompilation-5016[<bytecode_run_at_6bee0074>].filter.json.gz",
+      "bytes": 24339,
+      "sha256": "00bb3e45c8f91d0d8586ef1e386105961f36c3ff68fba5b0dfb06f4136a1f649"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/budget-2000/trace.log.gz",
+      "bytes": 16540,
+      "sha256": "069df1d54169b4e1bcd1dde2dc1041d707f9d14c60f70281e6a3832898e8170c"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/capture.json",
+      "bytes": 31164,
+      "sha256": "2ea0e4b65bcbb05acbd40dc3bd6853b5f72b3464c4483bf48c09cccf30168fe6"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/cold-summary.json",
+      "bytes": 19334,
+      "sha256": "7b9a5de6a71457bb96fe48d667b2d525c386f525a1d72538b5350fc9b951509e"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/python/raw/correctness.log",
+      "bytes": 3250,
+      "sha256": "c20449f27058b60e8fd316479866116f99018d5c1e47e45a02a1adb8295f1fc5"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5003[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 50830,
+      "sha256": "d867ac8ca781d9355ea6a2d346cae55b4d813464eb7f821f8b5f726801c022fa"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5003[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 94280,
+      "sha256": "acac6f23ff51f4997f193906994aa01a7d280132475169d080cc8f1d6c2bed57"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5008[Object#run].bgv.gz",
+      "bytes": 13435,
+      "sha256": "89fd0ba3ac37016363b264ea28daf7d15cffbc5104d8dd821df830e3ac8d3f1a"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5008[Object#run].filter.json.gz",
+      "bytes": 11901,
+      "sha256": "74cbdccdc8280417b60bf579202bd687e9e061cc78ff31b7f13f29169f7cde84"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/ruby/budget-2000/trace.log.gz",
+      "bytes": 46346,
+      "sha256": "0e28e7e4e30eddc239b20145586dd4ae56c7d51f3d4d7981693de5d8075215bc"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/ruby/capture.json",
+      "bytes": 47038,
+      "sha256": "69cbdecd2f614e60846b27375b4083699711151cd2ba41dcdaaeb660781d58b4"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/ruby/cold-summary.json",
+      "bytes": 24136,
+      "sha256": "220fd7032389efef6e359eda4e06e7200ea2129f5205c354fca7c98b9a8f5b10"
+    },
+    {
+      "path": "tier-2/primitive-switch-default/ruby/raw/correctness.log",
+      "bytes": 3312,
+      "sha256": "b81607d02a48554ffefbeb5ee24e23d41d202c9a4540f03c43c577d429a1a0d9"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/js/budget-2000/bgv/TruffleHotSpotCompilation-2575[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 66404,
+      "sha256": "c1b525ebe0874829a1961a374e8508ef4619851902c471b712c7c81d39e5624c"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/js/budget-2000/bgv/TruffleHotSpotCompilation-2575[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 120461,
+      "sha256": "8edea559572d154b4b24aa7a0b792e75ac0923a44414cdefd1a1c7452a4763b5"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/js/budget-2000/bgv/TruffleHotSpotCompilation-2622[run].bgv.gz",
+      "bytes": 14737,
+      "sha256": "760b108e83e238e8341206b98961143d2c6c5123a833f839faf4789327a31448"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/js/budget-2000/bgv/TruffleHotSpotCompilation-2622[run].filter.json.gz",
+      "bytes": 10353,
+      "sha256": "db0b50917bf4ba9f1b839b57d06ace9aa176ae1dbb190884ca73783fef14aee3"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/js/budget-2000/trace.log.gz",
+      "bytes": 12587,
+      "sha256": "f93231ca91bcfaf2838bff4f6bc2f15fa42f2dd895159355875fc557ec473f91"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/js/capture.json",
+      "bytes": 20750,
+      "sha256": "fe35f6459892b86777513c35d903ef61c1d25fafd7a200ddeee3fec2dacc9df0"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/js/cold-summary.json",
+      "bytes": 10117,
+      "sha256": "c400630a1396c87a741624ff66c44a6dd7342032483891a2ce792b3ee85d4b28"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/js/raw/correctness.log",
+      "bytes": 3239,
+      "sha256": "407e548f4210601ea4cc2d7cc78bc832ef291e0cdb0f93718fde1a1f2cc65c14"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3686[ProtosBuiltinCallRootNode@3e3aab2f].bgv.gz",
+      "bytes": 134067,
+      "sha256": "538ca6fa0a68589ac6d4a2e916de428ce433d97f984fd144ab5af0379b8b7e5b"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3686[ProtosBuiltinCallRootNode@3e3aab2f].filter.json.gz",
+      "bytes": 275547,
+      "sha256": "e61dfc43aa0b61a7b7b80b2fffc146280e8807c52672b99d920e82e28c032e3d"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3738[ProtosBytecodeRootNodeGen@6e61b2e3].bgv.gz",
+      "bytes": 1257219,
+      "sha256": "2fb2b3becab9f51de992fa0850fb41b1974ddc0e048afd1a88b034526d5dd20e"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3738[ProtosBytecodeRootNodeGen@6e61b2e3].filter.json.gz",
+      "bytes": 3714697,
+      "sha256": "a1c697a8c43c3393b5de287409513e42c86eb21393a035709de68bb70fabec0a"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3802[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 2948838,
+      "sha256": "10bc82c970e9a67a6221b4c1d22496326122192ec42a896c2696b9134bed55f3"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3802[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 6534501,
+      "sha256": "a80ed5e63029f7a1030eb89be6e77b20afb1a9a223e71ab2208657f4010535e8"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3816[protos-root:24cb284b48210543[CLOSURE|truffle:2b3c4fa5e33562e9b86a70b23166b3f2b194367f5b28ea78afe6b7f2733e2383__workspaces_protos-benchmarks_cases_primitive-switch-first_primitive-switch-first.protos|1050...].bgv.gz",
+      "bytes": 3204801,
+      "sha256": "884ce0270be8e42e05972525ee12729ace75f6461aed94ddc3b686d553fb416f"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3816[protos-root:24cb284b48210543[CLOSURE|truffle:2b3c4fa5e33562e9b86a70b23166b3f2b194367f5b28ea78afe6b7f2733e2383__workspaces_protos-benchmarks_cases_primitive-switch-first_primitive-switch-first.protos|1050...].filter.json.gz",
+      "bytes": 6133277,
+      "sha256": "2f42f31a4562a41ce5f911814ee9dcaa5aae5d2feb2101fc68859015a8d26bbc"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3826[ProtosBuiltinCallRootNode@3e2e540].bgv.gz",
+      "bytes": 133624,
+      "sha256": "d583150e004287834cce53396c437aa19b5ccd9270590f09ef289f171248e29e"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3826[ProtosBuiltinCallRootNode@3e2e540].filter.json.gz",
+      "bytes": 275000,
+      "sha256": "bd6b59c0b0871f838450d3a89b2895e8c0ebefc3019b1e4e2682d4717943749c"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3830[ProtosBuiltinCallRootNode@3b6dabb8].bgv.gz",
+      "bytes": 133632,
+      "sha256": "0363026ec9da7fcadafdaa277fa0e7fd13eaee13a7647d78f638f0a65c908992"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3830[ProtosBuiltinCallRootNode@3b6dabb8].filter.json.gz",
+      "bytes": 275015,
+      "sha256": "e827464764e7245f79b14ac7e661c098d9e7275795274caea395e55399aa4222"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3831[ProtosBuiltinCallRootNode@6ef160cd].bgv.gz",
+      "bytes": 136069,
+      "sha256": "1a30ae39d140a5ab3201780c01977585e5bd68106485d244533512fc517188b8"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/bgv/TruffleHotSpotCompilation-3831[ProtosBuiltinCallRootNode@6ef160cd].filter.json.gz",
+      "bytes": 277781,
+      "sha256": "9b5c03c3d4c8eae3f2f5e22d310df6a274a29dc05026ca1b15df6b33c7fc2374"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/budget-2000/trace.log.gz",
+      "bytes": 28101,
+      "sha256": "4accfe9e80e1e361c853471ccbfc621f681e46dd77fff91a788e380d6f491f4f"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/capture.json",
+      "bytes": 93844,
+      "sha256": "cba2f7fd8829ad4dee09d939e8cb7be93226f50d8e3c9a82db0fb8e71f19fb40"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/cold-summary.json",
+      "bytes": 54384,
+      "sha256": "85e9130a99f51f5dbb7b7757ff2cd63340f32ebd5216b7d611a903a4184cb59f"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/raw/correctness.log",
+      "bytes": 3989,
+      "sha256": "9e80052123e1f1c6f37d60d027bb18eb3e35d4d3ef74407419229975e92f466b"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4050[<builtin_function_StringBuiltins.rpartition_at_1f01a35f>].bgv.gz",
+      "bytes": 68937,
+      "sha256": "eeccb95fba48e6ce8505829701a6914f1838e71a47f1be3dc990dffe9a80ef2f"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-4050[<builtin_function_StringBuiltins.rpartition_at_1f01a35f>].filter.json.gz",
+      "bytes": 170209,
+      "sha256": "138524045987de87d881f7d8426a6687d726921e0b1822a3298e18260d7495ca"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-5035[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 103716,
+      "sha256": "8983a567278d71a3f3175187fd50e0157e27d9822812fedf3621d192dfaca5aa"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-5035[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 225800,
+      "sha256": "79b7d4b7d8da9189a960c5fe5814fc4abecd75aa015270ccbd51c3ae1b9da00e"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-5053[<bytecode_run_at_25858a55>].bgv.gz",
+      "bytes": 19217,
+      "sha256": "51656bd66b59f0cb6926997c2d7e7975bb4293d231b6319113148b15b1588e5b"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/budget-2000/bgv/TruffleHotSpotCompilation-5053[<bytecode_run_at_25858a55>].filter.json.gz",
+      "bytes": 24208,
+      "sha256": "575d29cb021b46a70287520083968b506f2a082abf9606a4d9c919822dcced01"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/budget-2000/trace.log.gz",
+      "bytes": 16146,
+      "sha256": "d1fb3b40516c3a9e6446e885b0c8ef8da209351916a30c1fd961ffc17c51cfff"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/capture.json",
+      "bytes": 31143,
+      "sha256": "a191eed81a1e1d9275cdf9b79f558454313d7fc3c234125af24289558bb93c70"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/cold-summary.json",
+      "bytes": 19325,
+      "sha256": "1459fbf606f71dfd103b6a7f7a55736155943c11d8c03ac433950e61f826d027"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/python/raw/correctness.log",
+      "bytes": 3246,
+      "sha256": "fef8c7f87f69fc7053740fd92adb5d1a2b19ecd1b2577740a5a53d7dadd1bbcd"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5032[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 50645,
+      "sha256": "c6300bd1ee5d520c27bd594a4f58b94e26fbf4865fa4f81f1ba7137bf597f41d"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5032[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 94098,
+      "sha256": "13773349360cce557aecde1089910f382c45e33932293a6fedae3a98a22964ee"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5044[Object#run].bgv.gz",
+      "bytes": 13343,
+      "sha256": "1ac6602fa032acbec1d1dd49332a5f302201680b579e69afa58d64afaf78f205"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5044[Object#run].filter.json.gz",
+      "bytes": 11824,
+      "sha256": "8ef46c22773c45aa9f68a8c3e8176775b88824783e19dd9195e087e146bda399"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/ruby/budget-2000/trace.log.gz",
+      "bytes": 45509,
+      "sha256": "e8d32639e910cac53a51dd702035271c67f978eb078bd13c36faa2b36dad0ea1"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/ruby/capture.json",
+      "bytes": 47022,
+      "sha256": "9ca0da4c93e0fc38fa097ea19260ca27efdf75cafcce6193eb27dfe51b9304df"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/ruby/cold-summary.json",
+      "bytes": 24130,
+      "sha256": "7ea8d023ec627c22f0692f157fb54455abd198aafc982535c3dd7a9acb27cafa"
+    },
+    {
+      "path": "tier-2/primitive-switch-first/ruby/raw/correctness.log",
+      "bytes": 3308,
+      "sha256": "bc0897db04febf5665cd7f7abe18216ea5a3c475caf74d3fee277b9411b52727"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/js/budget-2000/bgv/TruffleHotSpotCompilation-2604[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 66471,
+      "sha256": "632fc396f5b190df423945bb20f929f1d83e3f50731777b26949141607187bcc"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/js/budget-2000/bgv/TruffleHotSpotCompilation-2604[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 120462,
+      "sha256": "471b0bdc0ec8f34a4cf19eb7b5b00ae73aa3a0b5ae1453eb6a9ff810d2495198"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/js/budget-2000/bgv/TruffleHotSpotCompilation-2648[run].bgv.gz",
+      "bytes": 14749,
+      "sha256": "fedfd874df0744ce21360d809c009a1ca0ae668e063f204951dd2c5a5445d00c"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/js/budget-2000/bgv/TruffleHotSpotCompilation-2648[run].filter.json.gz",
+      "bytes": 10357,
+      "sha256": "e78f5a0c2fe7b41c8fd5ccbaed9292f92d988b22c2a56ce338815ac67f4d1972"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/js/budget-2000/trace.log.gz",
+      "bytes": 12974,
+      "sha256": "9a1543bfb0c6142a555e6b30818ab86b3c43725cfaf072ab859dc43e809c8cdb"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/js/capture.json",
+      "bytes": 20742,
+      "sha256": "7dd9ed291df9a4b30de16ab28eebe8b3c36692386ae5e1ce54604d6cec68ace2"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/js/cold-summary.json",
+      "bytes": 10115,
+      "sha256": "59eb102afcd43af9c44a7dc09498ffcb98678b603cfd554ac001197ed58612a0"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/js/raw/correctness.log",
+      "bytes": 3237,
+      "sha256": "0825389092e5290d98456289031dbb026710becacd1f6747b8bb5df2c00fd51a"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3603[ProtosBytecodeRootNodeGen@5e2dc23f].bgv.gz",
+      "bytes": 1258810,
+      "sha256": "b4585842348f2a45294171de8b321092523568790c2d5fe00958df7698bba3dc"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3603[ProtosBytecodeRootNodeGen@5e2dc23f].filter.json.gz",
+      "bytes": 3717204,
+      "sha256": "b4648a6675f8b91b5055a8d557b88f5a27d52b414255bbb0d0d58a4635902cd7"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3640[ProtosBuiltinCallRootNode@16366ce8].bgv.gz",
+      "bytes": 134193,
+      "sha256": "8992230bfa47651d37788c6c633e604eab471d7fdfcb8bebc72db4c2fe828327"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3640[ProtosBuiltinCallRootNode@16366ce8].filter.json.gz",
+      "bytes": 275602,
+      "sha256": "1e00ecb89025aedd19e2ccb2d25c7d843ef24eb2b11c30125b1642394bef16ba"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3736[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 2948774,
+      "sha256": "8214a3839403f4035f51429e2a4a7fa8925f91c1d0c6d2626e412904f5d9554f"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3736[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 6534898,
+      "sha256": "3c9c012af02f1cf170298cea3dd06b3676bc750d4657408ba90f519dc8a85a57"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3750[protos-root:f82ff00276dfda01[CLOSURE|truffle:ad77788a3ac54e98b00b23238d3b696bcfc64de175099884b0c587bab372844b__workspaces_protos-benchmarks_cases_primitive-switch-last_primitive-switch-last.protos|1050+92]].bgv.gz",
+      "bytes": 3204670,
+      "sha256": "c935bccdce417beeba5d2c3d62a0f17dc496023a932e8140ec4817e23adcd18c"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3750[protos-root:f82ff00276dfda01[CLOSURE|truffle:ad77788a3ac54e98b00b23238d3b696bcfc64de175099884b0c587bab372844b__workspaces_protos-benchmarks_cases_primitive-switch-last_primitive-switch-last.protos|1050+92]].filter.json.gz",
+      "bytes": 6132551,
+      "sha256": "d0547b85e9f3c6363fd4dbb7ec2b3d79b4b229d74cf6b669a9f4fd12c631ac89"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3759[ProtosBuiltinCallRootNode@31b30eb1].bgv.gz",
+      "bytes": 134063,
+      "sha256": "6d5437b59f7d267c270449f6625831a9a6a78202b64634a0fda906c71ad0adb9"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3759[ProtosBuiltinCallRootNode@31b30eb1].filter.json.gz",
+      "bytes": 275062,
+      "sha256": "753ac410609ded1db0b3e9237f45ebbd963275133fb9bbb384d3d99657d7372c"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3765[ProtosBuiltinCallRootNode@2fa33552].bgv.gz",
+      "bytes": 133991,
+      "sha256": "abc9852b40bb4ad663221c5a2e098d48d7a7b82647f9ad979295cf48cc4bc22d"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3765[ProtosBuiltinCallRootNode@2fa33552].filter.json.gz",
+      "bytes": 275064,
+      "sha256": "5845e3127eabc9303a063c3918ce54ec0de0569fd81f9d8b870c0153c59e0742"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3768[ProtosBuiltinCallRootNode@2ee99217].bgv.gz",
+      "bytes": 136177,
+      "sha256": "bbaca736a0b08049c9fb5a4d8f4cf212ff331bbce6d8f1054973630be65c2c4e"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/bgv/TruffleHotSpotCompilation-3768[ProtosBuiltinCallRootNode@2ee99217].filter.json.gz",
+      "bytes": 277828,
+      "sha256": "5c2cefe487dbd1f96221395a257451e82247d4cf427efdb4ab5b040859a03226"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/budget-2000/trace.log.gz",
+      "bytes": 28224,
+      "sha256": "e8698c951918f0d2adfceed3407fc0bc343c51587776cde3cc9ef558d41d3c13"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/capture.json",
+      "bytes": 93799,
+      "sha256": "937ef881a907b4f8996d2d2f2c44136351ff7e21f6ad9f7e90c58714eef45bb7"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/cold-summary.json",
+      "bytes": 54358,
+      "sha256": "5a03801d7bb8f00c2ef09899d6bac46785dd9135c6c914259dccd3611738db07"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/raw/correctness.log",
+      "bytes": 3987,
+      "sha256": "d3c4dbf7eb61d14ed33c25464f566f309cf04a619d2c342a84d90883451cbd1f"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-4140[<builtin_function_StringBuiltins.rpartition_at_10ef862f>].bgv.gz",
+      "bytes": 69013,
+      "sha256": "6cf27b6b7b7db861c4e05993f1c2140d0e91dfd07c021697adf8a250d178da17"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-4140[<builtin_function_StringBuiltins.rpartition_at_10ef862f>].filter.json.gz",
+      "bytes": 170210,
+      "sha256": "90aa61cec481857449f4ccf9397cf065798a1e2f5037aad64e8ba26b48d16b99"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-5129[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 103982,
+      "sha256": "259b413b58686d5293dd64f7d60a7309b20d1c46e6efa8a1f61bf6ba72424dd8"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-5129[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 226624,
+      "sha256": "4f997bb5d6b051cd18655bd371900ed1e93d256366ed8e35747bb30dff3019eb"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-5148[<bytecode_run_at_552472a8>].bgv.gz",
+      "bytes": 19334,
+      "sha256": "16e74f49a6a0dc0dbc613baa5b1832cef8930e77b1b59ff650693b4ece13b2b4"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/budget-2000/bgv/TruffleHotSpotCompilation-5148[<bytecode_run_at_552472a8>].filter.json.gz",
+      "bytes": 24334,
+      "sha256": "d588aa1815472511f855f9dadaebb9e5016e62fac897b212df1f655d206568f5"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/budget-2000/trace.log.gz",
+      "bytes": 16342,
+      "sha256": "db0db54f0d572e742f9b3f169f7ad7785a8ffa165674805f3112b45e2888caaa"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/capture.json",
+      "bytes": 31140,
+      "sha256": "cddae9d7a925b306c4e10811dea95d9f6a828e9553ce01d39ed5db4cd2fa1124"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/cold-summary.json",
+      "bytes": 19325,
+      "sha256": "894c703d17d2c4288f79a568448f9aaf70caa6668f8b09d621ec77479f61348d"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/python/raw/correctness.log",
+      "bytes": 3244,
+      "sha256": "2e5d2edecb50321be37a1a5e138eb4f7d6924578f8a6831178acc9c44a689ca3"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5022[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 50831,
+      "sha256": "5292cc37b244d038c6e95636d14524b2a08fcce65e887a05af040e782a9e0db0"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5022[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 94315,
+      "sha256": "f4d61ffd4eec15b7edd1f3c9d264c844634f7bf9fc4697a2495d582b769f6a07"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5030[Object#run].bgv.gz",
+      "bytes": 13449,
+      "sha256": "d6e58817be51f0a1fbd4e175f24b28f4c834e7e833b570a81a13411cd3d37ff6"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/ruby/budget-2000/bgv/TruffleHotSpotCompilation-5030[Object#run].filter.json.gz",
+      "bytes": 11934,
+      "sha256": "b86109d119fbd39a2821ac3dab776d4b525605d48172bbef44720f6c1f2c6a09"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/ruby/budget-2000/trace.log.gz",
+      "bytes": 46296,
+      "sha256": "2e1e4daf9a7d58ab68d1768651b8bf65ca978277f1f65d131802274bcfa8afdc"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/ruby/capture.json",
+      "bytes": 47014,
+      "sha256": "fb53305f4c64463af57e7f72a6917a77fd79d5911d05e35b6be74af481313016"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/ruby/cold-summary.json",
+      "bytes": 24127,
+      "sha256": "df4b5df3ec9d5c62c1e6fb42ddea02f13f367e10a25fbd9a24c78e67451a7e6d"
+    },
+    {
+      "path": "tier-2/primitive-switch-last/ruby/raw/correctness.log",
+      "bytes": 3306,
+      "sha256": "56fc883fb410e4f9299eaed121ec7102ffd0456dffe2d6b78973deb23d61b3a6"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/js/budget-2000/bgv/TruffleHotSpotCompilation-2617[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].bgv.gz",
+      "bytes": 66441,
+      "sha256": "054cee2dba8090d4506356ba57b14bb89e5d6627a64bb79fb645ce0839a84029"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/js/budget-2000/bgv/TruffleHotSpotCompilation-2617[org.graalvm.polyglot.Value<InteropBoundFunction>.execute].filter.json.gz",
+      "bytes": 120480,
+      "sha256": "c73d382b31404843eebcab90a6444180150242878244f224de696a1e14a3e498"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/js/budget-2000/bgv/TruffleHotSpotCompilation-2667[run].bgv.gz",
+      "bytes": 14744,
+      "sha256": "2ff80ffc24c2b7006431d0d6da063ebfee526c849d0ebd26f845619470ec30ac"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/js/budget-2000/bgv/TruffleHotSpotCompilation-2667[run].filter.json.gz",
+      "bytes": 10362,
+      "sha256": "b4122fe26b9a0cec14bcd814fd939d7ca64f3219f263ad1af96794c9dadba926"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/js/budget-2000/trace.log.gz",
+      "bytes": 12827,
+      "sha256": "44a7df2db71972d39f16eadf804ff0a923b4cf817b39e5b8d8a6d1748040c255"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/js/capture.json",
+      "bytes": 20758,
+      "sha256": "c136181048d958e974f5db7d63b94722550d05768a11c4000bdf1bb5cbc1f552"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/js/cold-summary.json",
+      "bytes": 10121,
+      "sha256": "17a91f580269edeaf3205f986a658e4ca2014357482820a4f28d83e422dc6d1a"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/js/raw/correctness.log",
+      "bytes": 3241,
+      "sha256": "2bf3f61ae77f9f5d0d6e04faab648adc3496f9e65938515d546804aedca0aadb"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3594[ProtosBuiltinCallRootNode@3d9527e7].bgv.gz",
+      "bytes": 134119,
+      "sha256": "7f0787c2894babe7109a1c8016737f4ff83ec4bf9f22e4801ccbc21c58e17cef"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3594[ProtosBuiltinCallRootNode@3d9527e7].filter.json.gz",
+      "bytes": 275550,
+      "sha256": "ece865e7543785c5034366bed6322a789ba6a93da6f90142af25d0ee48379e60"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3611[ProtosBytecodeRootNodeGen@2ab44a63].bgv.gz",
+      "bytes": 1259620,
+      "sha256": "f9651689afa1901ae5be2b431bebf009c7880652b0e3f6a7be0930ddb2c6878b"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3611[ProtosBytecodeRootNodeGen@2ab44a63].filter.json.gz",
+      "bytes": 3725198,
+      "sha256": "3b784a7d1daeff6f5d539dd8a031e3e5846fab23873fb9ae8646bcae66acfa23"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3692[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+      "bytes": 2949083,
+      "sha256": "301ebc88aaef5d9cf897d78b189b46825de342f90244e8dc54ca744a8b7e2bc6"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3692[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].filter.json.gz",
+      "bytes": 6535020,
+      "sha256": "4cb528302d99efa2a3d9d9d4c14180bd50ab0686f806e5bfaeea60fe5d67190b"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3707[protos-root:089be8c60955c817[CLOSURE|truffle:ac6b9af6b14d08b76bedcf71dc82ba4d1eb298d545ca4e0b0e9e958b092dc64f__workspaces_protos-benchmarks_cases_primitive-switch-middle_primitive-switch-middle.protos|10...].bgv.gz",
+      "bytes": 3204964,
+      "sha256": "b684df2f7f5c25dea066e3ce410a00ee89351d9c597bd500cb08aee30003e063"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3707[protos-root:089be8c60955c817[CLOSURE|truffle:ac6b9af6b14d08b76bedcf71dc82ba4d1eb298d545ca4e0b0e9e958b092dc64f__workspaces_protos-benchmarks_cases_primitive-switch-middle_primitive-switch-middle.protos|10...].filter.json.gz",
+      "bytes": 6133246,
+      "sha256": "604b2371fa558744005db50a02ab88950a93d5eb9b2818810a22432a4adedfa3"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3715[ProtosBuiltinCallRootNode@8012958].bgv.gz",
+      "bytes": 133637,
+      "sha256": "5d659699045d9bed0a1e99faee6f8da0aebaeb2931572ce8a43039b1bec1dc38"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3715[ProtosBuiltinCallRootNode@8012958].filter.json.gz",
+      "bytes": 275008,
+      "sha256": "b78071567a488ac46bec3e20ef21051c97ce9225996dac3811f5eb43fa391e98"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3720[ProtosBuiltinCallRootNode@3f9555d].bgv.gz",
+      "bytes": 133825,
+      "sha256": "43271c19084afe7eaa47f087de71d8e3a4535892d4897781bbbf885e0cda0edd"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3720[ProtosBuiltinCallRootNode@3f9555d].filter.json.gz",
+      "bytes": 275012,
+      "sha256": "e6bf7b37bee704e3da1b872e9766ebdd82bee2940d60dbea821b9358049be7e1"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3722[ProtosBuiltinCallRootNode@31b30eb1].bgv.gz",
+      "bytes": 136189,
+      "sha256": "a0dea97d8510c7ab20d75f89ed9bc412e0423a7491c7c4a4748f40482bf43368"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/bgv/TruffleHotSpotCompilation-3722[ProtosBuiltinCallRootNode@31b30eb1].filter.json.gz",
+      "bytes": 277786,
+      "sha256": "11f247d063f863c859d032ac650de4e51353ed9e4404131d50ce24898c86e9bf"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/budget-2000/trace.log.gz",
+      "bytes": 28509,
+      "sha256": "35855f97d45a57238f5136dfbb2d4557953e7d27542eb7c532a2365d5028582d"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/capture.json",
+      "bytes": 93884,
+      "sha256": "1f03cdf1620378fc3ff11c110b4fe5b89b9ca291a2ca6a33dad267a4a8a2546b"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/cold-summary.json",
+      "bytes": 54408,
+      "sha256": "4b4e71eed78654c35dcb1692359ce643111e0249dcdbe4debc4dabf820cad2f9"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/raw/correctness.log",
+      "bytes": 3991,
+      "sha256": "982cf84d2e20982773704b4c90c3e7ed7d323b298e895f5d1adc62ab66b50b74"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/protos/raw/product-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-4156[<builtin_function_StringBuiltins.rpartition_at_78053ae7>].bgv.gz",
+      "bytes": 68918,
+      "sha256": "834c8a2f8cf701a628b72151bcde7d882345fa4ef8a137b82b06261228717dad"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-4156[<builtin_function_StringBuiltins.rpartition_at_78053ae7>].filter.json.gz",
+      "bytes": 170212,
+      "sha256": "9e5e7163d8685917312317bff2e85bde4805ca3b08f46f1f9c63e93616b1a303"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-5082[org.graalvm.polyglot.Value<PFunction>.execute].bgv.gz",
+      "bytes": 104063,
+      "sha256": "98d7c394239dcaf20f1492d3bb018e48a9ce582cfedb02bdc4a330a27d7aa86c"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-5082[org.graalvm.polyglot.Value<PFunction>.execute].filter.json.gz",
+      "bytes": 226860,
+      "sha256": "5f63a56ba13f2f1e8d8625dfd40e8e1fddc07be0cbf73d92110b1878b093ec2c"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-5102[<bytecode_run_at_211b1aec>].bgv.gz",
+      "bytes": 19404,
+      "sha256": "ee93601c6d8196de19f015a6dfb84a34484a7ae82ad437c130e1a24a21e1f790"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/budget-2000/bgv/TruffleHotSpotCompilation-5102[<bytecode_run_at_211b1aec>].filter.json.gz",
+      "bytes": 24509,
+      "sha256": "903ffe5bd2e794c35427c63a7bc8a96a8223a32f82189e00fe1dcf5486f713c7"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/budget-2000/trace.log.gz",
+      "bytes": 16403,
+      "sha256": "590468fd1b4109392ba78050fe53fbd65e49c171715c0ed0094b694babfdaa5b"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/capture.json",
+      "bytes": 31155,
+      "sha256": "a9f84877e0d614974fa3b376def1e8a6b09dadea9cdef0875f46914e53bf4046"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/cold-summary.json",
+      "bytes": 19331,
+      "sha256": "6de6414a1e64c26eb5aa911ff4509834b366435797f73e581749606c4fdb745c"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/python/raw/correctness.log",
+      "bytes": 3248,
+      "sha256": "9c65e02df625e338309e4f763949780f740cbbc88cf30cdaf27ac4113ad30329"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4971[org.graalvm.polyglot.Value<RubyMethod>.execute].bgv.gz",
+      "bytes": 50752,
+      "sha256": "e9203c4e2251de19cf64857e88dab71c247376c0879a6a984d8435ddcf0ddc02"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4971[org.graalvm.polyglot.Value<RubyMethod>.execute].filter.json.gz",
+      "bytes": 94316,
+      "sha256": "94c5e065c12d2e9358ed9cb90c478f40b875ed4374f3a7f28edc564949aeaec8"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4977[Object#run].bgv.gz",
+      "bytes": 13396,
+      "sha256": "fe15e6b6c6ea898c4709effce8aa710649ee0599789f6a6e1e6e7f67b864d34e"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/ruby/budget-2000/bgv/TruffleHotSpotCompilation-4977[Object#run].filter.json.gz",
+      "bytes": 11890,
+      "sha256": "88b2835f3ac2d3805f674bd8f6d6e50db6d51e31cf02335d11715569759406d7"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/ruby/budget-2000/trace.log.gz",
+      "bytes": 46242,
+      "sha256": "0ef8c105b06212609e3d433e705da0e7699c6186d34cc323a2ac0b17dacd43e8"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/ruby/capture.json",
+      "bytes": 47030,
+      "sha256": "367b8f82d51ba46d37d50549eff27f837dbca386ad5d86669f08983eb902472b"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/ruby/cold-summary.json",
+      "bytes": 24133,
+      "sha256": "47e7f828ef8c9483ed894ba7c91af2a59dc167af6108e6dc11e4aaa5ebb5017e"
+    },
+    {
+      "path": "tier-2/primitive-switch-middle/ruby/raw/correctness.log",
+      "bytes": 3310,
+      "sha256": "0b5e28e8ca6d4ca208c4729ee7f165b6a7cef52e99b82dc3c526b1de133560b4"
+    }
+  ]
+}

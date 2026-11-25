@@ -1,0 +1,2591 @@
+$ taskset -c 0 java -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.BytecodeHistogram=language,root -Dpolyglot.bench-bytecode-size=true -Dprotos.benchmarks.peer.language=python -cp /workspaces/protos-benchmarks/.work/embedded/bytecode-size-instrument/3980573a5e925094c19c08df374a85dba709f334ad891fe0dda7d7f4a61aad81/classes:/workspaces/protos-benchmarks/.work/embedded/peer-25.4.4.1.1/executable-value/25424f56219054532a677d5774519bb5b904d665d76bbdae7c879c6d71e6e41f/classes:/home/vscode/.m2/repository/org/graalvm/polyglot/polyglot/25.4.4.1.1/polyglot-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/collections/25.4.4.1.1/collections-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/nativeimage/25.4.4.1.1/nativeimage-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/word/25.4.4.1.1/word-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/polyglot/js/25.4.4.1.1/js-25.4.4.1.1.pom:/home/vscode/.m2/repository/org/graalvm/js/js/25.4.4.1.1/js-25.4.4.1.1.pom:/home/vscode/.m2/repository/org/graalvm/js/js-language/25.4.4.1.1/js-language-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/regex/regex/25.4.4.1.1/regex-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-api/25.4.4.1.1/truffle-api-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/sdk/jniutils/25.4.4.1.1/jniutils-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/shadowed/icu4j/25.4.4.1.1/icu4j-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-runtime/25.4.4.1.1/truffle-runtime-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-compiler/25.4.4.1.1/truffle-compiler-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/polyglot/python/25.4.4.1.1/python-25.4.4.1.1.pom:/home/vscode/.m2/repository/org/graalvm/python/python/25.4.4.1.1/python-25.4.4.1.1.pom:/home/vscode/.m2/repository/org/graalvm/python/python-language/25.4.4.1.1/python-language-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/tools/profiler-tool/25.4.4.1.1/profiler-tool-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/shadowed/json/25.4.4.1.1/json-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/shadowed/xz/25.4.4.1.1/xz-25.4.4.1.1.jar:/home/vscode/.m2/repository/org/graalvm/python/python-resources/25.4.4.1.1/python-resources-25.4.4.1.1.jar com.guillermomolina.protos.benchmarks.measure.peer.PeerExecutableSurface measure - /workspaces/protos-benchmarks/cases/primitive-switch-middle/primitive-switch-middle.py 0 1 100 -
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by com.oracle.truffle.polyglot.JDKSupport in an unnamed module (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-api/25.4.4.1.1/truffle-api-25.4.4.1.1.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime (file:/home/vscode/.m2/repository/org/graalvm/truffle/truffle-runtime/25.4.4.1.1/truffle-runtime-25.4.4.1.1.jar)
+WARNING: Please consider reporting this to the maintainers of class com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	1	UNCACHED	786	3770	0	3770	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDkzNTNkNDM=
+BENCH_BYTECODE_SIZE_V2	X0xpc3Q=	2	UNCACHED	38	172	0	172	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzQ5OTk2YTY=
+BENCH_BYTECODE_SIZE_V2	X1dlYWtWYWx1ZURpY3Rpb25hcnk=	3	UNCACHED	110	516	0	516	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzY2NzNlZA==
+BENCH_BYTECODE_SIZE_V2	X0Jsb2NraW5nT25NYW5hZ2Vy	4	UNCACHED	80	382	0	382	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzI5YzhkZWY=
+BENCH_BYTECODE_SIZE_V2	X0RlYWRsb2NrRXJyb3I=	5	UNCACHED	34	150	0	150	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANGZlYTA5NWI=
+BENCH_BYTECODE_SIZE_V2	X01vZHVsZUxvY2s=	6	UNCACHED	110	526	0	526	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDcxNGY0NDc=
+BENCH_BYTECODE_SIZE_V2	X0R1bW15TW9kdWxlTG9jaw==	7	UNCACHED	90	434	0	434	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AZjMxMDY3NQ==
+BENCH_BYTECODE_SIZE_V2	X01vZHVsZUxvY2tNYW5hZ2Vy	8	UNCACHED	74	352	0	352	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjg4NWYzZjc=
+BENCH_BYTECODE_SIZE_V2	TW9kdWxlU3BlYw==	9	UNCACHED	182	880	0	880	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjIxOTAwNmE=
+BENCH_BYTECODE_SIZE_V2	QnVpbHRpbkltcG9ydGVy	10	UNCACHED	164	802	0	802	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AYmQ3MDNiYg==
+BENCH_BYTECODE_SIZE_V2	X3JlcXVpcmVzX2J1aWx0aW4=	11	UNCACHED	56	204	0	204	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2M1MDQ0ZmE=
+BENCH_BYTECODE_SIZE_V2	X3dyYXA=	12	UNCACHED	82	324	0	324	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMmQ0MWJiNWE=
+BENCH_BYTECODE_SIZE_V2	X3dyYXA=	12	CACHED	82	324	0	324	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMmQ0MWJiNWE=
+BENCH_BYTECODE_SIZE_V2	RnJvemVuSW1wb3J0ZXI=	13	UNCACHED	210	1018	0	1018	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANGMzYzMxYTU=
+BENCH_BYTECODE_SIZE_V2	X3JlcXVpcmVzX2Zyb3plbg==	14	UNCACHED	56	204	0	204	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjQyZDM0ZjE=
+BENCH_BYTECODE_SIZE_V2	X0ltcG9ydExvY2tDb250ZXh0	15	UNCACHED	62	292	0	292	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2UxNzBhYmU=
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	16	UNCACHED	1094	5440	0	5440	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTY4MjA0NDY=
+BENCH_BYTECODE_SIZE_V2	PGdlbmV4cHI+	17	UNCACHED	58	232	0	232	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWRmZjEwOGM=
+BENCH_BYTECODE_SIZE_V2	PHNldGNvbXA+	18	UNCACHED	48	178	0	178	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDVjMjhjNDk=
+BENCH_BYTECODE_SIZE_V2	X21ha2VfcmVsYXhfY2FzZQ==	19	UNCACHED	102	422	0	422	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMWUwOWMwYg==
+BENCH_BYTECODE_SIZE_V2	V2luZG93c1JlZ2lzdHJ5RmluZGVy	20	UNCACHED	116	558	0	558	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2EwMDIzN2Q=
+BENCH_BYTECODE_SIZE_V2	X0xvYWRlckJhc2ljcw==	21	UNCACHED	86	412	0	412	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmM5NjM0NmI=
+BENCH_BYTECODE_SIZE_V2	U291cmNlTG9hZGVy	22	UNCACHED	122	588	0	588	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTU2OTQ0Y2Q=
+BENCH_BYTECODE_SIZE_V2	RmlsZUxvYWRlcg==	23	UNCACHED	148	716	0	716	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzI5OGMyZDk=
+BENCH_BYTECODE_SIZE_V2	X2NoZWNrX25hbWU=	24	UNCACHED	86	338	0	338	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMjM5YmM0M2Y=
+BENCH_BYTECODE_SIZE_V2	X3dyYXA=	25	UNCACHED	82	324	0	324	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzM0MjUxNzE=
+BENCH_BYTECODE_SIZE_V2	X3dyYXA=	25	CACHED	82	324	0	324	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzM0MjUxNzE=
+BENCH_BYTECODE_SIZE_V2	U291cmNlRmlsZUxvYWRlcg==	26	UNCACHED	78	370	0	370	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTFhNjllOGY=
+BENCH_BYTECODE_SIZE_V2	U291cmNlbGVzc0ZpbGVMb2FkZXI=	27	UNCACHED	62	292	0	292	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmY5MjZkMDE=
+BENCH_BYTECODE_SIZE_V2	RXh0ZW5zaW9uRmlsZUxvYWRlcg==	28	UNCACHED	154	754	0	754	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjExYTkxZGY=
+BENCH_BYTECODE_SIZE_V2	X05hbWVzcGFjZVBhdGg=	29	UNCACHED	184	900	0	900	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzlhYmE4MTM=
+BENCH_BYTECODE_SIZE_V2	TmFtZXNwYWNlTG9hZGVy	30	UNCACHED	132	644	0	644	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzE0MzRiNjM=
+BENCH_BYTECODE_SIZE_V2	UGF0aEZpbmRlcg==	31	UNCACHED	144	688	0	688	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDAyN2VkZWI=
+BENCH_BYTECODE_SIZE_V2	RmlsZUZpbmRlcg==	32	UNCACHED	140	672	0	672	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDYzYTFmNDc=
+BENCH_BYTECODE_SIZE_V2	QXBwbGVGcmFtZXdvcmtMb2FkZXI=	33	UNCACHED	50	232	0	232	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjhlMDk0Yzk=
+BENCH_BYTECODE_SIZE_V2	X2luc3RhbGw=	34	UNCACHED	64	254	0	254	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmI1MjlkNDI=
+BENCH_BYTECODE_SIZE_V2	X3NldHVw	35	UNCACHED	244	1072	0	1072	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzkwZjQ5MzM=
+BENCH_BYTECODE_SIZE_V2	X3NwZWNfZnJvbV9tb2R1bGU=	36	UNCACHED	486	1724	0	1724	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDNiNzQ5Nzk=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	37	UNCACHED	84	326	0	326	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AN2I2Yjk5YzU=
+BENCH_BYTECODE_SIZE_V2	Y2FjaGVk	38	UNCACHED	24	84	0	84	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTUzMDBiOTM=
+BENCH_BYTECODE_SIZE_V2	X2luaXRfbW9kdWxlX2F0dHJz	39	UNCACHED	718	2654	0	2654	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTIzNDI2YTk=
+BENCH_BYTECODE_SIZE_V2	cGFyZW50	40	UNCACHED	54	206	0	206	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2IxODk1ZQ==
+BENCH_BYTECODE_SIZE_V2	aGFzX2xvY2F0aW9u	41	UNCACHED	20	70	0	70	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTA4OWE3MmI=
+BENCH_BYTECODE_SIZE_V2	X3NwZWNfZnJvbV9tb2R1bGU=	36	CACHED	486	1724	0	1724	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDNiNzQ5Nzk=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	37	CACHED	84	326	0	326	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AN2I2Yjk5YzU=
+BENCH_BYTECODE_SIZE_V2	Y2FjaGVk	38	CACHED	24	84	0	84	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTUzMDBiOTM=
+BENCH_BYTECODE_SIZE_V2	X2luaXRfbW9kdWxlX2F0dHJz	39	CACHED	718	2654	0	2654	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTIzNDI2YTk=
+BENCH_BYTECODE_SIZE_V2	cGFyZW50	40	CACHED	54	206	0	206	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2IxODk1ZQ==
+BENCH_BYTECODE_SIZE_V2	aGFzX2xvY2F0aW9u	41	CACHED	20	70	0	70	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTA4OWE3MmI=
+BENCH_BYTECODE_SIZE_V2	X2ZpeF91cF9tb2R1bGU=	42	UNCACHED	730	3014	0	3014	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTg4YjlhMWU=
+BENCH_BYTECODE_SIZE_V2	X3Jlc29sdmVfZmlsZW5hbWU=	43	UNCACHED	328	1306	0	1306	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AN2RkODQ3YTI=
+BENCH_BYTECODE_SIZE_V2	X2J1aWx0aW5fZnJvbV9uYW1l	44	UNCACHED	58	228	0	228	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzYyZGI5OTI=
+BENCH_BYTECODE_SIZE_V2	ZmluZF9zcGVj	45	UNCACHED	66	258	0	258	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTVhNTkxZDk=
+BENCH_BYTECODE_SIZE_V2	c3BlY19mcm9tX2xvYWRlcg==	46	UNCACHED	284	1102	0	1102	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMjkzMjcyMWU=
+BENCH_BYTECODE_SIZE_V2	X3JlcXVpcmVzX2J1aWx0aW5fd3JhcHBlcg==	47	UNCACHED	78	322	0	322	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWE2ZDRkZWU=
+BENCH_BYTECODE_SIZE_V2	aXNfcGFja2FnZQ==	48	UNCACHED	18	60	0	60	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AN2FmN2M5YWE=
+BENCH_BYTECODE_SIZE_V2	X2xvYWRfdW5sb2NrZWQ=	49	UNCACHED	394	1524	0	1524	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMjA4Yjg0MjU=
+BENCH_BYTECODE_SIZE_V2	bW9kdWxlX2Zyb21fc3BlYw==	50	UNCACHED	106	442	0	442	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzRlZDNiZTQ=
+BENCH_BYTECODE_SIZE_V2	Y3JlYXRlX21vZHVsZQ==	51	UNCACHED	86	370	0	370	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDgyMjQzODE=
+BENCH_BYTECODE_SIZE_V2	ZXhlY19tb2R1bGU=	52	UNCACHED	34	120	0	120	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2YzYTUyOWY=
+BENCH_BYTECODE_SIZE_V2	X3ZlcmJvc2VfbWVzc2FnZQ==	53	UNCACHED	106	440	0	440	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTk4ZmYyYjM=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	54	UNCACHED	90	348	0	348	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTYwYzM3NTg=
+BENCH_BYTECODE_SIZE_V2	S2V5ZWRSZWY=	55	UNCACHED	100	468	0	468	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANGQxNDUxNzc=
+BENCH_BYTECODE_SIZE_V2	Y2xlYXI=	56	UNCACHED	42	164	0	164	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTYwOGUyNTQ=
+BENCH_BYTECODE_SIZE_V2	X3NldHVw	35	CACHED	244	1072	0	1072	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzkwZjQ5MzM=
+BENCH_BYTECODE_SIZE_V2	X2luc3RhbGxfZXh0ZXJuYWxfaW1wb3J0ZXJz	57	UNCACHED	46	196	0	196	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMjFmYTE5ZTQ=
+BENCH_BYTECODE_SIZE_V2	X2luc3RhbGw=	58	UNCACHED	92	370	0	370	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzc0NzU3MWM=
+BENCH_BYTECODE_SIZE_V2	X3NldF9ib290c3RyYXBfbW9kdWxl	59	UNCACHED	22	80	0	80	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjllMzA4ZTI=
+BENCH_BYTECODE_SIZE_V2	X2dldF9zdXBwb3J0ZWRfZmlsZV9sb2FkZXJz	60	UNCACHED	154	674	0	674	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMWM4MGY4ZGQ=
+BENCH_BYTECODE_SIZE_V2	cGF0aF9ob29r	61	UNCACHED	58	202	0	202	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDE5N2U4NTk=
+BENCH_BYTECODE_SIZE_V2	X19pbXBvcnRfXw==	62	UNCACHED	232	946	0	946	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTEzZTZlMDY=
+BENCH_BYTECODE_SIZE_V2	X2djZF9pbXBvcnQ=	63	UNCACHED	58	228	0	228	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmFlNWUxY2Y=
+BENCH_BYTECODE_SIZE_V2	X3Nhbml0eV9jaGVjaw==	64	UNCACHED	154	696	0	696	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AZjk5NzljZg==
+BENCH_BYTECODE_SIZE_V2	X2ZpbmRfYW5kX2xvYWQ=	65	UNCACHED	290	1182	0	1182	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDZiZmYzODg=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	66	UNCACHED	30	110	0	110	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjljMjYzZjg=
+BENCH_BYTECODE_SIZE_V2	X19lbnRlcl9f	67	UNCACHED	46	176	0	176	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjU4NzFjZmQ=
+BENCH_BYTECODE_SIZE_V2	X2dldF9tb2R1bGVfbG9jaw==	68	UNCACHED	242	876	0	876	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMjdlYTU1MmQ=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	69	UNCACHED	78	306	0	306	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmY1MzI5NWU=
+BENCH_BYTECODE_SIZE_V2	YWNxdWlyZQ==	70	UNCACHED	302	1170	0	1170	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzY1NzA5MzY=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	71	UNCACHED	30	108	0	108	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTJmMTI3NDQ=
+BENCH_BYTECODE_SIZE_V2	X19lbnRlcl9f	72	UNCACHED	62	242	0	242	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMWM2MTgyOTU=
+BENCH_BYTECODE_SIZE_V2	c2V0ZGVmYXVsdA==	73	UNCACHED	152	534	0	534	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWZmOGQ3NmY=
+BENCH_BYTECODE_SIZE_V2	X19uZXdfXw==	74	UNCACHED	50	184	0	184	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTc4YzQ0ODA=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	75	UNCACHED	42	154	0	154	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzYxNWY4ZDk=
+BENCH_BYTECODE_SIZE_V2	X19leGl0X18=	76	UNCACHED	46	170	0	170	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzJjMjlkODc=
+BENCH_BYTECODE_SIZE_V2	X2ZpbmRfYW5kX2xvYWRfdW5sb2NrZWQ=	77	UNCACHED	562	2172	0	2172	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTMxNWJlZmU=
+BENCH_BYTECODE_SIZE_V2	X2ZpbmRfc3BlYw==	78	UNCACHED	358	1326	0	1326	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AZTYwYzQ2Ng==
+BENCH_BYTECODE_SIZE_V2	X19lbnRlcl9f	79	UNCACHED	32	114	0	114	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjIwZTBkMzY=
+BENCH_BYTECODE_SIZE_V2	X19leGl0X18=	80	UNCACHED	32	114	0	114	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWNkMmFkYzc=
+BENCH_BYTECODE_SIZE_V2	ZmluZF9zcGVj	81	UNCACHED	178	692	0	692	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2RmNGNkOTY=
+BENCH_BYTECODE_SIZE_V2	Y3JlYXRlX21vZHVsZQ==	82	UNCACHED	106	380	0	380	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTgyNjdiYTE=
+BENCH_BYTECODE_SIZE_V2	X25ld19tb2R1bGU=	83	UNCACHED	26	98	0	98	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AZTM1Njk0MA==
+BENCH_BYTECODE_SIZE_V2	ZXhlY19tb2R1bGU=	84	UNCACHED	58	224	0	224	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMmM4YzQyYw==
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	85	UNCACHED	428	2282	0	2282	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDRiZDdmMjQ=
+BENCH_BYTECODE_SIZE_V2	WmlwSW1wb3J0RXJyb3I=	86	UNCACHED	34	150	0	150	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2U3ZGE0Y2I=
+BENCH_BYTECODE_SIZE_V2	emlwaW1wb3J0ZXI=	87	UNCACHED	190	928	0	928	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjFkNDE1NWI=
+BENCH_BYTECODE_SIZE_V2	X19leGl0X18=	88	UNCACHED	42	152	0	152	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmMzOGY0ZGU=
+BENCH_BYTECODE_SIZE_V2	cmVsZWFzZQ==	89	UNCACHED	194	794	0	794	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDg5YzE1ZTI=
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	90	UNCACHED	118	560	0	560	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWQzYTIzOA==
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	91	UNCACHED	76	366	0	366	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMWFiYTg5Nzg=
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	92	UNCACHED	56	246	0	246	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMWYzZjBkMjU=
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	93	UNCACHED	188	878	0	878	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWZiMGEwOWU=
+BENCH_BYTECODE_SIZE_V2	SmF2YVBhY2thZ2VMb2FkZXI=	94	UNCACHED	140	684	0	684	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzU2MDMwZTI=
+BENCH_BYTECODE_SIZE_V2	SmF2YVR5cGVMb2FkZXI=	95	UNCACHED	92	444	0	444	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMWI4NGQwM2Q=
+BENCH_BYTECODE_SIZE_V2	SmF2YUltcG9ydEZpbmRlcg==	96	UNCACHED	88	412	0	412	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzY1YTRiOWI=
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	97	UNCACHED	170	852	0	852	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2NlNGViNDI=
+BENCH_BYTECODE_SIZE_V2	X2ZpbmRfc3BlYw==	78	CACHED	358	1326	0	1326	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AZTYwYzQ2Ng==
+BENCH_BYTECODE_SIZE_V2	X19lbnRlcl9f	79	CACHED	32	114	0	114	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjIwZTBkMzY=
+BENCH_BYTECODE_SIZE_V2	ZmluZF9zcGVj	45	CACHED	66	258	0	258	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTVhNTkxZDk=
+BENCH_BYTECODE_SIZE_V2	X19leGl0X18=	80	CACHED	32	114	0	114	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWNkMmFkYzc=
+BENCH_BYTECODE_SIZE_V2	c3BlY19mcm9tX2xvYWRlcg==	46	CACHED	284	1102	0	1102	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMjkzMjcyMWU=
+BENCH_BYTECODE_SIZE_V2	X3Jlc29sdmVfZmlsZW5hbWU=	43	CACHED	328	1306	0	1306	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AN2RkODQ3YTI=
+BENCH_BYTECODE_SIZE_V2	X2xvYWRfdW5sb2NrZWQ=	49	CACHED	394	1524	0	1524	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMjA4Yjg0MjU=
+BENCH_BYTECODE_SIZE_V2	bW9kdWxlX2Zyb21fc3BlYw==	50	CACHED	106	442	0	442	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzRlZDNiZTQ=
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	98	UNCACHED	800	3728	0	3728	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTM1ZjE2MGU=
+BENCH_BYTECODE_SIZE_V2	X2ZpbmRfYW5kX2xvYWQ=	65	CACHED	290	1182	0	1182	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDZiZmYzODg=
+BENCH_BYTECODE_SIZE_V2	Q29kZWNJbmZv	99	UNCACHED	110	508	0	508	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AN2YzNmNkOGY=
+BENCH_BYTECODE_SIZE_V2	Q29kZWM=	100	UNCACHED	70	320	0	320	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AOWRhMzg2Yw==
+BENCH_BYTECODE_SIZE_V2	SW5jcmVtZW50YWxFbmNvZGVy	101	UNCACHED	110	522	0	522	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWNkZjYxZA==
+BENCH_BYTECODE_SIZE_V2	QnVmZmVyZWRJbmNyZW1lbnRhbEVuY29kZXI=	102	UNCACHED	120	574	0	574	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDhjYzA2MGQ=
+BENCH_BYTECODE_SIZE_V2	SW5jcmVtZW50YWxEZWNvZGVy	103	UNCACHED	108	514	0	514	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2E1YzYwMDk=
+BENCH_BYTECODE_SIZE_V2	QnVmZmVyZWRJbmNyZW1lbnRhbERlY29kZXI=	104	UNCACHED	120	574	0	574	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AN2JhZjdlMmM=
+BENCH_BYTECODE_SIZE_V2	U3RyZWFtV3JpdGVy	105	UNCACHED	158	758	0	758	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjA2NTU2NDI=
+BENCH_BYTECODE_SIZE_V2	U3RyZWFtUmVhZGVy	106	UNCACHED	242	1144	0	1144	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2Y5MTBmMzY=
+BENCH_BYTECODE_SIZE_V2	U3RyZWFtUmVhZGVyV3JpdGVy	107	UNCACHED	246	1176	0	1176	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzljOTNhZjY=
+BENCH_BYTECODE_SIZE_V2	U3RyZWFtUmVjb2Rlcg==	108	UNCACHED	250	1198	0	1198	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWIzMTI4NjM=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	66	CACHED	30	110	0	110	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjljMjYzZjg=
+BENCH_BYTECODE_SIZE_V2	X19lbnRlcl9f	67	CACHED	46	176	0	176	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANjU4NzFjZmQ=
+BENCH_BYTECODE_SIZE_V2	X2dldF9tb2R1bGVfbG9jaw==	68	CACHED	242	876	0	876	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMjdlYTU1MmQ=
+BENCH_BYTECODE_SIZE_V2	YWNxdWlyZQ==	70	CACHED	302	1170	0	1170	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMzY1NzA5MzY=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	71	CACHED	30	108	0	108	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTJmMTI3NDQ=
+BENCH_BYTECODE_SIZE_V2	X19lbnRlcl9f	72	CACHED	62	242	0	242	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMWM2MTgyOTU=
+BENCH_BYTECODE_SIZE_V2	c2V0ZGVmYXVsdA==	73	CACHED	152	534	0	534	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWZmOGQ3NmY=
+BENCH_BYTECODE_SIZE_V2	X19leGl0X18=	76	CACHED	46	170	0	170	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzJjMjlkODc=
+BENCH_BYTECODE_SIZE_V2	X2xvY2tfdW5sb2NrX21vZHVsZQ==	109	UNCACHED	112	376	0	376	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzM4YWU3ODU=
+BENCH_BYTECODE_SIZE_V2	X2djZF9pbXBvcnQ=	63	CACHED	58	228	0	228	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmFlNWUxY2Y=
+BENCH_BYTECODE_SIZE_V2	X3Nhbml0eV9jaGVjaw==	64	CACHED	154	696	0	696	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AZjk5NzljZg==
+BENCH_BYTECODE_SIZE_V2	cmVsZWFzZQ==	89	CACHED	194	794	0	794	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDg5YzE1ZTI=
+BENCH_BYTECODE_SIZE_V2	X3ZlcmJvc2VfbWVzc2FnZQ==	53	CACHED	106	440	0	440	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANTk4ZmYyYjM=
+BENCH_BYTECODE_SIZE_V2	X19leGl0X18=	88	CACHED	42	152	0	152	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmMzOGY0ZGU=
+BENCH_BYTECODE_SIZE_V2	X2hhbmRsZV9mcm9tbGlzdA==	110	UNCACHED	352	1432	0	1432	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMWQ5Y2FjNmU=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	69	CACHED	78	306	0	306	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmY1MzI5NWU=
+BENCH_BYTECODE_SIZE_V2	X2ZpbmRfYW5kX2xvYWRfdW5sb2NrZWQ=	77	CACHED	562	2172	0	2172	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTMxNWJlZmU=
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	111	UNCACHED	1358	5518	0	5518	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTg0MTlhYjc=
+BENCH_BYTECODE_SIZE_V2	Q29kZWNSZWdpc3RyeUVycm9y	112	UNCACHED	34	150	0	150	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANWY5M2VjMDI=
+BENCH_BYTECODE_SIZE_V2	X19pbXBvcnRfXw==	62	CACHED	232	946	0	946	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AMTEzZTZlMDY=
+BENCH_BYTECODE_SIZE_V2	X19uZXdfXw==	113	UNCACHED	100	382	0	382	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AM2YzNmMxOTE=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	114	UNCACHED	42	152	0	152	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANGE3NmM5MA==
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	115	UNCACHED	24	84	0	84	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANzhkNTJkNGM=
+BENCH_BYTECODE_SIZE_V2	X19pbml0X18=	116	UNCACHED	30	110	0	110	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5AN2Q3NDEyMDA=
+BENCH_BYTECODE_SIZE_V2	PG1vZHVsZT4=	117	UNCACHED	32	138	0	138	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANmY2OTk4YjY=
+mode=jvm
+surface=executable-value
+language=python
+run_mode=executable-value
+source=/workspaces/protos-benchmarks/cases/primitive-switch-middle/primitive-switch-middle.py
+warmup_iterations=0
+steady_iterations=1
+sample_calls=100
+setup_ns=6389461604
+BENCH_BYTECODE_SIZE_V2	cnVu	118	UNCACHED	82	328	0	328	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDYxNWJjMDA=
+sample phase=cold iteration=1 elapsed_ns=13529306
+BENCH_BYTECODE_SIZE_V2	cnVu	118	CACHED	82	328	0	328	UEJ5dGVjb2RlRFNMUm9vdE5vZGVHZW5ANDYxNWJjMDA=
+sample phase=steady iteration=1 elapsed_ns=20951149
+result=23
+[To redirect Truffle log output to a file use one of the following options:
+* '--log.file=<path>' if the option is passed using a guest language launcher.
+* '-Dpolyglot.log.file=<path>' if the option is passed using the host Java launcher.
+* Configure logging using the polyglot embedding API.]
+[engine] [bc] Instruction histogram for: com.oracle.graal.python.nodes.bytecode_dsl.PBytecodeDSLRootNode
+  -----------------------------------------
+   Count  | Percent | Group / Instruction
+  -----------------------------------------
+   22514  |   100.0 | ▶ python
+    2424  |    10.8 |   ▶ Root: run
+     212  |     0.9 |     003 load.constant
+     202  |     0.9 |     011 branch
+     202  |     0.9 |     013 branch.false
+     202  |     0.9 |     017 dup
+     202  |     0.9 |     0a6 c.Eq
+     202  |     0.9 |     186 c.Not
+     192  |     0.9 |     004 load.constant$Int
+     192  |     0.9 |     007 load.local$Int
+     192  |     0.9 |     00e store.local$Int$Int
+     101  |     0.4 |     019 return
+     101  |     0.4 |     01d tag.enter
+     101  |     0.4 |     03e c.EnterCalleeContext
+     101  |     0.4 |     040 c.EpilogForReturn
+      96  |     0.4 |     016 pop$generic
+      96  |     0.4 |     021 tag.leave$generic
+      10  |     0.0 |     006 load.local
+      10  |     0.0 |     00c store.local
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+    1523  |     6.8 |   ▶ Root: _init_module_attrs
+     250  |     1.1 |     009 load.local$Object
+     171  |     0.8 |     184 c.Yes
+     152  |     0.7 |     003 load.constant
+     130  |     0.6 |     013 branch.false
+      97  |     0.4 |     006 load.local
+      92  |     0.4 |     0e5 c.IsNone
+      76  |     0.3 |     017 dup
+      76  |     0.3 |     026 sc.BoolOr
+      76  |     0.3 |     17a c.CallTernaryMethod
+      56  |     0.2 |     181 c.ReadGlobal$ReadBuiltinFastPath
+      53  |     0.2 |     011 branch
+      47  |     0.2 |     06a c.GetAttribute
+      44  |     0.2 |     074 c.SetAttribute
+      25  |     0.1 |     071 c.GetAttribute$InstanceValue
+      20  |     0.1 |     180 c.ReadGlobal
+      19  |     0.1 |     019 return
+      19  |     0.1 |     01d tag.enter
+      19  |     0.1 |     03e c.EnterCalleeContext
+      19  |     0.1 |     040 c.EpilogForReturn
+      19  |     0.1 |     054 c.CopyArguments
+      19  |     0.1 |     0e4 c.IsNotNone
+      14  |     0.1 |     021 tag.leave$generic
+      11  |     0.0 |     00f store.local$generic
+       9  |     0.0 |     075 c.SetAttribute$InstanceValue
+       5  |     0.0 |     00c store.local
+       5  |     0.0 |     01e tag.leave
+    1452  |     6.4 |   ▶ Root: _spec_from_module
+     168  |     0.7 |     009 load.local$Object
+     120  |     0.5 |     006 load.local
+     108  |     0.5 |     013 branch.false
+     108  |     0.5 |     01c load.exception
+      84  |     0.4 |     003 load.constant
+      72  |     0.3 |     0b5 c.SetCurrentException
+      70  |     0.3 |     00f store.local$generic
+      60  |     0.3 |     011 branch
+      54  |     0.2 |     06a c.GetAttribute
+      50  |     0.2 |     00c store.local
+      36  |     0.2 |     0b4 c.GetCurrentException
+      36  |     0.2 |     0b7 c.MarkExceptionAsCaught
+      36  |     0.2 |     0e5 c.IsNone
+      36  |     0.2 |     16c c.ExceptMatch
+      35  |     0.2 |     181 c.ReadGlobal$ReadBuiltinFastPath
+      30  |     0.1 |     180 c.ReadGlobal
+      24  |     0.1 |     017 dup
+      24  |     0.1 |     02d create.variadic
+      24  |     0.1 |     0e4 c.IsNotNone
+      24  |     0.1 |     184 c.Yes
+      22  |     0.1 |     074 c.SetAttribute
+      21  |     0.1 |     016 pop$generic
+      15  |     0.1 |     014 pop
+      14  |     0.1 |     075 c.SetAttribute$InstanceValue
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     025 sc.BoolAnd
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     04e c.CollectToObjectArray
+      12  |     0.1 |     054 c.CopyArguments
+      12  |     0.1 |     08f c.MappingToKeywords
+      12  |     0.1 |     090 c.MakeDict
+      12  |     0.1 |     0c8 c.CallVarargsMethod
+      12  |     0.1 |     17a c.CallTernaryMethod
+      12  |     0.1 |     186 c.Not
+       7  |     0.0 |     021 tag.leave$generic
+       7  |     0.0 |     02b merge.conditional$generic
+       7  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+       6  |     0.0 |     071 c.GetAttribute$InstanceValue
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     028 merge.conditional
+     705  |     3.1 |   ▶ Root: _find_and_load
+      60  |     0.3 |     009 load.local$Object
+      48  |     0.2 |     006 load.local
+      44  |     0.2 |     017 dup
+      42  |     0.2 |     180 c.ReadGlobal
+      42  |     0.2 |     182 c.ReadGlobal$ReadGlobalFastPath
+      41  |     0.2 |     003 load.constant
+      41  |     0.2 |     184 c.Yes
+      36  |     0.2 |     013 branch.false
+      32  |     0.1 |     005 load.stackvalue
+      24  |     0.1 |     010 store.stackvalue
+      24  |     0.1 |     067 c.GetMethod
+      24  |     0.1 |     167 c.Is
+      23  |     0.1 |     17a c.CallTernaryMethod
+      14  |     0.1 |     00f store.local$generic
+      13  |     0.1 |     06b c.GetAttribute$Module
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     026 sc.BoolOr
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      11  |     0.0 |     00c store.local
+      11  |     0.0 |     06a c.GetAttribute
+      11  |     0.0 |     17b c.CallTernaryMethod$BuiltinFunctionCached
+      10  |     0.0 |     181 c.ReadGlobal$ReadBuiltinFastPath
+       9  |     0.0 |     174 c.CallUnaryMethod
+       8  |     0.0 |     021 tag.leave$generic
+       8  |     0.0 |     0ca c.ContextManagerEnter
+       8  |     0.0 |     0cb c.ContextManagerExit
+       7  |     0.0 |     0e5 c.IsNone
+       6  |     0.0 |     00b clear.local
+       6  |     0.0 |     011 branch
+       6  |     0.0 |     177 c.CallBinaryMethod
+       5  |     0.0 |     0a6 c.Eq
+       4  |     0.0 |     016 pop$generic
+       4  |     0.0 |     01e tag.leave
+       4  |     0.0 |     186 c.Not
+       2  |     0.0 |     014 pop
+       2  |     0.0 |     176 c.CallUnaryMethod$CallPFunction
+       2  |     0.0 |     178 c.CallBinaryMethod$CallObjectSingleContext
+       1  |     0.0 |     179 c.CallBinaryMethod$CallPFunction
+     705  |     3.1 |   ▶ Root: ModuleSpec.__init__
+     182  |     0.8 |     009 load.local$Object
+     112  |     0.5 |     075 c.SetAttribute$InstanceValue
+      75  |     0.3 |     003 load.constant
+      65  |     0.3 |     006 load.local
+      40  |     0.2 |     074 c.SetAttribute
+      20  |     0.1 |     02e empty.variadic
+      20  |     0.1 |     07b c.MakeList
+      19  |     0.1 |     013 branch.false
+      19  |     0.1 |     017 dup
+      19  |     0.1 |     019 return
+      19  |     0.1 |     01d tag.enter
+      19  |     0.1 |     03e c.EnterCalleeContext
+      19  |     0.1 |     040 c.EpilogForReturn
+      19  |     0.1 |     054 c.CopyArguments
+      19  |     0.1 |     184 c.Yes
+      14  |     0.1 |     021 tag.leave$generic
+      14  |     0.1 |     02b merge.conditional$generic
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     028 merge.conditional
+       1  |     0.0 |     011 branch
+     703  |     3.1 |   ▶ Root: _ModuleLock.release
+      53  |     0.2 |     009 load.local$Object
+      46  |     0.2 |     003 load.constant
+      46  |     0.2 |     174 c.CallUnaryMethod
+      41  |     0.2 |     006 load.local
+      41  |     0.2 |     013 branch.false
+      37  |     0.2 |     071 c.GetAttribute$InstanceValue
+      36  |     0.2 |     005 load.stackvalue
+      36  |     0.2 |     017 dup
+      28  |     0.1 |     06a c.GetAttribute
+      24  |     0.1 |     00b clear.local
+      24  |     0.1 |     010 store.stackvalue
+      24  |     0.1 |     067 c.GetMethod
+      24  |     0.1 |     186 c.Not
+      18  |     0.1 |     180 c.ReadGlobal
+      17  |     0.1 |     0a2 c.Gt
+      17  |     0.1 |     184 c.Yes
+      16  |     0.1 |     181 c.ReadGlobal$ReadBuiltinFastPath
+      14  |     0.1 |     016 pop$generic
+      12  |     0.1 |     011 branch
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      12  |     0.1 |     0aa c.Ne
+      12  |     0.1 |     0ca c.ContextManagerEnter
+      12  |     0.1 |     0cb c.ContextManagerExit
+      10  |     0.0 |     014 pop
+       7  |     0.0 |     00f store.local$generic
+       7  |     0.0 |     021 tag.leave$generic
+       7  |     0.0 |     175 c.CallUnaryMethod$CallObjectSingle
+       7  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+       5  |     0.0 |     00c store.local
+       5  |     0.0 |     01e tag.leave
+       3  |     0.0 |     074 c.SetAttribute
+       2  |     0.0 |     075 c.SetAttribute$InstanceValue
+     700  |     3.1 |   ▶ Root: _ModuleLock.acquire
+      75  |     0.3 |     009 load.local$Object
+      60  |     0.3 |     003 load.constant
+      60  |     0.3 |     017 dup
+      48  |     0.2 |     005 load.stackvalue
+      47  |     0.2 |     006 load.local
+      27  |     0.1 |     071 c.GetAttribute$InstanceValue
+      24  |     0.1 |     010 store.stackvalue
+      24  |     0.1 |     013 branch.false
+      24  |     0.1 |     067 c.GetMethod
+      24  |     0.1 |     0ca c.ContextManagerEnter
+      24  |     0.1 |     0cb c.ContextManagerExit
+      24  |     0.1 |     184 c.Yes
+      19  |     0.1 |     0a6 c.Eq
+      17  |     0.1 |     177 c.CallBinaryMethod
+      16  |     0.1 |     06a c.GetAttribute
+      14  |     0.1 |     182 c.ReadGlobal$ReadGlobalFastPath
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     026 sc.BoolOr
+      12  |     0.1 |     02e empty.variadic
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      12  |     0.1 |     07b c.MakeList
+      12  |     0.1 |     174 c.CallUnaryMethod
+      10  |     0.0 |     180 c.ReadGlobal
+       7  |     0.0 |     00f store.local$generic
+       7  |     0.0 |     016 pop$generic
+       7  |     0.0 |     021 tag.leave$generic
+       7  |     0.0 |     075 c.SetAttribute$InstanceValue
+       7  |     0.0 |     178 c.CallBinaryMethod$CallObjectSingleContext
+       5  |     0.0 |     00c store.local
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     074 c.SetAttribute
+     677  |     3.0 |   ▶ Root: <module>
+     648  |     2.9 |     003 load.constant
+      20  |     0.1 |     02c load.variadic
+       2  |     0.0 |     050 c.WriteName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     090 c.MakeDict
+     630  |     2.8 |   ▶ Root: _setup
+      85  |     0.4 |     009 load.local$Object
+      66  |     0.3 |     013 branch.false
+      56  |     0.2 |     006 load.local
+      47  |     0.2 |     184 c.Yes
+      44  |     0.2 |     177 c.CallBinaryMethod
+      42  |     0.2 |     180 c.ReadGlobal
+      42  |     0.2 |     182 c.ReadGlobal$ReadGlobalFastPath
+      26  |     0.1 |     017 dup
+      19  |     0.1 |     066 c.ForIterate
+      17  |     0.1 |     012 branch.backward
+      17  |     0.1 |     04f c.Contains
+      16  |     0.1 |     011 branch
+      15  |     0.1 |     00c store.local
+      14  |     0.1 |     00f store.local$generic
+      14  |     0.1 |     093 c.UnpackToLocals2
+      12  |     0.1 |     167 c.Is
+      11  |     0.0 |     06b c.GetAttribute$Module
+      11  |     0.0 |     181 c.ReadGlobal$ReadBuiltinFastPath
+      10  |     0.0 |     016 pop$generic
+       9  |     0.0 |     014 pop
+       9  |     0.0 |     06a c.GetAttribute
+       7  |     0.0 |     005 load.stackvalue
+       7  |     0.0 |     010 store.stackvalue
+       7  |     0.0 |     067 c.GetMethod
+       3  |     0.0 |     078 c.WriteGlobal
+       3  |     0.0 |     174 c.CallUnaryMethod
+       3  |     0.0 |     17a c.CallTernaryMethod
+       3  |     0.0 |     186 c.Not
+       2  |     0.0 |     05b c.GetIter
+       2  |     0.0 |     0d3 c.BinarySubscript
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     00b clear.local
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     088 c.MakeConstantObjectTuple
+       1  |     0.0 |     0c6 c.CallNilaryMethod
+       1  |     0.0 |     176 c.CallUnaryMethod$CallPFunction
+     594  |     2.6 |   ▶ Root: _wrap
+     124  |     0.6 |     009 load.local$Object
+      54  |     0.2 |     013 branch.false
+      54  |     0.2 |     177 c.CallBinaryMethod
+      48  |     0.2 |     180 c.ReadGlobal
+      36  |     0.2 |     017 dup
+      32  |     0.1 |     006 load.local
+      30  |     0.1 |     066 c.ForIterate
+      29  |     0.1 |     016 pop$generic
+      24  |     0.1 |     012 branch.backward
+      24  |     0.1 |     17a c.CallTernaryMethod
+      24  |     0.1 |     181 c.ReadGlobal$ReadBuiltinFastPath
+      24  |     0.1 |     184 c.Yes
+      12  |     0.1 |     06a c.GetAttribute
+       7  |     0.0 |     014 pop
+       6  |     0.0 |     003 load.constant
+       6  |     0.0 |     005 load.stackvalue
+       6  |     0.0 |     010 store.stackvalue
+       6  |     0.0 |     019 return
+       6  |     0.0 |     01d tag.enter
+       6  |     0.0 |     03e c.EnterCalleeContext
+       6  |     0.0 |     040 c.EpilogForReturn
+       6  |     0.0 |     054 c.CopyArguments
+       6  |     0.0 |     05b c.GetIter
+       6  |     0.0 |     067 c.GetMethod
+       6  |     0.0 |     088 c.MakeConstantObjectTuple
+       5  |     0.0 |     021 tag.leave$generic
+       1  |     0.0 |     01e tag.leave
+     567  |     2.5 |   ▶ Root: _get_module_lock
+      45  |     0.2 |     006 load.local
+      40  |     0.2 |     180 c.ReadGlobal
+      29  |     0.1 |     005 load.stackvalue
+      29  |     0.1 |     010 store.stackvalue
+      29  |     0.1 |     017 dup
+      29  |     0.1 |     067 c.GetMethod
+      29  |     0.1 |     174 c.CallUnaryMethod
+      24  |     0.1 |     011 branch
+      22  |     0.1 |     013 branch.false
+      21  |     0.1 |     009 load.local$Object
+      21  |     0.1 |     00c store.local
+      21  |     0.1 |     182 c.ReadGlobal$ReadGlobalFastPath
+      17  |     0.1 |     0e5 c.IsNone
+      15  |     0.1 |     014 pop
+      15  |     0.1 |     01c load.exception
+      14  |     0.1 |     016 pop$generic
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      12  |     0.1 |     0d3 c.BinarySubscript
+      10  |     0.0 |     003 load.constant
+      10  |     0.0 |     018 load.null
+      10  |     0.0 |     0b5 c.SetCurrentException
+       7  |     0.0 |     021 tag.leave$generic
+       7  |     0.0 |     0c6 c.CallNilaryMethod
+       6  |     0.0 |     00f store.local$generic
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     02d create.variadic
+       5  |     0.0 |     04e c.CollectToObjectArray
+       5  |     0.0 |     063 c.MakeFunction
+       5  |     0.0 |     092 c.SetItem
+       5  |     0.0 |     0b4 c.GetCurrentException
+       5  |     0.0 |     0b7 c.MarkExceptionAsCaught
+       5  |     0.0 |     16c c.ExceptMatch
+       5  |     0.0 |     17a c.CallTernaryMethod
+     513  |     2.3 |   ▶ Root: <module>
+     130  |     0.6 |     003 load.constant
+      94  |     0.4 |     018 load.null
+      75  |     0.3 |     050 c.WriteName
+      47  |     0.2 |     063 c.MakeFunction
+      34  |     0.2 |     051 c.ReadName
+      21  |     0.1 |     02d create.variadic
+      19  |     0.1 |     04e c.CollectToObjectArray
+      12  |     0.1 |     07a c.LoadBuildClass
+      12  |     0.1 |     0c8 c.CallVarargsMethod
+       7  |     0.0 |     0ae c.Import
+       6  |     0.0 |     013 branch.false
+       6  |     0.0 |     017 dup
+       5  |     0.0 |     174 c.CallUnaryMethod
+       5  |     0.0 |     184 c.Yes
+       4  |     0.0 |     005 load.stackvalue
+       4  |     0.0 |     010 store.stackvalue
+       4  |     0.0 |     067 c.GetMethod
+       3  |     0.0 |     083 c.MakeConstantObjectList
+       2  |     0.0 |     05b c.GetIter
+       2  |     0.0 |     06a c.GetAttribute
+       2  |     0.0 |     088 c.MakeConstantObjectTuple
+       2  |     0.0 |     08e c.MakeKeywords
+       2  |     0.0 |     0c6 c.CallNilaryMethod
+       2  |     0.0 |     0c9 c.CallComprehension
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     078 c.WriteGlobal
+       1  |     0.0 |     0a6 c.Eq
+       1  |     0.0 |     0d3 c.BinarySubscript
+       1  |     0.0 |     121 c.PyNumberAdd
+       1  |     0.0 |     177 c.CallBinaryMethod
+       1  |     0.0 |     17a c.CallTernaryMethod
+       1  |     0.0 |     186 c.Not
+     511  |     2.3 |   ▶ Root: _load_unlocked
+      73  |     0.3 |     006 load.local
+      54  |     0.2 |     06a c.GetAttribute
+      39  |     0.2 |     009 load.local$Object
+      28  |     0.1 |     003 load.constant
+      27  |     0.1 |     180 c.ReadGlobal
+      22  |     0.1 |     071 c.GetAttribute$InstanceValue
+      21  |     0.1 |     013 branch.false
+      18  |     0.1 |     177 c.CallBinaryMethod
+      14  |     0.1 |     005 load.stackvalue
+      14  |     0.1 |     010 store.stackvalue
+      14  |     0.1 |     011 branch
+      14  |     0.1 |     017 dup
+      14  |     0.1 |     067 c.GetMethod
+      14  |     0.1 |     092 c.SetItem
+      13  |     0.1 |     182 c.ReadGlobal$ReadGlobalFastPath
+       9  |     0.0 |     00c store.local
+       9  |     0.0 |     074 c.SetAttribute
+       8  |     0.0 |     014 pop
+       8  |     0.0 |     06b c.GetAttribute$Module
+       7  |     0.0 |     019 return
+       7  |     0.0 |     01d tag.enter
+       7  |     0.0 |     03e c.EnterCalleeContext
+       7  |     0.0 |     040 c.EpilogForReturn
+       7  |     0.0 |     054 c.CopyArguments
+       7  |     0.0 |     0e4 c.IsNotNone
+       7  |     0.0 |     0e5 c.IsNone
+       7  |     0.0 |     17a c.CallTernaryMethod
+       7  |     0.0 |     186 c.Not
+       6  |     0.0 |     016 pop$generic
+       5  |     0.0 |     00f store.local$generic
+       5  |     0.0 |     075 c.SetAttribute$InstanceValue
+       5  |     0.0 |     174 c.CallUnaryMethod
+       4  |     0.0 |     01e tag.leave
+       3  |     0.0 |     021 tag.leave$generic
+       3  |     0.0 |     178 c.CallBinaryMethod$CallObjectSingleContext
+       2  |     0.0 |     176 c.CallUnaryMethod$CallPFunction
+       2  |     0.0 |     181 c.ReadGlobal$ReadBuiltinFastPath
+     426  |     1.9 |   ▶ Root: _find_spec
+      56  |     0.2 |     006 load.local
+      42  |     0.2 |     009 load.local$Object
+      33  |     0.1 |     013 branch.false
+      23  |     0.1 |     017 dup
+      18  |     0.1 |     00b clear.local
+      18  |     0.1 |     011 branch
+      16  |     0.1 |     00c store.local
+      14  |     0.1 |     06a c.GetAttribute
+      14  |     0.1 |     180 c.ReadGlobal
+      12  |     0.1 |     00f store.local$generic
+      10  |     0.0 |     04f c.Contains
+      10  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+      10  |     0.0 |     184 c.Yes
+      10  |     0.0 |     186 c.Not
+       9  |     0.0 |     003 load.constant
+       9  |     0.0 |     005 load.stackvalue
+       9  |     0.0 |     066 c.ForIterate
+       9  |     0.0 |     0c6 c.CallNilaryMethod
+       9  |     0.0 |     0ca c.ContextManagerEnter
+       9  |     0.0 |     0cb c.ContextManagerExit
+       9  |     0.0 |     0e4 c.IsNotNone
+       9  |     0.0 |     17a c.CallTernaryMethod
+       6  |     0.0 |     06b c.GetAttribute$Module
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     019 return
+       5  |     0.0 |     01d tag.enter
+       5  |     0.0 |     025 sc.BoolAnd
+       5  |     0.0 |     03e c.EnterCalleeContext
+       5  |     0.0 |     040 c.EpilogForReturn
+       5  |     0.0 |     054 c.CopyArguments
+       5  |     0.0 |     05b c.GetIter
+       5  |     0.0 |     0e5 c.IsNone
+       4  |     0.0 |     012 branch.backward
+       4  |     0.0 |     016 pop$generic
+       4  |     0.0 |     06e c.GetAttribute$Type
+       3  |     0.0 |     01e tag.leave
+       2  |     0.0 |     021 tag.leave$generic
+     417  |     1.9 |   ▶ Root: FrozenImporter._resolve_filename
+      61  |     0.3 |     006 load.local
+      55  |     0.2 |     003 load.constant
+      27  |     0.1 |     184 c.Yes
+      23  |     0.1 |     00c store.local
+      22  |     0.1 |     013 branch.false
+      20  |     0.1 |     16b c.Format
+      17  |     0.1 |     017 dup
+      17  |     0.1 |     180 c.ReadGlobal
+      13  |     0.1 |     02d create.variadic
+      12  |     0.1 |     186 c.Not
+      11  |     0.0 |     009 load.local$Object
+      11  |     0.0 |     06a c.GetAttribute
+      11  |     0.0 |     17a c.CallTernaryMethod
+       8  |     0.0 |     005 load.stackvalue
+       8  |     0.0 |     010 store.stackvalue
+       7  |     0.0 |     011 branch
+       7  |     0.0 |     067 c.GetMethod
+       7  |     0.0 |     0cf c.BuildString
+       6  |     0.0 |     019 return
+       6  |     0.0 |     01d tag.enter
+       6  |     0.0 |     026 sc.BoolOr
+       6  |     0.0 |     03e c.EnterCalleeContext
+       6  |     0.0 |     040 c.EpilogForReturn
+       6  |     0.0 |     054 c.CopyArguments
+       6  |     0.0 |     07e c.MakeTuple
+       6  |     0.0 |     0aa c.Ne
+       5  |     0.0 |     01e tag.leave
+       4  |     0.0 |     00f store.local$generic
+       3  |     0.0 |     01c load.exception
+       2  |     0.0 |     014 pop
+       2  |     0.0 |     0b5 c.SetCurrentException
+       2  |     0.0 |     177 c.CallBinaryMethod
+       2  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+       1  |     0.0 |     021 tag.leave$generic
+       1  |     0.0 |     028 merge.conditional
+       1  |     0.0 |     068 c.GetMethod$StringFastPath
+       1  |     0.0 |     06b c.GetAttribute$Module
+       1  |     0.0 |     06e c.GetAttribute$Type
+       1  |     0.0 |     074 c.SetAttribute
+       1  |     0.0 |     0a6 c.Eq
+       1  |     0.0 |     0b4 c.GetCurrentException
+       1  |     0.0 |     0b7 c.MarkExceptionAsCaught
+       1  |     0.0 |     16c c.ExceptMatch
+       1  |     0.0 |     17b c.CallTernaryMethod$BuiltinFunctionCached
+       1  |     0.0 |     181 c.ReadGlobal$ReadBuiltinFastPath
+     396  |     1.8 |   ▶ Root: _check_name.<locals>._wrap
+      72  |     0.3 |     009 load.local$Object
+      36  |     0.2 |     013 branch.false
+      36  |     0.2 |     177 c.CallBinaryMethod
+      32  |     0.1 |     006 load.local
+      24  |     0.1 |     017 dup
+      24  |     0.1 |     180 c.ReadGlobal
+      24  |     0.1 |     181 c.ReadGlobal$ReadBuiltinFastPath
+      20  |     0.1 |     066 c.ForIterate
+      17  |     0.1 |     016 pop$generic
+      16  |     0.1 |     012 branch.backward
+      16  |     0.1 |     17a c.CallTernaryMethod
+      16  |     0.1 |     184 c.Yes
+       8  |     0.0 |     06a c.GetAttribute
+       7  |     0.0 |     014 pop
+       4  |     0.0 |     003 load.constant
+       4  |     0.0 |     005 load.stackvalue
+       4  |     0.0 |     010 store.stackvalue
+       4  |     0.0 |     019 return
+       4  |     0.0 |     01d tag.enter
+       4  |     0.0 |     03e c.EnterCalleeContext
+       4  |     0.0 |     040 c.EpilogForReturn
+       4  |     0.0 |     054 c.CopyArguments
+       4  |     0.0 |     05b c.GetIter
+       4  |     0.0 |     067 c.GetMethod
+       4  |     0.0 |     088 c.MakeConstantObjectTuple
+       3  |     0.0 |     021 tag.leave$generic
+       1  |     0.0 |     01e tag.leave
+     391  |     1.7 |   ▶ Root: <module>
+     126  |     0.6 |     003 load.constant
+      90  |     0.4 |     018 load.null
+      53  |     0.2 |     050 c.WriteName
+      45  |     0.2 |     063 c.MakeFunction
+      19  |     0.1 |     02d create.variadic
+      15  |     0.1 |     04e c.CollectToObjectArray
+      11  |     0.0 |     07a c.LoadBuildClass
+      11  |     0.0 |     0c8 c.CallVarargsMethod
+       4  |     0.0 |     051 c.ReadName
+       4  |     0.0 |     08e c.MakeKeywords
+       2  |     0.0 |     02e empty.variadic
+       2  |     0.0 |     078 c.WriteGlobal
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     090 c.MakeDict
+       1  |     0.0 |     0c6 c.CallNilaryMethod
+       1  |     0.0 |     121 c.PyNumberAdd
+     348  |     1.5 |   ▶ Root: _BlockingOnManager.__enter__
+      28  |     0.1 |     009 load.local$Object
+      24  |     0.1 |     005 load.stackvalue
+      24  |     0.1 |     010 store.stackvalue
+      24  |     0.1 |     017 dup
+      21  |     0.1 |     071 c.GetAttribute$InstanceValue
+      20  |     0.1 |     006 load.local
+      15  |     0.1 |     06a c.GetAttribute
+      14  |     0.1 |     069 c.GetMethod$FastPath
+      14  |     0.1 |     182 c.ReadGlobal$ReadGlobalFastPath
+      12  |     0.1 |     003 load.constant
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      12  |     0.1 |     0c6 c.CallNilaryMethod
+      10  |     0.0 |     067 c.GetMethod
+      10  |     0.0 |     180 c.ReadGlobal
+       7  |     0.0 |     016 pop$generic
+       7  |     0.0 |     021 tag.leave$generic
+       7  |     0.0 |     075 c.SetAttribute$InstanceValue
+       7  |     0.0 |     178 c.CallBinaryMethod$CallObjectSingleContext
+       7  |     0.0 |     17c c.CallTernaryMethod$CallPFunction
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     074 c.SetAttribute
+       5  |     0.0 |     177 c.CallBinaryMethod
+       5  |     0.0 |     17a c.CallTernaryMethod
+     332  |     1.5 |   ▶ Root: ModuleSpec.parent
+      23  |     0.1 |     009 load.local$Object
+      23  |     0.1 |     071 c.GetAttribute$InstanceValue
+      21  |     0.1 |     003 load.constant
+      17  |     0.1 |     013 branch.false
+      17  |     0.1 |     019 return
+      17  |     0.1 |     01d tag.enter
+      17  |     0.1 |     03e c.EnterCalleeContext
+      17  |     0.1 |     040 c.EpilogForReturn
+      17  |     0.1 |     054 c.CopyArguments
+      17  |     0.1 |     0e5 c.IsNone
+      16  |     0.1 |     005 load.stackvalue
+      16  |     0.1 |     010 store.stackvalue
+      16  |     0.1 |     017 dup
+      11  |     0.0 |     004 load.constant$Int
+      11  |     0.0 |     006 load.local
+      11  |     0.0 |     021 tag.leave$generic
+      11  |     0.0 |     068 c.GetMethod$StringFastPath
+      11  |     0.0 |     06a c.GetAttribute
+      11  |     0.0 |     0d5 c.BinarySubscript$GenericStorage
+      11  |     0.0 |     178 c.CallBinaryMethod$CallObjectSingleContext
+       6  |     0.0 |     01e tag.leave
+       5  |     0.0 |     067 c.GetMethod
+       5  |     0.0 |     0d3 c.BinarySubscript
+       5  |     0.0 |     177 c.CallBinaryMethod
+     302  |     1.3 |   ▶ Root: FrozenImporter.find_spec
+      78  |     0.3 |     006 load.local
+      20  |     0.1 |     00c store.local
+      17  |     0.1 |     003 load.constant
+      16  |     0.1 |     180 c.ReadGlobal
+      12  |     0.1 |     00b clear.local
+      12  |     0.1 |     02d create.variadic
+       9  |     0.0 |     005 load.stackvalue
+       9  |     0.0 |     010 store.stackvalue
+       9  |     0.0 |     017 dup
+       9  |     0.0 |     067 c.GetMethod
+       9  |     0.0 |     06a c.GetAttribute
+       8  |     0.0 |     013 branch.false
+       8  |     0.0 |     04e c.CollectToObjectArray
+       8  |     0.0 |     08f c.MappingToKeywords
+       8  |     0.0 |     090 c.MakeDict
+       8  |     0.0 |     0c8 c.CallVarargsMethod
+       4  |     0.0 |     019 return
+       4  |     0.0 |     01d tag.enter
+       4  |     0.0 |     01e tag.leave
+       4  |     0.0 |     02e empty.variadic
+       4  |     0.0 |     03e c.EnterCalleeContext
+       4  |     0.0 |     040 c.EpilogForReturn
+       4  |     0.0 |     054 c.CopyArguments
+       4  |     0.0 |     074 c.SetAttribute
+       4  |     0.0 |     093 c.UnpackToLocals2
+       4  |     0.0 |     094 c.UnpackToLocals
+       4  |     0.0 |     0e5 c.IsNone
+       4  |     0.0 |     174 c.CallUnaryMethod
+       4  |     0.0 |     177 c.CallBinaryMethod
+       4  |     0.0 |     17d c.CallQuaternaryMethod
+       4  |     0.0 |     184 c.Yes
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     17a c.CallTernaryMethod
+     300  |     1.3 |   ▶ Root: _sanity_check
+      40  |     0.2 |     013 branch.false
+      40  |     0.2 |     184 c.Yes
+      20  |     0.1 |     003 load.constant
+      20  |     0.1 |     006 load.local
+      20  |     0.1 |     186 c.Not
+      10  |     0.0 |     004 load.constant$Int
+      10  |     0.0 |     008 load.local$Int$unboxed
+      10  |     0.0 |     009 load.local$Object
+      10  |     0.0 |     017 dup
+      10  |     0.0 |     019 return
+      10  |     0.0 |     01d tag.enter
+      10  |     0.0 |     025 sc.BoolAnd
+      10  |     0.0 |     03e c.EnterCalleeContext
+      10  |     0.0 |     040 c.EpilogForReturn
+      10  |     0.0 |     054 c.CopyArguments
+      10  |     0.0 |     177 c.CallBinaryMethod
+      10  |     0.0 |     180 c.ReadGlobal
+      10  |     0.0 |     181 c.ReadGlobal$ReadBuiltinFastPath
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     021 tag.leave$generic
+       5  |     0.0 |     09a c.Lt
+       5  |     0.0 |     09d c.Lt$Cmp0
+       5  |     0.0 |     0a2 c.Gt
+       5  |     0.0 |     0a5 c.Gt$Cmp0
+     298  |     1.3 |   ▶ Root: <module>
+      78  |     0.3 |     003 load.constant
+      47  |     0.2 |     050 c.WriteName
+      44  |     0.2 |     018 load.null
+      22  |     0.1 |     063 c.MakeFunction
+      21  |     0.1 |     051 c.ReadName
+      14  |     0.1 |     02d create.variadic
+      14  |     0.1 |     04e c.CollectToObjectArray
+      10  |     0.0 |     07a c.LoadBuildClass
+      10  |     0.0 |     0c8 c.CallVarargsMethod
+       6  |     0.0 |     017 dup
+       6  |     0.0 |     174 c.CallUnaryMethod
+       5  |     0.0 |     05a c.LoadBytes
+       3  |     0.0 |     011 branch
+       3  |     0.0 |     014 pop
+       2  |     0.0 |     013 branch.false
+       2  |     0.0 |     0ae c.Import
+       2  |     0.0 |     184 c.Yes
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     083 c.MakeConstantObjectList
+       1  |     0.0 |     0a6 c.Eq
+       1  |     0.0 |     0b0 c.ImportStar
+     294  |     1.3 |   ▶ Root: _find_and_load_unlocked
+      60  |     0.3 |     006 load.local
+      29  |     0.1 |     00c store.local
+      27  |     0.1 |     013 branch.false
+      22  |     0.1 |     003 load.constant
+      22  |     0.1 |     184 c.Yes
+      15  |     0.1 |     180 c.ReadGlobal
+      12  |     0.1 |     177 c.CallBinaryMethod
+       8  |     0.0 |     005 load.stackvalue
+       8  |     0.0 |     010 store.stackvalue
+       8  |     0.0 |     017 dup
+       8  |     0.0 |     067 c.GetMethod
+       8  |     0.0 |     06a c.GetAttribute
+       8  |     0.0 |     0d3 c.BinarySubscript
+       7  |     0.0 |     011 branch
+       6  |     0.0 |     174 c.CallUnaryMethod
+       5  |     0.0 |     019 return
+       5  |     0.0 |     01d tag.enter
+       5  |     0.0 |     03e c.EnterCalleeContext
+       5  |     0.0 |     040 c.EpilogForReturn
+       5  |     0.0 |     054 c.CopyArguments
+       5  |     0.0 |     0e5 c.IsNone
+       4  |     0.0 |     01e tag.leave
+       3  |     0.0 |     009 load.local$Object
+       3  |     0.0 |     014 pop
+       2  |     0.0 |     04f c.Contains
+       1  |     0.0 |     00f store.local$generic
+       1  |     0.0 |     021 tag.leave$generic
+       1  |     0.0 |     17a c.CallTernaryMethod
+       1  |     0.0 |     186 c.Not
+     272  |     1.2 |   ▶ Root: spec_from_loader
+      44  |     0.2 |     006 load.local
+      24  |     0.1 |     013 branch.false
+      17  |     0.1 |     003 load.constant
+      17  |     0.1 |     184 c.Yes
+      14  |     0.1 |     009 load.local$Object
+      14  |     0.1 |     02d create.variadic
+      14  |     0.1 |     0e5 c.IsNone
+      10  |     0.0 |     017 dup
+       8  |     0.0 |     180 c.ReadGlobal
+       7  |     0.0 |     019 return
+       7  |     0.0 |     01d tag.enter
+       7  |     0.0 |     025 sc.BoolAnd
+       7  |     0.0 |     03e c.EnterCalleeContext
+       7  |     0.0 |     040 c.EpilogForReturn
+       7  |     0.0 |     04e c.CollectToObjectArray
+       7  |     0.0 |     054 c.CopyArguments
+       7  |     0.0 |     08f c.MappingToKeywords
+       7  |     0.0 |     090 c.MakeDict
+       7  |     0.0 |     0c8 c.CallVarargsMethod
+       7  |     0.0 |     186 c.Not
+       6  |     0.0 |     011 branch
+       6  |     0.0 |     177 c.CallBinaryMethod
+       5  |     0.0 |     01e tag.leave
+       3  |     0.0 |     005 load.stackvalue
+       3  |     0.0 |     00c store.local
+       3  |     0.0 |     010 store.stackvalue
+       3  |     0.0 |     067 c.GetMethod
+       2  |     0.0 |     021 tag.leave$generic
+       2  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+     252  |     1.1 |   ▶ Root: _BlockingOnManager.__exit__
+      14  |     0.1 |     009 load.local$Object
+      14  |     0.1 |     00f store.local$generic
+      14  |     0.1 |     071 c.GetAttribute$InstanceValue
+      12  |     0.1 |     003 load.constant
+      12  |     0.1 |     005 load.stackvalue
+      12  |     0.1 |     010 store.stackvalue
+      12  |     0.1 |     017 dup
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      12  |     0.1 |     056 c.LoadVariableArguments
+      12  |     0.1 |     057 c.LoadKeywordArguments
+      10  |     0.0 |     006 load.local
+      10  |     0.0 |     00c store.local
+      10  |     0.0 |     06a c.GetAttribute
+       7  |     0.0 |     016 pop$generic
+       7  |     0.0 |     021 tag.leave$generic
+       7  |     0.0 |     069 c.GetMethod$FastPath
+       7  |     0.0 |     178 c.CallBinaryMethod$CallObjectSingleContext
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     067 c.GetMethod
+       5  |     0.0 |     177 c.CallBinaryMethod
+     238  |     1.1 |   ▶ Root: module_from_spec
+      35  |     0.2 |     006 load.local
+      21  |     0.1 |     177 c.CallBinaryMethod
+      14  |     0.1 |     003 load.constant
+      14  |     0.1 |     009 load.local$Object
+      14  |     0.1 |     013 branch.false
+      10  |     0.0 |     00c store.local
+      10  |     0.0 |     06a c.GetAttribute
+      10  |     0.0 |     180 c.ReadGlobal
+       7  |     0.0 |     005 load.stackvalue
+       7  |     0.0 |     010 store.stackvalue
+       7  |     0.0 |     011 branch
+       7  |     0.0 |     017 dup
+       7  |     0.0 |     019 return
+       7  |     0.0 |     01d tag.enter
+       7  |     0.0 |     03e c.EnterCalleeContext
+       7  |     0.0 |     040 c.EpilogForReturn
+       7  |     0.0 |     054 c.CopyArguments
+       7  |     0.0 |     067 c.GetMethod
+       7  |     0.0 |     0e5 c.IsNone
+       7  |     0.0 |     184 c.Yes
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+       4  |     0.0 |     00f store.local$generic
+       4  |     0.0 |     071 c.GetAttribute$InstanceValue
+       2  |     0.0 |     016 pop$generic
+       2  |     0.0 |     021 tag.leave$generic
+       2  |     0.0 |     181 c.ReadGlobal$ReadBuiltinFastPath
+       2  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+     233  |     1.0 |   ▶ Root: _WeakValueDictionary.setdefault
+      28  |     0.1 |     009 load.local$Object
+      27  |     0.1 |     006 load.local
+      14  |     0.1 |     013 branch.false
+      12  |     0.1 |     011 branch
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      12  |     0.1 |     0d3 c.BinarySubscript
+      12  |     0.1 |     0e5 c.IsNone
+      11  |     0.0 |     0c6 c.CallNilaryMethod
+       7  |     0.0 |     00f store.local$generic
+       7  |     0.0 |     021 tag.leave$generic
+       7  |     0.0 |     06a c.GetAttribute
+       7  |     0.0 |     071 c.GetAttribute$InstanceValue
+       6  |     0.0 |     00c store.local
+       5  |     0.0 |     01e tag.leave
+       3  |     0.0 |     01c load.exception
+       2  |     0.0 |     0b5 c.SetCurrentException
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     092 c.SetItem
+       1  |     0.0 |     0b4 c.GetCurrentException
+       1  |     0.0 |     0b7 c.MarkExceptionAsCaught
+       1  |     0.0 |     16c c.ExceptMatch
+       1  |     0.0 |     17a c.CallTernaryMethod
+       1  |     0.0 |     180 c.ReadGlobal
+       1  |     0.0 |     184 c.Yes
+     214  |     1.0 |   ▶ Root: FrozenImporter._fix_up_module
+      48  |     0.2 |     006 load.local
+      18  |     0.1 |     013 branch.false
+      14  |     0.1 |     003 load.constant
+      14  |     0.1 |     06a c.GetAttribute
+      14  |     0.1 |     186 c.Not
+      12  |     0.1 |     180 c.ReadGlobal
+      10  |     0.0 |     00c store.local
+       6  |     0.0 |     005 load.stackvalue
+       6  |     0.0 |     010 store.stackvalue
+       6  |     0.0 |     017 dup
+       6  |     0.0 |     067 c.GetMethod
+       6  |     0.0 |     177 c.CallBinaryMethod
+       6  |     0.0 |     184 c.Yes
+       4  |     0.0 |     011 branch
+       4  |     0.0 |     074 c.SetAttribute
+       4  |     0.0 |     0e5 c.IsNone
+       4  |     0.0 |     174 c.CallUnaryMethod
+       2  |     0.0 |     019 return
+       2  |     0.0 |     01d tag.enter
+       2  |     0.0 |     01e tag.leave
+       2  |     0.0 |     02d create.variadic
+       2  |     0.0 |     02e empty.variadic
+       2  |     0.0 |     03e c.EnterCalleeContext
+       2  |     0.0 |     040 c.EpilogForReturn
+       2  |     0.0 |     04e c.CollectToObjectArray
+       2  |     0.0 |     054 c.CopyArguments
+       2  |     0.0 |     08f c.MappingToKeywords
+       2  |     0.0 |     090 c.MakeDict
+       2  |     0.0 |     093 c.UnpackToLocals2
+       2  |     0.0 |     0a6 c.Eq
+       2  |     0.0 |     0c8 c.CallVarargsMethod
+       2  |     0.0 |     17a c.CallTernaryMethod
+       2  |     0.0 |     17d c.CallQuaternaryMethod
+     212  |     0.9 |   ▶ Root: <module>
+      55  |     0.2 |     003 load.constant
+      45  |     0.2 |     050 c.WriteName
+      32  |     0.1 |     018 load.null
+      16  |     0.1 |     063 c.MakeFunction
+      10  |     0.0 |     051 c.ReadName
+       9  |     0.0 |     0ae c.Import
+       5  |     0.0 |     02d create.variadic
+       4  |     0.0 |     06a c.GetAttribute
+       3  |     0.0 |     017 dup
+       3  |     0.0 |     05a c.LoadBytes
+       3  |     0.0 |     07e c.MakeTuple
+       3  |     0.0 |     0af c.ImportFrom
+       2  |     0.0 |     04e c.CollectToObjectArray
+       2  |     0.0 |     07a c.LoadBuildClass
+       2  |     0.0 |     088 c.MakeConstantObjectTuple
+       2  |     0.0 |     0c8 c.CallVarargsMethod
+       2  |     0.0 |     121 c.PyNumberAdd
+       2  |     0.0 |     174 c.CallUnaryMethod
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     078 c.WriteGlobal
+       1  |     0.0 |     083 c.MakeConstantObjectList
+       1  |     0.0 |     089 c.MakeSlice
+       1  |     0.0 |     090 c.MakeDict
+       1  |     0.0 |     0d3 c.BinarySubscript
+     210  |     0.9 |   ▶ Root: _gcd_import
+      25  |     0.1 |     006 load.local
+      15  |     0.1 |     009 load.local$Object
+      15  |     0.1 |     180 c.ReadGlobal
+      15  |     0.1 |     182 c.ReadGlobal$ReadGlobalFastPath
+      10  |     0.0 |     013 branch.false
+      10  |     0.0 |     019 return
+      10  |     0.0 |     01d tag.enter
+      10  |     0.0 |     03e c.EnterCalleeContext
+      10  |     0.0 |     040 c.EpilogForReturn
+      10  |     0.0 |     054 c.CopyArguments
+      10  |     0.0 |     184 c.Yes
+       6  |     0.0 |     021 tag.leave$generic
+       5  |     0.0 |     003 load.constant
+       5  |     0.0 |     004 load.constant$Int
+       5  |     0.0 |     007 load.local$Int
+       5  |     0.0 |     008 load.local$Int$unboxed
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     016 pop$generic
+       5  |     0.0 |     0a2 c.Gt
+       5  |     0.0 |     0a5 c.Gt$Cmp0
+       5  |     0.0 |     177 c.CallBinaryMethod
+       5  |     0.0 |     179 c.CallBinaryMethod$CallPFunction
+       5  |     0.0 |     17a c.CallTernaryMethod
+       5  |     0.0 |     17c c.CallTernaryMethod$CallPFunction
+       4  |     0.0 |     01e tag.leave
+     185  |     0.8 |   ▶ Root: _ModuleLock.__init__
+      35  |     0.2 |     006 load.local
+      30  |     0.1 |     074 c.SetAttribute
+      10  |     0.0 |     003 load.constant
+      10  |     0.0 |     005 load.stackvalue
+      10  |     0.0 |     010 store.stackvalue
+      10  |     0.0 |     017 dup
+      10  |     0.0 |     02e empty.variadic
+      10  |     0.0 |     067 c.GetMethod
+      10  |     0.0 |     07b c.MakeList
+      10  |     0.0 |     174 c.CallUnaryMethod
+      10  |     0.0 |     180 c.ReadGlobal
+       5  |     0.0 |     019 return
+       5  |     0.0 |     01d tag.enter
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     03e c.EnterCalleeContext
+       5  |     0.0 |     040 c.EpilogForReturn
+       5  |     0.0 |     054 c.CopyArguments
+     175  |     0.8 |   ▶ Root: __import__
+      25  |     0.1 |     006 load.local
+      20  |     0.1 |     003 load.constant
+      15  |     0.1 |     013 branch.false
+      10  |     0.0 |     0a6 c.Eq
+      10  |     0.0 |     174 c.CallUnaryMethod
+      10  |     0.0 |     180 c.ReadGlobal
+      10  |     0.0 |     184 c.Yes
+       5  |     0.0 |     005 load.stackvalue
+       5  |     0.0 |     00c store.local
+       5  |     0.0 |     010 store.stackvalue
+       5  |     0.0 |     011 branch
+       5  |     0.0 |     017 dup
+       5  |     0.0 |     019 return
+       5  |     0.0 |     01d tag.enter
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     03e c.EnterCalleeContext
+       5  |     0.0 |     040 c.EpilogForReturn
+       5  |     0.0 |     054 c.CopyArguments
+       5  |     0.0 |     067 c.GetMethod
+       5  |     0.0 |     0d3 c.BinarySubscript
+       5  |     0.0 |     177 c.CallBinaryMethod
+       5  |     0.0 |     186 c.Not
+     168  |     0.7 |   ▶ Root: _ModuleLockManager.__enter__
+      15  |     0.1 |     006 load.local
+      10  |     0.0 |     06a c.GetAttribute
+      10  |     0.0 |     174 c.CallUnaryMethod
+       9  |     0.0 |     009 load.local$Object
+       8  |     0.0 |     003 load.constant
+       8  |     0.0 |     005 load.stackvalue
+       8  |     0.0 |     010 store.stackvalue
+       8  |     0.0 |     017 dup
+       8  |     0.0 |     019 return
+       8  |     0.0 |     01d tag.enter
+       8  |     0.0 |     03e c.EnterCalleeContext
+       8  |     0.0 |     040 c.EpilogForReturn
+       8  |     0.0 |     054 c.CopyArguments
+       6  |     0.0 |     071 c.GetAttribute$InstanceValue
+       6  |     0.0 |     176 c.CallUnaryMethod$CallPFunction
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     067 c.GetMethod
+       5  |     0.0 |     074 c.SetAttribute
+       5  |     0.0 |     180 c.ReadGlobal
+       3  |     0.0 |     016 pop$generic
+       3  |     0.0 |     021 tag.leave$generic
+       3  |     0.0 |     069 c.GetMethod$FastPath
+       3  |     0.0 |     075 c.SetAttribute$InstanceValue
+       3  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+     168  |     0.7 |   ▶ Root: ModuleSpec.has_location
+      21  |     0.1 |     019 return
+      21  |     0.1 |     01d tag.enter
+      21  |     0.1 |     03e c.EnterCalleeContext
+      21  |     0.1 |     040 c.EpilogForReturn
+      21  |     0.1 |     054 c.CopyArguments
+      16  |     0.1 |     009 load.local$Object
+      16  |     0.1 |     021 tag.leave$generic
+      16  |     0.1 |     071 c.GetAttribute$InstanceValue
+       5  |     0.0 |     006 load.local
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     06a c.GetAttribute
+     156  |     0.7 |   ▶ Root: _BlockingOnManager.__init__
+      28  |     0.1 |     009 load.local$Object
+      20  |     0.1 |     006 load.local
+      14  |     0.1 |     075 c.SetAttribute$InstanceValue
+      12  |     0.1 |     003 load.constant
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      10  |     0.0 |     074 c.SetAttribute
+       7  |     0.0 |     021 tag.leave$generic
+       5  |     0.0 |     01e tag.leave
+     152  |     0.7 |   ▶ Root: _ModuleLockManager.__exit__
+      10  |     0.0 |     00c store.local
+       8  |     0.0 |     003 load.constant
+       8  |     0.0 |     005 load.stackvalue
+       8  |     0.0 |     010 store.stackvalue
+       8  |     0.0 |     017 dup
+       8  |     0.0 |     019 return
+       8  |     0.0 |     01d tag.enter
+       8  |     0.0 |     03e c.EnterCalleeContext
+       8  |     0.0 |     040 c.EpilogForReturn
+       8  |     0.0 |     054 c.CopyArguments
+       8  |     0.0 |     056 c.LoadVariableArguments
+       8  |     0.0 |     057 c.LoadKeywordArguments
+       6  |     0.0 |     00f store.local$generic
+       5  |     0.0 |     006 load.local
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     067 c.GetMethod
+       5  |     0.0 |     06a c.GetAttribute
+       5  |     0.0 |     174 c.CallUnaryMethod
+       3  |     0.0 |     009 load.local$Object
+       3  |     0.0 |     016 pop$generic
+       3  |     0.0 |     021 tag.leave$generic
+       3  |     0.0 |     069 c.GetMethod$FastPath
+       3  |     0.0 |     071 c.GetAttribute$InstanceValue
+       3  |     0.0 |     176 c.CallUnaryMethod$CallPFunction
+     148  |     0.7 |   ▶ Root: _check_name
+      28  |     0.1 |     006 load.local
+      16  |     0.1 |     003 load.constant
+      12  |     0.1 |     018 load.null
+       8  |     0.0 |     00c store.local
+       8  |     0.0 |     02d create.variadic
+       8  |     0.0 |     063 c.MakeFunction
+       4  |     0.0 |     00b clear.local
+       4  |     0.0 |     013 branch.false
+       4  |     0.0 |     014 pop
+       4  |     0.0 |     019 return
+       4  |     0.0 |     01d tag.enter
+       4  |     0.0 |     01e tag.leave
+       4  |     0.0 |     03e c.EnterCalleeContext
+       4  |     0.0 |     040 c.EpilogForReturn
+       4  |     0.0 |     04e c.CollectToObjectArray
+       4  |     0.0 |     054 c.CopyArguments
+       4  |     0.0 |     0b9 c.LoadCell
+       4  |     0.0 |     0bd c.StoreCell
+       4  |     0.0 |     0be c.CreateCells
+       4  |     0.0 |     0c1 c.MakeCellArray
+       4  |     0.0 |     0e4 c.IsNotNone
+       4  |     0.0 |     177 c.CallBinaryMethod
+       4  |     0.0 |     180 c.ReadGlobal
+     145  |     0.6 |   ▶ Root: BuiltinImporter.find_spec
+      14  |     0.1 |     006 load.local
+       8  |     0.0 |     180 c.ReadGlobal
+       7  |     0.0 |     003 load.constant
+       7  |     0.0 |     005 load.stackvalue
+       7  |     0.0 |     010 store.stackvalue
+       7  |     0.0 |     013 branch.false
+       7  |     0.0 |     017 dup
+       7  |     0.0 |     019 return
+       7  |     0.0 |     01d tag.enter
+       7  |     0.0 |     03e c.EnterCalleeContext
+       7  |     0.0 |     040 c.EpilogForReturn
+       7  |     0.0 |     054 c.CopyArguments
+       7  |     0.0 |     067 c.GetMethod
+       7  |     0.0 |     177 c.CallBinaryMethod
+       7  |     0.0 |     184 c.Yes
+       6  |     0.0 |     01e tag.leave
+       6  |     0.0 |     02d create.variadic
+       3  |     0.0 |     04e c.CollectToObjectArray
+       3  |     0.0 |     06a c.GetAttribute
+       3  |     0.0 |     08f c.MappingToKeywords
+       3  |     0.0 |     090 c.MakeDict
+       3  |     0.0 |     0c8 c.CallVarargsMethod
+       2  |     0.0 |     009 load.local$Object
+       2  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+       1  |     0.0 |     021 tag.leave$generic
+     126  |     0.6 |   ▶ Root: _ImportLockContext.__exit__
+       9  |     0.0 |     003 load.constant
+       9  |     0.0 |     005 load.stackvalue
+       9  |     0.0 |     010 store.stackvalue
+       9  |     0.0 |     017 dup
+       9  |     0.0 |     019 return
+       9  |     0.0 |     01d tag.enter
+       9  |     0.0 |     03e c.EnterCalleeContext
+       9  |     0.0 |     040 c.EpilogForReturn
+       9  |     0.0 |     054 c.CopyArguments
+       9  |     0.0 |     067 c.GetMethod
+       9  |     0.0 |     174 c.CallUnaryMethod
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     180 c.ReadGlobal
+       4  |     0.0 |     016 pop$generic
+       4  |     0.0 |     021 tag.leave$generic
+       4  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+     126  |     0.6 |   ▶ Root: _ImportLockContext.__enter__
+       9  |     0.0 |     003 load.constant
+       9  |     0.0 |     005 load.stackvalue
+       9  |     0.0 |     010 store.stackvalue
+       9  |     0.0 |     017 dup
+       9  |     0.0 |     019 return
+       9  |     0.0 |     01d tag.enter
+       9  |     0.0 |     03e c.EnterCalleeContext
+       9  |     0.0 |     040 c.EpilogForReturn
+       9  |     0.0 |     054 c.CopyArguments
+       9  |     0.0 |     067 c.GetMethod
+       9  |     0.0 |     174 c.CallUnaryMethod
+       5  |     0.0 |     014 pop
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     180 c.ReadGlobal
+       4  |     0.0 |     016 pop$generic
+       4  |     0.0 |     021 tag.leave$generic
+       4  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+     123  |     0.5 |   ▶ Root: StreamRecoder
+      39  |     0.2 |     003 load.constant
+      28  |     0.1 |     018 load.null
+      21  |     0.1 |     050 c.WriteName
+      14  |     0.1 |     063 c.MakeFunction
+       7  |     0.0 |     02d create.variadic
+       6  |     0.0 |     04e c.CollectToObjectArray
+       2  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+     121  |     0.5 |   ▶ Root: StreamReaderWriter
+      38  |     0.2 |     003 load.constant
+      28  |     0.1 |     018 load.null
+      20  |     0.1 |     050 c.WriteName
+      14  |     0.1 |     063 c.MakeFunction
+       7  |     0.0 |     02d create.variadic
+       6  |     0.0 |     04e c.CollectToObjectArray
+       2  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+     120  |     0.5 |   ▶ Root: ModuleSpec.cached
+      14  |     0.1 |     009 load.local$Object
+      12  |     0.1 |     003 load.constant
+      12  |     0.1 |     019 return
+      12  |     0.1 |     01d tag.enter
+      12  |     0.1 |     03e c.EnterCalleeContext
+      12  |     0.1 |     040 c.EpilogForReturn
+      12  |     0.1 |     054 c.CopyArguments
+      10  |     0.0 |     006 load.local
+       7  |     0.0 |     021 tag.leave$generic
+       7  |     0.0 |     075 c.SetAttribute$InstanceValue
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     074 c.SetAttribute
+     119  |     0.5 |   ▶ Root: StreamReader
+      38  |     0.2 |     003 load.constant
+      26  |     0.1 |     018 load.null
+      18  |     0.1 |     050 c.WriteName
+      13  |     0.1 |     063 c.MakeFunction
+       8  |     0.0 |     02d create.variadic
+       7  |     0.0 |     04e c.CollectToObjectArray
+       3  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+     112  |     0.5 |   ▶ Root: _verbose_message
+      12  |     0.1 |     06a c.GetAttribute
+       7  |     0.0 |     003 load.constant
+       7  |     0.0 |     013 branch.false
+       7  |     0.0 |     019 return
+       7  |     0.0 |     01d tag.enter
+       7  |     0.0 |     03e c.EnterCalleeContext
+       7  |     0.0 |     040 c.EpilogForReturn
+       7  |     0.0 |     054 c.CopyArguments
+       7  |     0.0 |     056 c.LoadVariableArguments
+       7  |     0.0 |     09e c.Ge
+       7  |     0.0 |     184 c.Yes
+       5  |     0.0 |     006 load.local
+       5  |     0.0 |     00c store.local
+       5  |     0.0 |     01e tag.leave
+       5  |     0.0 |     180 c.ReadGlobal
+       2  |     0.0 |     007 load.local$Int
+       2  |     0.0 |     00f store.local$generic
+       2  |     0.0 |     021 tag.leave$generic
+       2  |     0.0 |     06b c.GetAttribute$Module
+       2  |     0.0 |     182 c.ReadGlobal$ReadGlobalFastPath
+     108  |     0.5 |   ▶ Root: FrozenImporter.exec_module
+      20  |     0.1 |     006 load.local
+      12  |     0.1 |     00c store.local
+      12  |     0.1 |     06a c.GetAttribute
+       8  |     0.0 |     177 c.CallBinaryMethod
+       8  |     0.0 |     180 c.ReadGlobal
+       4  |     0.0 |     003 load.constant
+       4  |     0.0 |     005 load.stackvalue
+       4  |     0.0 |     010 store.stackvalue
+       4  |     0.0 |     014 pop
+       4  |     0.0 |     017 dup
+       4  |     0.0 |     019 return
+       4  |     0.0 |     01d tag.enter
+       4  |     0.0 |     01e tag.leave
+       4  |     0.0 |     03e c.EnterCalleeContext
+       4  |     0.0 |     040 c.EpilogForReturn
+       4  |     0.0 |     054 c.CopyArguments
+       4  |     0.0 |     067 c.GetMethod
+     104  |     0.5 |   ▶ Root: _lock_unlock_module
+      12  |     0.1 |     006 load.local
+      12  |     0.1 |     174 c.CallUnaryMethod
+       8  |     0.0 |     005 load.stackvalue
+       8  |     0.0 |     010 store.stackvalue
+       8  |     0.0 |     014 pop
+       8  |     0.0 |     017 dup
+       8  |     0.0 |     067 c.GetMethod
+       4  |     0.0 |     003 load.constant
+       4  |     0.0 |     00c store.local
+       4  |     0.0 |     011 branch
+       4  |     0.0 |     019 return
+       4  |     0.0 |     01d tag.enter
+       4  |     0.0 |     01e tag.leave
+       4  |     0.0 |     03e c.EnterCalleeContext
+       4  |     0.0 |     040 c.EpilogForReturn
+       4  |     0.0 |     054 c.CopyArguments
+       4  |     0.0 |     180 c.ReadGlobal
+     104  |     0.5 |   ▶ Root: _ModuleLockManager.__init__
+      16  |     0.1 |     003 load.constant
+      15  |     0.1 |     006 load.local
+      10  |     0.0 |     074 c.SetAttribute
+       9  |     0.0 |     009 load.local$Object
+       8  |     0.0 |     019 return
+       8  |     0.0 |     01d tag.enter
+       8  |     0.0 |     03e c.EnterCalleeContext
+       8  |     0.0 |     040 c.EpilogForReturn
+       8  |     0.0 |     054 c.CopyArguments
+       6  |     0.0 |     075 c.SetAttribute$InstanceValue
+       5  |     0.0 |     01e tag.leave
+       3  |     0.0 |     021 tag.leave$generic
+     103  |     0.5 |   ▶ Root: FrozenImporter
+      25  |     0.1 |     003 load.constant
+      18  |     0.1 |     018 load.null
+      15  |     0.1 |     050 c.WriteName
+      13  |     0.1 |     051 c.ReadName
+      12  |     0.1 |     174 c.CallUnaryMethod
+       9  |     0.0 |     063 c.MakeFunction
+       2  |     0.0 |     02d create.variadic
+       2  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+      93  |     0.4 |   ▶ Root: zipimporter
+      30  |     0.1 |     003 load.constant
+      24  |     0.1 |     018 load.null
+      17  |     0.1 |     050 c.WriteName
+      12  |     0.1 |     063 c.MakeFunction
+       2  |     0.0 |     02d create.variadic
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      92  |     0.4 |   ▶ Root: FrozenImporter.create_module
+      24  |     0.1 |     006 load.local
+      12  |     0.1 |     06a c.GetAttribute
+       8  |     0.0 |     00c store.local
+       4  |     0.0 |     011 branch
+       4  |     0.0 |     013 branch.false
+       4  |     0.0 |     019 return
+       4  |     0.0 |     01d tag.enter
+       4  |     0.0 |     01e tag.leave
+       4  |     0.0 |     03e c.EnterCalleeContext
+       4  |     0.0 |     040 c.EpilogForReturn
+       4  |     0.0 |     054 c.CopyArguments
+       4  |     0.0 |     074 c.SetAttribute
+       4  |     0.0 |     174 c.CallUnaryMethod
+       4  |     0.0 |     180 c.ReadGlobal
+       4  |     0.0 |     184 c.Yes
+      90  |     0.4 |   ▶ Root: _NamespacePath
+      32  |     0.1 |     003 load.constant
+      22  |     0.1 |     018 load.null
+      17  |     0.1 |     050 c.WriteName
+      11  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      89  |     0.4 |   ▶ Root: ModuleSpec
+      30  |     0.1 |     003 load.constant
+      16  |     0.1 |     018 load.null
+      13  |     0.1 |     050 c.WriteName
+       8  |     0.0 |     063 c.MakeFunction
+       6  |     0.0 |     051 c.ReadName
+       5  |     0.0 |     174 c.CallUnaryMethod
+       2  |     0.0 |     02d create.variadic
+       2  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     08e c.MakeKeywords
+      80  |     0.4 |   ▶ Root: BuiltinImporter
+      18  |     0.1 |     003 load.constant
+      13  |     0.1 |     050 c.WriteName
+      12  |     0.1 |     018 load.null
+      12  |     0.1 |     051 c.ReadName
+      10  |     0.0 |     174 c.CallUnaryMethod
+       6  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     07e c.MakeTuple
+      78  |     0.3 |   ▶ Root: _requires_builtin
+      18  |     0.1 |     006 load.local
+       6  |     0.0 |     003 load.constant
+       3  |     0.0 |     00b clear.local
+       3  |     0.0 |     00c store.local
+       3  |     0.0 |     014 pop
+       3  |     0.0 |     018 load.null
+       3  |     0.0 |     019 return
+       3  |     0.0 |     01d tag.enter
+       3  |     0.0 |     01e tag.leave
+       3  |     0.0 |     02d create.variadic
+       3  |     0.0 |     03e c.EnterCalleeContext
+       3  |     0.0 |     040 c.EpilogForReturn
+       3  |     0.0 |     054 c.CopyArguments
+       3  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     0b9 c.LoadCell
+       3  |     0.0 |     0bd c.StoreCell
+       3  |     0.0 |     0be c.CreateCells
+       3  |     0.0 |     0c1 c.MakeCellArray
+       3  |     0.0 |     177 c.CallBinaryMethod
+       3  |     0.0 |     180 c.ReadGlobal
+      78  |     0.3 |   ▶ Root: _requires_frozen
+      18  |     0.1 |     006 load.local
+       6  |     0.0 |     003 load.constant
+       3  |     0.0 |     00b clear.local
+       3  |     0.0 |     00c store.local
+       3  |     0.0 |     014 pop
+       3  |     0.0 |     018 load.null
+       3  |     0.0 |     019 return
+       3  |     0.0 |     01d tag.enter
+       3  |     0.0 |     01e tag.leave
+       3  |     0.0 |     02d create.variadic
+       3  |     0.0 |     03e c.EnterCalleeContext
+       3  |     0.0 |     040 c.EpilogForReturn
+       3  |     0.0 |     054 c.CopyArguments
+       3  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     0b9 c.LoadCell
+       3  |     0.0 |     0bd c.StoreCell
+       3  |     0.0 |     0be c.CreateCells
+       3  |     0.0 |     0c1 c.MakeCellArray
+       3  |     0.0 |     177 c.CallBinaryMethod
+       3  |     0.0 |     180 c.ReadGlobal
+      77  |     0.3 |   ▶ Root: StreamWriter
+      22  |     0.1 |     003 load.constant
+      18  |     0.1 |     018 load.null
+      13  |     0.1 |     050 c.WriteName
+       9  |     0.0 |     063 c.MakeFunction
+       4  |     0.0 |     02d create.variadic
+       3  |     0.0 |     04e c.CollectToObjectArray
+       2  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+      75  |     0.3 |   ▶ Root: ExtensionFileLoader
+      24  |     0.1 |     003 load.constant
+      18  |     0.1 |     018 load.null
+      14  |     0.1 |     050 c.WriteName
+       9  |     0.0 |     063 c.MakeFunction
+       2  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     174 c.CallUnaryMethod
+      72  |     0.3 |   ▶ Root: FileLoader
+      19  |     0.1 |     003 load.constant
+      13  |     0.1 |     018 load.null
+      13  |     0.1 |     050 c.WriteName
+       7  |     0.0 |     063 c.MakeFunction
+       4  |     0.0 |     051 c.ReadName
+       3  |     0.0 |     006 load.local
+       3  |     0.0 |     174 c.CallUnaryMethod
+       2  |     0.0 |     02d create.variadic
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     0be c.CreateCells
+       1  |     0.0 |     0c1 c.MakeCellArray
+      70  |     0.3 |   ▶ Root: PathFinder
+      17  |     0.1 |     003 load.constant
+      12  |     0.1 |     018 load.null
+      11  |     0.0 |     050 c.WriteName
+       7  |     0.0 |     051 c.ReadName
+       6  |     0.0 |     063 c.MakeFunction
+       6  |     0.0 |     174 c.CallUnaryMethod
+       2  |     0.0 |     02d create.variadic
+       2  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+      69  |     0.3 |   ▶ Root: <module>
+      13  |     0.1 |     003 load.constant
+      12  |     0.1 |     050 c.WriteName
+       6  |     0.0 |     018 load.null
+       6  |     0.0 |     051 c.ReadName
+       3  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     0ae c.Import
+       2  |     0.0 |     014 pop
+       2  |     0.0 |     017 dup
+       2  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     013 branch.false
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     07a c.LoadBuildClass
+       1  |     0.0 |     083 c.MakeConstantObjectList
+       1  |     0.0 |     090 c.MakeDict
+       1  |     0.0 |     0a6 c.Eq
+       1  |     0.0 |     0af c.ImportFrom
+       1  |     0.0 |     0c8 c.CallVarargsMethod
+       1  |     0.0 |     177 c.CallBinaryMethod
+       1  |     0.0 |     184 c.Yes
+      68  |     0.3 |   ▶ Root: FileFinder
+      23  |     0.1 |     003 load.constant
+      14  |     0.1 |     018 load.null
+      12  |     0.1 |     050 c.WriteName
+       7  |     0.0 |     063 c.MakeFunction
+       2  |     0.0 |     02d create.variadic
+       2  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     174 c.CallUnaryMethod
+      64  |     0.3 |   ▶ Root: NamespaceLoader
+      20  |     0.1 |     003 load.constant
+      16  |     0.1 |     018 load.null
+      12  |     0.1 |     050 c.WriteName
+       8  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      63  |     0.3 |   ▶ Root: BuiltinImporter.create_module
+       6  |     0.0 |     006 load.local
+       6  |     0.0 |     06a c.GetAttribute
+       6  |     0.0 |     180 c.ReadGlobal
+       3  |     0.0 |     005 load.stackvalue
+       3  |     0.0 |     010 store.stackvalue
+       3  |     0.0 |     013 branch.false
+       3  |     0.0 |     017 dup
+       3  |     0.0 |     019 return
+       3  |     0.0 |     01d tag.enter
+       3  |     0.0 |     01e tag.leave
+       3  |     0.0 |     03e c.EnterCalleeContext
+       3  |     0.0 |     040 c.EpilogForReturn
+       3  |     0.0 |     04f c.Contains
+       3  |     0.0 |     054 c.CopyArguments
+       3  |     0.0 |     067 c.GetMethod
+       3  |     0.0 |     177 c.CallBinaryMethod
+       3  |     0.0 |     184 c.Yes
+       3  |     0.0 |     186 c.Not
+      59  |     0.3 |   ▶ Root: JavaPackageLoader
+      13  |     0.1 |     003 load.constant
+      10  |     0.0 |     018 load.null
+       9  |     0.0 |     050 c.WriteName
+       7  |     0.0 |     051 c.ReadName
+       5  |     0.0 |     063 c.MakeFunction
+       5  |     0.0 |     174 c.CallUnaryMethod
+       1  |     0.0 |     013 branch.false
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     184 c.Yes
+      59  |     0.3 |   ▶ Root: SourceLoader
+      17  |     0.1 |     003 load.constant
+      14  |     0.1 |     018 load.null
+      11  |     0.0 |     050 c.WriteName
+       7  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     08e c.MakeKeywords
+      58  |     0.3 |   ▶ Root: <module>
+      12  |     0.1 |     003 load.constant
+       6  |     0.0 |     018 load.null
+       5  |     0.0 |     050 c.WriteName
+       3  |     0.0 |     02d create.variadic
+       3  |     0.0 |     04e c.CollectToObjectArray
+       3  |     0.0 |     051 c.ReadName
+       3  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     07a c.LoadBuildClass
+       3  |     0.0 |     0c8 c.CallVarargsMethod
+       2  |     0.0 |     06a c.GetAttribute
+       2  |     0.0 |     0ae c.Import
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     013 branch.false
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     0c6 c.CallNilaryMethod
+       1  |     0.0 |     177 c.CallBinaryMethod
+       1  |     0.0 |     184 c.Yes
+      58  |     0.3 |   ▶ Root: BufferedIncrementalDecoder
+      17  |     0.1 |     003 load.constant
+      12  |     0.1 |     018 load.null
+      11  |     0.0 |     050 c.WriteName
+       6  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     02d create.variadic
+       2  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      58  |     0.3 |   ▶ Root: BufferedIncrementalEncoder
+      17  |     0.1 |     003 load.constant
+      12  |     0.1 |     018 load.null
+      11  |     0.0 |     050 c.WriteName
+       6  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     02d create.variadic
+       2  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      57  |     0.3 |   ▶ Root: _requires_builtin.<locals>._requires_builtin_wrapper
+      12  |     0.1 |     006 load.local
+       3  |     0.0 |     013 branch.false
+       3  |     0.0 |     019 return
+       3  |     0.0 |     01d tag.enter
+       3  |     0.0 |     01e tag.leave
+       3  |     0.0 |     03e c.EnterCalleeContext
+       3  |     0.0 |     040 c.EpilogForReturn
+       3  |     0.0 |     04f c.Contains
+       3  |     0.0 |     054 c.CopyArguments
+       3  |     0.0 |     06a c.GetAttribute
+       3  |     0.0 |     0b9 c.LoadCell
+       3  |     0.0 |     0c0 c.InitFreeVars
+       3  |     0.0 |     177 c.CallBinaryMethod
+       3  |     0.0 |     180 c.ReadGlobal
+       3  |     0.0 |     184 c.Yes
+       3  |     0.0 |     186 c.Not
+      57  |     0.3 |   ▶ Root: <module>
+      11  |     0.0 |     003 load.constant
+      10  |     0.0 |     018 load.null
+       7  |     0.0 |     050 c.WriteName
+       5  |     0.0 |     051 c.ReadName
+       5  |     0.0 |     063 c.MakeFunction
+       5  |     0.0 |     174 c.CallUnaryMethod
+       3  |     0.0 |     02d create.variadic
+       3  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     090 c.MakeDict
+       1  |     0.0 |     0ae c.Import
+      56  |     0.2 |   ▶ Root: _get_supported_file_loaders
+       9  |     0.0 |     180 c.ReadGlobal
+       5  |     0.0 |     02d create.variadic
+       4  |     0.0 |     003 load.constant
+       4  |     0.0 |     006 load.local
+       3  |     0.0 |     00c store.local
+       3  |     0.0 |     07e c.MakeTuple
+       2  |     0.0 |     005 load.stackvalue
+       2  |     0.0 |     010 store.stackvalue
+       2  |     0.0 |     013 branch.false
+       2  |     0.0 |     017 dup
+       2  |     0.0 |     067 c.GetMethod
+       2  |     0.0 |     07b c.MakeList
+       2  |     0.0 |     177 c.CallBinaryMethod
+       2  |     0.0 |     184 c.Yes
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04f c.Contains
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     07d c.MakeFrozenSet
+       1  |     0.0 |     121 c.PyNumberAdd
+       1  |     0.0 |     174 c.CallUnaryMethod
+      53  |     0.2 |   ▶ Root: _ModuleLock
+      20  |     0.1 |     003 load.constant
+      10  |     0.0 |     018 load.null
+      10  |     0.0 |     050 c.WriteName
+       5  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      53  |     0.2 |   ▶ Root: WindowsRegistryFinder
+      13  |     0.1 |     003 load.constant
+      11  |     0.0 |     050 c.WriteName
+       6  |     0.0 |     018 load.null
+       5  |     0.0 |     051 c.ReadName
+       3  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     174 c.CallUnaryMethod
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     025 sc.BoolAnd
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     184 c.Yes
+      53  |     0.2 |   ▶ Root: _WeakValueDictionary
+      17  |     0.1 |     003 load.constant
+      10  |     0.0 |     018 load.null
+       9  |     0.0 |     050 c.WriteName
+       5  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     02d create.variadic
+       2  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      53  |     0.2 |   ▶ Root: CodecInfo
+      23  |     0.1 |     003 load.constant
+       9  |     0.0 |     050 c.WriteName
+       6  |     0.0 |     018 load.null
+       3  |     0.0 |     02d create.variadic
+       3  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     08e c.MakeKeywords
+      53  |     0.2 |   ▶ Root: IncrementalEncoder
+      16  |     0.1 |     003 load.constant
+      10  |     0.0 |     018 load.null
+      10  |     0.0 |     050 c.WriteName
+       5  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     02d create.variadic
+       2  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      52  |     0.2 |   ▶ Root: IncrementalDecoder
+      15  |     0.1 |     003 load.constant
+      10  |     0.0 |     018 load.null
+      10  |     0.0 |     050 c.WriteName
+       5  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     02d create.variadic
+       2  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      50  |     0.2 |   ▶ Root: _handle_fromlist
+      10  |     0.0 |     006 load.local
+       5  |     0.0 |     013 branch.false
+       4  |     0.0 |     003 load.constant
+       3  |     0.0 |     180 c.ReadGlobal
+       2  |     0.0 |     014 pop
+       2  |     0.0 |     017 dup
+       2  |     0.0 |     066 c.ForIterate
+       2  |     0.0 |     16b c.Format
+       2  |     0.0 |     177 c.CallBinaryMethod
+       2  |     0.0 |     186 c.Not
+       1  |     0.0 |     00c store.local
+       1  |     0.0 |     011 branch
+       1  |     0.0 |     012 branch.backward
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     05b c.GetIter
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     0a6 c.Eq
+       1  |     0.0 |     0cf c.BuildString
+       1  |     0.0 |     174 c.CallUnaryMethod
+       1  |     0.0 |     184 c.Yes
+      48  |     0.2 |   ▶ Root: _WeakValueDictionary.__init__.<locals>.KeyedRef
+       9  |     0.0 |     003 load.constant
+       9  |     0.0 |     050 c.WriteName
+       5  |     0.0 |     006 load.local
+       4  |     0.0 |     02d create.variadic
+       3  |     0.0 |     018 load.null
+       3  |     0.0 |     063 c.MakeFunction
+       3  |     0.0 |     0c1 c.MakeCellArray
+       2  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     088 c.MakeConstantObjectTuple
+       1  |     0.0 |     0be c.CreateCells
+       1  |     0.0 |     0c0 c.InitFreeVars
+       1  |     0.0 |     174 c.CallUnaryMethod
+      45  |     0.2 |   ▶ Root: BuiltinImporter.exec_module
+       3  |     0.0 |     003 load.constant
+       3  |     0.0 |     005 load.stackvalue
+       3  |     0.0 |     006 load.local
+       3  |     0.0 |     010 store.stackvalue
+       3  |     0.0 |     014 pop
+       3  |     0.0 |     017 dup
+       3  |     0.0 |     019 return
+       3  |     0.0 |     01d tag.enter
+       3  |     0.0 |     01e tag.leave
+       3  |     0.0 |     03e c.EnterCalleeContext
+       3  |     0.0 |     040 c.EpilogForReturn
+       3  |     0.0 |     054 c.CopyArguments
+       3  |     0.0 |     067 c.GetMethod
+       3  |     0.0 |     177 c.CallBinaryMethod
+       3  |     0.0 |     180 c.ReadGlobal
+      45  |     0.2 |   ▶ Root: CodecInfo.__new__
+      21  |     0.1 |     006 load.local
+       7  |     0.0 |     074 c.SetAttribute
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     00c store.local
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     013 branch.false
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     0e4 c.IsNotNone
+       1  |     0.0 |     17a c.CallTernaryMethod
+       1  |     0.0 |     180 c.ReadGlobal
+      44  |     0.2 |   ▶ Root: _install
+       6  |     0.0 |     180 c.ReadGlobal
+       3  |     0.0 |     005 load.stackvalue
+       3  |     0.0 |     010 store.stackvalue
+       3  |     0.0 |     014 pop
+       3  |     0.0 |     017 dup
+       3  |     0.0 |     067 c.GetMethod
+       2  |     0.0 |     003 load.constant
+       2  |     0.0 |     006 load.local
+       2  |     0.0 |     02d create.variadic
+       2  |     0.0 |     06a c.GetAttribute
+       2  |     0.0 |     177 c.CallBinaryMethod
+       1  |     0.0 |     00c store.local
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     07b c.MakeList
+       1  |     0.0 |     0c3 c.UnpackStarredVariadic
+       1  |     0.0 |     0c6 c.CallNilaryMethod
+       1  |     0.0 |     0c8 c.CallVarargsMethod
+       1  |     0.0 |     174 c.CallUnaryMethod
+      44  |     0.2 |   ▶ Root: _new_module
+       8  |     0.0 |     174 c.CallUnaryMethod
+       8  |     0.0 |     180 c.ReadGlobal
+       4  |     0.0 |     006 load.local
+       4  |     0.0 |     019 return
+       4  |     0.0 |     01d tag.enter
+       4  |     0.0 |     01e tag.leave
+       4  |     0.0 |     03e c.EnterCalleeContext
+       4  |     0.0 |     040 c.EpilogForReturn
+       4  |     0.0 |     054 c.CopyArguments
+      43  |     0.2 |   ▶ Root: _DummyModuleLock
+      14  |     0.1 |     003 load.constant
+       9  |     0.0 |     050 c.WriteName
+       8  |     0.0 |     018 load.null
+       4  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      43  |     0.2 |   ▶ Root: _WeakValueDictionary.__init__
+       6  |     0.0 |     006 load.local
+       5  |     0.0 |     003 load.constant
+       2  |     0.0 |     005 load.stackvalue
+       2  |     0.0 |     010 store.stackvalue
+       2  |     0.0 |     017 dup
+       2  |     0.0 |     02d create.variadic
+       2  |     0.0 |     067 c.GetMethod
+       2  |     0.0 |     180 c.ReadGlobal
+       1  |     0.0 |     00c store.local
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     018 load.null
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     074 c.SetAttribute
+       1  |     0.0 |     07a c.LoadBuildClass
+       1  |     0.0 |     0bd c.StoreCell
+       1  |     0.0 |     0be c.CreateCells
+       1  |     0.0 |     0c1 c.MakeCellArray
+       1  |     0.0 |     0c8 c.CallVarargsMethod
+       1  |     0.0 |     174 c.CallUnaryMethod
+       1  |     0.0 |     177 c.CallBinaryMethod
+      41  |     0.2 |   ▶ Root: _LoaderBasics
+      12  |     0.1 |     003 load.constant
+       9  |     0.0 |     050 c.WriteName
+       8  |     0.0 |     018 load.null
+       4  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      40  |     0.2 |   ▶ Root: _builtin_from_name
+       6  |     0.0 |     006 load.local
+       4  |     0.0 |     180 c.ReadGlobal
+       2  |     0.0 |     005 load.stackvalue
+       2  |     0.0 |     00c store.local
+       2  |     0.0 |     010 store.stackvalue
+       2  |     0.0 |     013 branch.false
+       2  |     0.0 |     017 dup
+       2  |     0.0 |     019 return
+       2  |     0.0 |     01d tag.enter
+       2  |     0.0 |     01e tag.leave
+       2  |     0.0 |     03e c.EnterCalleeContext
+       2  |     0.0 |     040 c.EpilogForReturn
+       2  |     0.0 |     054 c.CopyArguments
+       2  |     0.0 |     067 c.GetMethod
+       2  |     0.0 |     0e5 c.IsNone
+       2  |     0.0 |     174 c.CallUnaryMethod
+       2  |     0.0 |     177 c.CallBinaryMethod
+      38  |     0.2 |   ▶ Root: _BlockingOnManager
+      13  |     0.1 |     003 load.constant
+       8  |     0.0 |     050 c.WriteName
+       6  |     0.0 |     018 load.null
+       3  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      37  |     0.2 |   ▶ Root: SourceFileLoader
+      10  |     0.0 |     003 load.constant
+       8  |     0.0 |     050 c.WriteName
+       6  |     0.0 |     018 load.null
+       3  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     08e c.MakeKeywords
+      36  |     0.2 |   ▶ Root: <module>
+       7  |     0.0 |     003 load.constant
+       6  |     0.0 |     018 load.null
+       5  |     0.0 |     050 c.WriteName
+       3  |     0.0 |     063 c.MakeFunction
+       2  |     0.0 |     014 pop
+       2  |     0.0 |     017 dup
+       2  |     0.0 |     0ae c.Import
+       2  |     0.0 |     0af c.ImportFrom
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+      35  |     0.2 |   ▶ Root: _ModuleLockManager
+      11  |     0.0 |     003 load.constant
+       7  |     0.0 |     050 c.WriteName
+       6  |     0.0 |     018 load.null
+       3  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      35  |     0.2 |   ▶ Root: JavaTypeLoader
+       7  |     0.0 |     003 load.constant
+       6  |     0.0 |     050 c.WriteName
+       4  |     0.0 |     018 load.null
+       4  |     0.0 |     051 c.ReadName
+       2  |     0.0 |     063 c.MakeFunction
+       2  |     0.0 |     174 c.CallUnaryMethod
+       1  |     0.0 |     013 branch.false
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     184 c.Yes
+      33  |     0.1 |   ▶ Root: Codec
+       8  |     0.0 |     003 load.constant
+       7  |     0.0 |     050 c.WriteName
+       4  |     0.0 |     018 load.null
+       2  |     0.0 |     02d create.variadic
+       2  |     0.0 |     04e c.CollectToObjectArray
+       2  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      33  |     0.1 |   ▶ Root: JavaImportFinder
+       7  |     0.0 |     003 load.constant
+       6  |     0.0 |     050 c.WriteName
+       4  |     0.0 |     018 load.null
+       2  |     0.0 |     051 c.ReadName
+       2  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     013 branch.false
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     184 c.Yes
+      30  |     0.1 |   ▶ Root: _install
+       5  |     0.0 |     180 c.ReadGlobal
+       3  |     0.0 |     014 pop
+       3  |     0.0 |     177 c.CallBinaryMethod
+       2  |     0.0 |     005 load.stackvalue
+       2  |     0.0 |     006 load.local
+       2  |     0.0 |     010 store.stackvalue
+       2  |     0.0 |     017 dup
+       2  |     0.0 |     067 c.GetMethod
+       2  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+      30  |     0.1 |   ▶ Root: <genexpr>
+       3  |     0.0 |     014 pop
+       2  |     0.0 |     003 load.constant
+       2  |     0.0 |     013 branch.false
+       2  |     0.0 |     017 dup
+       2  |     0.0 |     032 tag.resume
+       2  |     0.0 |     066 c.ForIterate
+       1  |     0.0 |     001 load.argument
+       1  |     0.0 |     006 load.local
+       1  |     0.0 |     012 branch.backward
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     023 c.YieldGenerator
+       1  |     0.0 |     024 c.YieldValue
+       1  |     0.0 |     030 tag.yield
+       1  |     0.0 |     031 tag.yieldNull
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     0a6 c.Eq
+       1  |     0.0 |     0d8 c.PreResumeYield
+       1  |     0.0 |     0da c.ResumeYield
+       1  |     0.0 |     174 c.CallUnaryMethod
+       1  |     0.0 |     180 c.ReadGlobal
+      29  |     0.1 |   ▶ Root: SourcelessFileLoader
+       8  |     0.0 |     003 load.constant
+       7  |     0.0 |     050 c.WriteName
+       4  |     0.0 |     018 load.null
+       2  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      29  |     0.1 |   ▶ Root: _ImportLockContext
+       8  |     0.0 |     003 load.constant
+       7  |     0.0 |     050 c.WriteName
+       4  |     0.0 |     018 load.null
+       2  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      27  |     0.1 |   ▶ Root: FileFinder.path_hook
+       7  |     0.0 |     006 load.local
+       2  |     0.0 |     003 load.constant
+       2  |     0.0 |     00b clear.local
+       2  |     0.0 |     00c store.local
+       2  |     0.0 |     0bd c.StoreCell
+       1  |     0.0 |     018 load.null
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     056 c.LoadVariableArguments
+       1  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     0be c.CreateCells
+       1  |     0.0 |     0c1 c.MakeCellArray
+      26  |     0.1 |   ▶ Root: <module>
+       7  |     0.0 |     003 load.constant
+       6  |     0.0 |     018 load.null
+       3  |     0.0 |     050 c.WriteName
+       3  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     04e c.CollectToObjectArray
+      26  |     0.1 |   ▶ Root: IncrementalEncoder.__init__
+       6  |     0.0 |     006 load.local
+       4  |     0.0 |     003 load.constant
+       4  |     0.0 |     074 c.SetAttribute
+       2  |     0.0 |     019 return
+       2  |     0.0 |     01d tag.enter
+       2  |     0.0 |     01e tag.leave
+       2  |     0.0 |     03e c.EnterCalleeContext
+       2  |     0.0 |     040 c.EpilogForReturn
+       2  |     0.0 |     054 c.CopyArguments
+      25  |     0.1 |   ▶ Root: <setcomp>
+       3  |     0.0 |     017 dup
+       2  |     0.0 |     003 load.constant
+       2  |     0.0 |     013 branch.false
+       2  |     0.0 |     066 c.ForIterate
+       1  |     0.0 |     001 load.argument
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     006 load.local
+       1  |     0.0 |     012 branch.backward
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02d create.variadic
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     07c c.MakeSet
+       1  |     0.0 |     0cf c.BuildString
+       1  |     0.0 |     16b c.Format
+       1  |     0.0 |     189 c.SetAdd
+      23  |     0.1 |   ▶ Root: _WeakValueDictionary.__init__.<locals>.KeyedRef.__new__
+       6  |     0.0 |     006 load.local
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     00c store.local
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     074 c.SetAttribute
+       1  |     0.0 |     0c0 c.InitFreeVars
+       1  |     0.0 |     0c6 c.CallNilaryMethod
+       1  |     0.0 |     17d c.CallQuaternaryMethod
+       1  |     0.0 |     180 c.ReadGlobal
+      23  |     0.1 |   ▶ Root: AppleFrameworkLoader
+       6  |     0.0 |     003 load.constant
+       6  |     0.0 |     050 c.WriteName
+       2  |     0.0 |     018 load.null
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     07e c.MakeTuple
+      23  |     0.1 |   ▶ Root: _make_relax_case
+       2  |     0.0 |     003 load.constant
+       2  |     0.0 |     018 load.null
+       2  |     0.0 |     180 c.ReadGlobal
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     006 load.local
+       1  |     0.0 |     00c store.local
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     013 branch.false
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     063 c.MakeFunction
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     0be c.CreateCells
+       1  |     0.0 |     177 c.CallBinaryMethod
+       1  |     0.0 |     184 c.Yes
+      21  |     0.1 |   ▶ Root: _install_external_importers
+       2  |     0.0 |     006 load.local
+       2  |     0.0 |     180 c.ReadGlobal
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     00c store.local
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     078 c.WriteGlobal
+       1  |     0.0 |     0ae c.Import
+       1  |     0.0 |     0d3 c.BinarySubscript
+       1  |     0.0 |     177 c.CallBinaryMethod
+      21  |     0.1 |   ▶ Root: BuiltinImporter.is_package
+       3  |     0.0 |     003 load.constant
+       3  |     0.0 |     019 return
+       3  |     0.0 |     01d tag.enter
+       3  |     0.0 |     01e tag.leave
+       3  |     0.0 |     03e c.EnterCalleeContext
+       3  |     0.0 |     040 c.EpilogForReturn
+       3  |     0.0 |     054 c.CopyArguments
+      19  |     0.1 |   ▶ Root: BufferedIncrementalDecoder.__init__
+       3  |     0.0 |     006 load.local
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     05a c.LoadBytes
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     074 c.SetAttribute
+       1  |     0.0 |     17a c.CallTernaryMethod
+       1  |     0.0 |     180 c.ReadGlobal
+      19  |     0.1 |   ▶ Root: _WeakValueDictionary.clear
+       3  |     0.0 |     006 load.local
+       3  |     0.0 |     074 c.SetAttribute
+       2  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     07b c.MakeList
+       1  |     0.0 |     090 c.MakeDict
+       1  |     0.0 |     0c6 c.CallNilaryMethod
+       1  |     0.0 |     180 c.ReadGlobal
+      19  |     0.1 |   ▶ Root: _WeakValueDictionary.__init__.<locals>.KeyedRef.__init__
+       2  |     0.0 |     006 load.local
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     005 load.stackvalue
+       1  |     0.0 |     010 store.stackvalue
+       1  |     0.0 |     014 pop
+       1  |     0.0 |     017 dup
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     067 c.GetMethod
+       1  |     0.0 |     06a c.GetAttribute
+       1  |     0.0 |     0c0 c.InitFreeVars
+       1  |     0.0 |     0c6 c.CallNilaryMethod
+       1  |     0.0 |     17a c.CallTernaryMethod
+       1  |     0.0 |     180 c.ReadGlobal
+      17  |     0.1 |   ▶ Root: _List
+       5  |     0.0 |     050 c.WriteName
+       3  |     0.0 |     003 load.constant
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+       1  |     0.0 |     088 c.MakeConstantObjectTuple
+      15  |     0.1 |   ▶ Root: CodecRegistryError
+       4  |     0.0 |     050 c.WriteName
+       3  |     0.0 |     003 load.constant
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      15  |     0.1 |   ▶ Root: _DeadlockError
+       4  |     0.0 |     050 c.WriteName
+       3  |     0.0 |     003 load.constant
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      15  |     0.1 |   ▶ Root: ZipImportError
+       4  |     0.0 |     050 c.WriteName
+       3  |     0.0 |     003 load.constant
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     02e empty.variadic
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     07e c.MakeTuple
+      14  |     0.1 |   ▶ Root: <module>
+       3  |     0.0 |     003 load.constant
+       2  |     0.0 |     018 load.null
+       2  |     0.0 |     050 c.WriteName
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     051 c.ReadName
+       1  |     0.0 |     063 c.MakeFunction
+      10  |     0.0 |   ▶ Root: IncrementalDecoder.__init__
+       2  |     0.0 |     006 load.local
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     074 c.SetAttribute
+       9  |     0.0 |   ▶ Root: _set_bootstrap_module
+       1  |     0.0 |     003 load.constant
+       1  |     0.0 |     006 load.local
+       1  |     0.0 |     019 return
+       1  |     0.0 |     01d tag.enter
+       1  |     0.0 |     01e tag.leave
+       1  |     0.0 |     03e c.EnterCalleeContext
+       1  |     0.0 |     040 c.EpilogForReturn
+       1  |     0.0 |     054 c.CopyArguments
+       1  |     0.0 |     078 c.WriteGlobal
+  -----------------------------------------
+  Total executed instructions: 22514
+

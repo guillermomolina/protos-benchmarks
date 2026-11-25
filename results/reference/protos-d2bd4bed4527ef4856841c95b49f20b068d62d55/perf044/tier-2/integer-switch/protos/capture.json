@@ -1,0 +1,3058 @@
+{
+  "adapter_source_sha256": "328fa1ab6301eebb3494d6bc151289737c9a32d33027496b5be64cfb647a287e",
+  "capture_finished": "2026-11-25T11:14:40.935900+00:00",
+  "capture_key": {
+    "budgets": [
+      16000
+    ],
+    "capture_mode": "cold-single-compilation-v1",
+    "expected_result": "31000",
+    "extra_jvm_options": [],
+    "final_tier": 2,
+    "first_tier_threshold": 100,
+    "graph_jvm_options": [
+      "-Dpolyglot.engine.AllowExperimentalOptions=true",
+      "-Dpolyglot.engine.TraceCompilation=true",
+      "-Dpolyglot.engine.BackgroundCompilation=false",
+      "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+      "-Dpolyglot.compiler.TraceInlining=true",
+      "-Djdk.graal.Dump=Truffle:1"
+    ],
+    "invocations": 2000,
+    "java_runtime_version": "25.0.5.0.3+1-jvmci-25.5-b26",
+    "language": "protos",
+    "last_tier_threshold": 1000,
+    "requested_peer_version": null,
+    "requested_root": "all",
+    "requested_tier": 2,
+    "retain_recompiled_tiers": false,
+    "runtime": {
+      "revision": "d2bd4bed4527ef4856841c95b49f20b068d62d55",
+      "source_state_sha256": "ed9bc68c9af130d1f239fc5f4b9782fc14c0613d52c87213a80f994dcc70b259"
+    },
+    "selected_phase": "After TruffleTier",
+    "stage": "smoke",
+    "surface": "canonical",
+    "warmup_calls": 0,
+    "workload": "integer-switch"
+  },
+  "capture_started": "2026-11-25T11:12:31.410396+00:00",
+  "capture_valid": true,
+  "compiled_driver_cache": {
+    "classes_sha256": "d2de930aeda2cf54f3d0da529f00b282b7eefdd7805a6cb14c5bdb65ecee676a",
+    "identity": {
+      "dependency_classpath_sha256": "30a2cffa2279109bb8d94cc75f62878bf5502c28f41c035028807e3ce665a9a9",
+      "java_home": "/usr/lib64/graalvm/graalvm-community-java25i5",
+      "java_runtime_version": "25.0.5.0.3+1-jvmci-25.5-b26",
+      "product_classes_sha256": "30d9616fd85445bcb36788966b4a0dd253fd0217ab5ec2ff6cd4e41a3f8d7d23",
+      "protos_revision": "d2bd4bed4527ef4856841c95b49f20b068d62d55",
+      "protos_source_state_sha256": "ed9bc68c9af130d1f239fc5f4b9782fc14c0613d52c87213a80f994dcc70b259",
+      "surface": "canonical"
+    },
+    "identity_sha256": "bac22bec592a679a9c87a3f092ee2df91a714758cbc06bf5c5bb14baad1207e6",
+    "is_evidence": false,
+    "path": "/workspaces/protos-benchmarks/.work/embedded/d2bd4bed4527ef4856841c95b49f20b068d62d55/canonical/328fa1ab6301eebb3494d6bc151289737c9a32d33027496b5be64cfb647a287e",
+    "status": "reused"
+  },
+  "correctness": {
+    "actual": "31000",
+    "exit_code": 0,
+    "result": "PASS"
+  },
+  "correctness_uses_separate_jvm": true,
+  "dependency_classpath_sha256": "30a2cffa2279109bb8d94cc75f62878bf5502c28f41c035028807e3ce665a9a9",
+  "expected_result": "31000",
+  "fresh_jvm": true,
+  "graph_jvm_options": [
+    "-Dpolyglot.engine.AllowExperimentalOptions=true",
+    "-Dpolyglot.engine.TraceCompilation=true",
+    "-Dpolyglot.engine.BackgroundCompilation=false",
+    "-Dpolyglot.compiler.TraceNodeExpansion=truffleTier",
+    "-Dpolyglot.compiler.TraceInlining=true",
+    "-Djdk.graal.Dump=Truffle:1",
+    "-Dpolyglot.engine.MultiTier=true",
+    "-Dpolyglot.engine.DynamicCompilationThresholds=false",
+    "-Dpolyglot.engine.FirstTierMinInvokeThreshold=1",
+    "-Dpolyglot.engine.MinInvokeThreshold=1",
+    "-Dpolyglot.engine.OSR=false",
+    "-Dpolyglot.engine.FirstTierCompilationThreshold=100",
+    "-Dpolyglot.engine.LastTierCompilationThreshold=1000",
+    "-Djdk.graal.DumpPath=/workspaces/protos-benchmarks/results/local/perf044-baseline-20261125/tier-2/.staging/cold-capture-j5vsx9wc/raw/cold-jvm/dumps",
+    "-Dprotos.diagnostic.stableRootIdentity=true"
+  ],
+  "harness": {
+    "dirty": false,
+    "git_head": "02270f962a9a316e766d05b869ef4dc019745552",
+    "porcelain": "",
+    "source_sha256": {
+      "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+      "cases/catalog.json": "4d338cbe45dfadc0c536c7855b834eae62e87f4ca99e5491617c555be5aaea10",
+      "cases/integer-switch/integer-switch.protos": "a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24",
+      "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+      "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+      "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+      "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+      "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+      "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+      "harness/measure/surfaces/canonical/ProtosCanonicalSurface.java": "9f1f3862998c54a55f8afdade2bac7bb07935cc8db32521f7303c4d02cedd535",
+      "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+      "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+      "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+      "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+      "harness/policy/cases.json": "44ab2bc57b5ee521a1c793ea2d0ad96b71401d098c89d4da1168904c340f26b6",
+      "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+      "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+    }
+  },
+  "harness_after_source_sha256": {
+    "benchmark.py": "b1f3b7843bbe999229d80f4ba4e3589f1c001b82944135bbb501643cd42bba9d",
+    "cases/catalog.json": "4d338cbe45dfadc0c536c7855b834eae62e87f4ca99e5491617c555be5aaea10",
+    "cases/integer-switch/integer-switch.protos": "a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24",
+    "harness/bytecode_size_runtime.py": "6d4699a467267279f121ebadec175dc5ebe0520a0c7cdfcd36c675f28d1a84f7",
+    "harness/compiler_trace.py": "b7ec3d7d40c31de7214dd73b9e24159e678c0d93a42a489d8ba58bc15892853f",
+    "harness/graph_evidence.py": "131f204b8bcce4f2c1036668aed7bec118cdbaeb284b5ca403365082b1e73b7f",
+    "harness/igv_analyzer.sh": "3717bbda909afd3d61b9bd308efb66174bc63ec81fbd9de006a039b69e0a0d23",
+    "harness/instruments/BytecodeSizeInstrument.java": "dd94f8f5a1db8093464ce3af94f34fc9a97ab0d43da5ecf95d524de8ff3f6e4b",
+    "harness/measure/engine/com/guillermomolina/protos/benchmarks/measure/MeasurementEngine.java": "01dddf5c63a5ddd1ef226774b296be4a149957cfaac2e4b94425a55e165e2301",
+    "harness/measure/surfaces/canonical/ProtosCanonicalSurface.java": "9f1f3862998c54a55f8afdade2bac7bb07935cc8db32521f7303c4d02cedd535",
+    "harness/measure/surfaces/shared/PolyglotResultInvocation.java": "7b9163ad45a755ae14f09ae82291788172f990b7ecc99f2489c1050e417f4b0c",
+    "harness/measure_graphs.py": "985fdc52bff49b83a624cfc681bf77db1fc4c76588a9cf4357c26ef60cb0f827",
+    "harness/measure_protos.py": "fbd9bd1bcc83b7086068dc37b471b7635089c0f121b0ac6b6c4f5dbad32d666d",
+    "harness/measurement_support.py": "972fa0156bea0734ba94dd2fe8044262242209eb5746dcdf21291eb5d342ece8",
+    "harness/policy/cases.json": "44ab2bc57b5ee521a1c793ea2d0ad96b71401d098c89d4da1168904c340f26b6",
+    "harness/policy/graphs.json": "509ad4b095f36ed4aaa84a741a277479632133320212c6e03175a0dde7579477",
+    "harness/workload_catalog.py": "01010fbede3d53bf95bf3a30fb94572d40641b277ef68c03259ffae04162800a"
+  },
+  "host": {
+    "affinity_policy": "taskset -c <cpu>",
+    "architecture": "x86_64",
+    "container": true,
+    "cpu": 0,
+    "cpu_model": "AMD Ryzen 7 3700X 8-Core Processor",
+    "cpu_siblings": [
+      0,
+      8
+    ],
+    "hostname": "8fe8582f8873",
+    "kernel": "7.3.5-zen1-1-zen",
+    "os": "Linux",
+    "process_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "invocation_sequence": {
+    "cold_calls": 1,
+    "post_warmup_calls": 2000,
+    "process": "fresh-jvm",
+    "setup": "before-cold-call",
+    "total_measured_invocations": 2001,
+    "warmup_calls": 0
+  },
+  "java": {
+    "java.home": "/usr/lib64/graalvm/graalvm-community-java25i5",
+    "java.runtime.version": "25.0.5.0.3+1-jvmci-25.5-b26",
+    "java.vendor.version": "GraalVM CE 25.5.5.0.3+1.1",
+    "java.vm.name": "OpenJDK 64-Bit Server VM",
+    "java.vm.version": "25.0.5.0.3+1-jvmci-25.5-b26",
+    "version_output": "openjdk version \"25.0.5.0.3\" 2026-10-24\nOpenJDK Runtime Environment GraalVM CE 25.5.5.0.3+1.1 (build 25.0.5.0.3+1-jvmci-25.5-b26)\nOpenJDK 64-Bit Server VM GraalVM CE 25.5.5.0.3+1.1 (build 25.0.5.0.3+1-jvmci-25.5-b26, mixed mode, sharing)"
+  },
+  "language": "protos",
+  "mode": "cold-compilation",
+  "product_after": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "378baaca066de34acae74bc782039e787dc1c635e1ecf07e5676c09b24b5ae2b",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.5.5.0.3",
+    "maven_compiler_release": "25",
+    "pom_sha256": "69ec3a4a0fb56df7547ba45b5f2d94c602ce226c80e6212c34cf9579b916e495",
+    "porcelain": "",
+    "revision": "d2bd4bed4527ef4856841c95b49f20b068d62d55",
+    "source_state_sha256": "ed9bc68c9af130d1f239fc5f4b9782fc14c0613d52c87213a80f994dcc70b259",
+    "version": "0.4.223-SNAPSHOT"
+  },
+  "product_before": {
+    "clean": true,
+    "core_root": "/workspaces/protos/protos/lib/core",
+    "core_sha256": "378baaca066de34acae74bc782039e787dc1c635e1ecf07e5676c09b24b5ae2b",
+    "directory": "/workspaces/protos",
+    "graalvm_version": "25.5.5.0.3",
+    "maven_compiler_release": "25",
+    "pom_sha256": "69ec3a4a0fb56df7547ba45b5f2d94c602ce226c80e6212c34cf9579b916e495",
+    "porcelain": "",
+    "revision": "d2bd4bed4527ef4856841c95b49f20b068d62d55",
+    "source_state_sha256": "ed9bc68c9af130d1f239fc5f4b9782fc14c0613d52c87213a80f994dcc70b259",
+    "version": "0.4.223-SNAPSHOT"
+  },
+  "product_classes_sha256": "30d9616fd85445bcb36788966b4a0dd253fd0217ab5ec2ff6cd4e41a3f8d7d23",
+  "protos_revision": "d2bd4bed4527ef4856841c95b49f20b068d62d55",
+  "requested_root": "all",
+  "requested_tier": 2,
+  "retain_recompiled_tiers": false,
+  "root_inventory": {
+    "interpreted_roots_coverage": "NOT_ESTABLISHED",
+    "requested_tier": 2,
+    "roots": [
+      {
+        "compilation_ids": [
+          3599,
+          3974
+        ],
+        "cross_run_identity": "AMBIGUOUS",
+        "label": "ProtosBuiltinCallRootNode@3b3cd107",
+        "normalized_label": "ProtosBuiltinCallRootNode@*",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:204"
+      },
+      {
+        "compilation_ids": [
+          3404,
+          3891
+        ],
+        "cross_run_identity": "AMBIGUOUS",
+        "label": "ProtosBuiltinCallRootNode@4429f323",
+        "normalized_label": "ProtosBuiltinCallRootNode@*",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:205"
+      },
+      {
+        "compilation_ids": [
+          3604,
+          3976
+        ],
+        "cross_run_identity": "AMBIGUOUS",
+        "label": "ProtosBuiltinCallRootNode@474fed2b",
+        "normalized_label": "ProtosBuiltinCallRootNode@*",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:206"
+      },
+      {
+        "compilation_ids": [
+          3611,
+          3980
+        ],
+        "cross_run_identity": "AMBIGUOUS",
+        "label": "ProtosBuiltinCallRootNode@5d351d83",
+        "normalized_label": "ProtosBuiltinCallRootNode@*",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:207"
+      },
+      {
+        "compilation_ids": [
+          3460
+        ],
+        "cross_run_identity": "AMBIGUOUS",
+        "label": "ProtosBuiltinCallRootNode@c0ef280",
+        "normalized_label": "ProtosBuiltinCallRootNode@*",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:210"
+      },
+      {
+        "compilation_ids": [
+          3322,
+          3863
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "ProtosBytecodeRootNodeGen@454cb9c1",
+        "normalized_label": "ProtosBytecodeRootNodeGen@*",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:208"
+      },
+      {
+        "compilation_ids": [
+          4221,
+          4270
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+        "normalized_label": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:202"
+      },
+      {
+        "compilation_ids": [
+          3911,
+          4134
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1158+2]",
+        "normalized_label": "protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1158+2]",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:2"
+      },
+      {
+        "compilation_ids": [
+          3913,
+          4139
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1176+2]",
+        "normalized_label": "protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1176+2]",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:3"
+      },
+      {
+        "compilation_ids": [
+          3455
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:d2c2046d7677ba9c[CLOSURE|file:///workspaces/protos/protos/lib/core/Object.protos|1364+15]",
+        "normalized_label": "protos-root:d2c2046d7677ba9c[CLOSURE|file:///workspaces/protos/protos/lib/core/Object.protos|1364+15]",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:209"
+      },
+      {
+        "compilation_ids": [
+          3559,
+          3964,
+          4015,
+          4025,
+          4050,
+          4061,
+          4105,
+          4119
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1098+176]",
+        "normalized_label": "protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1098+176]",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:6"
+      },
+      {
+        "compilation_ids": [
+          3917,
+          4143
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1194+2]",
+        "normalized_label": "protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1194+2]",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:4"
+      },
+      {
+        "compilation_ids": [
+          3922,
+          4144
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1214+2]",
+        "normalized_label": "protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1214+2]",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": null,
+        "requested_tier": 2,
+        "status": "AVAILABLE",
+        "target": "1:5"
+      },
+      {
+        "compilation_ids": [
+          4001,
+          4010,
+          4080,
+          4083,
+          4148,
+          4150
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1050+240]",
+        "normalized_label": "protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1050+240]",
+        "observed_tiers": [
+          1,
+          2
+        ],
+        "reason": "TIER_COMPILATION_AMBIGUOUS",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:7"
+      },
+      {
+        "compilation_ids": [
+          3582,
+          3618,
+          3639,
+          3655,
+          3669,
+          3677,
+          3685,
+          3695,
+          3707,
+          3714,
+          3720,
+          3729,
+          3736,
+          3742,
+          3754,
+          3758
+        ],
+        "cross_run_identity": "UNIQUE",
+        "label": "protos-root:fe4d39dc9ed02927[CLOSURE|file:///workspaces/protos/protos/lib/core/Integer.protos|1125+24]",
+        "normalized_label": "protos-root:fe4d39dc9ed02927[CLOSURE|file:///workspaces/protos/protos/lib/core/Integer.protos|1125+24]",
+        "observed_tiers": [
+          1
+        ],
+        "reason": "REQUESTED_TIER_NOT_OBSERVED",
+        "requested_tier": 2,
+        "status": "UNAVAILABLE",
+        "target": "1:203"
+      }
+    ],
+    "scope": "observed-compiled-call-targets-only"
+  },
+  "runs": [
+    {
+      "budget": 2000,
+      "calls": 2001,
+      "compilation_count": 52,
+      "dump_inventory": [
+        {
+          "bytes": 3277309,
+          "name": "TruffleHotSpotCompilation-3322[ProtosBytecodeRootNodeGen@454cb9c1].bgv",
+          "sha256": "e88af7a6d8b78c3e672a8e58f1ce5cdfb626bbc6cfafa407386fb3483c7c5656"
+        },
+        {
+          "bytes": 834083,
+          "name": "TruffleHotSpotCompilation-3404[ProtosBuiltinCallRootNode@4429f323].bgv",
+          "sha256": "04a70510e96d42e7bd22b57691ea40d80cb0f3d811ead4ec75f5a87d80d9247a"
+        },
+        {
+          "bytes": 875618,
+          "name": "TruffleHotSpotCompilation-3455[protos-root:d2c2046d7677ba9c[CLOSURE|file:___workspaces_protos_protos_lib_core_Object.protos|1364+15]].bgv",
+          "sha256": "41c9671f4ecea7a4ed28a9f1224fe1f6b87e5ef3ca68d76e41cbfc8d32cc8764"
+        },
+        {
+          "bytes": 1434714,
+          "name": "TruffleHotSpotCompilation-3460[ProtosBuiltinCallRootNode@c0ef280].bgv",
+          "sha256": "787e94870f1081846979c25571011cecef9c012acb53c31f8c57ed5507fd2021"
+        },
+        {
+          "bytes": 22923982,
+          "name": "TruffleHotSpotCompilation-3559[protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1098+176]].bgv",
+          "sha256": "373f02f86c8be7b6a75f7d021d9a377bfdce866b3b5f846c5818946108851dce"
+        },
+        {
+          "bytes": 278051,
+          "name": "TruffleHotSpotCompilation-3582[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "41655fe626fbb0932f2a0457863842be19a7c1325dbc04f84187aa99cdd44af0"
+        },
+        {
+          "bytes": 679783,
+          "name": "TruffleHotSpotCompilation-3599[ProtosBuiltinCallRootNode@3b3cd107].bgv",
+          "sha256": "b00052cf11b6ee5923301188ec2090e89504255041c58e1b800adfaecd1bb93a"
+        },
+        {
+          "bytes": 679679,
+          "name": "TruffleHotSpotCompilation-3604[ProtosBuiltinCallRootNode@474fed2b].bgv",
+          "sha256": "a957ff732388628d27da9286ad7cd97cde4fc43821776b79bff2a776e103755c"
+        },
+        {
+          "bytes": 686005,
+          "name": "TruffleHotSpotCompilation-3611[ProtosBuiltinCallRootNode@5d351d83].bgv",
+          "sha256": "31c5d7d7a66d04a3ec4f0f0d99a7cdb3cf9a2886cf0775dc70f186669cf43352"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3618[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "6226d937587d545faf06698c7edeed7c867e19ec536c4e44227c9a871318da1a"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3639[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "eff0d0bf104271f68b4dba379a83ef6bbf02d761e6d8923080c567157a2324c9"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3655[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "662b8ba1f60330bc655d17c86f48f9597a49cd6dcfa793ceee3ba066c6ce2743"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3669[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "250c7abf0f9c0157c4d72da12f322b99ee5cddbf652c541252ec01254f3c2561"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3677[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "7ef5d4bcc2522636642a680fe38964d1af1f6811094a7391edc03760f414abfd"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3685[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "fbfa2cdc5c3f864a3a9aa301cf904ff2ceeb5f43487410fc5cf49118b01f4aaf"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3695[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "8f420b8cd8614135926550ed99fbb7b355163ffe5af3c22bc26a3dd226fd35fc"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3707[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "7895de4bc410afad289730f9f2a1f3497361bdc97c9368ec9078b317fe72d3d0"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3714[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "8b9c860f8f1c41195bed04644117212c4b6d64045d3fa7f3858ea96651e251da"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3720[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "40e7f23600a61a3e23537dd9d67d509396073d2f9d767d91db62e97d9f3c653e"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3729[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "3df97ca50ba36a5021b9ca98f9e68ca4ea9a262c28eb857197d1d059ababe672"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3736[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "ba259c0ebbbee6aaeafdc251b6c15fe1ae5fd5439cede2d377c1d525bbba7c6a"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3742[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "bd5408c59fff5caa67e2b6ebd98f07e5ec49e9f5fa94a9c4b6639892437a8183"
+        },
+        {
+          "bytes": 257597,
+          "name": "TruffleHotSpotCompilation-3754[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "f4253976f752a4d16cc4f4874bbeed6eb2f24fac3d39ddb7af2906e0e32613d0"
+        },
+        {
+          "bytes": 271093,
+          "name": "TruffleHotSpotCompilation-3758[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "23b7f27d399209a61402c5e052b67326cdd52a3f0d445e9f66f9433085decca6"
+        },
+        {
+          "bytes": 220598,
+          "name": "TruffleHotSpotCompilation-3763[protos-root:fe4d39dc9ed02927[CLOSURE|file:___workspaces_protos_protos_lib_core_Integer.protos|1125+24]].bgv",
+          "sha256": "b29823bd6f4001492a20d16502a5d9f6f072d85852322b047c9843dfdbea90cd"
+        },
+        {
+          "bytes": 6729095,
+          "name": "TruffleHotSpotCompilation-3863[ProtosBytecodeRootNodeGen@454cb9c1].bgv",
+          "sha256": "75bf593e027d98450994cf5bcf9af47960a01aee7c58bc8835a7c180b1f04814"
+        },
+        {
+          "bytes": 622828,
+          "name": "TruffleHotSpotCompilation-3891[ProtosBuiltinCallRootNode@4429f323].bgv",
+          "sha256": "3b01f24a0bb6c4355b2d1e84b3cd4953e25a86fd64c5fddfe12520c248823eea"
+        },
+        {
+          "bytes": 145403,
+          "name": "TruffleHotSpotCompilation-3911[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].bgv",
+          "sha256": "12fef0ab420457f043925e7cdb51f26e40eb5a0de06ddc37cfe0c09026a5a217"
+        },
+        {
+          "bytes": 145405,
+          "name": "TruffleHotSpotCompilation-3913[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].bgv",
+          "sha256": "a502178c63e2984628444d337cc106125536e7f8e14cf50fd979bdd62a13c3ba"
+        },
+        {
+          "bytes": 145404,
+          "name": "TruffleHotSpotCompilation-3917[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].bgv",
+          "sha256": "5dfa7159b0ee2d9caca355a98f0702e590cb88630fd03600fcf8190432bc4826"
+        },
+        {
+          "bytes": 145403,
+          "name": "TruffleHotSpotCompilation-3922[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].bgv",
+          "sha256": "90b4333ffa91288a31b0c4c900ce90e7a9614a36aed1fae4fbe97d02cb0c070c"
+        },
+        {
+          "bytes": 22203104,
+          "name": "TruffleHotSpotCompilation-3964[protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1098+176]].bgv",
+          "sha256": "0c603c8675d7b1555c9fb2eb436bffb08870dab23f3115eeb1ec274a779e5a87"
+        },
+        {
+          "bytes": 622486,
+          "name": "TruffleHotSpotCompilation-3974[ProtosBuiltinCallRootNode@3b3cd107].bgv",
+          "sha256": "738479d601310865257268a8590b3ec4c00df73fb89b8e328f64aabe0c30d9bd"
+        },
+        {
+          "bytes": 622375,
+          "name": "TruffleHotSpotCompilation-3976[ProtosBuiltinCallRootNode@474fed2b].bgv",
+          "sha256": "b2d622d856f1189eea4db743317d4e1695aab3a52a276fc25e64a37fb3aa288c"
+        },
+        {
+          "bytes": 628554,
+          "name": "TruffleHotSpotCompilation-3980[ProtosBuiltinCallRootNode@5d351d83].bgv",
+          "sha256": "6a10b4adef7827ca0235ee70e92442f7b2d5025a72a6897377dcfb922fdaa329"
+        },
+        {
+          "bytes": 989057,
+          "name": "TruffleHotSpotCompilation-4001[protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1050+240]].bgv",
+          "sha256": "3dfe5c4426937236f6b53439fd199bc2c632223b39fb9b760c5c44b0671faa3d"
+        },
+        {
+          "bytes": 465639,
+          "name": "TruffleHotSpotCompilation-4010[protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1050+240]].bgv",
+          "sha256": "43c5e1968b88edd339c84c81f1ff4a3b317fe443544e2b3abfc3d3967fb36575"
+        },
+        {
+          "bytes": 22496835,
+          "name": "TruffleHotSpotCompilation-4015[protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1098+176]].bgv",
+          "sha256": "08d1fe00a4f455f6a07bf9f6094a9126fdc27e630755e2f8c9bd6ceaa877216e"
+        },
+        {
+          "bytes": 22492798,
+          "name": "TruffleHotSpotCompilation-4025[protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1098+176]].bgv",
+          "sha256": "5f52be47ebb21975b1256412431adfee34ff577e652d5835d420bdb0838f7573"
+        },
+        {
+          "bytes": 22790087,
+          "name": "TruffleHotSpotCompilation-4050[protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1098+176]].bgv",
+          "sha256": "4328bb745d0ff92085515d281f9a53df42ef47188302cfea90e4b7cdd79d9387"
+        },
+        {
+          "bytes": 22776411,
+          "name": "TruffleHotSpotCompilation-4061[protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1098+176]].bgv",
+          "sha256": "bdb13038f3bce901b03dd307cf8ffdddce63a7960eed60d5a3621538e838fe14"
+        },
+        {
+          "bytes": 825269,
+          "name": "TruffleHotSpotCompilation-4080[protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1050+240]].bgv",
+          "sha256": "071d8478c4b7ce3e5ccaa5fdd0f2b53c2e832c662d6244e224a28070b0bc9cdb"
+        },
+        {
+          "bytes": 469876,
+          "name": "TruffleHotSpotCompilation-4083[protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1050+240]].bgv",
+          "sha256": "981ac986598a34d88c5be0f607c36db1b37c4780c413178f79669f802a143ad8"
+        },
+        {
+          "bytes": 21978134,
+          "name": "TruffleHotSpotCompilation-4105[protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1098+176]].bgv",
+          "sha256": "088f11b33cf0ad2160bd16f48f229a0772df6f075d32e5a941018c73f68cc8c1"
+        },
+        {
+          "bytes": 21885039,
+          "name": "TruffleHotSpotCompilation-4119[protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1098+176]].bgv",
+          "sha256": "19bf59a72c7de9c209600b597d5d5c04abe4300251ec521a45a2a8bff72ebb9f"
+        },
+        {
+          "bytes": 118611,
+          "name": "TruffleHotSpotCompilation-4134[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].bgv",
+          "sha256": "5322e60d65d0bfe21043198769172fb60b8ea167a852df6785ee1520dba90ad6"
+        },
+        {
+          "bytes": 118611,
+          "name": "TruffleHotSpotCompilation-4139[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].bgv",
+          "sha256": "4a27b922e24b6dd15dbb2cb6981d55fc8efb50f3357314f5fcdc00b8df459741"
+        },
+        {
+          "bytes": 118611,
+          "name": "TruffleHotSpotCompilation-4143[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].bgv",
+          "sha256": "f319b8d41606f34652401b5438a5ad20db442cfcbfc338b9b8ca8135b23f80d5"
+        },
+        {
+          "bytes": 118611,
+          "name": "TruffleHotSpotCompilation-4144[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].bgv",
+          "sha256": "5cfc43395e6b05f19652c49ba43854bd3c973c8e1b3991ec153cb283e86a7517"
+        },
+        {
+          "bytes": 1062344,
+          "name": "TruffleHotSpotCompilation-4148[protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1050+240]].bgv",
+          "sha256": "41bc8ee927ea26959a208b64a76c6e74c1b2694e6a53474fadff4c4f5825ea1e"
+        },
+        {
+          "bytes": 22701642,
+          "name": "TruffleHotSpotCompilation-4150[protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1050+240]].bgv",
+          "sha256": "78ab789c06f616ef0662f1f2b7e1d32f7ba70f7f0477ba4bfc9b29ff964d1e05"
+        },
+        {
+          "bytes": 547791,
+          "name": "TruffleHotSpotCompilation-4221[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "b0b80b42e34b1e9312b5bcd2e921fb6d2f4a95473c99b42cc6802d8ce943fc71"
+        },
+        {
+          "bytes": 6915190,
+          "name": "TruffleHotSpotCompilation-4270[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+          "sha256": "5472b7aebd8c62639a4cbf86b330b0270d804864537dd8faed0d02ce0b7c42ce"
+        }
+      ],
+      "exit_code": 0,
+      "failure_count": 1,
+      "invalidation_count": 21,
+      "resolution": {
+        "units": [
+          {
+            "ast_nodes": 2,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBuiltinCallRootNode",
+                "self": {
+                  "allocs": 6,
+                  "count": 472,
+                  "cycles": 486,
+                  "ifs": 42,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 534
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedIndirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 32,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 36
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3974[ProtosBuiltinCallRootNode@3b3cd107].bgv"
+            ],
+            "comp_id": 3974,
+            "compilation_time_ms": 64,
+            "cross_run_identity": "AMBIGUOUS",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 14,
+              "count": 642,
+              "cycles": 738,
+              "ifs": 42,
+              "invokes": 0,
+              "loops": 1,
+              "size": 829
+            },
+            "graal_compilation_ms": 51,
+            "inlined": [],
+            "ir_after_truffle_tier": 642,
+            "ir_final": 901,
+            "label": "ProtosBuiltinCallRootNode@3b3cd107",
+            "machine_code_bytes": 4458,
+            "normalized_label": "ProtosBuiltinCallRootNode@*",
+            "other_compilation_ids": [
+              3599
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:204",
+            "tier": 2,
+            "truffle_compilation_ms": 13,
+            "via": null
+          },
+          {
+            "ast_nodes": 2,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBuiltinCallRootNode",
+                "self": {
+                  "allocs": 6,
+                  "count": 472,
+                  "cycles": 486,
+                  "ifs": 42,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 534
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedIndirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 32,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 36
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3891[ProtosBuiltinCallRootNode@4429f323].bgv"
+            ],
+            "comp_id": 3891,
+            "compilation_time_ms": 87,
+            "cross_run_identity": "AMBIGUOUS",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 14,
+              "count": 643,
+              "cycles": 738,
+              "ifs": 42,
+              "invokes": 0,
+              "loops": 1,
+              "size": 829
+            },
+            "graal_compilation_ms": 60,
+            "inlined": [],
+            "ir_after_truffle_tier": 643,
+            "ir_final": 901,
+            "label": "ProtosBuiltinCallRootNode@4429f323",
+            "machine_code_bytes": 4458,
+            "normalized_label": "ProtosBuiltinCallRootNode@*",
+            "other_compilation_ids": [
+              3404
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:205",
+            "tier": 2,
+            "truffle_compilation_ms": 27,
+            "via": null
+          },
+          {
+            "ast_nodes": 2,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBuiltinCallRootNode",
+                "self": {
+                  "allocs": 6,
+                  "count": 472,
+                  "cycles": 486,
+                  "ifs": 42,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 534
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedIndirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 32,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 36
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3976[ProtosBuiltinCallRootNode@474fed2b].bgv"
+            ],
+            "comp_id": 3976,
+            "compilation_time_ms": 52,
+            "cross_run_identity": "AMBIGUOUS",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 14,
+              "count": 642,
+              "cycles": 738,
+              "ifs": 42,
+              "invokes": 0,
+              "loops": 1,
+              "size": 829
+            },
+            "graal_compilation_ms": 40,
+            "inlined": [],
+            "ir_after_truffle_tier": 642,
+            "ir_final": 901,
+            "label": "ProtosBuiltinCallRootNode@474fed2b",
+            "machine_code_bytes": 4458,
+            "normalized_label": "ProtosBuiltinCallRootNode@*",
+            "other_compilation_ids": [
+              3604
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:206",
+            "tier": 2,
+            "truffle_compilation_ms": 12,
+            "via": null
+          },
+          {
+            "ast_nodes": 2,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBuiltinCallRootNode",
+                "self": {
+                  "allocs": 6,
+                  "count": 472,
+                  "cycles": 486,
+                  "ifs": 42,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 534
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedIndirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 16,
+                  "cycles": 32,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 36
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3980[ProtosBuiltinCallRootNode@5d351d83].bgv"
+            ],
+            "comp_id": 3980,
+            "compilation_time_ms": 86,
+            "cross_run_identity": "AMBIGUOUS",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 14,
+              "count": 646,
+              "cycles": 746,
+              "ifs": 42,
+              "invokes": 0,
+              "loops": 1,
+              "size": 838
+            },
+            "graal_compilation_ms": 38,
+            "inlined": [],
+            "ir_after_truffle_tier": 646,
+            "ir_final": 906,
+            "label": "ProtosBuiltinCallRootNode@5d351d83",
+            "machine_code_bytes": 4526,
+            "normalized_label": "ProtosBuiltinCallRootNode@*",
+            "other_compilation_ids": [
+              3611
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:207",
+            "tier": 2,
+            "truffle_compilation_ms": 48,
+            "via": null
+          },
+          {
+            "ast_nodes": 3,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBuiltinCallRootNode",
+                "self": {
+                  "allocs": 22,
+                  "count": 1181,
+                  "cycles": 1152,
+                  "ifs": 111,
+                  "invokes": 0,
+                  "loops": 3,
+                  "size": 1366
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBuiltinCallRootNode",
+                "self": {
+                  "allocs": 22,
+                  "count": 1166,
+                  "cycles": 1152,
+                  "ifs": 111,
+                  "invokes": 0,
+                  "loops": 3,
+                  "size": 1351
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 21,
+                  "count": 186,
+                  "cycles": 265,
+                  "ifs": 14,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 344
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 8,
+                  "count": 184,
+                  "cycles": 214,
+                  "ifs": 10,
+                  "invokes": 0,
+                  "loops": 2,
+                  "size": 263
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 21,
+                  "count": 173,
+                  "cycles": 244,
+                  "ifs": 14,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 311
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CallBinaryMethod_Node",
+                "self": {
+                  "allocs": 7,
+                  "count": 107,
+                  "cycles": 147,
+                  "ifs": 10,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 154
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$StructuredPrepareChildCall_Node",
+                "self": {
+                  "allocs": 1,
+                  "count": 103,
+                  "cycles": 175,
+                  "ifs": 5,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 255
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$StructuredAcceptChildOutcome_Node",
+                "self": {
+                  "allocs": 0,
+                  "count": 88,
+                  "cycles": 103,
+                  "ifs": 6,
+                  "invokes": 0,
+                  "loops": 1,
+                  "size": 111
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosFunctionCallDispatchersFactory$FunctionCachedCallNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 84,
+                  "cycles": 143,
+                  "ifs": 4,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 169
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosFunctionCallDispatchersFactory$CallNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 76,
+                  "cycles": 121,
+                  "ifs": 8,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 127
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosFunctionCallDispatchersFactory$FunctionDirectInvokeNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 54,
+                  "cycles": 99,
+                  "ifs": 5,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 103
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosFunctionCallDispatchersFactory$FunctionDirectInvokeNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 54,
+                  "cycles": 99,
+                  "ifs": 5,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 103
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-3863[ProtosBytecodeRootNodeGen@454cb9c1].bgv"
+            ],
+            "comp_id": 3863,
+            "compilation_time_ms": 1367,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 203,
+              "count": 5101,
+              "cycles": 5925,
+              "ifs": 317,
+              "invokes": 0,
+              "loops": 11,
+              "size": 7104
+            },
+            "graal_compilation_ms": 1061,
+            "inlined": [
+              "protos-root:271de23a6f0d8bb3[CLOSURE|file:///workspaces/protos/protos/lib/core/Any.protos|1046+4]",
+              "protos-root:d2c2046d7677ba9c[CLOSURE|file:///workspaces/protos/protos/lib/core/Object.protos|1364+15]",
+              "ProtosBuiltinCallRootNode@c0ef280",
+              "protos-root:271de23a6f0d8bb3[CLOSURE|file:///workspaces/protos/protos/lib/core/Any.protos|1046+4]",
+              "protos-root:d2c2046d7677ba9c[CLOSURE|file:///workspaces/protos/protos/lib/core/Object.protos|1364+15]",
+              "ProtosBuiltinCallRootNode@c0ef280"
+            ],
+            "ir_after_truffle_tier": 5519,
+            "ir_final": 13638,
+            "label": "ProtosBytecodeRootNodeGen@454cb9c1",
+            "machine_code_bytes": 64571,
+            "normalized_label": "ProtosBytecodeRootNodeGen@*",
+            "other_compilation_ids": [
+              3322
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:208",
+            "tier": 2,
+            "truffle_compilation_ms": 307,
+            "via": null
+          },
+          {
+            "ast_nodes": 6,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosHostExecutableClosureGen$InteropLibraryExports$Cached",
+                "self": {
+                  "allocs": 1,
+                  "count": 47,
+                  "cycles": 67,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 82
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$ExecuteNoArgsNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 15,
+                  "cycles": 15,
+                  "ifs": 1,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 20
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosFunctionCallDispatchersFactory$FunctionCachedCallNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 11,
+                  "cycles": 16,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 19
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "OptimizedDirectCallNode",
+                "self": {
+                  "allocs": 0,
+                  "count": 10,
+                  "cycles": 10,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 13
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotLanguageContextFactory$ToHostValueNodeGen$Inlined",
+                "self": {
+                  "allocs": 1,
+                  "count": 9,
+                  "cycles": 14,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 14
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "PolyglotValueDispatchFactory$InteropValueFactory$SharedExecuteNodeGen$Inlined",
+                "self": {
+                  "allocs": 0,
+                  "count": 6,
+                  "cycles": 2,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 7
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4270[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv"
+            ],
+            "comp_id": 4270,
+            "compilation_time_ms": 1031,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 4,
+              "count": 234,
+              "cycles": 239,
+              "ifs": 3,
+              "invokes": 0,
+              "loops": 0,
+              "size": 319
+            },
+            "graal_compilation_ms": 128,
+            "inlined": [],
+            "ir_after_truffle_tier": 234,
+            "ir_final": 460,
+            "label": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+            "machine_code_bytes": 2324,
+            "normalized_label": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+            "other_compilation_ids": [
+              4221
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:202",
+            "tier": 2,
+            "truffle_compilation_ms": 903,
+            "via": null
+          },
+          {
+            "ast_nodes": 3,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 4,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4134[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].bgv"
+            ],
+            "comp_id": 4134,
+            "compilation_time_ms": 11,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 48,
+              "cycles": 50,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 75
+            },
+            "graal_compilation_ms": 7,
+            "inlined": [],
+            "ir_after_truffle_tier": 48,
+            "ir_final": 59,
+            "label": "protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1158+2]",
+            "machine_code_bytes": 256,
+            "normalized_label": "protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1158+2]",
+            "other_compilation_ids": [
+              3911
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:2",
+            "tier": 2,
+            "truffle_compilation_ms": 4,
+            "via": null
+          },
+          {
+            "ast_nodes": 3,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 4,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4139[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].bgv"
+            ],
+            "comp_id": 4139,
+            "compilation_time_ms": 13,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 48,
+              "cycles": 50,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 75
+            },
+            "graal_compilation_ms": 7,
+            "inlined": [],
+            "ir_after_truffle_tier": 48,
+            "ir_final": 59,
+            "label": "protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1176+2]",
+            "machine_code_bytes": 256,
+            "normalized_label": "protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1176+2]",
+            "other_compilation_ids": [
+              3913
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:3",
+            "tier": 2,
+            "truffle_compilation_ms": 6,
+            "via": null
+          },
+          {
+            "ast_nodes": 3,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 4,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4143[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].bgv"
+            ],
+            "comp_id": 4143,
+            "compilation_time_ms": 11,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 48,
+              "cycles": 50,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 75
+            },
+            "graal_compilation_ms": 7,
+            "inlined": [],
+            "ir_after_truffle_tier": 48,
+            "ir_final": 59,
+            "label": "protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1194+2]",
+            "machine_code_bytes": 256,
+            "normalized_label": "protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1194+2]",
+            "other_compilation_ids": [
+              3917
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:4",
+            "tier": 2,
+            "truffle_compilation_ms": 4,
+            "via": null
+          },
+          {
+            "ast_nodes": 3,
+            "attribution": [
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen$CachedBytecodeNode",
+                "self": {
+                  "allocs": 1,
+                  "count": 4,
+                  "cycles": 8,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 10
+                }
+              },
+              {
+                "location": "null:-1:-1--1",
+                "name": "ProtosBytecodeRootNodeGen",
+                "self": {
+                  "allocs": 0,
+                  "count": 1,
+                  "cycles": 0,
+                  "ifs": 0,
+                  "invokes": 0,
+                  "loops": 0,
+                  "size": 1
+                }
+              }
+            ],
+            "bgv": [
+              "TruffleHotSpotCompilation-4144[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].bgv"
+            ],
+            "comp_id": 4144,
+            "compilation_time_ms": 12,
+            "cross_run_identity": "UNIQUE",
+            "edge": null,
+            "expansion_truffle_tier": {
+              "allocs": 1,
+              "count": 48,
+              "cycles": 50,
+              "ifs": 0,
+              "invokes": 0,
+              "loops": 0,
+              "size": 75
+            },
+            "graal_compilation_ms": 7,
+            "inlined": [],
+            "ir_after_truffle_tier": 48,
+            "ir_final": 59,
+            "label": "protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1214+2]",
+            "machine_code_bytes": 256,
+            "normalized_label": "protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1214+2]",
+            "other_compilation_ids": [
+              3922
+            ],
+            "role": "selected",
+            "src": "n/a",
+            "superseded_comp_ids": [],
+            "target": "1:5",
+            "tier": 2,
+            "truffle_compilation_ms": 5,
+            "via": null
+          }
+        ]
+      },
+      "result": "31000",
+      "retained_bgv": [
+        "budget-2000/bgv/TruffleHotSpotCompilation-3974[ProtosBuiltinCallRootNode@3b3cd107].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3891[ProtosBuiltinCallRootNode@4429f323].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3976[ProtosBuiltinCallRootNode@474fed2b].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3980[ProtosBuiltinCallRootNode@5d351d83].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-3863[ProtosBytecodeRootNodeGen@454cb9c1].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4270[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4134[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4139[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4143[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].bgv.gz",
+        "budget-2000/bgv/TruffleHotSpotCompilation-4144[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].bgv.gz"
+      ],
+      "trace_log": "budget-2000/trace.log.gz",
+      "trace_log_sha256": "1048f994248b6410dd271c8f082c355e5c5f1e651a3e982a9b8d2ca20e9d8873"
+    }
+  ],
+  "schema_version": 1,
+  "selected_compilations": [
+    {
+      "bgv": "TruffleHotSpotCompilation-3974[ProtosBuiltinCallRootNode@3b3cd107].bgv",
+      "comp_id": 3974,
+      "ir_final": 901,
+      "ir_initial": 642,
+      "machine_code_bytes": 4458,
+      "normalized_root": "ProtosBuiltinCallRootNode@*",
+      "root": "ProtosBuiltinCallRootNode@3b3cd107",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3891[ProtosBuiltinCallRootNode@4429f323].bgv",
+      "comp_id": 3891,
+      "ir_final": 901,
+      "ir_initial": 643,
+      "machine_code_bytes": 4458,
+      "normalized_root": "ProtosBuiltinCallRootNode@*",
+      "root": "ProtosBuiltinCallRootNode@4429f323",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3976[ProtosBuiltinCallRootNode@474fed2b].bgv",
+      "comp_id": 3976,
+      "ir_final": 901,
+      "ir_initial": 642,
+      "machine_code_bytes": 4458,
+      "normalized_root": "ProtosBuiltinCallRootNode@*",
+      "root": "ProtosBuiltinCallRootNode@474fed2b",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3980[ProtosBuiltinCallRootNode@5d351d83].bgv",
+      "comp_id": 3980,
+      "ir_final": 906,
+      "ir_initial": 646,
+      "machine_code_bytes": 4526,
+      "normalized_root": "ProtosBuiltinCallRootNode@*",
+      "root": "ProtosBuiltinCallRootNode@5d351d83",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-3863[ProtosBytecodeRootNodeGen@454cb9c1].bgv",
+      "comp_id": 3863,
+      "ir_final": 13638,
+      "ir_initial": 5519,
+      "machine_code_bytes": 64571,
+      "normalized_root": "ProtosBytecodeRootNodeGen@*",
+      "root": "ProtosBytecodeRootNodeGen@454cb9c1",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4270[org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute].bgv",
+      "comp_id": 4270,
+      "ir_final": 460,
+      "ir_initial": 234,
+      "machine_code_bytes": 2324,
+      "normalized_root": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+      "root": "org.graalvm.polyglot.Value<ProtosHostExecutableClosure>.execute",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4134[protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1158+2]].bgv",
+      "comp_id": 4134,
+      "ir_final": 59,
+      "ir_initial": 48,
+      "machine_code_bytes": 256,
+      "normalized_root": "protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1158+2]",
+      "root": "protos-root:b21df33d214a84d1[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1158+2]",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4139[protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1176+2]].bgv",
+      "comp_id": 4139,
+      "ir_final": 59,
+      "ir_initial": 48,
+      "machine_code_bytes": 256,
+      "normalized_root": "protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1176+2]",
+      "root": "protos-root:c9bb914e3f328f20[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1176+2]",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4143[protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1194+2]].bgv",
+      "comp_id": 4143,
+      "ir_final": 59,
+      "ir_initial": 48,
+      "machine_code_bytes": 256,
+      "normalized_root": "protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1194+2]",
+      "root": "protos-root:e8fd565c1f9d8f63[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1194+2]",
+      "tier": 2
+    },
+    {
+      "bgv": "TruffleHotSpotCompilation-4144[protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24__workspaces_protos-benchmarks_cases_integer-switch_integer-switch.protos|1214+2]].bgv",
+      "comp_id": 4144,
+      "ir_final": 59,
+      "ir_initial": 48,
+      "machine_code_bytes": 256,
+      "normalized_root": "protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1214+2]",
+      "root": "protos-root:eea5a37e9a76e942[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1214+2]",
+      "tier": 2
+    }
+  ],
+  "selected_phase": "After TruffleTier",
+  "semantic_root_catalog": {
+    "roots": [
+      {
+        "kind": "TOP_LEVEL",
+        "length": 98,
+        "occurrences": 1,
+        "selector": "protos-root:6af481effb19efbc",
+        "source": "file:///workspaces/protos/protos/lib/core/Actor.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 37,
+        "occurrences": 1,
+        "selector": "protos-root:03294caf2f24a2be",
+        "source": "file:///workspaces/protos/protos/lib/core/Any.protos",
+        "start": 1015
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 4,
+        "occurrences": 2,
+        "selector": "protos-root:271de23a6f0d8bb3",
+        "source": "file:///workspaces/protos/protos/lib/core/Any.protos",
+        "start": 1046
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 9,
+        "occurrences": 1,
+        "selector": "protos-root:ede17c8287610dee",
+        "source": "file:///workspaces/protos/protos/lib/core/Array.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 22,
+        "occurrences": 1,
+        "selector": "protos-root:707b9c71207044d3",
+        "source": "file:///workspaces/protos/protos/lib/core/BigInteger.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 9,
+        "occurrences": 1,
+        "selector": "protos-root:6d5971b25375adc1",
+        "source": "file:///workspaces/protos/protos/lib/core/Bytes.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 46,
+        "occurrences": 1,
+        "selector": "protos-root:493523c4d9f37f8e",
+        "source": "file:///workspaces/protos/protos/lib/core/Capture.protos",
+        "start": 1015
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 9,
+        "occurrences": 1,
+        "selector": "protos-root:4ef13bcefd7d35d6",
+        "source": "file:///workspaces/protos/protos/lib/core/Capture.protos",
+        "start": 1050
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 1218,
+        "occurrences": 1,
+        "selector": "protos-root:bb9d2878bc32b503",
+        "source": "file:///workspaces/protos/protos/lib/core/Complex.protos",
+        "start": 1751
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 121,
+        "occurrences": 1,
+        "selector": "protos-root:3d1a0ee47a2aa0a4",
+        "source": "file:///workspaces/protos/protos/lib/core/Complex.protos",
+        "start": 1798
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 125,
+        "occurrences": 1,
+        "selector": "protos-root:1dc0bb5a55900d30",
+        "source": "file:///workspaces/protos/protos/lib/core/Complex.protos",
+        "start": 2050
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 126,
+        "occurrences": 1,
+        "selector": "protos-root:3cb5287d162bf6ce",
+        "source": "file:///workspaces/protos/protos/lib/core/Complex.protos",
+        "start": 2267
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 126,
+        "occurrences": 1,
+        "selector": "protos-root:d06a9ec7b5721686",
+        "source": "file:///workspaces/protos/protos/lib/core/Complex.protos",
+        "start": 2485
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 127,
+        "occurrences": 1,
+        "selector": "protos-root:f464410b1f97c585",
+        "source": "file:///workspaces/protos/protos/lib/core/Complex.protos",
+        "start": 2810
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 11,
+        "occurrences": 1,
+        "selector": "protos-root:7e167c137ac8ebbb",
+        "source": "file:///workspaces/protos/protos/lib/core/Context.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 12,
+        "occurrences": 1,
+        "selector": "protos-root:4abe5588f0bb8483",
+        "source": "file:///workspaces/protos/protos/lib/core/Encoding.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 9,
+        "occurrences": 1,
+        "selector": "protos-root:4be45f808e4d8125",
+        "source": "file:///workspaces/protos/protos/lib/core/Error.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 71,
+        "occurrences": 1,
+        "selector": "protos-root:62a680a223180d84",
+        "source": "file:///workspaces/protos/protos/lib/core/Float.protos",
+        "start": 1015
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 18,
+        "occurrences": 1,
+        "selector": "protos-root:2dec8ef76adb6661",
+        "source": "file:///workspaces/protos/protos/lib/core/Float.protos",
+        "start": 1060
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 3289,
+        "occurrences": 1,
+        "selector": "protos-root:669981c0a22e7773",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 1599
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 224,
+        "occurrences": 1,
+        "selector": "protos-root:507870b5ae09182c",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 1647
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 630,
+        "occurrences": 1,
+        "selector": "protos-root:e2e9707f026a6549",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 2003
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 417,
+        "occurrences": 1,
+        "selector": "protos-root:870d2ceb7275c80f",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 2206
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 36,
+        "occurrences": 1,
+        "selector": "protos-root:57088e99b897f382",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 2254
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 281,
+        "occurrences": 2,
+        "selector": "protos-root:4736f8b4ad5b6d9c",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 2328
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 631,
+        "occurrences": 1,
+        "selector": "protos-root:e57db647dee252f4",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 2726
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 418,
+        "occurrences": 1,
+        "selector": "protos-root:beb48c31148cb200",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 2929
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 37,
+        "occurrences": 1,
+        "selector": "protos-root:a81cf9ec6363c22d",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 2977
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 281,
+        "occurrences": 2,
+        "selector": "protos-root:401df12ad59a90d9",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 3052
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 619,
+        "occurrences": 1,
+        "selector": "protos-root:4de37084ad82b5f1",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 3450
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 406,
+        "occurrences": 1,
+        "selector": "protos-root:c4417b5b4a91fa38",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 3653
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 37,
+        "occurrences": 1,
+        "selector": "protos-root:304933031adf8daa",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 3701
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 269,
+        "occurrences": 2,
+        "selector": "protos-root:f5e7b60a665a8678",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 3776
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 620,
+        "occurrences": 1,
+        "selector": "protos-root:d31f9956fc3efe1e",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 4235
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 407,
+        "occurrences": 1,
+        "selector": "protos-root:120ca1713f168890",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 4438
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 38,
+        "occurrences": 1,
+        "selector": "protos-root:3a2f84b60a70ca58",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 4486
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 269,
+        "occurrences": 2,
+        "selector": "protos-root:80a60715f192a59b",
+        "source": "file:///workspaces/protos/protos/lib/core/Fraction.protos",
+        "start": 4562
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 10,
+        "occurrences": 1,
+        "selector": "protos-root:a61cf093b60769f4",
+        "source": "file:///workspaces/protos/protos/lib/core/Future.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 15,
+        "occurrences": 1,
+        "selector": "protos-root:9587a48bff43cc63",
+        "source": "file:///workspaces/protos/protos/lib/core/IdentityMap.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 142,
+        "occurrences": 1,
+        "selector": "protos-root:ccb7484bf858815d",
+        "source": "file:///workspaces/protos/protos/lib/core/Integer.protos",
+        "start": 1015
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 8,
+        "occurrences": 1,
+        "selector": "protos-root:0331599b1c726c58",
+        "source": "file:///workspaces/protos/protos/lib/core/Integer.protos",
+        "start": 1062
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 24,
+        "occurrences": 2,
+        "selector": "protos-root:fe4d39dc9ed02927",
+        "source": "file:///workspaces/protos/protos/lib/core/Integer.protos",
+        "start": 1125
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 23,
+        "occurrences": 1,
+        "selector": "protos-root:0a36d48e34accf31",
+        "source": "file:///workspaces/protos/protos/lib/core/InvalidReturn.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 7,
+        "occurrences": 1,
+        "selector": "protos-root:a7f95459b92ca8c2",
+        "source": "file:///workspaces/protos/protos/lib/core/Map.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 346,
+        "occurrences": 1,
+        "selector": "protos-root:9b2b9c47a6b5fa1c",
+        "source": "file:///workspaces/protos/protos/lib/core/Number.protos",
+        "start": 1261
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 92,
+        "occurrences": 1,
+        "selector": "protos-root:d738f2c950f0d817",
+        "source": "file:///workspaces/protos/protos/lib/core/Number.protos",
+        "start": 1364
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 97,
+        "occurrences": 1,
+        "selector": "protos-root:9d262615b7b8d688",
+        "source": "file:///workspaces/protos/protos/lib/core/Number.protos",
+        "start": 1502
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 1352,
+        "occurrences": 1,
+        "selector": "protos-root:e68dd911baee7ff8",
+        "source": "file:///workspaces/protos/protos/lib/core/Object.protos",
+        "start": 1161
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 72,
+        "occurrences": 1,
+        "selector": "protos-root:6d16927587986393",
+        "source": "file:///workspaces/protos/protos/lib/core/Object.protos",
+        "start": 1197
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 14,
+        "occurrences": 1,
+        "selector": "protos-root:26837ee3fdcb6147",
+        "source": "file:///workspaces/protos/protos/lib/core/Object.protos",
+        "start": 1309
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 15,
+        "occurrences": 2,
+        "selector": "protos-root:d2c2046d7677ba9c",
+        "source": "file:///workspaces/protos/protos/lib/core/Object.protos",
+        "start": 1364
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 121,
+        "occurrences": 1,
+        "selector": "protos-root:0ec55efbb1a438ea",
+        "source": "file:///workspaces/protos/protos/lib/core/Object.protos",
+        "start": 1590
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 121,
+        "occurrences": 1,
+        "selector": "protos-root:3b721d3ab461adf9",
+        "source": "file:///workspaces/protos/protos/lib/core/Object.protos",
+        "start": 1915
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 130,
+        "occurrences": 1,
+        "selector": "protos-root:85f61d8d491c5e4b",
+        "source": "file:///workspaces/protos/protos/lib/core/Object.protos",
+        "start": 2136
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 134,
+        "occurrences": 1,
+        "selector": "protos-root:82b1b3dbb6cae682",
+        "source": "file:///workspaces/protos/protos/lib/core/Object.protos",
+        "start": 2377
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 1895,
+        "occurrences": 1,
+        "selector": "protos-root:bc03f727921029b5",
+        "source": "file:///workspaces/protos/protos/lib/core/Path.protos",
+        "start": 1363
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 26,
+        "occurrences": 1,
+        "selector": "protos-root:729bcd66d7c45830",
+        "source": "file:///workspaces/protos/protos/lib/core/Path.protos",
+        "start": 1401
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 316,
+        "occurrences": 1,
+        "selector": "protos-root:a4dddc41c2554e1d",
+        "source": "file:///workspaces/protos/protos/lib/core/Path.protos",
+        "start": 1466
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 493,
+        "occurrences": 1,
+        "selector": "protos-root:374372c9295f9a56",
+        "source": "file:///workspaces/protos/protos/lib/core/Path.protos",
+        "start": 1913
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 229,
+        "occurrences": 1,
+        "selector": "protos-root:c2c660b39245d3b6",
+        "source": "file:///workspaces/protos/protos/lib/core/Path.protos",
+        "start": 2152
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 14,
+        "occurrences": 1,
+        "selector": "protos-root:b24ed27c7d0600b4",
+        "source": "file:///workspaces/protos/protos/lib/core/Path.protos",
+        "start": 2322
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 450,
+        "occurrences": 1,
+        "selector": "protos-root:6626889a16d297b6",
+        "source": "file:///workspaces/protos/protos/lib/core/Path.protos",
+        "start": 2664
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 11,
+        "occurrences": 1,
+        "selector": "protos-root:2261c09c2d1e2a4c",
+        "source": "file:///workspaces/protos/protos/lib/core/Process.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 5081,
+        "occurrences": 1,
+        "selector": "protos-root:bc1ad6d85ed8bfda",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 1567
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 543,
+        "occurrences": 1,
+        "selector": "protos-root:c5f5f6d09cb2382a",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 1722
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 592,
+        "occurrences": 1,
+        "selector": "protos-root:114bd66128874f0d",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 2537
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 495,
+        "occurrences": 1,
+        "selector": "protos-root:4c403134cfcb3565",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 2624
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 23,
+        "occurrences": 1,
+        "selector": "protos-root:54e01a89f04b4bdd",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 3234
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 310,
+        "occurrences": 1,
+        "selector": "protos-root:1f90ae8294b93208",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 3414
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 36,
+        "occurrences": 1,
+        "selector": "protos-root:c4b317271bdec4ed",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 3832
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 44,
+        "occurrences": 1,
+        "selector": "protos-root:dd79de9aa00cc479",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 4010
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 551,
+        "occurrences": 1,
+        "selector": "protos-root:a442c9b4c5ff2e01",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 4314
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 592,
+        "occurrences": 1,
+        "selector": "protos-root:583846b4e8d094b3",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 5137
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 487,
+        "occurrences": 1,
+        "selector": "protos-root:dc74adc6c2a66f83",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 5232
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 24,
+        "occurrences": 1,
+        "selector": "protos-root:230f802fdc18e76d",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 5835
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 310,
+        "occurrences": 1,
+        "selector": "protos-root:8b5cbd07e0aacedd",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 6016
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 28,
+        "occurrences": 1,
+        "selector": "protos-root:90b5683e1f86be6a",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 6434
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 36,
+        "occurrences": 1,
+        "selector": "protos-root:41ca03a6b71abab5",
+        "source": "file:///workspaces/protos/protos/lib/core/Range.protos",
+        "start": 6604
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 24,
+        "occurrences": 1,
+        "selector": "protos-root:4476252a471f8f81",
+        "source": "file:///workspaces/protos/protos/lib/core/SmallInteger.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 10,
+        "occurrences": 1,
+        "selector": "protos-root:c7b01e6354a6d2d9",
+        "source": "file:///workspaces/protos/protos/lib/core/String.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 14,
+        "occurrences": 1,
+        "selector": "protos-root:a01c5c01ad92b097",
+        "source": "file:///workspaces/protos/protos/lib/core/TextReader.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 14,
+        "occurrences": 1,
+        "selector": "protos-root:32742f32ab6b504b",
+        "source": "file:///workspaces/protos/protos/lib/core/TextWriter.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 201,
+        "occurrences": 1,
+        "selector": "protos-root:652b3109f764824b",
+        "source": "file:///workspaces/protos/protos/lib/core/clock/Clock.protos",
+        "start": 1098
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 139,
+        "occurrences": 1,
+        "selector": "protos-root:7a1e44d6fa076fc1",
+        "source": "file:///workspaces/protos/protos/lib/core/clock/Clock.protos",
+        "start": 1152
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 58,
+        "occurrences": 1,
+        "selector": "protos-root:76bfde3a6ffda926",
+        "source": "file:///workspaces/protos/protos/lib/core/clock/Clock.protos",
+        "start": 1187
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 857,
+        "occurrences": 1,
+        "selector": "protos-root:d5218c0a2dcc6cf9",
+        "source": "file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos",
+        "start": 1216
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 545,
+        "occurrences": 1,
+        "selector": "protos-root:3e752a7d21049892",
+        "source": "file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos",
+        "start": 1261
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 244,
+        "occurrences": 1,
+        "selector": "protos-root:c046a6cc59169a3e",
+        "source": "file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos",
+        "start": 1352
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 147,
+        "occurrences": 2,
+        "selector": "protos-root:86d70cdd6cd3c353",
+        "source": "file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos",
+        "start": 1435
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 88,
+        "occurrences": 2,
+        "selector": "protos-root:3e99a0e09f001e11",
+        "source": "file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos",
+        "start": 1476
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 44,
+        "occurrences": 1,
+        "selector": "protos-root:a009f47fc833c699",
+        "source": "file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos",
+        "start": 1670
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 217,
+        "occurrences": 1,
+        "selector": "protos-root:f54eaf8cdd5b18a1",
+        "source": "file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos",
+        "start": 1848
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 44,
+        "occurrences": 1,
+        "selector": "protos-root:280ac64372caa180",
+        "source": "file:///workspaces/protos/protos/lib/core/entropy/Entropy.protos",
+        "start": 1996
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 471,
+        "occurrences": 1,
+        "selector": "protos-root:c35393179f305c94",
+        "source": "file:///workspaces/protos/protos/lib/core/error_taxonomy.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 326,
+        "occurrences": 1,
+        "selector": "protos-root:716442a6a12dffa9",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildOutput.protos",
+        "start": 1227
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 118,
+        "occurrences": 1,
+        "selector": "protos-root:db7046ef55e5f91a",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildOutput.protos",
+        "start": 1275
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 110,
+        "occurrences": 1,
+        "selector": "protos-root:282b975cd449a591",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildOutput.protos",
+        "start": 1435
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 771,
+        "occurrences": 1,
+        "selector": "protos-root:3445800d6ae937da",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos",
+        "start": 1386
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 107,
+        "occurrences": 1,
+        "selector": "protos-root:c1e97c5d4eb6eff0",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos",
+        "start": 1436
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 108,
+        "occurrences": 1,
+        "selector": "protos-root:9327fc90d90fbc68",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos",
+        "start": 1586
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 108,
+        "occurrences": 1,
+        "selector": "protos-root:d341aa2ecc85c6a1",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos",
+        "start": 1737
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 106,
+        "occurrences": 1,
+        "selector": "protos-root:0981bd03848639b0",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos",
+        "start": 1886
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 111,
+        "occurrences": 1,
+        "selector": "protos-root:01b8e6f3a7fa87aa",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildProcess.protos",
+        "start": 2038
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 327,
+        "occurrences": 1,
+        "selector": "protos-root:4a38099da81bf76a",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildStdin.protos",
+        "start": 1170
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 119,
+        "occurrences": 1,
+        "selector": "protos-root:740e0a44e352ab73",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildStdin.protos",
+        "start": 1218
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 110,
+        "occurrences": 1,
+        "selector": "protos-root:f3e1ac84a0ea9485",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ChildStdin.protos",
+        "start": 1379
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 936,
+        "occurrences": 1,
+        "selector": "protos-root:1e5bf638cad59ff1",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/Execution.protos",
+        "start": 1628
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 881,
+        "occurrences": 1,
+        "selector": "protos-root:fa45e25bea064c65",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/Execution.protos",
+        "start": 1675
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 179,
+        "occurrences": 1,
+        "selector": "protos-root:01e0fc7abcdb9496",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/Execution.protos",
+        "start": 2020
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 86,
+        "occurrences": 1,
+        "selector": "protos-root:ac0ec0b529e7166b",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/Execution.protos",
+        "start": 2099
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 13,
+        "occurrences": 1,
+        "selector": "protos-root:5ef0eef29316226d",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/Execution.protos",
+        "start": 2154
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 44,
+        "occurrences": 1,
+        "selector": "protos-root:15b3bcaaff7f67de",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/Execution.protos",
+        "start": 2487
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 478,
+        "occurrences": 1,
+        "selector": "protos-root:1dafbdd8e592a674",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos",
+        "start": 1281
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 109,
+        "occurrences": 1,
+        "selector": "protos-root:30bc6914078aca2b",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos",
+        "start": 1330
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 111,
+        "occurrences": 1,
+        "selector": "protos-root:cb900b126dde499b",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos",
+        "start": 1484
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 111,
+        "occurrences": 1,
+        "selector": "protos-root:4b2f157df607ae81",
+        "source": "file:///workspaces/protos/protos/lib/core/execution/ExitStatus.protos",
+        "start": 1640
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 317,
+        "occurrences": 1,
+        "selector": "protos-root:b18f678db214eec6",
+        "source": "file:///workspaces/protos/protos/lib/core/filesystem/Open.protos",
+        "start": 1977
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 170,
+        "occurrences": 1,
+        "selector": "protos-root:ee2f045ce9c761d1",
+        "source": "file:///workspaces/protos/protos/lib/core/filesystem/Open.protos",
+        "start": 2122
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 419,
+        "occurrences": 1,
+        "selector": "protos-root:fd89af3672abf063",
+        "source": "file:///workspaces/protos/protos/lib/core/import.protos",
+        "start": 1778
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 366,
+        "occurrences": 1,
+        "selector": "protos-root:4418015fc0dda085",
+        "source": "file:///workspaces/protos/protos/lib/core/import.protos",
+        "start": 1823
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 93,
+        "occurrences": 1,
+        "selector": "protos-root:7fd3ad9efdb6e68d",
+        "source": "file:///workspaces/protos/protos/lib/core/import.protos",
+        "start": 2070
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 1795,
+        "occurrences": 1,
+        "selector": "protos-root:5cdf5486eff32a7a",
+        "source": "file:///workspaces/protos/protos/lib/core/network/IpAddress.protos",
+        "start": 1401
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 1003,
+        "occurrences": 1,
+        "selector": "protos-root:6150128fb9f8f843",
+        "source": "file:///workspaces/protos/protos/lib/core/network/IpAddress.protos",
+        "start": 1530
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 314,
+        "occurrences": 1,
+        "selector": "protos-root:7c23ef8f1221f01b",
+        "source": "file:///workspaces/protos/protos/lib/core/network/IpAddress.protos",
+        "start": 2669
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 135,
+        "occurrences": 1,
+        "selector": "protos-root:4cf95775b376aa35",
+        "source": "file:///workspaces/protos/protos/lib/core/network/IpAddress.protos",
+        "start": 3017
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 1446,
+        "occurrences": 1,
+        "selector": "protos-root:2217aec1b2fcd0db",
+        "source": "file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos",
+        "start": 1361
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 640,
+        "occurrences": 1,
+        "selector": "protos-root:50eab260287e729e",
+        "source": "file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos",
+        "start": 1491
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 316,
+        "occurrences": 1,
+        "selector": "protos-root:2ddb80345f8b5949",
+        "source": "file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos",
+        "start": 2268
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 143,
+        "occurrences": 1,
+        "selector": "protos-root:de8ed3d4db27c78f",
+        "source": "file:///workspaces/protos/protos/lib/core/network/IpEndpoint.protos",
+        "start": 2618
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 557,
+        "occurrences": 1,
+        "selector": "protos-root:d77b2037a3b38950",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Network.protos",
+        "start": 2309
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 341,
+        "occurrences": 1,
+        "selector": "protos-root:889d7f45bb6f6872",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Network.protos",
+        "start": 2517
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 122,
+        "occurrences": 1,
+        "selector": "protos-root:461cf5c3235cac16",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Network.protos",
+        "start": 2671
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 1306,
+        "occurrences": 1,
+        "selector": "protos-root:5374481c35479f45",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 2337
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 752,
+        "occurrences": 1,
+        "selector": "protos-root:f597f538853b8a73",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 2548
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 457,
+        "occurrences": 1,
+        "selector": "protos-root:7f8859ffaf3af1b3",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 2638
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 394,
+        "occurrences": 2,
+        "selector": "protos-root:35a91c0317be3363",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 2687
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 197,
+        "occurrences": 4,
+        "selector": "protos-root:564379cf11463220",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 2866
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 26,
+        "occurrences": 4,
+        "selector": "protos-root:610e3ab6e0cfcb70",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 3015
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 44,
+        "occurrences": 1,
+        "selector": "protos-root:a1e92a283c824abc",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 3167
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 218,
+        "occurrences": 1,
+        "selector": "protos-root:7b92d2ed65f9b3f0",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 3417
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 44,
+        "occurrences": 1,
+        "selector": "protos-root:d80a01b5b3364435",
+        "source": "file:///workspaces/protos/protos/lib/core/network/Resolver.protos",
+        "start": 3566
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 29,
+        "occurrences": 1,
+        "selector": "protos-root:4b7e22c153a4b185",
+        "source": "file:///workspaces/protos/protos/lib/core/network/TcpAcceptor.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 31,
+        "occurrences": 1,
+        "selector": "protos-root:e48a51f8f76654a0",
+        "source": "file:///workspaces/protos/protos/lib/core/network/TcpConnection.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 29,
+        "occurrences": 1,
+        "selector": "protos-root:2f7491a5bdba5fe2",
+        "source": "file:///workspaces/protos/protos/lib/core/network/TcpListener.protos",
+        "start": 1015
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 1503,
+        "occurrences": 1,
+        "selector": "protos-root:fea0888be9f06f52",
+        "source": "file:///workspaces/protos/protos/lib/core/prelude.protos",
+        "start": 1015
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 79,
+        "occurrences": 1,
+        "selector": "protos-root:fada205850060a06",
+        "source": "file:///workspaces/protos/protos/lib/core/prelude.protos",
+        "start": 1412
+      },
+      {
+        "kind": "TOP_LEVEL",
+        "length": 259,
+        "occurrences": 1,
+        "selector": "protos-root:0d47485a97de6cb8",
+        "source": "truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos",
+        "start": 1033
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 240,
+        "occurrences": 1,
+        "selector": "protos-root:fab478f50a64071c",
+        "source": "truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos",
+        "start": 1050
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 176,
+        "occurrences": 1,
+        "selector": "protos-root:dd19e11ad38de47c",
+        "source": "truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos",
+        "start": 1098
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 2,
+        "occurrences": 1,
+        "selector": "protos-root:b21df33d214a84d1",
+        "source": "truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos",
+        "start": 1158
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 2,
+        "occurrences": 1,
+        "selector": "protos-root:c9bb914e3f328f20",
+        "source": "truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos",
+        "start": 1176
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 2,
+        "occurrences": 1,
+        "selector": "protos-root:e8fd565c1f9d8f63",
+        "source": "truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos",
+        "start": 1194
+      },
+      {
+        "kind": "CLOSURE",
+        "length": 2,
+        "occurrences": 1,
+        "selector": "protos-root:eea5a37e9a76e942",
+        "source": "truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos",
+        "start": 1214
+      }
+    ],
+    "schema": 1,
+    "scope": "all-catalogued-semantic-roots",
+    "status": "AVAILABLE"
+  },
+  "surface": "canonical",
+  "timing_evidence": "NONE",
+  "timing_explanation": "Compilation instrumentation changes execution cost; sample timings are not benchmark measurements.",
+  "unavailable_roots": [
+    {
+      "compilation_ids": [
+        3460
+      ],
+      "cross_run_identity": "AMBIGUOUS",
+      "label": "ProtosBuiltinCallRootNode@c0ef280",
+      "normalized_label": "ProtosBuiltinCallRootNode@*",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:210"
+    },
+    {
+      "compilation_ids": [
+        3455
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "protos-root:d2c2046d7677ba9c[CLOSURE|file:///workspaces/protos/protos/lib/core/Object.protos|1364+15]",
+      "normalized_label": "protos-root:d2c2046d7677ba9c[CLOSURE|file:///workspaces/protos/protos/lib/core/Object.protos|1364+15]",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:209"
+    },
+    {
+      "compilation_ids": [
+        3559,
+        3964,
+        4015,
+        4025,
+        4050,
+        4061,
+        4105,
+        4119
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1098+176]",
+      "normalized_label": "protos-root:dd19e11ad38de47c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1098+176]",
+      "observed_tiers": [
+        1,
+        2
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:6"
+    },
+    {
+      "compilation_ids": [
+        4001,
+        4010,
+        4080,
+        4083,
+        4148,
+        4150
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1050+240]",
+      "normalized_label": "protos-root:fab478f50a64071c[CLOSURE|truffle:a99b3d5078ed3362bce687942f2ad1f8474e486ef11d5a4993ecb100d0d2bf24//workspaces/protos-benchmarks/cases/integer-switch/integer-switch.protos|1050+240]",
+      "observed_tiers": [
+        1,
+        2
+      ],
+      "reason": "TIER_COMPILATION_AMBIGUOUS",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:7"
+    },
+    {
+      "compilation_ids": [
+        3582,
+        3618,
+        3639,
+        3655,
+        3669,
+        3677,
+        3685,
+        3695,
+        3707,
+        3714,
+        3720,
+        3729,
+        3736,
+        3742,
+        3754,
+        3758
+      ],
+      "cross_run_identity": "UNIQUE",
+      "label": "protos-root:fe4d39dc9ed02927[CLOSURE|file:///workspaces/protos/protos/lib/core/Integer.protos|1125+24]",
+      "normalized_label": "protos-root:fe4d39dc9ed02927[CLOSURE|file:///workspaces/protos/protos/lib/core/Integer.protos|1125+24]",
+      "observed_tiers": [
+        1
+      ],
+      "reason": "REQUESTED_TIER_NOT_OBSERVED",
+      "requested_tier": 2,
+      "status": "UNAVAILABLE",
+      "target": "1:203"
+    }
+  ],
+  "workload": "integer-switch"
+}

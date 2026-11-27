@@ -47,13 +47,13 @@ baked into a separate, SHA-pinned Podman image during `image-build-ruby`.
 Correctness must pass before timing is accepted.
 
 Protos uses a dedicated, digest-pinned GraalVM CE `25.5.5.0.3`
-runner image. GraalJS and GraalPy retain the shared `25.4.4.1.1`
-image, so upgrading Protos does not silently change peer runtimes.
+runner image. GraalJS and GraalPy use a separate shared `25.5.5.0.3`
+runner pinned to the same GraalVM base image as Protos.
 Build the Protos image explicitly with `make image-build LANGUAGE=protos`
 before preparing or measuring Protos.
 
 The Ruby image is independent because TruffleRuby `40.0.0` requires
-GraalVM/Truffle `25.3.4.1`, while the other implementations use `25.4.4.1.1`.
+GraalVM/Truffle `25.3.4.1`, while the other implementations use `25.5.5.0.3`.
 No manual host Ruby installation is used. Build and validate explicitly:
 
 ```sh
@@ -65,7 +65,7 @@ make correctness CASE=all LANGUAGE=ruby
 ```
 
 `LANGUAGE=all` dispatches Ruby into its own image for each execution; the
-other languages remain on the original pinned image. Ruby source ends with
+other languages use their dedicated pinned images. Ruby source ends with
 `method(:run)`; the guest callable is acquired once before measurement and
 the timed operation remains `run.execute()` in the shared Java engine.
 The Ruby guest method, any nested lambda, and Polyglot adapter are distinct
@@ -98,7 +98,7 @@ the unique framework-callee trace in each capture; ambiguous or missing
 compilations fail closed rather than invent a root. A missing Bytecode DSL histogram
 is not a zero-node Graal graph. Ruby compiler counts are generated on its
 pinned 25.3 toolchain and are not presented as identical-toolchain comparisons
-with the 25.4 peers.
+with the 25.5 peers.
 
 ## Retained evidence
 

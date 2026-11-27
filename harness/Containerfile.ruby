@@ -2,8 +2,8 @@
 # ("LICENSE") AS FIRST COMPLETED BY: Guillermo Adrián Molina.
 # See LICENSE.TXT at the repository root.
 #
-# Official GraalVM Community 25.3.4.1, independently pinned from the 25.4
-# Protos/JS/Python runner. The Ruby Maven embedding distribution is baked
+# Official GraalVM Community 25.3.4.1, independently pinned from the 25.5
+# Protos and JS/Python runners. The Ruby Maven embedding distribution is baked
 # into this image during the explicit Podman build (never during measurement).
 FROM ghcr.io/graalvm/graalvm-community:25i3-25.0.4.1-ol10@sha256:636592a38dbd6461e71aaf019ed1ff1f389c171540bc2cb632fd73e6ec7848d7
 

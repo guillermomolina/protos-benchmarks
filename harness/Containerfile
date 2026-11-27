@@ -13,7 +13,7 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 # the specific language governing rights and limitations under the License.
 
-FROM ghcr.io/graalvm/graalvm-community:25i4-25.0.4.1.1-ol10@sha256:a7b4810d7c755e9627feaa1459eb5a93338643b16d745d4f3fc86db71e5da7f5
+FROM ghcr.io/graalvm/jdk-community:25i5-25.0.5.0.3@sha256:267e78b5e941a5b18ce634c0aa2d333f888c42b65aa5c1e54a767642cc9db53d
 
 USER root
 
@@ -40,8 +40,8 @@ RUN microdnf clean all
 
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-RUN java -version 2>&1 | grep -F "GraalVM CE 25.4.4.1.1"
-RUN mvn -version | grep -F "Apache Maven 3.9.9"
+RUN java -version 2>&1 | grep -F "GraalVM CE 25.5.5.0.3"
+RUN mvn -version | grep -F "Apache Maven"
 RUN python3 -c "import sys; assert sys.version_info[:2] == (3, 12)"
 RUN command -v taskset
 

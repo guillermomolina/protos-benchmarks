@@ -23,8 +23,12 @@ class RubyImageSelectionTest(unittest.TestCase):
         args = benchmark.parse_args(['correctness', '--language', 'all'])
         self.assertEqual('localhost/protos-bench-runner:ruby-40.0.0-graal25.3.4.1',
                          benchmark.runtime_image(args, 'ruby'))
-        for language in ('protos', 'js', 'python'):
+        self.assertEqual(args.protos_image,
+                         benchmark.runtime_image(args, 'protos'))
+        for language in ('js', 'python'):
             self.assertEqual(args.image, benchmark.runtime_image(args, language))
+        self.assertNotEqual(args.protos_image, args.image)
+        self.assertNotEqual(args.protos_image, args.ruby_image)
         self.assertNotEqual(args.image, args.ruby_image)
 
     def test_ruby_is_first_class_in_all_selection(self):
@@ -74,7 +78,7 @@ class RubyImageSelectionTest(unittest.TestCase):
         self.assertEqual(0,result)
         self.assertEqual(4,run.call_count)
         images=[call.args[1] for call in run.call_args_list]
-        self.assertEqual([args.image,args.image,args.image,args.ruby_image],images)
+        self.assertEqual([args.protos_image,args.image,args.image,args.ruby_image],images)
         language_args=[call.args[3] for call in run.call_args_list]
         for language, invocation in zip(('protos','js','python','ruby'),language_args):
             self.assertEqual(language,invocation[invocation.index('--language')+1])

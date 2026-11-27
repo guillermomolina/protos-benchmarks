@@ -42,7 +42,7 @@ class RubyPeerGraphIsolationTest(unittest.TestCase):
         product.assert_called_once()
         self.assertEqual(ROOT,run.call_args.args[2])
         self.assertIn('--dir',run.call_args.args[3])
-        self.assertEqual(args.image,run.call_args.args[1])
+        self.assertEqual(args.protos_image,run.call_args.args[1])
 
     def test_ruby_graph_capture_host_is_independent(self):
         args=benchmark.parse_args([

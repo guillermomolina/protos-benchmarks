@@ -25,8 +25,8 @@ import workload_catalog
 
 class RubyIntegrationContractTest(unittest.TestCase):
 
-    def test_all_seventeen_workloads_are_catalogued(self):
-        self.assertEqual(17, len(workload_catalog.workload_ids()))
+    def test_all_twenty_six_workloads_are_catalogued(self):
+        self.assertEqual(26, len(workload_catalog.workload_ids()))
         self.assertEqual(
             ("protos", "js", "python", "ruby"),
             workload_catalog.LANGUAGES,

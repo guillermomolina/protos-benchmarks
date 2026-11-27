@@ -22,7 +22,7 @@ import benchmark as h
 class CatalogTest(unittest.TestCase):
     def test_catalog_is_complete(self):
         data = h.load_catalog()
-        self.assertEqual(len(data["workloads"]), 17)
+        self.assertEqual(len(data["workloads"]), 26)
 
         for item in data["workloads"]:
             self.assertEqual(
@@ -268,7 +268,12 @@ class PodmanContractTest(unittest.TestCase):
             self.assertEqual(version, expected_versions[language])
             self.assertEqual(
                 call.args[1],
-                args.ruby_image if language == "ruby" else args.image,
+                {
+                    "protos": args.protos_image,
+                    "js": args.image,
+                    "python": args.image,
+                    "ruby": args.ruby_image,
+                }[language],
             )
         self.assertEqual(seen_languages, set(expected_versions))
 

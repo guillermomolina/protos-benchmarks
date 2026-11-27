@@ -599,7 +599,7 @@ class PolicyTest(unittest.TestCase):
             list(workload_catalog.workload_ids()),
             mg.select_workloads(self.policy, "all"),
         )
-        self.assertEqual(17, len(mg.select_workloads(self.policy, "all")))
+        self.assertEqual(26, len(mg.select_workloads(self.policy, "all")))
 
     def test_peer_capture_key_is_independent_of_protos(self):
         java = {"java.runtime.version": "25.0.4.1.1"}

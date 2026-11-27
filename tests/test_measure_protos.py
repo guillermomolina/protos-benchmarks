@@ -1010,7 +1010,7 @@ class DriverTest(unittest.TestCase):
 
     def test_same_reference_timing_policy_for_every_language(self):
         mp.peer_classpath = lambda version=None, *, language="js": (
-            version or "25.4.4.1.1", "/fake/peer.jar"
+            version or mp.jvm_runtime.harness_graalvm_version(), "/fake/peer.jar"
         )
         older = make_product(self.tmp, "protos-older", "0.3.0-SNAPSHOT")
         runs = {
@@ -1049,7 +1049,13 @@ class DriverTest(unittest.TestCase):
                 150 if workload == "primitive-while-zero" else 50
             )
             expected_calls = (
-                1000000 if workload == "primitive-while-zero" else 10000
+                1000000 if workload == "primitive-while-zero"
+                else 1000 if workload in (
+                    "array-iteration-sum",
+                    "array-iteration-callback",
+                    "array-iteration-for",
+                )
+                else 10000
             )
             self.assertEqual(
                 (timing["warmup_iterations"], timing["steady_iterations"], timing["sample_calls"], timing["selection"]),
@@ -1663,7 +1669,7 @@ class DriverTest(unittest.TestCase):
     def test_peer_language_needs_no_product(self):
         argv = ["--language", "js", "--workload", WORKLOAD, "--stage", "smoke", "--output", str(self.output)]
         mp.peer_classpath = lambda version=None, *, language="js": (
-            version or "25.4.4.1.1", "/fake/peer.jar"
+            version or mp.jvm_runtime.harness_graalvm_version(), "/fake/peer.jar"
         )
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):

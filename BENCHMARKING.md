@@ -104,9 +104,9 @@ results for a different version or host.
 ## Protos GraalVM runtime
 
 Protos is measured in its own digest-pinned GraalVM CE 25.5.5.0.3
-container (`harness/Containerfile.protos`). The existing shared
-GraalVM 25.4.4.1.1 image remains assigned to GraalJS and GraalPy,
-and the separate GraalVM 25.3.4.1 image remains assigned to Ruby.
+container (`harness/Containerfile.protos`). GraalJS and GraalPy use a separate shared
+GraalVM 25.5.5.0.3 image pinned to the same base as Protos,
+while Ruby retains its separate GraalVM 25.3.4.1 image.
 
 The runtime selector is language-specific for correctness, timing,
 bytecode captures and graph captures. Product preparation uses the
@@ -122,8 +122,8 @@ POM into the image itself. `harness/policy/ruby-peer.pom.xml` pins the Ruby
 and Polyglot libraries, while `harness/policy/runtimes.json` pins the toolchain
 identities. This is the official TruffleRuby Maven embedding distribution
 inside the container; it is not the native TruffleRuby container, and no
-Ruby runtime is installed on the Linux host. The original GraalVM 25.4
-image remains unchanged. Ruby's runtime is never loaded on that image.
+Ruby runtime is installed on the Linux host. The GraalJS/GraalPy image is independently pinned.
+Ruby's runtime is never loaded on that image.
 
 The Ruby source is evaluated and returns `method(:run)` once at setup. Timed
 calls execute the prepared `Value` without parser, method lookup, context

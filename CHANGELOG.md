@@ -6,6 +6,11 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Changed
 
+- Updated GraalJS and GraalPy to GraalVM 25.5.5.0.3,
+  sharing the exact compiler base image used by Protos.
+  Preserved the independent TruffleRuby toolchain and historical
+  benchmark evidence. Reconciled harness tests with the current
+  workload catalog, runtime isolation and measurement policies.
 - Added cold structural graph capture and analysis with explicit
   Tier 1/Tier 2 selection, compiled-root inventories, per-root pairing,
   graph evidence verification and derived structural reports. Missing

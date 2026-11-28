@@ -31,6 +31,47 @@ class RubyImageSelectionTest(unittest.TestCase):
         self.assertNotEqual(args.protos_image, args.ruby_image)
         self.assertNotEqual(args.image, args.ruby_image)
 
+    def test_primary_runners_share_pinned_graalvm_toolchain(self):
+        version = '25.6.5.1'
+        self.assertEqual(version, runtime.harness_graalvm_version())
+
+        args = benchmark.parse_args(['correctness', '--language', 'all'])
+        self.assertEqual(
+            f'localhost/protos-bench-runner:graal{version}-standalone',
+            args.image,
+        )
+        self.assertEqual(
+            f'localhost/protos-bench-runner:protos-graal{version}-standalone',
+            args.protos_image,
+        )
+
+        images = []
+
+        for name in ('Containerfile', 'Containerfile.protos'):
+            content = (ROOT / 'harness' / name).read_text(
+                encoding='utf-8'
+            )
+            bases = [
+                line.split()[1]
+                for line in content.splitlines()
+                if line.startswith('FROM ')
+            ]
+            self.assertEqual(len(bases), 1)
+            self.assertRegex(
+                bases[0],
+                r'^ghcr[.]io/graalvm/jdk-community:'
+                r'25i6-25[.]0[.]5[.]1-ol10'
+                r'@sha256:[0-9a-f]{64}$',
+            )
+            self.assertIn(f'GraalVM CE {version}', content)
+            images.extend(bases)
+
+        self.assertEqual(images[0], images[1])
+
+        makefile = (ROOT / 'Makefile').read_text(encoding='utf-8')
+        self.assertIn(f'PODMAN_IMAGE ?= {args.image}', makefile)
+        self.assertIn(f'PROTOS_IMAGE ?= {args.protos_image}', makefile)
+
     def test_ruby_is_first_class_in_all_selection(self):
         self.assertEqual(('protos', 'js', 'python', 'ruby'),
                          benchmark.selected_languages('all'))

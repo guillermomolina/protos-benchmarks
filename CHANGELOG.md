@@ -6,6 +6,16 @@ All notable changes to Protos Benchmarks are documented in this file.
 
 ### Changed
 
+- Aligned the dedicated Protos runner and shared GraalJS/GraalPy runner
+  with GraalVM CE 25.6.5.1 and JDK 25.0.5.1 using the same digest-pinned
+  base image. Updated peer dependencies and default image selectors,
+  removed the obsolete fixed Protos Maven dependency, and added
+  toolchain-alignment regression coverage. Protos continues to build
+  from the selected checkout. Preserved the independent TruffleRuby and
+  IGV analyzer toolchains and all historical benchmark evidence.
+  Validated runtime preparation, correctness-only execution for Protos,
+  GraalJS and GraalPy, and all 315 harness tests. No new reference
+  measurements or live graph captures were performed.
 - Updated GraalJS and GraalPy to GraalVM 25.5.5.0.3,
   sharing the exact compiler base image used by Protos.
   Preserved the independent TruffleRuby toolchain and historical

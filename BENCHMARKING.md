@@ -103,10 +103,12 @@ results for a different version or host.
 
 ## Protos GraalVM runtime
 
-Protos is measured in its own digest-pinned GraalVM CE 25.5.5.0.3
-container (`harness/Containerfile.protos`). GraalJS and GraalPy use a separate shared
-GraalVM 25.5.5.0.3 image pinned to the same base as Protos,
-while Ruby retains its separate GraalVM 25.3.4.1 image.
+Protos is measured in its own digest-pinned GraalVM CE 25.6.5.1
+container (`harness/Containerfile.protos`), using JDK 25.0.5.1 on Oracle Linux 10.
+GraalJS and GraalPy use a separate shared GraalVM 25.6.5.1 image pinned to the
+same base as Protos, while Ruby retains its separate GraalVM 25.3.4.1 image.
+Existing results captured with older toolchains remain historical evidence;
+the updated runner does not relabel or replace them.
 
 The runtime selector is language-specific for correctness, timing,
 bytecode captures and graph captures. Product preparation uses the
@@ -130,8 +132,8 @@ calls execute the prepared `Value` without parser, method lookup, context
 bootstrap or runtime installation. Ruby closures and Protos return-home
 semantics are not asserted to have identical guest representations.
 
-The Ruby 25.3 and peer 25.4 compilation graphs must be recorded with their
-own compiler identity. The `cold-capture` `all` root census permits actual
+Compilation graphs from Ruby and the other runtimes must be recorded with
+their actual compiler identities. The `cold-capture` `all` root census permits actual
 Ruby root discovery. A `graphs-capture` root comparison must not assume JS or
 Python root labels, and an absent Ruby Bytecode DSL histogram is not a zero
 node/operation measurement.

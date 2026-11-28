@@ -40,8 +40,8 @@ SURFACE ?= canonical
 CPU ?=
 OUTPUT ?=
 PROTOS_REPO ?= $(abspath ../protos)
-PODMAN_IMAGE ?= localhost/protos-bench-runner:graal25.5.5.0.3-standalone
-PROTOS_IMAGE ?= localhost/protos-bench-runner:protos-graal25.5.5.0.3-standalone
+PODMAN_IMAGE ?= localhost/protos-bench-runner:graal25.6.5.1-standalone
+PROTOS_IMAGE ?= localhost/protos-bench-runner:protos-graal25.6.5.1-standalone
 
 ARGS = --case "$(CASE)" --language "$(LANGUAGE)" --stage "$(STAGE)" \
        --profile "$(PROFILE)" --surface "$(SURFACE)" \

@@ -24,11 +24,11 @@ CONTAINER_ROOT = "/workspaces/protos-benchmarks"
 CONTAINER_PRODUCT = "/workspaces/protos"
 
 LANGUAGES = ("protos", "js", "python", "ruby")
-DEFAULT_PROTOS_IMAGE = "localhost/protos-bench-runner:protos-graal25.5.5.0.3-standalone"
+DEFAULT_PROTOS_IMAGE = "localhost/protos-bench-runner:protos-graal25.6.5.1-standalone"
 DEFAULT_RUBY_IMAGE = "localhost/protos-bench-runner:ruby-40.0.0-graal25.3.4.1"
 DEFAULT_IMAGE = (
     "localhost/protos-bench-runner:"
-    "graal25.5.5.0.3-standalone"
+    "graal25.6.5.1-standalone"
 )
 
 COMMANDS = (
